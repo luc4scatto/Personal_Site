@@ -1,0 +1,88 @@
+:root {
+  /* palette — change the identity here */
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --text: #f2f2f2;
+  --text-dim: #9a9a9a;
+  --accent: #ccff00;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  --space: clamp(4rem, 10vh, 8rem);
+  --pad-x: clamp(1.25rem, 5vw, 4rem);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: clamp(2.75rem, 9vw, 7rem);
+  font-weight: 700;
+}
+
+h2 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: 2rem;
+}
+
+a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.accent {
+  color: var(--accent);
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.9em 1.8em;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: 500;
+  transition: background 0.25s, color 0.25s;
+}
+
+.btn:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+section {
+  padding: var(--space) var(--pad-x);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luca Cattolin — Portfolio</title>
+    <meta name="description" content="Portfolio of Luca Cattolin — developer building modern web experiences." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="nav">
+      <a class="nav-logo" href="#hero">LC</a>
+      <nav>
+        <a href="#about">About</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- hero container is sized to host a Three.js canvas later -->
+      <section id="hero" class="hero">
+        <p class="hero-kicker" data-stagger>Hi, I'm Luca Cattolin</p>
+        <h1 data-stagger>
+          I build <span class="accent">modern</span><br />
+          web experiences.
+        </h1>
+        <p class="hero-tagline" data-stagger>
+          Developer focused on clean code, bold interfaces and things that move.
+        </p>
+        <a class="btn" href="#projects" data-stagger>See my work ↓</a>
+      </section>
+
+      <section id="about" class="about">
+        <h2 data-reveal>About</h2>
+        <div class="about-grid" data-reveal>
+          <p>
+            I'm a developer based in Italy. I like turning ideas into fast,
+            accessible and memorable websites. When I'm not coding I'm probably
+            exploring 3D on the web, automation and new tools.
+          </p>
+          <div class="about-photo" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section id="skills" class="skills">
+        <h2 data-reveal>Skills</h2>
+        <ul class="skills-grid" data-reveal>
+          <li>JavaScript</li>
+          <li>HTML &amp; CSS</li>
+          <li>Python</li>
+          <li>Git &amp; GitHub</li>
+          <li>Automation</li>
+          <li>UI / UX</li>
+        </ul>
+      </section>
+
+      <section id="projects" class="projects">
+        <h2 data-reveal>Projects</h2>
+        <div class="projects-grid">
+          <article class="card" data-reveal>
+            <div class="card-thumb" aria-hidden="true"></div>
+            <h3>Project One</h3>
+            <p>Short description of the project, what it does and why it matters.</p>
+            <div class="card-links">
+              <a href="#">GitHub</a>
+              <a href="#">Live</a>
+            </div>
+          </article>
+          <article class="card" data-reveal>
+            <div class="card-thumb" aria-hidden="true"></div>
+            <h3>Project Two</h3>
+            <p>Short description of the project, what it does and why it matters.</p>
+            <div class="card-links">
+              <a href="#">GitHub</a>
+              <a href="#">Live</a>
+            </div>
+          </article>
+          <article class="card" data-reveal>
+            <div class="card-thumb" aria-hidden="true"></div>
+            <h3>Project Three</h3>
+            <p>Short description of the project, what it does and why it matters.</p>
+            <div class="card-links">
+              <a href="#">GitHub</a>
+              <a href="#">Live</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="contact" class="contact">
+        <h2 data-reveal>Let's talk</h2>
+        <p data-reveal>Got a project in mind or just want to say hi?</p>
+        <a class="btn" href="mailto:scattolinluca2@gmail.com" data-reveal>scattolinluca2@gmail.com</a>
+        <div class="contact-links" data-reveal>
+          <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>© 2026 Luca Cattolin — built with Vite, hosted on GitHub Pages</p>
+    </footer>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
