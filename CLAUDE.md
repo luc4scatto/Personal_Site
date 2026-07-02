@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Single-page personal portfolio site (English content), deployed to GitHub Pages. Stack: Vite + vanilla JS/CSS + GSAP. No framework — do not introduce React/Vue/etc. Three.js/GLB support is planned for a future 3D hero; keep the hero container ready for a canvas but don't add three.js until asked.
+Single-page personal portfolio site for Luca Scattolin (English content), deployed to GitHub Pages. Stack: Vite + vanilla JS/CSS + GSAP. No framework — do not introduce React/Vue/etc. Three.js/GLB support is planned for a future 3D hero; keep the hero container ready for a canvas but don't add three.js until asked.
+
+- Repo: https://github.com/luc4scatto/Personal_Site (public)
+- Live: https://luc4scatto.github.io/Personal_Site/
+- Every push to `main` auto-deploys via the Pages workflow (source: GitHub Actions, already enabled)
 
 ## Commands
 
@@ -24,7 +28,7 @@ Single-page personal portfolio site (English content), deployed to GitHub Pages.
 
 ## Constraints
 
-- `vite.config.js` sets `base` for GitHub Pages — keep it in sync with the repo name, or `/` if the repo is `<username>.github.io`
+- `vite.config.js` sets `base: '/Personal_Site/'` to match the repo name — change only if the repo is renamed
 - All animations must respect `prefers-reduced-motion`
 - Mobile-first responsive; heavy animations are simplified or disabled on small viewports
 - Site copy currently uses placeholders; real content will come from a user-provided `.md` file and should replace placeholders in `index.html`
