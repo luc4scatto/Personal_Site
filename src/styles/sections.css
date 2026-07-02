@@ -1,0 +1,195 @@
+/* nav */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem var(--pad-x);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--accent);
+}
+
+.nav nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav nav a {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.nav nav a:hover,
+.nav nav a.active {
+  color: var(--accent);
+}
+
+/* hero — full viewport, ready to host a Three.js canvas behind the text */
+.hero {
+  min-height: 100svh;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-kicker {
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+}
+
+.hero-tagline {
+  color: var(--text-dim);
+  max-width: 34rem;
+  font-size: 1.15rem;
+}
+
+/* about */
+.about-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.about-grid p {
+  font-size: 1.2rem;
+  color: var(--text-dim);
+}
+
+.about-photo {
+  aspect-ratio: 1;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--accent) 25%, var(--surface)));
+}
+
+/* skills */
+.skills-grid {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.skills-grid li {
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid #222;
+  border-radius: 0.75rem;
+  font-family: var(--font-display);
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.skills-grid li:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+}
+
+/* projects */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid #222;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+
+.card-thumb {
+  aspect-ratio: 16 / 10;
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, #1d1d1d, #101010);
+}
+
+.card p {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+}
+
+.card-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.card-links a {
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+.card-links a:hover {
+  text-decoration: underline;
+}
+
+/* contact */
+.contact {
+  text-align: center;
+}
+
+.contact p {
+  color: var(--text-dim);
+  margin-bottom: 2rem;
+}
+
+.contact-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.contact-links a {
+  color: var(--text-dim);
+}
+
+.contact-links a:hover {
+  color: var(--accent);
+}
+
+/* footer */
+.footer {
+  text-align: center;
+  padding: 2rem var(--pad-x);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  border-top: 1px solid #1c1c1c;
+}
+
+@media (max-width: 700px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nav nav {
+    gap: 1rem;
+  }
+}
