@@ -146,9 +146,12 @@
 }
 
 .card-thumb {
+  width: 100%;
   aspect-ratio: 16 / 10;
   border-radius: 0.5rem;
   background: linear-gradient(135deg, #1d1d1d, #101010);
+  object-fit: cover;
+  display: block;
 }
 
 .card p {
@@ -193,6 +196,80 @@
 }
 
 .contact-links a:hover {
+  color: var(--accent);
+}
+
+/* project page (vivatech.html) */
+.page-hero {
+  padding-top: calc(var(--space) + 4rem);
+}
+
+.page-hero h1 {
+  font-size: clamp(2.5rem, 7vw, 5rem);
+}
+
+.project-meta {
+  color: var(--text-dim);
+  font-family: var(--font-display);
+  margin-top: 1rem;
+}
+
+.project-cover {
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  object-fit: cover;
+  border-radius: 1rem;
+  margin-top: 3rem;
+  display: block;
+}
+
+.project-description p {
+  font-size: 1.2rem;
+  color: var(--text-dim);
+  max-width: 44rem;
+}
+
+.project-description p + p {
+  margin-top: 1.5rem;
+}
+
+.project-video video {
+  width: 100%;
+  border-radius: 1rem;
+  display: block;
+}
+
+.gallery {
+  columns: 280px 3;
+  gap: 1rem;
+}
+
+.gallery img {
+  width: 100%;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.featured-links {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.featured-links a {
+  color: var(--text-dim);
+  transition: color 0.2s;
+}
+
+.featured-links a:hover {
+  color: var(--accent);
+}
+
+.featured-links a::before {
+  content: '↗ ';
   color: var(--accent);
 }
 
