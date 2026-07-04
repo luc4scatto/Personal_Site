@@ -20,3 +20,9 @@ const observer = new IntersectionObserver(
 sections.forEach((s) => observer.observe(s));
 
 initAnimations();
+
+// floating 3D hobby icons — lazy, respects reduced motion
+const heroCanvas = document.querySelector('#hero-canvas');
+if (heroCanvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  import('./hero3d.js').then((m) => m.initHero3D(heroCanvas));
+}
