@@ -39,7 +39,7 @@ Source of truth: `_originals/3d_files.blend` (183MB, **gitignored — never comm
   _originals/3d_files.blend --python tools/export_glb.py
 ```
 
-The script exports root objects and collections to `public/models/*.glb` with: per-mesh decimation cap (8k polys per mesh in collections, 20k for single-mesh objects — never uniform-ratio decimation, it destroys small parts), Bevel/Subsurf modifiers stripped (they explode poly counts at export), materials as PLACEHOLDER (keeps slots for per-part shading, drops textures), no UVs, Draco compression. New model = add it to the script dicts + to GLB_MODELS in hero3d.js.
+The script exports root objects and collections to `public/models/*.glb` with: per-mesh decimation cap (8k polys per mesh in collections, 20k for single-mesh objects, per-file overrides in `FILE_CAPS` — never uniform-ratio decimation, it destroys small parts; the CDJ jog wheel needs its 40k cap or it warps), Bevel/Subsurf modifiers stripped (they explode poly counts at export), materials as PLACEHOLDER (keeps slots for per-part shading, drops textures), no UVs, Draco compression. New model = add it to the script dicts + to GLB_MODELS in hero3d.js. Raw source meshes (OBJ/STL/FBX) live in `_originals/blend_files_meshes/` — gitignored like everything in `_originals/`, never move them into `public/`.
 
 ## Constraints
 
