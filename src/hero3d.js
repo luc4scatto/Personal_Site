@@ -20,7 +20,7 @@ const GLB_MODELS = [
 ];
 const ITEM_SIZE = 1.15;
 // per-model size tweaks on top of ITEM_SIZE
-const SIZE_TWEAKS = { cdj: 1.3, server: 0.85, turntable: 1.2 };
+const SIZE_TWEAKS = { cdj: 1.15, server: 0.85, turntable: 1.35 };
 const SPHERE_RADIUS = 2.5;
 // ponytail: wander amplitude < half the min distance between fibonacci homes
 // (12 pts on r=2.5 sphere → min dist ~2.3), so overlaps are impossible by construction
