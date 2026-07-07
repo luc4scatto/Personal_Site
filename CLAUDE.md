@@ -20,11 +20,11 @@ Personal portfolio site for Luca Scattolin (English content), deployed to GitHub
 
 ## Architecture
 
-- `index.html` — home sections (hero with 3D canvas, about, skills with brand icons, projects, contact)
-- `src/main.js` — entry point: nav highlighting, GSAP init, lazy dynamic import of hero3d.js (skipped if `prefers-reduced-motion`)
-- `src/animations.js` — GSAP + ScrollTrigger animations (scroll reveals, staggers)
-- `src/hero3d.js` — Three.js floating 3D hobby icons: 10 Draco GLBs + ~110 small decorative spheres. No-overlap is guaranteed geometrically (fibonacci-sphere homes, wander < half min home distance) — no physics engine. Materials are replaced at load: palette colors with per-mesh lightness shades, `side: DoubleSide` (open meshes look holey otherwise). Tunables at top of file (SPHERE_RADIUS, WANDER, SIZE_TWEAKS, shade offsets)
-- `src/styles/base.css` — reset, CSS custom properties (colors, spacing, typography). Change the visual identity here, not in section styles
+- `index.html` — home sections (hero with 3D canvas, marquee ribbon, about, skills with brand icons, projects, contact). Marquee = per-word `<span>`s duplicated once for the seamless CSS loop; keep an even word count per half or the color alternation jumps at the seam
+- `src/main.js` — entry point: nav highlighting, GSAP init, card spotlight (`--mx/--my` custom props), lazy dynamic import of hero3d.js (skipped if `prefers-reduced-motion`)
+- `src/animations.js` — GSAP + ScrollTrigger + SplitText animations (hero masked-line reveal, h2 clip reveals, scroll reveals, scroll progress bar, magnetic buttons)
+- `src/hero3d.js` — Three.js floating 3D hobby icons: 19 items from Draco GLBs (one is loaded twice) + ~110 small decorative shapes. No-overlap is guaranteed geometrically (fibonacci-sphere homes, wander < half min home distance) — no physics engine. Materials are replaced at load, cycling three palette colors (lime/white/violet, `COLORS`) per object; within an object, meshes get contrasting lightness shades and every 4th part goes dark metallic for component readability. `side: DoubleSide` (open meshes look holey otherwise). Tunables at top of file (SPHERE_RADIUS, WANDER, SIZE_TWEAKS, shade offsets)
+- `src/styles/base.css` — reset, CSS custom properties (colors, spacing, typography). Change the visual identity here, not in section styles. `--accent` (lime) is the primary; `--accent-2` (violet #a78bfa, same as the 3D scene) is used sparingly: scroll progress gradient, marquee alternation, about-photo gradient, `::selection`, vivatech link arrows
 - `src/styles/sections.css` — per-section layout and styles
 - `public/models/*.glb` — Draco-compressed models; `public/draco/` holds the decoder files (GLTFLoader.setDRACOLoader wired in hero3d.js)
 - `public/icons/`, `public/images/`, `public/video/` — skill brand icons (SVG), Vivatech photos, compressed project video
@@ -32,14 +32,15 @@ Personal portfolio site for Luca Scattolin (English content), deployed to GitHub
 
 ## 3D model pipeline
 
-Source of truth: `_originals/3d_files.blend` (183MB, **gitignored — never commit**; GitHub rejects files >100MB). Re-export after editing it:
+Current homepage models are external GLB assets. Raw uncompressed sources (~29MB) live in `_originals/new_models_raw/` — gitignored, never commit or move into `public/`. To (re)optimize one into the site:
 
 ```
-/Applications/Blender.app/Contents/MacOS/blender -b --factory-startup -noaudio \
-  _originals/3d_files.blend --python tools/export_glb.py
+npx @gltf-transform/cli optimize _originals/new_models_raw/<name>.glb public/models/<name>.glb --compress draco
 ```
 
-The script exports root objects and collections to `public/models/*.glb` with: per-mesh decimation cap (8k polys per mesh in collections, 20k for single-mesh objects, per-file overrides in `FILE_CAPS` — never uniform-ratio decimation, it destroys small parts; the CDJ jog wheel needs its 40k cap or it warps), Bevel/Subsurf modifiers stripped (they explode poly counts at export), materials as PLACEHOLDER (keeps slots for per-part shading, drops textures), no UVs, Draco compression. New model = add it to the script dicts + to GLB_MODELS in hero3d.js. Raw source meshes (OBJ/STL/FBX) live in `_originals/blend_files_meshes/` — gitignored like everything in `_originals/`, never move them into `public/`.
+This welds/simplifies/prunes and Draco-compresses (~29MB raw → ~70KB–180KB per file). Materials get replaced at runtime by hero3d.js, so texture/material loss is irrelevant. If simplification visibly damages a mesh, re-run with `--simplify false`. New model = optimize it into `public/models/` + add its name to GLB_MODELS in hero3d.js.
+
+Legacy Blender pipeline (previous models, kept for reference): `_originals/3d_files.blend` (183MB, gitignored) exported via `tools/export_glb.py` (per-mesh decimation caps in `FILE_CAPS`, modifiers stripped, placeholder materials, Draco). Run: `/Applications/Blender.app/Contents/MacOS/blender -b --factory-startup -noaudio _originals/3d_files.blend --python tools/export_glb.py`.
 
 ## Constraints
 

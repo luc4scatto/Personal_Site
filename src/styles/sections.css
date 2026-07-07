@@ -34,6 +34,18 @@
   color: var(--accent);
 }
 
+/* scroll progress bar under the nav */
+.scroll-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
 /* hero — full viewport, ready to host a Three.js canvas behind the text */
 .hero {
   min-height: 100svh;
@@ -89,6 +101,57 @@
   font-size: 1.15rem;
 }
 
+/* marquee band between hero and about */
+.marquee {
+  overflow: hidden;
+  border-top: 1px solid #1c1c1c;
+  border-bottom: 1px solid #1c1c1c;
+  padding: 1.1rem 0;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.marquee-track span {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: transparent;
+  -webkit-text-stroke: 1px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+/* words alternate lime/violet; 8 words per loop half keeps the seam invisible */
+.marquee-track span:nth-child(even) {
+  -webkit-text-stroke-color: color-mix(in srgb, var(--accent-2) 75%, transparent);
+}
+
+/* dot separator — uniform spacing between every word, including the loop seam */
+.marquee-track span::after {
+  content: '•';
+  margin: 0 1.4rem;
+  -webkit-text-stroke-color: color-mix(in srgb, var(--text-dim) 60%, transparent);
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
 /* about */
 .about-grid {
   display: grid;
@@ -105,7 +168,11 @@
 .about-photo {
   aspect-ratio: 1;
   border-radius: 1rem;
-  background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--accent) 25%, var(--surface)));
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-2) 20%, var(--surface)),
+    color-mix(in srgb, var(--accent) 25%, var(--surface))
+  );
 }
 
 /* skills */
@@ -168,6 +235,27 @@
   flex-direction: column;
   gap: 0.75rem;
   transition: border-color 0.2s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* spotlight following the pointer (--mx/--my set in main.js) */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--accent) 10%, transparent),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.card:hover::before {
+  opacity: 1;
 }
 
 .card:hover {
@@ -300,7 +388,7 @@
 
 .featured-links a::before {
   content: '↗ ';
-  color: var(--accent);
+  color: var(--accent-2);
 }
 
 /* footer */

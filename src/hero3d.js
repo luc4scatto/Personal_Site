@@ -4,26 +4,52 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 
 const ACCENT = 0xccff00;
 const WHITE = 0xf2f2f2;
+const VIOLET = 0xa78bfa; // third palette color — complementary to the lime accent
+const COLORS = [ACCENT, WHITE, VIOLET];
 const GLB_MODELS = [
-  'macbook',
-  'dj-mixer',
-  'vinyl',
-  'vinyl',
-  'vinyl',
-  'lego',
-  'printer-3d',
-  'speaker',
-  'server',
-  'cdj',
+  'mixing_board_01',
+  'transistor_03',
   'turntable',
-  'lego-figure',
+  'knob_39',
+  'gaming_computer',
+  'integrated_circuit_01',
+  'synthesizer',
+  'classical_computer_mouse_03',
+  'gaming_gpu',
+  'connector_iec_c19_coiled',
+  '3d_printer',
+  'knob_44',
+  'concert_speaker_02',
+  'integrated_circuit_02',
+  'pile_of_vinyl',
+  'sunglasses_04',
+  'mixing_board_03',
+  'cable_ethernet_coiled',
+  'concert_speaker_02',
 ];
-const ITEM_SIZE = 1.15;
-// per-model size tweaks on top of ITEM_SIZE
-const SIZE_TWEAKS = { cdj: 1.15, server: 0.85, turntable: 1.35 };
-const SPHERE_RADIUS = 2.5;
+const ITEM_SIZE = 0.95;
+// per-model size tweaks on top of ITEM_SIZE — hero pieces up, tiny parts down
+const SIZE_TWEAKS = {
+  mixing_board_01: 1.35,
+  turntable: 1.35,
+  synthesizer: 1.3,
+  gaming_computer: 1.2,
+  '3d_printer': 1.3,
+  gaming_gpu: 1.2,
+  pile_of_vinyl: 1.1,
+  mixing_board_03: 1.1,
+  sunglasses_04: 0.9,
+  classical_computer_mouse_03: 0.8,
+  connector_iec_c19_coiled: 0.8,
+  integrated_circuit_01: 0.7,
+  integrated_circuit_02: 0.7,
+  knob_39: 0.45,
+  knob_44: 0.45,
+  transistor_03: 0.55,
+};
+const SPHERE_RADIUS = 3.0;
 // ponytail: wander amplitude < half the min distance between fibonacci homes
-// (12 pts on r=2.5 sphere → min dist ~2.3), so overlaps are impossible by construction
+// (19 pts on r=3 sphere → min dist ~2.1), so overlaps are impossible by construction
 const WANDER = 0.3;
 
 function fibonacciSphere(count, radius) {
@@ -38,19 +64,22 @@ function fibonacciSphere(count, radius) {
   return pts;
 }
 
-// lightness variants of the base color so the parts of each object stay readable
-const SHADE_OFFSETS = [0, -0.1, 0.08, -0.05, 0.05, -0.14, 0.1];
+// stronger lightness variants of the base color so the parts of each object stay readable
+const SHADE_OFFSETS = [0, -0.18, 0.12, -0.09, 0.07, -0.24, 0.16];
+const NEUTRAL = 0x3a3a3a; // dark metallic parts interleaved for contrast between components
 
 function recolor(object, baseColor) {
   let i = 0;
   object.traverse((child) => {
     if (!child.isMesh) return;
-    const color = new THREE.Color(baseColor);
-    color.offsetHSL(0, 0, SHADE_OFFSETS[i % SHADE_OFFSETS.length]);
+    // every 4th part goes dark neutral + metallic, the rest are shades of the base
+    const neutral = i % 4 === 3;
+    const color = new THREE.Color(neutral ? NEUTRAL : baseColor);
+    if (!neutral) color.offsetHSL(0, 0, SHADE_OFFSETS[i % SHADE_OFFSETS.length]);
     child.material = new THREE.MeshStandardMaterial({
       color,
-      roughness: 0.35,
-      metalness: 0.1,
+      roughness: neutral ? 0.3 : 0.35,
+      metalness: neutral ? 0.6 : 0.1,
       side: THREE.DoubleSide, // open meshes / flipped normals would look holey otherwise
     });
     i++;
@@ -89,7 +118,7 @@ export function initHero3D(container) {
 
   function addItem(object, index) {
     normalize(object, ITEM_SIZE * (SIZE_TWEAKS[GLB_MODELS[index]] ?? 1));
-    recolor(object, index % 2 === 0 ? ACCENT : WHITE);
+    recolor(object, COLORS[index % COLORS.length]);
     const wrapper = new THREE.Group();
     wrapper.add(object);
     wrapper.position.copy(homes[index]);
@@ -124,7 +153,7 @@ export function initHero3D(container) {
       new THREE.TorusGeometry(1, 0.4, 8, 24),
       new THREE.IcosahedronGeometry(1.2, 0),
     ];
-    const shades = [ACCENT, WHITE, ACCENT, WHITE];
+    const shades = [ACCENT, WHITE, VIOLET, ACCENT, WHITE];
     const placed = [];
     let guard = 0;
     while (placed.length < 110 && guard++ < 4000) {
@@ -183,7 +212,7 @@ export function initHero3D(container) {
     // mobile band: centered group, camera further back to fit
     const mobile = window.innerWidth <= 700;
     group.position.x = mobile ? 0 : 0.2;
-    camera.position.z = mobile ? 10 : 11.5;
+    camera.position.z = mobile ? 12 : 13.5;
   }
   resize();
   new ResizeObserver(resize).observe(container);
