@@ -32,7 +32,7 @@ const ITEM_SIZE = 0.95;
 const SIZE_TWEAKS = {
   mixing_board_01: 1.35,
   turntable: 1.35,
-  synthesizer: 1.3,
+  synthesizer: 1.35,
   gaming_computer: 1.2,
   '3d_printer': 1.3,
   gaming_gpu: 1.2,
@@ -66,7 +66,7 @@ function fibonacciSphere(count, radius) {
 
 // stronger lightness variants of the base color so the parts of each object stay readable
 const SHADE_OFFSETS = [0, -0.18, 0.12, -0.09, 0.07, -0.24, 0.16];
-const NEUTRAL = 0x3a3a3a; // dark metallic parts interleaved for contrast between components
+const NEUTRAL = 0x9a9797; // dark-gray parts interleaved for contrast (high metalness reads near-black without an envmap)
 
 function recolor(object, baseColor) {
   let i = 0;
@@ -79,7 +79,7 @@ function recolor(object, baseColor) {
     child.material = new THREE.MeshStandardMaterial({
       color,
       roughness: neutral ? 0.3 : 0.35,
-      metalness: neutral ? 0.6 : 0.1,
+      metalness: neutral ? 0.35 : 0.1,
       side: THREE.DoubleSide, // open meshes / flipped normals would look holey otherwise
     });
     i++;
