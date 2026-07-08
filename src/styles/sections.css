@@ -1,3 +1,68 @@
+/* info card for a clicked 3D object */
+.object-info {
+  position: fixed;
+  z-index: 50;
+  max-width: 300px;
+  width: max-content;
+  padding: 1.1rem 1.3rem;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  border: 1px solid #2a2a2a;
+  border-left: 3px solid var(--accent);
+  border-radius: 0.9rem;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.object-info.is-open {
+  opacity: 1;
+  transform: none;
+}
+
+.object-info__title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin-bottom: 0.4rem;
+  padding-right: 1rem;
+}
+
+.object-info__text {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.object-info__close {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.6rem;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.object-info__close:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 700px) {
+  /* on mobile the card is a full-width bottom sheet */
+  .object-info {
+    left: 1rem !important;
+    right: 1rem !important;
+    top: auto !important;
+    bottom: 1rem;
+    max-width: none;
+    width: auto;
+  }
+}
+
 /* nav */
 .nav {
   position: fixed;
@@ -57,6 +122,20 @@
   gap: 1.5rem;
   position: relative;
   overflow: hidden;
+}
+
+/* hero headline: explicit masked lines (fixed spacing, no SplitText reflow) */
+.hero h1 .hero-line {
+  display: block;
+  overflow: hidden;
+  /* bottom room so descenders (the "g" in "bring") aren't clipped by the permanent
+     mask; negative margin cancels it so line spacing is unchanged */
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+
+.hero h1 .hero-line-inner {
+  display: block;
 }
 
 #hero-canvas {
@@ -196,8 +275,9 @@
 .skills-grid {
   list-style: none;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  /* fixed 3-column grid — a 4th item wraps to the next row regardless of available width */
+  grid-template-columns: repeat(3, max-content);
   gap: 0.75rem;
 }
 
@@ -417,5 +497,10 @@
 
   .nav nav {
     gap: 1rem;
+  }
+
+  .skills-grid {
+    /* narrower viewports: 2 columns so longer pills don't overflow */
+    grid-template-columns: repeat(2, max-content);
   }
 }
