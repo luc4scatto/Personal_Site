@@ -166,8 +166,12 @@
 }
 
 .about-photo {
+  width: 100%;
   aspect-ratio: 1;
   border-radius: 1rem;
+  object-fit: cover;
+  display: block;
+  /* gradient shows as placeholder while the photo loads */
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--accent-2) 20%, var(--surface)),
