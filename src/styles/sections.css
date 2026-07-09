@@ -88,7 +88,7 @@
   overflow-y: auto;
   background: var(--surface);
   border: 1px solid #2a2a2a;
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--skill-accent, var(--accent));
   border-radius: 1.25rem;
   padding: 2.75rem;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
@@ -96,7 +96,7 @@
   opacity: 0;
   pointer-events: none;
   transform: translateY(-50%) translateX(20px);
-  transition: opacity 0.3s, transform 0.3s;
+  transition: opacity 0.3s, transform 0.3s, border-color 0.15s;
 }
 
 .skill-panel.is-open {
@@ -105,17 +105,33 @@
   transform: translateY(-50%) translateX(0);
 }
 
+/* the whole card breathes (slight shrink + dim) while its content cross-fades */
+.skill-panel.is-open.is-switching {
+  opacity: 0.9;
+  transform: translateY(-50%) translateX(0) scale(0.97);
+  transition-duration: 0.15s;
+}
+
 .skill-panel__title {
   font-family: var(--font-display);
   font-size: 1.6rem;
   margin-bottom: 1rem;
   padding-right: 2rem;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .skill-panel__text {
   color: var(--text-dim);
   font-size: 1.05rem;
   line-height: 1.7;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* content cross-fade when jumping straight from one pill to another */
+.skill-panel.is-switching .skill-panel__title,
+.skill-panel.is-switching .skill-panel__text {
+  opacity: 0;
+  transform: translateY(6px);
 }
 
 .skill-panel__close {
@@ -152,13 +168,17 @@
     max-height: none;
     border-radius: 0;
     border-left: none;
-    border-top: 3px solid var(--accent);
+    border-top: 3px solid var(--skill-accent, var(--accent));
     padding: 5rem 1.5rem 2rem;
     transform: translateY(20px);
   }
 
   .skill-panel.is-open {
     transform: none;
+  }
+
+  .skill-panel.is-open.is-switching {
+    transform: scale(0.98);
   }
 }
 
