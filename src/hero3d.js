@@ -130,18 +130,18 @@ function normalize(object, size) {
 // info card shown on click — created once, appended to <body> (the canvas is pointer-events:none)
 function createInfoCard(onClose) {
   const card = document.createElement('div');
-  card.className = 'object-info';
+  card.className = 'info-card';
   card.hidden = true;
   card.innerHTML =
-    '<button class="object-info__close" aria-label="Close">&times;</button>' +
-    '<h3 class="object-info__title"></h3>' +
-    '<p class="object-info__text"></p>';
-  card.querySelector('.object-info__close').addEventListener('click', onClose);
+    '<button class="info-card__close" aria-label="Close">&times;</button>' +
+    '<h3 class="info-card__title"></h3>' +
+    '<p class="info-card__text"></p>';
+  card.querySelector('.info-card__close').addEventListener('click', onClose);
   document.body.appendChild(card);
   return {
     el: card,
-    title: card.querySelector('.object-info__title'),
-    text: card.querySelector('.object-info__text'),
+    title: card.querySelector('.info-card__title'),
+    text: card.querySelector('.info-card__text'),
   };
 }
 

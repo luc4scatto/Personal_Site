@@ -1,5 +1,5 @@
 /* info card for a clicked 3D object */
-.object-info {
+.info-card {
   position: fixed;
   z-index: 50;
   max-width: 300px;
@@ -16,25 +16,25 @@
   transition: opacity 0.25s, transform 0.25s;
 }
 
-.object-info.is-open {
+.info-card.is-open {
   opacity: 1;
   transform: none;
 }
 
-.object-info__title {
+.info-card__title {
   font-family: var(--font-display);
   font-size: 1.1rem;
   margin-bottom: 0.4rem;
   padding-right: 1rem;
 }
 
-.object-info__text {
+.info-card__text {
   color: var(--text-dim);
   font-size: 0.9rem;
   line-height: 1.5;
 }
 
-.object-info__close {
+.info-card__close {
   position: absolute;
   top: 0.45rem;
   right: 0.6rem;
@@ -47,19 +47,118 @@
   transition: color 0.2s;
 }
 
-.object-info__close:hover {
+.info-card__close:hover {
   color: var(--accent);
 }
 
 @media (max-width: 700px) {
   /* on mobile the card is a full-width bottom sheet */
-  .object-info {
+  .info-card {
     left: 1rem !important;
     right: 1rem !important;
     top: auto !important;
     bottom: 1rem;
     max-width: none;
     width: auto;
+  }
+}
+
+/* skill detail panel: big overlay, right-of-center on desktop, blurred backdrop on mobile only.
+   Backdrop is purely visual — pointer-events stay off so it never intercepts clicks meant
+   for a pill; outside-click handling lives on the window listener in main.js instead. */
+.skill-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.skill-panel-backdrop.is-open {
+  opacity: 1;
+}
+
+.skill-panel {
+  position: fixed;
+  top: 50%;
+  right: 10vw;
+  width: min(480px, 90vw);
+  max-height: min(600px, 80vh);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid #2a2a2a;
+  border-left: 3px solid var(--accent);
+  border-radius: 1.25rem;
+  padding: 2.75rem;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+  z-index: 61;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(20px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.skill-panel.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
+}
+
+.skill-panel__title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  padding-right: 2rem;
+}
+
+.skill-panel__text {
+  color: var(--text-dim);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.skill-panel__close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.skill-panel__close:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 700px) {
+  /* fullscreen takeover on mobile — never a bottom-anchored sheet that can crowd the footer */
+  .skill-panel-backdrop {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(10px);
+  }
+
+  .skill-panel {
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: auto;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+    border-left: none;
+    border-top: 3px solid var(--accent);
+    padding: 5rem 1.5rem 2rem;
+    transform: translateY(20px);
+  }
+
+  .skill-panel.is-open {
+    transform: none;
   }
 }
 
@@ -290,6 +389,7 @@
   border: 1px solid #222;
   border-radius: 999px;
   font-family: var(--font-display);
+  cursor: pointer;
   transition: border-color 0.2s, transform 0.2s;
 }
 
