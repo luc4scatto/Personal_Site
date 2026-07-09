@@ -31,19 +31,20 @@ document.querySelectorAll('.card').forEach((card) => {
 });
 
 // skill pill click → info card (placeholder copy, real text TBD)
+// colors extracted from each icon's actual fill in public/icons/ (not guessed from memory)
 const SKILL_DESCRIPTIONS = {
-  blender: { title: 'Blender', text: 'Placeholder — what I actually do with Blender goes here.' },
-  'autodesk-maya': { title: 'Autodesk Maya', text: 'Placeholder — what I actually do with Maya goes here.' },
-  'adobe-substance-3d': { title: 'Adobe Substance 3D', text: 'Placeholder — what I actually do with Substance 3D goes here.' },
-  'nvidia-omniverse': { title: 'NVIDIA Omniverse', text: 'Placeholder — what I actually do with Omniverse goes here.' },
-  'unreal-engine': { title: 'Unreal Engine', text: 'Placeholder — what I actually do with Unreal Engine goes here.' },
-  touchdesigner: { title: 'TouchDesigner', text: 'Placeholder — what I actually do with TouchDesigner goes here.' },
-  'after-effects': { title: 'After Effects', text: 'Placeholder — what I actually do with After Effects goes here.' },
-  'premiere-pro': { title: 'Premiere Pro', text: 'Placeholder — what I actually do with Premiere Pro goes here.' },
-  'davinci-resolve': { title: 'DaVinci Resolve', text: 'Placeholder — what I actually do with DaVinci Resolve goes here.' },
-  photoshop: { title: 'Photoshop', text: 'Placeholder — what I actually do with Photoshop goes here.' },
-  illustrator: { title: 'Illustrator', text: 'Placeholder — what I actually do with Illustrator goes here.' },
-  python: { title: 'Python', text: 'Placeholder — what I actually do with Python goes here.' },
+  blender: { title: 'Blender', text: 'Placeholder — what I actually do with Blender goes here.', color: '#E87D0D' },
+  'autodesk-maya': { title: 'Autodesk Maya', text: 'Placeholder — what I actually do with Maya goes here.', color: '#37A5CC' },
+  'adobe-substance-3d': { title: 'Adobe Substance 3D', text: 'Placeholder — what I actually do with Substance 3D goes here.', color: '#E03028' },
+  'nvidia-omniverse': { title: 'NVIDIA Omniverse', text: 'Placeholder — what I actually do with Omniverse goes here.', color: '#76B900' },
+  'unreal-engine': { title: 'Unreal Engine', text: 'Placeholder — what I actually do with Unreal Engine goes here.', color: '#FFFFFF' },
+  touchdesigner: { title: 'TouchDesigner', text: 'Placeholder — what I actually do with TouchDesigner goes here.', color: '#707D51' },
+  'after-effects': { title: 'After Effects', text: 'Placeholder — what I actually do with After Effects goes here.', color: '#9999FF' },
+  'premiere-pro': { title: 'Premiere Pro', text: 'Placeholder — what I actually do with Premiere Pro goes here.', color: '#9999FF' },
+  'davinci-resolve': { title: 'DaVinci Resolve', text: 'Placeholder — what I actually do with DaVinci Resolve goes here.', color: '#F0506B' },
+  photoshop: { title: 'Photoshop', text: 'Placeholder — what I actually do with Photoshop goes here.', color: '#31A8FF' },
+  illustrator: { title: 'Illustrator', text: 'Placeholder — what I actually do with Illustrator goes here.', color: '#FF9A00' },
+  python: { title: 'Python', text: 'Placeholder — what I actually do with Python goes here.', color: '#3776AB' },
 };
 
 const skillPills = document.querySelectorAll('.skills-grid li[data-skill]');
@@ -70,11 +71,26 @@ if (skillPills.length) {
   };
 
   const openSkillPanel = (li) => {
+    const wasOpen = !!activeSkillEl;
     activeSkillEl = li;
     const d = SKILL_DESCRIPTIONS[li.dataset.skill];
     if (!d) return;
-    title.textContent = d.title;
-    text.textContent = d.text;
+    const applyContent = () => {
+      title.textContent = d.title;
+      text.textContent = d.text;
+      panel.style.setProperty('--skill-accent', d.color);
+    };
+    if (wasOpen) {
+      // switching straight from one pill to another — cross-fade the content
+      // instead of an instant swap (the panel itself stays put, only the text fades)
+      panel.classList.add('is-switching');
+      setTimeout(() => {
+        applyContent();
+        panel.classList.remove('is-switching');
+      }, 150);
+    } else {
+      applyContent();
+    }
     backdrop.classList.add('is-open');
     panel.classList.add('is-open');
     document.body.style.overflow = 'hidden';
