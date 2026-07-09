@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 
-// ponytail: base assumes repo name "Personal_Site"; change to '/' if repo becomes <username>.github.io
+// base '/' — site is served from the custom domain root (lucascattolin.com), not a repo-name subpath
 export default defineConfig({
-  base: '/Personal_Site/',
+  base: '/',
   build: {
     rollupOptions: {
       input: {
