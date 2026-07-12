@@ -64,6 +64,7 @@ if (skillPills.length) {
   let activeSkillEl = null;
 
   const closeSkillPanel = () => {
+    activeSkillEl?.classList.remove('is-active');
     activeSkillEl = null;
     backdrop.classList.remove('is-open');
     panel.classList.remove('is-open');
@@ -72,7 +73,9 @@ if (skillPills.length) {
 
   const openSkillPanel = (li) => {
     const wasOpen = !!activeSkillEl;
+    activeSkillEl?.classList.remove('is-active');
     activeSkillEl = li;
+    li.classList.add('is-active');
     const d = SKILL_DESCRIPTIONS[li.dataset.skill];
     if (!d) return;
     const applyContent = () => {
@@ -119,5 +122,10 @@ if (skillPills.length) {
 // floating 3D hobby icons — lazy, respects reduced motion
 const heroCanvas = document.querySelector('#hero-canvas');
 if (heroCanvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  import('./hero3d.js').then((m) => m.initHero3D(heroCanvas));
+  import('./hero3d.js').then((m) => {
+    m.initHero3D(heroCanvas);
+    // the "click the objects" hint only makes sense once the 3D scene exists
+    const hint = document.querySelector('.hero-hint');
+    if (hint) hint.hidden = false;
+  });
 }

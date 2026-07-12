@@ -265,6 +265,11 @@
   height: 100%;
   z-index: -1;
   pointer-events: none;
+  /* fade the left edge instead of hard-clipping it: objects that drift toward the
+     headline dissolve into the background rather than being cut off or sitting
+     legibly on top of the text */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 24%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 24%);
 }
 
 #hero-canvas canvas {
@@ -280,10 +285,45 @@
     bottom: 0;
     width: 100%;
     height: 42%;
+    /* band is centered below the text on mobile — no side fade needed */
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 
   .hero {
     padding-bottom: 42svh;
+  }
+}
+
+/* "click the objects" invite — sits under the 3D sphere, fades out after the first focus */
+.hero-hint {
+  position: absolute;
+  bottom: 2.2rem;
+  right: 25%;
+  transform: translateX(50%);
+  color: var(--text-dim);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  animation: hero-hint-breathe 2.6s ease-in-out infinite;
+  transition: opacity 0.4s;
+}
+
+.hero-hint.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
+}
+
+@keyframes hero-hint-breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@media (max-width: 700px) {
+  .hero-hint {
+    right: 50%;
+    bottom: 0.9rem;
   }
 }
 
@@ -395,8 +435,11 @@
   list-style: none;
   padding: 0;
   display: grid;
-  /* fixed 3-column grid — a 4th item wraps to the next row regardless of available width */
-  grid-template-columns: repeat(3, max-content);
+  /* fixed 3 equal-width columns so every pill fills its column — the "+" then lands
+     flush at the right edge of each pill regardless of label length. max-width caps
+     pill width (columns would otherwise stretch to the 1200px section) */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 54rem;
   gap: 0.75rem;
 }
 
@@ -410,12 +453,34 @@
   border-radius: 999px;
   font-family: var(--font-display);
   cursor: pointer;
+  white-space: nowrap;
   transition: border-color 0.2s, transform 0.2s;
 }
 
 .skills-grid li:hover {
   border-color: var(--accent);
   transform: translateY(-3px);
+}
+
+/* "+" affordance: signals the pill expands; rotates into a × while its panel is open */
+.skills-grid li::after {
+  content: '+';
+  color: var(--text-dim);
+  font-weight: 500;
+  font-size: 1.25rem;
+  line-height: 1;
+  margin-left: auto;
+  padding-left: 0.9rem;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.skills-grid li:hover::after {
+  color: var(--accent);
+}
+
+.skills-grid li.is-active::after {
+  transform: rotate(45deg);
+  color: var(--accent);
 }
 
 .skill-icon {
@@ -620,7 +685,13 @@
   }
 
   .skills-grid {
-    /* narrower viewports: 2 columns so longer pills don't overflow */
-    grid-template-columns: repeat(2, max-content);
+    /* narrower viewports: 2 equal columns filling the width, "+" still flush right */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: none;
+  }
+
+  /* allow long labels to wrap on small screens instead of overflowing the pill */
+  .skills-grid li {
+    white-space: normal;
   }
 }
