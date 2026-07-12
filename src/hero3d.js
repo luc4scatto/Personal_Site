@@ -82,6 +82,7 @@ const WANDER = 0.3;
 const FOCUS_SCALE = 1.3;
 const HOVER_SCALE = 1.12; // gentle scale-up while the pointer is over an object
 const PULSE_AMP = 0.18; // extra scale at the peak of a click-me pulse
+const GLOW_AMP = 0.5; // emissive flash at the peak of a pulse (same sin curve)
 const BLUR_STRENGTH = 2.5; // gaussian blur radius (in texels) applied while focused
 
 function fibonacciSphere(count, radius) {
@@ -174,6 +175,14 @@ export function initHero3D(container) {
   function addItem(object, index) {
     normalize(object, ITEM_SIZE * (SIZE_TWEAKS[GLB_MODELS[index]] ?? 1));
     recolor(object, COLORS[index % COLORS.length]);
+    // each mesh glows its own color during the click-me pulse (emissiveIntensity animated in the loop)
+    const mats = [];
+    object.traverse((child) => {
+      if (!child.isMesh) return;
+      child.material.emissive = child.material.color.clone();
+      child.material.emissiveIntensity = 0;
+      mats.push(child.material);
+    });
     const wrapper = new THREE.Group();
     wrapper.add(object);
     wrapper.position.copy(homes[index]);
@@ -181,6 +190,8 @@ export function initHero3D(container) {
     const item = {
       wrapper,
       home: homes[index],
+      mats,
+      glow: 0,
       clickable: true,
       model: GLB_MODELS[index],
       focusAmt: 0, // eased 0→1 while this item is the focused one
@@ -287,6 +298,7 @@ export function initHero3D(container) {
 
   function focus(item) {
     if (focusedItem === item) return;
+    document.querySelector('.hero-hint')?.classList.add('is-hidden');
     if (focusedItem) focusedItem.wrapper.traverse((o) => o.layers.set(0));
     focusedItem = item;
     item.wrapper.traverse((o) => o.layers.set(1));
@@ -416,8 +428,14 @@ export function initHero3D(container) {
     const py = rect.top + (-tmpV.y * 0.5 + 0.5) * rect.height;
     const cw = info.el.offsetWidth;
     const ch = info.el.offsetHeight;
-    const x = Math.min(Math.max(px + 44, 12), window.innerWidth - cw - 12);
-    const y = Math.min(Math.max(py - ch / 2, 12), window.innerHeight - ch - 12);
+    const M = 24; // keep this much clearance from the viewport edges
+    const gap = 44; // horizontal offset from the object
+    // prefer the right side of the object; flip to the left when the card would
+    // otherwise run into the right edge (objects near the sphere's rim)
+    let x = px + gap;
+    if (x + cw > window.innerWidth - M) x = px - gap - cw;
+    x = Math.min(Math.max(x, M), window.innerWidth - cw - M);
+    const y = Math.min(Math.max(py - ch / 2, M), window.innerHeight - ch - M);
     info.el.style.left = `${x}px`;
     info.el.style.top = `${y}px`;
   }
@@ -467,9 +485,16 @@ export function initHero3D(container) {
           it.nextPulse = t + 3 + Math.random() * 5;
         }
         let pulse = 1;
+        let glow = 0;
         if (!focusedItem && t < it.pulseUntil) {
           const p = (t - it.pulseStart) / (it.pulseUntil - it.pulseStart);
-          pulse = 1 + Math.sin(Math.PI * p) * PULSE_AMP;
+          const wave = Math.sin(Math.PI * p);
+          pulse = 1 + wave * PULSE_AMP;
+          glow = wave * GLOW_AMP;
+        }
+        if (glow !== it.glow) {
+          it.glow = glow;
+          it.mats.forEach((m) => (m.emissiveIntensity = glow));
         }
         // ease the hover scale (suppressed on the focused item — it's already scaled up)
         it.hoverAmt += ((it === hoveredItem && it !== focusedItem ? 1 : 0) - it.hoverAmt) * 0.15;
