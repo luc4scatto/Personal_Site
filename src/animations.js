@@ -1,5 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { content } from './content.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -91,7 +92,7 @@ export function initAnimations() {
 // builds the accent-word slot and returns a start() that begins the looping cascade
 function initWordCycler(el) {
   if (!el) return () => {};
-  const WORDS = ['3D', '2D', 'AI'];
+  const WORDS = content.hero.words;
   const HOLD = 1.8; // seconds a word stays before the next slides in
   const DURATION = 0.5;
 

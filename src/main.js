@@ -1,6 +1,21 @@
 import './styles/base.css';
 import './styles/sections.css';
 import { initAnimations } from './animations.js';
+import { content } from './content.js';
+
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// fill every [data-copy="a.b.c"] element from content.js — runs before any animation
+// so GSAP only ever sees the final text, never a swap mid-reveal
+document.querySelectorAll('[data-copy]').forEach((el) => {
+  const value = el.dataset.copy.split('.').reduce((o, k) => o?.[k], content);
+  if (typeof value !== 'string') return;
+  el.innerHTML = value.split('\n').map(escapeHtml).join('<br>');
+});
+const emailLink = document.querySelector('[data-copy="contact.email"]');
+if (emailLink) emailLink.href = `mailto:${content.contact.email}`;
 
 // highlight the nav link of the section currently in view
 const sections = document.querySelectorAll('main section[id]');
@@ -30,22 +45,8 @@ document.querySelectorAll('.card').forEach((card) => {
   });
 });
 
-// skill pill click → info card (placeholder copy, real text TBD)
-// colors extracted from each icon's actual fill in public/icons/ (not guessed from memory)
-const SKILL_DESCRIPTIONS = {
-  blender: { title: 'Blender', text: 'Placeholder — what I actually do with Blender goes here.', color: '#E87D0D' },
-  'autodesk-maya': { title: 'Autodesk Maya', text: 'Placeholder — what I actually do with Maya goes here.', color: '#37A5CC' },
-  'adobe-substance-3d': { title: 'Adobe Substance 3D', text: 'Placeholder — what I actually do with Substance 3D goes here.', color: '#E03028' },
-  'nvidia-omniverse': { title: 'NVIDIA Omniverse', text: 'Placeholder — what I actually do with Omniverse goes here.', color: '#76B900' },
-  'unreal-engine': { title: 'Unreal Engine', text: 'Placeholder — what I actually do with Unreal Engine goes here.', color: '#FFFFFF' },
-  touchdesigner: { title: 'TouchDesigner', text: 'Placeholder — what I actually do with TouchDesigner goes here.', color: '#707D51' },
-  'after-effects': { title: 'After Effects', text: 'Placeholder — what I actually do with After Effects goes here.', color: '#9999FF' },
-  'premiere-pro': { title: 'Premiere Pro', text: 'Placeholder — what I actually do with Premiere Pro goes here.', color: '#9999FF' },
-  'davinci-resolve': { title: 'DaVinci Resolve', text: 'Placeholder — what I actually do with DaVinci Resolve goes here.', color: '#F0506B' },
-  photoshop: { title: 'Photoshop', text: 'Placeholder — what I actually do with Photoshop goes here.', color: '#31A8FF' },
-  illustrator: { title: 'Illustrator', text: 'Placeholder — what I actually do with Illustrator goes here.', color: '#FF9A00' },
-  python: { title: 'Python', text: 'Placeholder — what I actually do with Python goes here.', color: '#3776AB' },
-};
+// skill pill click → info card (copy lives in src/content.js)
+const SKILL_DESCRIPTIONS = content.skills;
 
 const skillPills = document.querySelectorAll('.skills-grid li[data-skill]');
 if (skillPills.length) {
