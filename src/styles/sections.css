@@ -293,6 +293,11 @@
   .hero {
     padding-bottom: 42svh;
   }
+
+  /* "See my work" duplicates the nav's Projects link and crowds the mobile hero */
+  .hero .btn {
+    display: none;
+  }
 }
 
 /* "click the objects" invite — sits under the 3D sphere, fades out after the first focus */

@@ -321,15 +321,66 @@ export function initHero3D(container) {
     }, 260);
   }
 
+  // ---- drag-to-rotate: press on the canvas (mouse or touch) and drag to spin the sphere ----
+  let manualRotY = 0;
+  let manualRotX = 0;
+  let dragging = false;
+  let dragged = false; // true once a press moves past the threshold — suppresses the click that follows
+  let dragX = 0;
+  let dragY = 0;
+  const DRAG_SPEED = 0.006;
+  const DRAG_THRESHOLD = 4; // px of movement before a press counts as a drag, not a click
+
+  function insideCanvas(x, y) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+  }
+
+  window.addEventListener('pointerdown', (e) => {
+    if (focusedItem || !insideCanvas(e.clientX, e.clientY)) return;
+    e.preventDefault(); // the press may land on text behind the (pointer-events:none) canvas — stop native text selection
+    dragging = true;
+    dragged = false;
+    dragX = e.clientX;
+    dragY = e.clientY;
+  });
+  window.addEventListener('pointerup', () => {
+    dragging = false;
+  });
+  window.addEventListener('pointercancel', () => {
+    dragging = false;
+  });
+
   // parallax + hover cursor share one pointermove; click focuses / dismisses
   const mouse = { x: 0, y: 0 };
-  window.addEventListener('pointermove', (e) => {
-    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
-    hoveredItem = focusedItem ? null : pick(e.clientX, e.clientY);
-    document.body.style.cursor = hoveredItem ? 'pointer' : '';
-  });
+  window.addEventListener(
+    'pointermove',
+    (e) => {
+      if (dragging) {
+        const dx = e.clientX - dragX;
+        const dy = e.clientY - dragY;
+        if (!dragged && Math.hypot(dx, dy) > DRAG_THRESHOLD) dragged = true;
+        if (dragged) {
+          e.preventDefault(); // stop touch-scroll while actively rotating the sphere
+          manualRotY += dx * DRAG_SPEED;
+          manualRotX = Math.max(-0.9, Math.min(0.9, manualRotX + dy * DRAG_SPEED));
+          dragX = e.clientX;
+          dragY = e.clientY;
+        }
+      } else {
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
+      }
+      hoveredItem = focusedItem || dragging ? null : pick(e.clientX, e.clientY);
+      document.body.style.cursor = dragging ? 'grabbing' : hoveredItem ? 'pointer' : '';
+    },
+    { passive: false }
+  );
   window.addEventListener('click', (e) => {
+    if (dragged) {
+      dragged = false; // this click is the tail end of a drag — swallow it
+      return;
+    }
     if (e.target instanceof Node && info.el.contains(e.target)) return; // interacting with the card itself
     const hit = pick(e.clientX, e.clientY);
     if (hit) focus(hit);
@@ -511,8 +562,8 @@ export function initHero3D(container) {
       autoSpin += 0.001;
       parallaxY += (mouse.x * 0.35 - parallaxY) * 0.03;
       parallaxX += (mouse.y * 0.2 - parallaxX) * 0.03;
-      group.rotation.y = autoSpin + parallaxY;
-      group.rotation.x = parallaxX;
+      group.rotation.y = autoSpin + parallaxY + manualRotY;
+      group.rotation.x = parallaxX + manualRotX;
     }
 
     if (focusedItem) {
