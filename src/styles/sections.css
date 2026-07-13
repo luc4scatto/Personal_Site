@@ -52,14 +52,10 @@
 }
 
 @media (max-width: 700px) {
-  /* on mobile the card is a full-width bottom sheet */
+  /* same floating card as desktop, just narrower so it always clears the viewport
+     edges on small phones (positionCard() in hero3d.js still does the placement) */
   .info-card {
-    left: 1rem !important;
-    right: 1rem !important;
-    top: auto !important;
-    bottom: 1rem;
-    max-width: none;
-    width: auto;
+    max-width: min(300px, calc(100vw - 3rem));
   }
 }
 
@@ -152,33 +148,31 @@
 }
 
 @media (max-width: 700px) {
-  /* fullscreen takeover on mobile — never a bottom-anchored sheet that can crowd the footer */
+  /* small centered card with a blurred backdrop — same spot every time, matching
+     the 3D-object info card rather than a fullscreen takeover */
   .skill-panel-backdrop {
     background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(10px);
   }
 
   .skill-panel {
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    width: auto;
-    height: 100%;
-    max-height: none;
-    border-radius: 0;
-    border-left: none;
-    border-top: 3px solid var(--skill-accent, var(--accent));
-    padding: 5rem 1.5rem 2rem;
-    transform: translateY(20px);
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    width: min(320px, calc(100vw - 3rem));
+    max-height: min(70vh, 420px);
+    border-top: none;
+    padding: 2rem 1.75rem;
+    transform: translate(-50%, -50%);
   }
 
   .skill-panel.is-open {
-    transform: none;
+    transform: translate(-50%, -50%);
   }
 
   .skill-panel.is-open.is-switching {
-    transform: scale(0.98);
+    transform: translate(-50%, -50%) scale(0.97);
   }
 }
 
@@ -279,21 +273,26 @@
 }
 
 @media (max-width: 700px) {
-  /* on mobile the icons live in a band at the bottom of the hero. The band stops
-     short of the hero's own bottom edge (bottom: 3rem, not 0) so that strip is
-     reserved exclusively for .hero-hint below — objects can never wander into it */
+  /* on mobile the sphere moves out of absolute positioning and into normal flow,
+     ordered after the text (flex `order`, DOM stays put for a11y/no-op for JS
+     selectors). As a real flow block with its own margin it can never overlap the
+     text above or .hero-hint below — no more fighting a percentage-of-an-ambiguous-
+     parent-height calculation to keep a safe gap on both sides */
   #hero-canvas {
+    order: 1;
+    position: relative;
     top: auto;
-    bottom: 3rem;
+    right: auto;
     width: 100%;
-    height: 46%;
+    height: 46svh;
+    margin-top: 2.5rem;
     /* band is centered below the text on mobile — no side fade needed */
     -webkit-mask-image: none;
     mask-image: none;
   }
 
   .hero {
-    padding-bottom: calc(46svh + 3rem);
+    padding-bottom: 2.5rem;
   }
 
   /* "See my work" duplicates the nav's Projects link and crowds the mobile hero */
@@ -329,8 +328,13 @@
 
 @media (max-width: 700px) {
   .hero-hint {
-    right: 50%;
-    bottom: 0.9rem;
+    order: 2;
+    position: static;
+    display: block;
+    width: 100%;
+    margin-top: 0.9rem;
+    text-align: center;
+    transform: none;
   }
 }
 
@@ -691,14 +695,40 @@
     gap: 1rem;
   }
 
+  /* icon-only on mobile: long labels wrapped a pill into a chubby 2-3 line blob.
+     The label stays in the DOM (visually-hidden, not display:none) so the name is
+     still announced to screen readers — sighted mobile users just get the logo. */
   .skills-grid {
-    /* narrower viewports: 2 equal columns filling the width, "+" still flush right */
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
+    gap: 0.6rem;
     max-width: none;
   }
 
-  /* allow long labels to wrap on small screens instead of overflowing the pill */
   .skills-grid li {
-    white-space: normal;
+    position: relative;
+    justify-content: center;
+    aspect-ratio: 1;
+    padding: 0.6rem;
+  }
+
+  .skills-grid li::after {
+    display: none;
+  }
+
+  .skill-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .skill-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 }
