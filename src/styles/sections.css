@@ -279,19 +279,21 @@
 }
 
 @media (max-width: 700px) {
-  /* on mobile the icons live in a band at the bottom of the hero */
+  /* on mobile the icons live in a band at the bottom of the hero. The band stops
+     short of the hero's own bottom edge (bottom: 3rem, not 0) so that strip is
+     reserved exclusively for .hero-hint below — objects can never wander into it */
   #hero-canvas {
     top: auto;
-    bottom: 0;
+    bottom: 3rem;
     width: 100%;
-    height: 42%;
+    height: 46%;
     /* band is centered below the text on mobile — no side fade needed */
     -webkit-mask-image: none;
     mask-image: none;
   }
 
   .hero {
-    padding-bottom: 42svh;
+    padding-bottom: calc(46svh + 3rem);
   }
 
   /* "See my work" duplicates the nav's Projects link and crowds the mobile hero */

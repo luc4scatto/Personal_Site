@@ -4,6 +4,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { HorizontalBlurShader } from 'three/addons/shaders/HorizontalBlurShader.js';
 import { VerticalBlurShader } from 'three/addons/shaders/VerticalBlurShader.js';
+import { content } from './content.js';
 
 const ACCENT = 0xccff00;
 const WHITE = 0xf2f2f2;
@@ -31,28 +32,8 @@ const GLB_MODELS = [
   'concert_speaker_02',
 ];
 
-// placeholder blurbs shown when an object is clicked — one per model, real copy TBD
-const DESCRIPTIONS = {
-  turntable: { title: 'Vinyl & DJing', text: 'Placeholder — I spin records and love the ritual of mixing on a real turntable.' },
-  pile_of_vinyl: { title: 'Vinyl Collection', text: 'Placeholder — an ever-growing crate of records I hunt for on weekends.' },
-  mixing_board_01: { title: 'Mixing', text: 'Placeholder — layering tracks and riding faders is my kind of flow state.' },
-  mixing_board_03: { title: 'Live Sound', text: 'Placeholder — patching a console and dialing in a mix for a room.' },
-  synthesizer: { title: 'Synths', text: 'Placeholder — chasing sounds and building patches from scratch.' },
-  knob_39: { title: 'Sound Design', text: 'Placeholder — I tweak knobs until a patch finally clicks.' },
-  knob_44: { title: 'Tweaking', text: 'Placeholder — endless fine-tuning is half the fun.' },
-  gaming_computer: { title: 'PC Gaming', text: 'Placeholder — I built this rig myself and it doubles as my render machine.' },
-  gaming_gpu: { title: 'Hardware', text: 'Placeholder — GPUs, benchmarks and the occasional upgrade rabbit hole.' },
-  integrated_circuit_01: { title: 'Electronics', text: 'Placeholder — tinkering with circuits and small hardware projects.' },
-  integrated_circuit_02: { title: 'Chips & Boards', text: 'Placeholder — I like understanding how the silicon actually works.' },
-  transistor_03: { title: 'Tinkering', text: 'Placeholder — soldering, breadboards and figuring things out by hand.' },
-  '3d_printer': { title: '3D Printing', text: 'Placeholder — prototyping props and parts one layer at a time.' },
-  classical_computer_mouse_03: { title: 'Everyday Tools', text: 'Placeholder — the trusty tools I work with every day.' },
-  connector_iec_c19_coiled: { title: 'Gear & Cables', text: 'Placeholder — the unglamorous cables that keep the studio running.' },
-  cable_ethernet_coiled: { title: 'Connectivity', text: 'Placeholder — a tidy network is a happy network.' },
-  sunglasses_04: { title: 'Eyewear & Design', text: 'Placeholder — eyewear is where my day job at Thélios meets good design.' },
-  concert_speaker_02: { title: 'Live Music', text: 'Placeholder — gigs, festivals and chasing the perfect drop.' },
-  _default: { title: 'One of my things', text: 'Placeholder description — this object represents one of my interests.' },
-};
+// blurbs shown when an object is clicked — copy lives in src/content.js
+const DESCRIPTIONS = content.hero3dObjects;
 
 const ITEM_SIZE = 0.95;
 // per-model size tweaks on top of ITEM_SIZE — hero pieces up, tiny parts down
@@ -496,10 +477,11 @@ export function initHero3D(container) {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
-    // mobile band: centered group, camera further back to fit
+    // mobile band: centered group, camera pulled in closer than desktop so the
+    // sphere reads at a decent size within the shorter band
     const mobile = window.innerWidth <= 700;
     group.position.x = mobile ? 0 : 0.2;
-    camera.position.z = mobile ? 12 : 13.5;
+    camera.position.z = mobile ? 10.5 : 13.5;
     if (rtA) {
       const s = rtSize();
       rtA.setSize(s.x, s.y);
