@@ -11,7 +11,7 @@ export const content = {
     line2Prefix: 'to life with',
     words: ['3D', '2D', 'AI'], // cycles through the accent word after "to life with"
     tagline:
-      '3D Technical Artist & Creative Technologist -- building the 3D pipeline at Thélios, from 2D design to renders, configurators and interactive experiences.',
+      '3D Technical Artist & Creative Technologist - building the 3D pipeline at Thélios, from 2D design to renders, configurators and interactive experiences.',
     hint: '✦ click on an object to learn more',
     cta: 'See my work ↓',
   },

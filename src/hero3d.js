@@ -448,11 +448,6 @@ export function initHero3D(container) {
 
   function positionCard() {
     if (!focusedItem) return;
-    if (window.innerWidth <= 700) {
-      info.el.style.left = '';
-      info.el.style.top = ''; // let the CSS bottom-sheet layout take over
-      return;
-    }
     focusedItem.wrapper.getWorldPosition(tmpV);
     tmpV.project(camera);
     const rect = renderer.domElement.getBoundingClientRect();
