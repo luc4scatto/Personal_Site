@@ -7,13 +7,26 @@
 export const content = {
   hero: {
     kicker: "Hi, I'm Luca Scattolin",
-    line1: 'I bring ideas',
+    line1: 'Bringing ideas',
     line2Prefix: 'to life with',
     words: ['3D', '2D', 'AI'], // cycles through the accent word after "to life with"
+    subtitle: '3D Technical Artist & Creative Technologist',
     tagline:
-      '3D Technical Artist & Creative Technologist - building the 3D pipeline at Thélios, from 2D design to renders, configurators and interactive experiences.',
+      'I build 2D-3D pipelines across every major DCC softwares,\npowering also configurators and interactive 3D experiences.',
     hint: '✦ click on an object to learn more',
-    cta: 'See my work ↓',
+    cta: 'See my works ↓',
+  },
+  // scrolling marquee band between hero and about (src/main.js builds the loop from this array)
+  // keep an even number of words or the lime/violet alternation jumps at the loop seam
+  marquee: {
+    words: ['USD Enthusiast', 
+            'Omniverse Wizard', 
+            'Blender Endorser', 
+            'Unreal Engine Explorer', 
+            'Maya Wrangler', 
+            'TouchDesigner Lover',
+            'Adobe Suite Aficionado',
+            'Python Ninja'],
   },
   about: {
     paragraph:
