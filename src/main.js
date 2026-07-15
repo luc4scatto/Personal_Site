@@ -17,6 +17,13 @@ document.querySelectorAll('[data-copy]').forEach((el) => {
 const emailLink = document.querySelector('[data-copy="contact.email"]');
 if (emailLink) emailLink.href = `mailto:${content.contact.email}`;
 
+// marquee band — duplicate the word list once for the seamless CSS loop
+const marqueeTrack = document.getElementById('marquee-track');
+if (marqueeTrack) {
+  const words = content.marquee.words;
+  marqueeTrack.innerHTML = [...words, ...words].map((w) => `<span>${escapeHtml(w)}</span>`).join('');
+}
+
 // highlight the nav link of the section currently in view
 const sections = document.querySelectorAll('main section[id]');
 const navLinks = document.querySelectorAll('.nav nav a');
@@ -64,6 +71,25 @@ if (skillPills.length) {
 
   let activeSkillEl = null;
 
+  // keep the panel clear of the grid: center it in the leftover space between the
+  // grid's actual right edge and the viewport edge, so it never lands on top of a pill
+  const positionSkillPanel = () => {
+    if (window.innerWidth <= 700) {
+      panel.style.left = '';
+      panel.style.right = '';
+      return;
+    }
+    const grid = document.querySelector('.skills-grid');
+    if (!grid) return;
+    const gridRect = grid.getBoundingClientRect();
+    const panelWidth = panel.offsetWidth || 360;
+    const available = window.innerWidth - gridRect.right;
+    const maxLeft = window.innerWidth - panelWidth - 16;
+    const left = Math.min(gridRect.right + (available - panelWidth) / 2, maxLeft);
+    panel.style.left = `${Math.max(left, 16)}px`;
+    panel.style.right = 'auto';
+  };
+
   const closeSkillPanel = () => {
     activeSkillEl?.classList.remove('is-active');
     activeSkillEl = null;
@@ -95,6 +121,7 @@ if (skillPills.length) {
     } else {
       applyContent();
     }
+    positionSkillPanel();
     backdrop.classList.add('is-open');
     panel.classList.add('is-open');
     document.body.style.overflow = 'hidden';
@@ -105,6 +132,10 @@ if (skillPills.length) {
       if (activeSkillEl === li) closeSkillPanel();
       else openSkillPanel(li);
     });
+  });
+
+  window.addEventListener('resize', () => {
+    if (activeSkillEl) positionSkillPanel();
   });
 
   panel.querySelector('.skill-panel__close').addEventListener('click', closeSkillPanel);
