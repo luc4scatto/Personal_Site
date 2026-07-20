@@ -84,6 +84,12 @@ export const content = {
     concert_speaker_02: { title: 'Live Music', text: 'Placeholder — gigs, festivals and chasing the perfect drop.' },
     _default: { title: 'One of my things', text: 'Placeholder description — this object represents one of my interests.' },
   },
+  // invitation filling the empty gutter beside the skills grid until a pill is clicked
+  // (.skill-ghost in index.html — only rendered from 1000px up, see sections.css)
+  skillsHint: {
+    title: 'Pick a skill',
+    text: 'Click any tool to see what I actually do with it.',
+  },
   // shown in the Skills section panel (src/main.js) — color = brand color extracted from each icon
   skills: {
     blender: { title: 'Blender', text: 'Placeholder — what I actually do with Blender goes here.', color: '#E87D0D' },
