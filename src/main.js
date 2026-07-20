@@ -108,18 +108,36 @@ if (skillPills.length) {
     ghost.classList.toggle('is-cramped', available < panelWidth + 24);
   };
 
-  // the ghost is position:fixed like the panel, so without this it would hang in the
-  // middle of every other section too. The -50%/-50% margins collapse the root to a
-  // single line across the middle of the viewport — exactly where the card sits — so it
-  // shows only while that line is inside the skills section, and not merely when the
-  // section happens to be partly on screen next to About.
+  // the ghost is position:fixed like the panel, so it has to be switched off outside the
+  // skills section or it hangs over About and Projects. An IntersectionObserver can't
+  // express the rule we actually want — it fires as soon as the section *touches* the
+  // observed band, so the card popped in while the About photo was still on screen —
+  // so compare the rectangles directly: the card only shows once it, plus a margin,
+  // fits inside the section. That starts the fade well before either neighbour arrives.
   const skillsSection = document.getElementById('skills');
+  const GHOST_CLEARANCE = 96; // px of section that must sit above and below the card
+
+  const updateGhostVisibility = () => {
+    if (!ghost || !skillsSection) return;
+    const rect = skillsSection.getBoundingClientRect();
+    const mid = window.innerHeight / 2; // the card is centered on the viewport
+    const reach = ghost.offsetHeight / 2 + GHOST_CLEARANCE;
+    ghost.classList.toggle('is-visible', rect.top < mid - reach && rect.bottom > mid + reach);
+  };
+
   if (ghost && skillsSection) {
-    new IntersectionObserver(
-      ([entry]) => ghost.classList.toggle('is-visible', entry.isIntersecting),
-      { rootMargin: '-50% 0px -50% 0px' }
-    ).observe(skillsSection);
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        updateGhostVisibility();
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
     positionSkillPanel();
+    updateGhostVisibility();
   }
 
   const closeSkillPanel = () => {
@@ -170,7 +188,10 @@ if (skillPills.length) {
 
   // unconditional: the ghost sits in the same slot and has to follow the grid even
   // while the panel is closed
-  window.addEventListener('resize', positionSkillPanel);
+  window.addEventListener('resize', () => {
+    positionSkillPanel();
+    updateGhostVisibility();
+  });
 
   panel.querySelector('.skill-panel__close').addEventListener('click', closeSkillPanel);
   // click outside the panel/pills closes it — pill clicks are excluded here so switching
