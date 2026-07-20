@@ -148,6 +148,69 @@
   color: var(--accent);
 }
 
+/* ghost card: fills the gutter the real panel floats into, so the right half of the
+   skills section reads as an invitation instead of dead space. Geometry mirrors
+   .skill-panel above — keep the two in sync. Hidden by default and only switched on
+   from 1000px up, because below that the panel is a centered modal and there is no
+   gutter at all; that makes the phone/small-tablet case immune to a stuck class. */
+.skill-ghost {
+  display: none;
+}
+
+@media (min-width: 1000px) {
+  .skill-ghost {
+    display: block;
+    position: fixed;
+    top: 50%;
+    right: 10vw; /* fallback only — main.js sets left against the grid's right edge */
+    width: min(360px, 90vw);
+    padding: 2.75rem;
+    border: 1px dashed #222;
+    border-left: 3px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+    border-radius: 1.25rem;
+    z-index: 59; /* under the panel (61) — they are never both on screen anyway */
+    opacity: 0;
+    pointer-events: none; /* decorative: never intercepts a click meant for a pill */
+    transform: translateY(-50%);
+    transition: opacity 0.4s;
+  }
+
+  /* is-visible = skills section on screen, is-cramped = gutter too narrow for the card,
+     is-dismissed = a real panel has taken the slot. All three set in main.js. */
+  .skill-ghost.is-visible:not(.is-cramped):not(.is-dismissed) {
+    opacity: 1;
+  }
+}
+
+.skill-ghost__title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--text-dim);
+  margin-bottom: 1rem;
+}
+
+.skill-ghost__text {
+  color: var(--text-dim);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  opacity: 0.7;
+}
+
+/* arrow points back at the pills, on the same 2.6s breath as .hero-hint so the site's
+   two "there is something to click here" invitations share one rhythm */
+.skill-ghost__text::before {
+  content: '←';
+  display: inline-block;
+  margin-right: 0.5rem;
+  color: var(--accent);
+  animation: skill-ghost-nudge 2.6s ease-in-out infinite;
+}
+
+@keyframes skill-ghost-nudge {
+  0%, 100% { transform: translateX(0); opacity: 0.55; }
+  50% { transform: translateX(-6px); opacity: 1; }
+}
+
 /* phones + small tablets: below this width the grid can't give up a column wide enough
    for a floating panel, so it becomes a centered modal. Keep in sync with PANEL_MODAL
    in main.js. */
@@ -463,6 +526,17 @@
 @media (prefers-reduced-motion: reduce) {
   .marquee-track {
     animation: none;
+  }
+
+  /* the ghost card still shows — it's information, not decoration — just without the
+     fade and without the arrow moving */
+  .skill-ghost {
+    transition: none;
+  }
+
+  .skill-ghost__text::before {
+    animation: none;
+    opacity: 1;
   }
 }
 

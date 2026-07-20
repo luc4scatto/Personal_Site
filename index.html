@@ -100,6 +100,14 @@
             <li data-skill="python"><img class="skill-icon" src="icons/python.svg" alt="" loading="lazy" /> <span class="skill-label">Python</span></li>
           </ul>
         </div>
+        <!-- placeholder filling the gutter the detail panel floats into: same slot, same
+             size, dashed. main.js positions it against the grid and fades it out while a
+             panel is open. No data-reveal — that tween writes inline opacity and would
+             fight the fade. Decorative, hence aria-hidden: the pills are the real controls. -->
+        <div class="skill-ghost" aria-hidden="true">
+          <p class="skill-ghost__title" data-copy="skillsHint.title">Pick a skill</p>
+          <p class="skill-ghost__text" data-copy="skillsHint.text">Click any tool to see what I actually do with it.</p>
+        </div>
       </section>
 
       <section id="projects" class="projects">

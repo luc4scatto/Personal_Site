@@ -71,12 +71,18 @@ if (skillPills.length) {
 
   let activeSkillEl = null;
 
+  // "pick a skill" placeholder holding the gutter until a pill is clicked. It lives in
+  // index.html so its copy comes from content.js via [data-copy]; CSS keeps it out of
+  // the way below 1000px, where the panel is a modal and there is no gutter.
+  const ghost = document.querySelector('.skill-ghost');
+
   // viewports where the panel is a centered modal instead of floating beside the grid —
   // must match the media query on .skill-panel in sections.css
   const PANEL_MODAL = '(max-width: 999px)';
 
   // keep the panel clear of the grid: center it in the leftover space between the
-  // grid's actual right edge and the viewport edge, so it never lands on top of a pill
+  // grid's actual right edge and the viewport edge, so it never lands on top of a pill.
+  // The ghost card occupies the same slot, so it gets the same left.
   const positionSkillPanel = () => {
     if (window.matchMedia(PANEL_MODAL).matches) {
       panel.style.left = '';
@@ -92,13 +98,36 @@ if (skillPills.length) {
     const left = Math.min(gridRect.right + (available - panelWidth) / 2, maxLeft);
     panel.style.left = `${Math.max(left, 16)}px`;
     panel.style.right = 'auto';
+    if (!ghost) return;
+    ghost.style.left = panel.style.left;
+    ghost.style.right = 'auto';
+    // the panel may clamp on top of the grid rather than disappear — that's a deliberate
+    // user action. The ghost is only an invitation, so where the gutter is too narrow for
+    // it (roughly 1367-1420px, just past where the grid goes back to 3 columns) it steps
+    // aside instead of parking on the pills.
+    ghost.classList.toggle('is-cramped', available < panelWidth + 24);
   };
+
+  // the ghost is position:fixed like the panel, so without this it would hang in the
+  // middle of every other section too. The -50%/-50% margins collapse the root to a
+  // single line across the middle of the viewport — exactly where the card sits — so it
+  // shows only while that line is inside the skills section, and not merely when the
+  // section happens to be partly on screen next to About.
+  const skillsSection = document.getElementById('skills');
+  if (ghost && skillsSection) {
+    new IntersectionObserver(
+      ([entry]) => ghost.classList.toggle('is-visible', entry.isIntersecting),
+      { rootMargin: '-50% 0px -50% 0px' }
+    ).observe(skillsSection);
+    positionSkillPanel();
+  }
 
   const closeSkillPanel = () => {
     activeSkillEl?.classList.remove('is-active');
     activeSkillEl = null;
     backdrop.classList.remove('is-open');
     panel.classList.remove('is-open');
+    ghost?.classList.remove('is-dismissed');
     document.body.style.overflow = '';
   };
 
@@ -128,6 +157,7 @@ if (skillPills.length) {
     positionSkillPanel();
     backdrop.classList.add('is-open');
     panel.classList.add('is-open');
+    ghost?.classList.add('is-dismissed');
     document.body.style.overflow = 'hidden';
   };
 
@@ -138,9 +168,9 @@ if (skillPills.length) {
     });
   });
 
-  window.addEventListener('resize', () => {
-    if (activeSkillEl) positionSkillPanel();
-  });
+  // unconditional: the ghost sits in the same slot and has to follow the grid even
+  // while the panel is closed
+  window.addEventListener('resize', positionSkillPanel);
 
   panel.querySelector('.skill-panel__close').addEventListener('click', closeSkillPanel);
   // click outside the panel/pills closes it — pill clicks are excluded here so switching
