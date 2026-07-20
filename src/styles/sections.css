@@ -100,6 +100,10 @@
   opacity: 1;
   pointer-events: auto;
   transform: translateY(-50%) translateX(0);
+  /* the panel is opaque, so without this head start for the ghost card it would simply
+     cover it rather than take over from it. Opening only — closing has no delay because
+     the base rule above carries none. */
+  transition-delay: 0.16s;
 }
 
 /* the whole card breathes (slight shrink + dim) while its content cross-fades */
@@ -107,6 +111,7 @@
   opacity: 0.9;
   transform: translateY(-50%) translateX(0) scale(0.97);
   transition-duration: 0.15s;
+  transition-delay: 0s; /* already open: nothing to hand over, keep the switch snappy */
 }
 
 .skill-panel__title {
@@ -172,13 +177,21 @@
     opacity: 0;
     pointer-events: none; /* decorative: never intercepts a click meant for a pill */
     transform: translateY(-50%);
-    transition: opacity 0.4s;
+    transition: opacity 0.28s ease-out, transform 0.28s ease-out;
   }
 
   /* is-visible = skills section on screen, is-cramped = gutter too narrow for the card,
      is-dismissed = a real panel has taken the slot. All three set in main.js. */
   .skill-ghost.is-visible:not(.is-cramped):not(.is-dismissed) {
     opacity: 1;
+    /* let the outgoing panel clear the slot first on the way back */
+    transition-delay: 0.12s;
+  }
+
+  /* handing the slot over to the real panel: shrink a touch while fading so the card
+     reads as dissolving, instead of just being covered by the panel landing on top */
+  .skill-ghost.is-dismissed {
+    transform: translateY(-50%) scale(0.97);
   }
 }
 
@@ -236,6 +249,9 @@
 
   .skill-panel.is-open {
     transform: translate(-50%, -50%);
+    /* no ghost card down here to hand the slot over to, so the panel opens immediately —
+       the head start it gets above 1000px would just feel like lag */
+    transition-delay: 0s;
   }
 
   .skill-panel.is-open.is-switching {
