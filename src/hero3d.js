@@ -35,6 +35,10 @@ const GLB_MODELS = [
 // blurbs shown when an object is clicked — copy lives in src/content.js
 const DESCRIPTIONS = content.hero3dObjects;
 
+// viewports where the CSS stacks the sphere below the hero text instead of placing it
+// beside it — must match the media query on #hero-canvas in sections.css
+const STACKED_HERO = '(max-width: 700px), (max-width: 1024px) and (orientation: portrait)';
+
 const ITEM_SIZE = 0.95;
 // per-model size tweaks on top of ITEM_SIZE — hero pieces up, tiny parts down
 const SIZE_TWEAKS = {
@@ -472,11 +476,11 @@ export function initHero3D(container) {
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
-    // mobile band: centered group, camera pulled in closer than desktop so the
+    // stacked band: centered group, camera pulled in closer than desktop so the
     // sphere reads at a decent size within the shorter band
-    const mobile = window.innerWidth <= 700;
-    group.position.x = mobile ? 0 : 0.2;
-    camera.position.z = mobile ? 10.5 : 13.5;
+    const stacked = window.matchMedia(STACKED_HERO).matches;
+    group.position.x = stacked ? 0 : 0.2;
+    camera.position.z = stacked ? 10.5 : 13.5;
     if (rtA) {
       const s = rtSize();
       rtA.setSize(s.x, s.y);

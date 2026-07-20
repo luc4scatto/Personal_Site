@@ -148,7 +148,10 @@
   color: var(--accent);
 }
 
-@media (max-width: 700px) {
+/* phones + tablets: below this width there is no usable gutter left of the viewport
+   edge for a floating panel, so it would land on the pills. Keep in sync with
+   PANEL_MODAL in main.js. */
+@media (max-width: 1100px) {
   /* small centered card with a blurred backdrop — same spot every time, matching
      the 3D-object info card rather than a fullscreen takeover */
   .skill-panel-backdrop {
@@ -273,8 +276,11 @@
   display: block;
 }
 
-@media (max-width: 700px) {
-  /* on mobile the sphere moves out of absolute positioning and into normal flow,
+/* phones + tablets held in portrait: on any viewport this narrow the headline is wider
+   than the free half of the screen, so the side-by-side hero always collides with the
+   sphere. Keep in sync with STACKED_HERO in hero3d.js (camera distance). */
+@media (max-width: 700px), (max-width: 1024px) and (orientation: portrait) {
+  /* the sphere moves out of absolute positioning and into normal flow,
      ordered after the text (flex `order`, DOM stays put for a11y/no-op for JS
      selectors). As a real flow block with its own margin it can never overlap the
      text above or .hero-hint below — no more fighting a percentage-of-an-ambiguous-
@@ -296,7 +302,11 @@
     padding-bottom: 2.5rem;
   }
 
-  /* "See my work" duplicates the nav's Projects link and crowds the mobile hero */
+}
+
+@media (max-width: 700px) {
+  /* "See my work" duplicates the nav's Projects link and crowds the mobile hero.
+     Tablets have the room, so it stays there. */
   .hero .btn {
     display: none;
   }
@@ -327,7 +337,7 @@
   50% { opacity: 1; }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 700px), (max-width: 1024px) and (orientation: portrait) {
   .hero-hint {
     order: 2;
     position: static;
@@ -336,6 +346,50 @@
     margin-top: 0.9rem;
     text-align: center;
     transform: none;
+  }
+}
+
+/* tablets in portrait: text block + 3D band both have to fit one 100svh hero, and at
+   9vw the two headline lines alone eat half of it — the kicker ended up clipped behind
+   the nav and the sphere ran off the bottom edge */
+@media (min-width: 701px) and (max-width: 1024px) and (orientation: portrait) {
+  .hero h1 {
+    font-size: clamp(2.75rem, 6.4vw, 4.5rem);
+  }
+
+  .hero-subtitle,
+  .hero-tagline {
+    max-width: 40rem;
+  }
+
+  .hero {
+    padding-block: 5.5rem 2rem;
+  }
+
+  /* the band takes whatever height is left after the text instead of a fixed svh
+     slice, so the hero always ends up exactly one screen tall — no clipped kicker
+     at the top, no sphere running off the bottom */
+  #hero-canvas {
+    /* zero basis, not auto: the <canvas> inside is sized by the renderer, so an auto
+       basis would let it dictate (and keep growing) the band's height */
+    flex: 1 1 0;
+    height: auto;
+    min-height: 14rem;
+    margin-top: 1rem;
+    overflow: hidden;
+  }
+}
+
+/* tablets/small laptops in landscape: hero stays side-by-side, but the 9vw headline
+   grows past the left half and runs into the sphere — hold the text to its column */
+@media (min-width: 701px) and (max-width: 1366px) and (orientation: landscape) {
+  .hero h1 {
+    font-size: clamp(2.5rem, 6.2vw, 4.5rem);
+  }
+
+  .hero-subtitle,
+  .hero-tagline {
+    max-width: 26rem;
   }
 }
 
