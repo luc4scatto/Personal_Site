@@ -148,10 +148,10 @@
   color: var(--accent);
 }
 
-/* phones + tablets: below this width there is no usable gutter left of the viewport
-   edge for a floating panel, so it would land on the pills. Keep in sync with
-   PANEL_MODAL in main.js. */
-@media (max-width: 1100px) {
+/* phones + small tablets: below this width the grid can't give up a column wide enough
+   for a floating panel, so it becomes a centered modal. Keep in sync with PANEL_MODAL
+   in main.js. */
+@media (max-width: 999px) {
   /* small centered card with a blurred backdrop — same spot every time, matching
      the 3D-object info card rather than a fullscreen takeover */
   .skill-panel-backdrop {
@@ -517,6 +517,15 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   max-width: 54rem;
   gap: 0.75rem;
+}
+
+/* tablets: drop to two columns and hold the grid narrow, so the detail panel has a
+   real gutter to sit in between the last pill and the right edge of the window */
+@media (min-width: 1000px) and (max-width: 1366px) {
+  .skills-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 32rem;
+  }
 }
 
 .skills-grid li {
