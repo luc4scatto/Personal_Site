@@ -73,7 +73,7 @@ if (skillPills.length) {
 
   // viewports where the panel is a centered modal instead of floating beside the grid —
   // must match the media query on .skill-panel in sections.css
-  const PANEL_MODAL = '(max-width: 1100px)';
+  const PANEL_MODAL = '(max-width: 999px)';
 
   // keep the panel clear of the grid: center it in the leftover space between the
   // grid's actual right edge and the viewport edge, so it never lands on top of a pill
