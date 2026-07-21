@@ -80,6 +80,11 @@ if (skillPills.length) {
   // must match the media query on .skill-panel in sections.css
   const PANEL_MODAL = '(max-width: 999px)';
 
+  // phones only: the panel covers most of the screen there, so the page stays locked
+  // behind it. Everywhere else — tablets included — the page keeps scrolling and the
+  // panel simply leaves with the section, the same way the ghost card does.
+  const SCROLL_LOCK = '(max-width: 700px)';
+
   // keep the panel clear of the grid: center it in the leftover space between the
   // grid's actual right edge and the viewport edge, so it never lands on top of a pill.
   // The ghost card occupies the same slot, so it gets the same left.
@@ -117,28 +122,19 @@ if (skillPills.length) {
   const skillsSection = document.getElementById('skills');
   const GHOST_CLEARANCE = 96; // px of section that must sit above and below the card
 
-  const updateGhostVisibility = () => {
-    if (!ghost || !skillsSection) return;
+  // is the fixed card's slot (the middle of the viewport) still well inside the section?
+  const cardSlotInSection = (cardHeight) => {
+    if (!skillsSection) return false;
     const rect = skillsSection.getBoundingClientRect();
-    const mid = window.innerHeight / 2; // the card is centered on the viewport
-    const reach = ghost.offsetHeight / 2 + GHOST_CLEARANCE;
-    ghost.classList.toggle('is-visible', rect.top < mid - reach && rect.bottom > mid + reach);
+    const mid = window.innerHeight / 2; // both cards are centered on the viewport
+    const reach = cardHeight / 2 + GHOST_CLEARANCE;
+    return rect.top < mid - reach && rect.bottom > mid + reach;
   };
 
-  if (ghost && skillsSection) {
-    let ticking = false;
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        ticking = false;
-        updateGhostVisibility();
-      });
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    positionSkillPanel();
-    updateGhostVisibility();
-  }
+  const updateGhostVisibility = () => {
+    if (!ghost) return;
+    ghost.classList.toggle('is-visible', cardSlotInSection(ghost.offsetHeight));
+  };
 
   const closeSkillPanel = () => {
     activeSkillEl?.classList.remove('is-active');
@@ -176,7 +172,7 @@ if (skillPills.length) {
     backdrop.classList.add('is-open');
     panel.classList.add('is-open');
     ghost?.classList.add('is-dismissed');
-    document.body.style.overflow = 'hidden';
+    if (window.matchMedia(SCROLL_LOCK).matches) document.body.style.overflow = 'hidden';
   };
 
   skillPills.forEach((li) => {
@@ -186,12 +182,37 @@ if (skillPills.length) {
     });
   });
 
+  // the page keeps scrolling with a panel open (except on phones), so an open panel has
+  // to leave the same way the ghost card does: once its slot is no longer inside the
+  // skills section. Otherwise it would hang over About or Projects.
+  let ticking = false;
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        updateGhostVisibility();
+        if (activeSkillEl && !window.matchMedia(SCROLL_LOCK).matches
+          && !cardSlotInSection(panel.offsetHeight)) closeSkillPanel();
+      });
+    },
+    { passive: true }
+  );
+
   // unconditional: the ghost sits in the same slot and has to follow the grid even
   // while the panel is closed
   window.addEventListener('resize', () => {
     positionSkillPanel();
     updateGhostVisibility();
+    // opened on a phone, then the window grew past the lock breakpoint — release the
+    // page rather than leaving it stuck until the panel is closed
+    if (!window.matchMedia(SCROLL_LOCK).matches) document.body.style.overflow = '';
   });
+
+  positionSkillPanel();
+  updateGhostVisibility();
 
   panel.querySelector('.skill-panel__close').addEventListener('click', closeSkillPanel);
   // click outside the panel/pills closes it — pill clicks are excluded here so switching
