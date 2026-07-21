@@ -742,6 +742,18 @@
   text-decoration: underline;
 }
 
+/* whole-card click target. :only-child on purpose — a card with a single link has one
+   unambiguous destination, so the overlay covers the card; the placeholder cards carry
+   two links (GitHub / Live) and keep their separate hit areas. Nothing is added to the
+   a11y tree: the link is still the only control, so keyboard and screen readers are
+   unchanged, and .card is already position: relative for the spotlight. */
+.card-links a:only-child::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
 /* contact */
 .contact {
   text-align: center;
