@@ -69,6 +69,14 @@ const HOVER_SCALE = 1.12; // gentle scale-up while the pointer is over an object
 const PULSE_AMP = 0.18; // extra scale at the peak of a click-me pulse
 const GLOW_AMP = 0.5; // emissive flash at the peak of a pulse (same sin curve)
 const BLUR_STRENGTH = 2.5; // gaussian blur radius (in texels) applied while focused
+// directional smear while the sphere is being spun — a cheap stand-in for real motion
+// blur (no velocity buffer, no second geometry pass), reusing the focus blur pipeline.
+// Two fullscreen passes, and only while the sphere is actually moving.
+// 2.5 is about the ceiling: the addon shaders take 9 fixed taps, so a wider radius
+// stops reading as a smear and starts showing the individual copies as banding
+const DRAG_BLUR = 1.6; // max blur radius in texels, at full speed
+const DRAG_BLUR_SPEED = 0.045; // rad/frame of rotation that reaches full blur
+const DRAG_BLUR_MIN = 0.02; // below this the extra passes aren't worth it — render plain
 
 function fibonacciSphere(count, radius) {
   const pts = [];
@@ -307,14 +315,59 @@ export function initHero3D(container) {
   }
 
   // ---- drag-to-rotate: press on the canvas (mouse or touch) and drag to spin the sphere ----
-  let manualRotY = 0;
-  let manualRotX = 0;
+  // The manual rotation is a quaternion, not a pair of euler angles: with eulers, once the
+  // cloud is flipped past vertical the world Y axis points opposite to the screen's, and
+  // dragging sideways rotates the wrong way. Premultiplying by a screen-space axis keeps
+  // "drag right" meaning "spin right" whatever the current orientation.
+  const manualQ = new THREE.Quaternion();
+  const stepQ = new THREE.Quaternion();
+  const AXIS_Y = new THREE.Vector3(0, 1, 0);
+  const AXIS_X = new THREE.Vector3(1, 0, 0);
+  // how much rotation was applied since the last frame, per screen axis — drives the smear
+  let appliedY = 0;
+  let appliedX = 0;
+
+  function rotateWorld(axis, angle) {
+    if (!angle) return;
+    stepQ.setFromAxisAngle(axis, angle);
+    manualQ.premultiply(stepQ); // premultiply = rotate about the screen axis, not the object's
+    if (axis === AXIS_Y) appliedY += Math.abs(angle);
+    else appliedX += Math.abs(angle);
+  }
+
+  // Composing rotations about two axes inevitably breeds rotation about the third, so the
+  // cloud slowly tilts and the horizon goes with it. Rather than constraining the drag
+  // (which would cost a pole where sideways dragging stops working), let it tilt freely
+  // and unwind the tilt once the cloud is at rest.
+  const AXIS_Z = new THREE.Vector3(0, 0, 1);
+  const UP = new THREE.Vector3(0, 1, 0);
+  const tmpUp = new THREE.Vector3();
+  const ROLL_FIX = 0.06; // fraction of the remaining tilt undone per frame (~1s to settle)
+  const ROLL_POLE = 0.15; // below this the cloud's up axis points at the camera — no "upright" to aim for
+
+  function settleRoll() {
+    tmpUp.copy(UP).applyQuaternion(manualQ);
+    const flat = Math.hypot(tmpUp.x, tmpUp.y); // how much of "up" is visible on screen
+    if (flat < ROLL_POLE) return; // near the pole the angle is meaningless — leave it be
+    const roll = Math.atan2(tmpUp.x, tmpUp.y);
+    if (Math.abs(roll) < 0.001) return;
+    // +roll, not -roll: atan2(x, y) measures clockwise from screen-up, the opposite sense
+    // to a rotation about +Z. Scaled by `flat` so it fades out instead of snapping at the pole.
+    stepQ.setFromAxisAngle(AXIS_Z, roll * ROLL_FIX * flat);
+    manualQ.premultiply(stepQ);
+  }
+
   let dragging = false;
   let dragged = false; // true once a press moves past the threshold — suppresses the click that follows
   let dragX = 0;
   let dragY = 0;
   const DRAG_SPEED = 0.006;
   const DRAG_THRESHOLD = 4; // px of movement before a press counts as a drag, not a click
+  // let go mid-spin and the cloud keeps turning, slowing down instead of stopping dead
+  let spinVelY = 0;
+  let spinVelX = 0;
+  const SPIN_FRICTION = 0.96; // velocity kept per frame after release (~1.5s to settle)
+  const SPIN_MIN = 0.0002; // below this the throw is over — drop back to the idle path
 
   function insideCanvas(x, y) {
     const rect = renderer.domElement.getBoundingClientRect();
@@ -326,6 +379,8 @@ export function initHero3D(container) {
     e.preventDefault(); // the press may land on text behind the (pointer-events:none) canvas — stop native text selection
     dragging = true;
     dragged = false;
+    spinVelY = 0; // grabbing the cloud stops whatever throw was still running
+    spinVelX = 0;
     dragX = e.clientX;
     dragY = e.clientY;
   });
@@ -347,8 +402,12 @@ export function initHero3D(container) {
         if (!dragged && Math.hypot(dx, dy) > DRAG_THRESHOLD) dragged = true;
         if (dragged) {
           e.preventDefault(); // stop touch-scroll while actively rotating the sphere
-          manualRotY += dx * DRAG_SPEED;
-          manualRotX = Math.max(-0.9, Math.min(0.9, manualRotX + dy * DRAG_SPEED));
+          // unclamped: the cloud tumbles freely on both axes
+          rotateWorld(AXIS_Y, dx * DRAG_SPEED);
+          rotateWorld(AXIS_X, dy * DRAG_SPEED);
+          // smoothed, so a tiny last-moment jiggle can't kill the throw
+          spinVelY = spinVelY * 0.7 + dx * DRAG_SPEED * 0.3;
+          spinVelX = spinVelX * 0.7 + dy * DRAG_SPEED * 0.3;
           dragX = e.clientX;
           dragY = e.clientY;
         }
@@ -435,10 +494,11 @@ export function initHero3D(container) {
       renderer.setRenderTarget(rtA);
       blurQuad.render(renderer);
     }
-    // 3. composite the blurred background to the canvas
+    // 3. composite the blurred background to the canvas, dimmed behind the focused item
     renderer.setRenderTarget(null);
     renderer.clear();
     compMat.uniforms.tDiffuse.value = rtA.texture;
+    compMat.uniforms.brightness.value = 0.5;
     blurQuad.material = compMat;
     blurQuad.render(renderer);
     // 4. draw the sharp focused object on top
@@ -448,6 +508,35 @@ export function initHero3D(container) {
     renderer.render(scene, camera);
     camera.layers.set(0);
     renderer.autoClear = true;
+  }
+
+  // one separable blur pass, sized per axis from how fast the sphere is turning: spinning
+  // around Y moves pixels sideways, around X moves them vertically. Same pipeline as
+  // renderFocused, minus the layer split and the dimming.
+  function renderDragBlur(hAmt, vAmt) {
+    const s = rtSize();
+    renderer.setRenderTarget(rtA);
+    renderer.clear();
+    renderer.render(scene, camera);
+
+    hMat.uniforms.tDiffuse.value = rtA.texture;
+    hMat.uniforms.h.value = hAmt / s.x;
+    blurQuad.material = hMat;
+    renderer.setRenderTarget(rtB);
+    blurQuad.render(renderer);
+
+    vMat.uniforms.tDiffuse.value = rtB.texture;
+    vMat.uniforms.v.value = vAmt / s.y;
+    blurQuad.material = vMat;
+    renderer.setRenderTarget(rtA);
+    blurQuad.render(renderer);
+
+    renderer.setRenderTarget(null);
+    renderer.clear();
+    compMat.uniforms.tDiffuse.value = rtA.texture;
+    compMat.uniforms.brightness.value = 1; // full brightness: nothing is being focused
+    blurQuad.material = compMat;
+    blurQuad.render(renderer);
   }
 
   function positionCard() {
@@ -494,6 +583,9 @@ export function initHero3D(container) {
   let autoSpin = 0;
   let parallaxX = 0;
   let parallaxY = 0;
+  const baseEuler = new THREE.Euler();
+  let blurH = 0; // current smear radius per axis, eased toward the rotation speed
+  let blurV = 0;
   renderer.setAnimationLoop(() => {
     const t = clock.getElapsedTime();
     items.forEach((it) => {
@@ -540,16 +632,45 @@ export function initHero3D(container) {
     if (!focusedItem) {
       // continuous slow spin (independent of the mouse) plus a mouse-parallax offset on top,
       // so the two never fight each other the way a single damped target would
+      // carry the throw: keep applying the release velocity, bled off a bit each frame.
+      // The smear follows for free — it reads the actual rotation, so it eases out too.
+      const throwing = Math.abs(spinVelY) > SPIN_MIN || Math.abs(spinVelX) > SPIN_MIN;
+      if (!dragging && throwing) {
+        rotateWorld(AXIS_Y, spinVelY);
+        rotateWorld(AXIS_X, spinVelX);
+        spinVelY *= SPIN_FRICTION;
+        spinVelX *= SPIN_FRICTION;
+      }
+      // only once the cloud has come to rest, so it never fights the hand
+      if (!dragging && !throwing) settleRoll();
       autoSpin += 0.001;
       parallaxY += (mouse.x * 0.35 - parallaxY) * 0.03;
       parallaxX += (mouse.y * 0.2 - parallaxX) * 0.03;
-      group.rotation.y = autoSpin + parallaxY + manualRotY;
-      group.rotation.x = parallaxX + manualRotX;
+      // idle spin and mouse parallax stay screen-relative, so they're applied on the
+      // outside of the manual rotation rather than accumulated into it
+      baseEuler.set(parallaxX, autoSpin + parallaxY, 0);
+      group.quaternion.setFromEuler(baseEuler).multiply(manualQ);
     }
+
+    // how far the cloud turned since the last frame, per screen axis — read from what was
+    // actually applied (euler deltas would jump wildly near the poles), so a flick that
+    // keeps easing out keeps smearing as it settles
+    const spinY = appliedY;
+    const spinX = appliedX;
+    appliedY = 0;
+    appliedX = 0;
+    // rise fast, fall slower, so letting go trails off instead of snapping sharp
+    const targetH = Math.min(spinY / DRAG_BLUR_SPEED, 1) * DRAG_BLUR;
+    const targetV = Math.min(spinX / DRAG_BLUR_SPEED, 1) * DRAG_BLUR;
+    blurH += (targetH - blurH) * (targetH > blurH ? 0.6 : 0.15);
+    blurV += (targetV - blurV) * (targetV > blurV ? 0.6 : 0.15);
 
     if (focusedItem) {
       renderFocused();
       positionCard();
+    } else if (blurH > DRAG_BLUR_MIN || blurV > DRAG_BLUR_MIN) {
+      ensureBlur();
+      renderDragBlur(blurH, blurV);
     } else {
       renderer.render(scene, camera);
     }
