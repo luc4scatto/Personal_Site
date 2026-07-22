@@ -122,6 +122,17 @@
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
+/* only rendered for skills flagged selfTaught in content.js; [hidden] takes it
+   out of flow entirely so unflagged cards keep the title's original spacing */
+.skill-panel__badge {
+  color: var(--accent-2);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
 .skill-panel__text {
   color: var(--text-dim);
   font-size: 1.1rem;
@@ -131,6 +142,7 @@
 
 /* content cross-fade when jumping straight from one pill to another */
 .skill-panel.is-switching .skill-panel__title,
+.skill-panel.is-switching .skill-panel__badge,
 .skill-panel.is-switching .skill-panel__text {
   opacity: 0;
   transform: translateY(6px);

@@ -64,9 +64,11 @@ if (skillPills.length) {
   panel.innerHTML =
     '<button class="skill-panel__close" aria-label="Close">&times;</button>' +
     '<h3 class="skill-panel__title"></h3>' +
+    '<p class="skill-panel__badge"></p>' +
     '<p class="skill-panel__text"></p>';
   document.body.append(backdrop, panel);
   const title = panel.querySelector('.skill-panel__title');
+  const badge = panel.querySelector('.skill-panel__badge');
   const text = panel.querySelector('.skill-panel__text');
 
   let activeSkillEl = null;
@@ -153,6 +155,8 @@ if (skillPills.length) {
     if (!d) return;
     const applyContent = () => {
       title.textContent = d.title;
+      badge.textContent = d.selfTaught ? '✦ Self-taught' : '';
+      badge.hidden = !d.selfTaught;
       text.textContent = d.text;
       panel.style.setProperty('--skill-accent', d.color);
     };
