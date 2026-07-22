@@ -853,6 +853,10 @@
   color: var(--accent-2);
 }
 
+.project-back {
+  text-align: center;
+}
+
 /* footer */
 .footer {
   text-align: center;
