@@ -104,6 +104,7 @@ export const content = {
     photoshop: { title: 'Photoshop', text: 'Placeholder - what I actually do with Photoshop goes here.', color: '#31A8FF' },
     illustrator: { title: 'Illustrator', text: 'Placeholder - what I actually do with Illustrator goes here.', color: '#FF9A00' },
     python: { title: 'Python', text: 'Placeholder - what I actually do with Python goes here.', color: '#3776AB' },
+    'qt-designer': { title: 'Qt Designer', text: 'Placeholder - what I actually do with Qt Designer goes here.', color: '#41CD52' },
     'hermes-agent': { title: 'Hermes Agent', text: 'Placeholder - what I actually do with Hermes Agent goes here.', color: '#D7B97B' },
     'claude-code': { title: 'Claude Code', text: 'Placeholder - what I actually do with Claude Code goes here.', color: '#D97757' },
     'second-brain': { title: 'Second Brain', text: 'Placeholder - what I actually do with my Second Brain goes here.', color: '#A78BFA' },
