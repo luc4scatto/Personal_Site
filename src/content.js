@@ -61,6 +61,7 @@ export const content = {
       "At Vivatech 2026 - the tenth edition of Europe's biggest tech event - LVMH brought ten of its Maisons to the Dream Gallery pavilion in Paris, showing how technology amplifies craftsmanship across the whole value chain.",
     description2:
       'For the Thélios space I developed the real-time interactive experience: a live 3D showcase of eyewear digital twins, built with TouchDesigner and Unreal Engine, letting visitors explore frames, materials and details up close as they interact with the installation.',
+    backCta: '← Back to projects',
   },
   // shown when a 3D hero object is clicked (src/hero3d.js) — keyed by model filename
   hero3dObjects: {
