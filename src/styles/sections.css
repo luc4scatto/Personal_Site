@@ -80,14 +80,14 @@
   position: fixed;
   top: 50%;
   right: 10vw;
-  width: min(360px, 90vw);
+  width: min(420px, 90vw);
   max-height: min(680px, 82vh);
   overflow-y: auto;
   background: var(--surface);
   border: 1px solid #2a2a2a;
   border-left: 3px solid var(--skill-accent, var(--accent));
   border-radius: 1.25rem;
-  padding: 2.75rem;
+  padding: 3rem;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
   z-index: 61;
   opacity: 0;
@@ -116,7 +116,7 @@
 
 .skill-panel__title {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.75rem;
   margin-bottom: 1rem;
   padding-right: 2rem;
   transition: opacity 0.15s ease, transform 0.15s ease;
@@ -124,7 +124,7 @@
 
 .skill-panel__text {
   color: var(--text-dim);
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   line-height: 1.7;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
@@ -168,8 +168,8 @@
     position: fixed;
     top: 50%;
     right: 10vw; /* fallback only — main.js sets left against the grid's right edge */
-    width: min(360px, 90vw);
-    padding: 2.75rem;
+    width: min(420px, 90vw);
+    padding: 3rem;
     border: 1px dashed #222;
     border-left: 3px dashed color-mix(in srgb, var(--accent) 40%, transparent);
     border-radius: 1.25rem;
@@ -197,14 +197,14 @@
 
 .skill-ghost__title {
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.75rem;
   color: var(--text-dim);
   margin-bottom: 1rem;
 }
 
 .skill-ghost__text {
   color: var(--text-dim);
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   line-height: 1.7;
   opacity: 0.7;
 }
@@ -609,9 +609,9 @@
   gap: 0.75rem;
 }
 
-/* tablets: drop to two columns and hold the grid narrow, so the detail panel has a
-   real gutter to sit in between the last pill and the right edge of the window */
-@media (min-width: 1000px) and (max-width: 1366px) {
+/* from tablet width up: two columns, grid held narrow so the detail panel always has a
+   real gutter to sit in beside the last pill instead of running to the window edge */
+@media (min-width: 1000px) {
   .skills-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     max-width: 32rem;
