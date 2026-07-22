@@ -39,7 +39,7 @@ The site used to have a single `700px` query, which left every tablet on the des
 | `max-width: 700px`, or `max-width: 1024px and (orientation: portrait)` | Hero stacks: the 3D canvas leaves absolute positioning and becomes a flow block under the text | `STACKED_HERO` in `hero3d.js` (camera distance) |
 | `max-width: 999px` | Skill detail panel is a centered modal with a blurred backdrop instead of floating beside the grid | `PANEL_MODAL` in `main.js` |
 | `max-width: 700px` | Page scroll is locked while a skill panel is open — phones only, where the card covers most of the screen | `SCROLL_LOCK` in `main.js` |
-| `min-width: 1000px and max-width: 1366px` | Skills grid drops to 2 columns capped at `32rem`, freeing a gutter for the panel | — |
+| `min-width: 1000px` | Skills grid drops to 2 columns capped at `32rem`, freeing a gutter the detail panel/ghost card (420px wide) sit in | — |
 
 Tablet specifics:
 - **Portrait tablets** (701–1024px): headline is `6.4vw` and `#hero-canvas` is `flex: 1 1 0` — a zero basis, not `auto`, because the `<canvas>` inside is sized by the renderer and an auto basis lets it drive (and keep growing) the band's height. Result: the hero is exactly one screen, no clipped kicker, no sphere off the bottom edge.

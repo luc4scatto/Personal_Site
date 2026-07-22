@@ -107,9 +107,8 @@ if (skillPills.length) {
     ghost.style.left = panel.style.left;
     ghost.style.right = 'auto';
     // the panel may clamp on top of the grid rather than disappear — that's a deliberate
-    // user action. The ghost is only an invitation, so where the gutter is too narrow for
-    // it (roughly 1367-1420px, just past where the grid goes back to 3 columns) it steps
-    // aside instead of parking on the pills.
+    // user action. The ghost is only an invitation, so wherever the gutter is too narrow
+    // for it, it steps aside instead of parking on the pills.
     ghost.classList.toggle('is-cramped', available < panelWidth + 24);
   };
 
