@@ -30,11 +30,11 @@ export const content = {
   },
   about: {
     paragraph:
-      'I work in the 3D R&D team at Thélios (LVMH eyewear), where I develop and maintain the 3D pipeline — from 2D design all the way to renders, 3D configurators and video.\nI recently built an interactive experience with TouchDesigner and Unreal Engine, showcased at Vivatech in Paris. Python ties it all together, across the whole 3D stack.',
+      'I work in the 3D R&D team at Thélios (LVMH eyewear), where I develop and maintain the 3D pipeline - from 2D design all the way to renders, 3D configurators and video.\nI recently built an interactive experience with TouchDesigner and Unreal Engine, showcased at Vivatech in Paris. Python ties it all together, across the whole 3D stack.',
   },
   projects: {
     vivatech: {
-      title: 'Vivatech — Interactive Experience',
+      title: 'Vivatech - Interactive Experience',
       description:
         'Real-time interactive installation built with TouchDesigner and Unreal Engine, showcased at Vivatech in Paris.',
     },
@@ -58,31 +58,31 @@ export const content = {
     kicker: 'Project',
     meta: 'Thélios · LVMH Dream Gallery · Vivatech Paris 2026 · TouchDesigner + Unreal Engine',
     description1:
-      "At Vivatech 2026 — the tenth edition of Europe's biggest tech event — LVMH brought ten of its Maisons to the Dream Gallery pavilion in Paris, showing how technology amplifies craftsmanship across the whole value chain.",
+      "At Vivatech 2026 - the tenth edition of Europe's biggest tech event - LVMH brought ten of its Maisons to the Dream Gallery pavilion in Paris, showing how technology amplifies craftsmanship across the whole value chain.",
     description2:
       'For the Thélios space I developed the real-time interactive experience: a live 3D showcase of eyewear digital twins, built with TouchDesigner and Unreal Engine, letting visitors explore frames, materials and details up close as they interact with the installation.',
   },
   // shown when a 3D hero object is clicked (src/hero3d.js) — keyed by model filename
   hero3dObjects: {
-    turntable: { title: 'Vinyl & DJing', text: 'Placeholder — I spin records and love the ritual of mixing on a real turntable.' },
-    pile_of_vinyl: { title: 'Vinyl Collection', text: 'Placeholder — an ever-growing crate of records I hunt for on weekends.' },
-    mixing_board_01: { title: 'Mixing', text: 'Placeholder — layering tracks and riding faders is my kind of flow state.' },
-    mixing_board_03: { title: 'Live Sound', text: 'Placeholder — patching a console and dialing in a mix for a room.' },
-    synthesizer: { title: 'Synths', text: 'Placeholder — chasing sounds and building patches from scratch.' },
-    knob_39: { title: 'Sound Design', text: 'Placeholder — I tweak knobs until a patch finally clicks.' },
-    knob_44: { title: 'Tweaking', text: 'Placeholder — endless fine-tuning is half the fun.' },
-    gaming_computer: { title: 'PC Gaming', text: 'Placeholder — I built this rig myself and it doubles as my render machine.' },
-    gaming_gpu: { title: 'Hardware', text: 'Placeholder — GPUs, benchmarks and the occasional upgrade rabbit hole.' },
-    integrated_circuit_01: { title: 'Electronics', text: 'Placeholder — tinkering with circuits and small hardware projects.' },
-    integrated_circuit_02: { title: 'Chips & Boards', text: 'Placeholder — I like understanding how the silicon actually works.' },
-    transistor_03: { title: 'Tinkering', text: 'Placeholder — soldering, breadboards and figuring things out by hand.' },
-    '3d_printer': { title: '3D Printing', text: 'Placeholder — prototyping props and parts one layer at a time.' },
-    classical_computer_mouse_03: { title: 'Everyday Tools', text: 'Placeholder — the trusty tools I work with every day.' },
-    connector_iec_c19_coiled: { title: 'Gear & Cables', text: 'Placeholder — the unglamorous cables that keep the studio running.' },
-    cable_ethernet_coiled: { title: 'Connectivity', text: 'Placeholder — a tidy network is a happy network.' },
-    sunglasses_04: { title: 'Eyewear & Design', text: 'Placeholder — eyewear is where my day job at Thélios meets good design.' },
-    concert_speaker_02: { title: 'Live Music', text: 'Placeholder — gigs, festivals and chasing the perfect drop.' },
-    _default: { title: 'One of my things', text: 'Placeholder description — this object represents one of my interests.' },
+    turntable: { title: 'Vinyl & DJing', text: 'Placeholder - I spin records and love the ritual of mixing on a real turntable.' },
+    pile_of_vinyl: { title: 'Vinyl Collection', text: 'Placeholder - an ever-growing crate of records I hunt for on weekends.' },
+    mixing_board_01: { title: 'Mixing', text: 'Placeholder - layering tracks and riding faders is my kind of flow state.' },
+    mixing_board_03: { title: 'Live Sound', text: 'Placeholder - patching a console and dialing in a mix for a room.' },
+    synthesizer: { title: 'Synths', text: 'Placeholder - chasing sounds and building patches from scratch.' },
+    knob_39: { title: 'Sound Design', text: 'Placeholder - I tweak knobs until a patch finally clicks.' },
+    knob_44: { title: 'Tweaking', text: 'Placeholder - endless fine-tuning is half the fun.' },
+    gaming_computer: { title: 'PC Gaming', text: 'Placeholder - I built this rig myself and it doubles as my render machine.' },
+    gaming_gpu: { title: 'Hardware', text: 'Placeholder - GPUs, benchmarks and the occasional upgrade rabbit hole.' },
+    integrated_circuit_01: { title: 'Electronics', text: 'Placeholder - tinkering with circuits and small hardware projects.' },
+    integrated_circuit_02: { title: 'Chips & Boards', text: 'Placeholder - I like understanding how the silicon actually works.' },
+    transistor_03: { title: 'Tinkering', text: 'Placeholder - soldering, breadboards and figuring things out by hand.' },
+    '3d_printer': { title: '3D Printing', text: 'Placeholder - prototyping props and parts one layer at a time.' },
+    classical_computer_mouse_03: { title: 'Everyday Tools', text: 'Placeholder - the trusty tools I work with every day.' },
+    connector_iec_c19_coiled: { title: 'Gear & Cables', text: 'Placeholder - the unglamorous cables that keep the studio running.' },
+    cable_ethernet_coiled: { title: 'Connectivity', text: 'Placeholder - a tidy network is a happy network.' },
+    sunglasses_04: { title: 'Eyewear & Design', text: 'Placeholder - eyewear is where my day job at Thélios meets good design.' },
+    concert_speaker_02: { title: 'Live Music', text: 'Placeholder - gigs, festivals and chasing the perfect drop.' },
+    _default: { title: 'One of my things', text: 'Placeholder description - this object represents one of my interests.' },
   },
   // invitation filling the empty gutter beside the skills grid until a pill is clicked
   // (.skill-ghost in index.html — only rendered from 1000px up, see sections.css)
