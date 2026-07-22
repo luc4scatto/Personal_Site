@@ -43,7 +43,7 @@ export const content = {
       description: 'Short description of the project, what it does and why it matters.',
     },
     three: {
-      title: 'Project Three',
+      title: 'Homelab',
       description: 'Short description of the project, what it does and why it matters.',
     },
   },
