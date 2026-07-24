@@ -65,11 +65,37 @@ if (skillPills.length) {
     '<button class="skill-panel__close" aria-label="Close">&times;</button>' +
     '<h3 class="skill-panel__title"></h3>' +
     '<p class="skill-panel__badge"></p>' +
-    '<p class="skill-panel__text"></p>';
+    '<p class="skill-panel__text"></p>' +
+    '<ul class="skill-panel__bullets"></ul>';
   document.body.append(backdrop, panel);
   const title = panel.querySelector('.skill-panel__title');
   const badge = panel.querySelector('.skill-panel__badge');
   const text = panel.querySelector('.skill-panel__text');
+  const bullets = panel.querySelector('.skill-panel__bullets');
+
+  // bullets entries are either a plain string or { label, subs: [] } for a nested group
+  // (e.g. Substance Painter / Designer under the Substance 3D card)
+  const renderBullets = (items) => {
+    bullets.innerHTML = '';
+    bullets.hidden = !items || !items.length;
+    if (!items) return;
+    for (const item of items) {
+      const li = document.createElement('li');
+      if (typeof item === 'string') {
+        li.textContent = item;
+      } else {
+        li.textContent = item.label;
+        const sub = document.createElement('ul');
+        for (const s of item.subs) {
+          const subLi = document.createElement('li');
+          subLi.textContent = s;
+          sub.append(subLi);
+        }
+        li.append(sub);
+      }
+      bullets.append(li);
+    }
+  };
 
   let activeSkillEl = null;
 
@@ -158,6 +184,7 @@ if (skillPills.length) {
       badge.textContent = d.selfTaught ? '✦ Self-taught' : '';
       badge.hidden = !d.selfTaught;
       text.textContent = d.text;
+      renderBullets(d.bullets);
       panel.style.setProperty('--skill-accent', d.color);
     };
     if (wasOpen) {

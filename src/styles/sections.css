@@ -135,15 +135,66 @@
 
 .skill-panel__text {
   color: var(--text-dim);
-  font-size: 1.1rem;
-  line-height: 1.7;
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.6;
   transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* per-skill "what I actually do" list — [hidden] when a card has no bullets keeps the
+   text's original spacing, same idea as .skill-panel__badge above */
+.skill-panel__bullets {
+  list-style: none;
+  margin-top: 1.25rem;
+  padding: 0;
+  color: var(--text-dim);
+  font-size: 1rem;
+  line-height: 1.6;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.skill-panel__bullets > li {
+  position: relative;
+  padding-left: 1.1rem;
+  margin-bottom: 0.4rem;
+}
+
+.skill-panel__bullets > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--skill-accent, var(--accent));
+}
+
+.skill-panel__bullets ul {
+  list-style: none;
+  margin: 0.4rem 0 0.6rem;
+  padding: 0;
+  opacity: 0.8;
+  font-size: 0.9rem;
+}
+
+.skill-panel__bullets ul li {
+  position: relative;
+  padding-left: 1.1rem;
+  margin-bottom: 0.3rem;
+}
+
+.skill-panel__bullets ul li::before {
+  content: '–';
+  position: absolute;
+  left: 0;
 }
 
 /* content cross-fade when jumping straight from one pill to another */
 .skill-panel.is-switching .skill-panel__title,
 .skill-panel.is-switching .skill-panel__badge,
-.skill-panel.is-switching .skill-panel__text {
+.skill-panel.is-switching .skill-panel__text,
+.skill-panel.is-switching .skill-panel__bullets {
   opacity: 0;
   transform: translateY(6px);
 }
