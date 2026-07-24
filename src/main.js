@@ -139,6 +139,7 @@ if (skillPills.length) {
   // --deal-* custom props (not the transform directly) so the base centering transform stays intact.
   const DEAL_DUR = 0.7; // seconds — long enough for the glide to read
   const DEAL_SHIFT = 220; // px the new card travels sideways as it's dealt onto the stack
+  const BORDER_FADE_DUR = 0.45; // seconds — the accent border crossfades roughly alongside the glide
   const dealSwitch = (applyContent) => {
     // a switch mid-animation: stop the running tweens and drop any clone still on screen
     gsap.killTweensOf(panel);
@@ -149,16 +150,35 @@ if (skillPills.length) {
     const clone = panel.cloneNode(true);
     clone.classList.add('is-deal-clone');
     clone.style.willChange = 'opacity';
+    // the clone inherits .skill-panel's base `transition: opacity 0.3s` plus the 0.16s
+    // transition-delay from .is-open — both fight GSAP the same way the transform did:
+    // the fade would start 0.16s late and then get re-smoothed over its own 0.3s, instead
+    // of disappearing quickly like the tween below asks. Strip it so GSAP has sole control.
+    clone.style.transition = 'none';
     document.body.appendChild(clone);
 
     // real panel gets the new content and glides in over the clone. will-change promotes both
     // cards to their own GPU layer so the big drop-shadow moves as a texture, not a repaint.
     applyContent();
     panel.style.willChange = 'transform';
+    // .skill-panel has its own `transition: transform 0.3s` (sections.css) for the open/close
+    // slide. Left on, it fights GSAP here: every rAF tick nudges --deal-x, and the CSS
+    // transition keeps re-chasing that moving target over its own 0.3s, smearing the glide
+    // down to nearly nothing. Drop transform from the transition for the duration of the deal.
+    // border-color is kept (that's what crossfades --skill-accent to the new pill's color) but
+    // re-timed: the base rule's 0.15s plus the 0.16s transition-delay .is-open carries (meant
+    // for the initial open, but it matches on *any* property change while is-open is set) made
+    // the accent snap late and fast instead of blending. Zero the delay and stretch it out here.
+    panel.style.transitionProperty = 'opacity, border-color';
+    panel.style.transitionDelay = '0s';
+    panel.style.transitionDuration = `${BORDER_FADE_DUR}s`;
 
     const cleanup = () => {
       clone.remove();
       panel.style.willChange = '';
+      panel.style.transitionProperty = '';
+      panel.style.transitionDelay = '';
+      panel.style.transitionDuration = '';
       gsap.set(panel, { clearProps: '--deal-x,--deal-r,--deal-s' });
     };
 
@@ -171,11 +191,17 @@ if (skillPills.length) {
         duration: DEAL_DUR, ease: 'power2.out', overwrite: true, onComplete: cleanup,
       }
     );
-    // old card underneath: stays put, just fades away as the new one lands on it
-    gsap.to(clone, { opacity: 0, duration: 0.32, ease: 'power1.out' });
+    // old card underneath: stays put and fades away fast — gone well before the new
+    // card (DEAL_DUR 0.7s) finishes its glide, so it reads as already-gone on arrival
+    gsap.to(clone, { opacity: 0, duration: 0.2, ease: 'power1.out' });
   };
 
   let activeSkillEl = null;
+  // set while ensurePanelClearance's own corrective scroll is in flight, so the scroll-close
+  // listener further down doesn't see the still-short geometry on the scroll's first frames
+  // and close the panel that scroll exists to make room for
+  let suppressScrollClose = false;
+  let suppressScrollCloseTimer;
 
   // "pick a skill" placeholder holding the gutter until a pill is clicked. It lives in
   // index.html so its copy comes from content.js via [data-copy]; CSS keeps it out of
@@ -241,6 +267,27 @@ if (skillPills.length) {
     ghost.classList.toggle('is-visible', cardSlotInSection(ghost.offsetHeight));
   };
 
+  // clicking a pill near the bottom of the section can leave the fixed, viewport-centered
+  // panel taller than the section has room for below it, so it spills onto Projects (or
+  // above it, onto About, right near the top of the section). Reuses the same
+  // cardSlotInSection geometry the ghost/close logic already relies on, just to decide how
+  // far to nudge the scroll instead of whether to show/hide something.
+  const ensurePanelClearance = () => {
+    if (window.matchMedia(PANEL_MODAL).matches) return; // modal panel is centered on the viewport regardless of scroll
+    if (!skillsSection || cardSlotInSection(panel.offsetHeight)) return;
+    const rect = skillsSection.getBoundingClientRect();
+    const mid = window.innerHeight / 2;
+    const reach = panel.offsetHeight / 2 + GHOST_CLEARANCE;
+    const shortfallBelow = (mid + reach) - rect.bottom; // > 0: not enough section left below the panel's slot
+    const shortfallAbove = (mid - reach) - rect.top; // > 0: not enough section above it (opened right as the section arrived)
+    const delta = shortfallBelow > 0 ? -shortfallBelow : shortfallAbove > 0 ? shortfallAbove : 0;
+    if (!delta) return;
+    suppressScrollClose = true;
+    window.scrollBy({ top: delta, behavior: 'smooth' });
+    clearTimeout(suppressScrollCloseTimer);
+    suppressScrollCloseTimer = setTimeout(() => { suppressScrollClose = false; }, 500);
+  };
+
   const closeSkillPanel = () => {
     activeSkillEl?.classList.remove('is-active');
     activeSkillEl = null;
@@ -276,6 +323,7 @@ if (skillPills.length) {
     panel.classList.add('is-open');
     ghost?.classList.add('is-dismissed');
     if (window.matchMedia(SCROLL_LOCK).matches) document.body.style.overflow = 'hidden';
+    if (!wasOpen) ensurePanelClearance(); // only on a fresh open — mid-switch the section hasn't moved
   };
 
   skillPills.forEach((li) => {
@@ -297,7 +345,7 @@ if (skillPills.length) {
       requestAnimationFrame(() => {
         ticking = false;
         updateGhostVisibility();
-        if (activeSkillEl && !window.matchMedia(SCROLL_LOCK).matches
+        if (activeSkillEl && !suppressScrollClose && !window.matchMedia(SCROLL_LOCK).matches
           && !cardSlotInSection(panel.offsetHeight)) closeSkillPanel();
       });
     },
