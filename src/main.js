@@ -1,3 +1,4 @@
+import gsap from 'gsap';
 import './styles/base.css';
 import './styles/sections.css';
 import { initAnimations } from './animations.js';
@@ -97,6 +98,83 @@ if (skillPills.length) {
     }
   };
 
+  // every card is sized to the tallest one in the set, so switching never resizes the box
+  // (which read as janky and made the shuffle look off). Measured at the real render width,
+  // re-run on resize because wrapping — and the modal's narrower width — changes the max.
+  const sizePanelToLargest = () => {
+    panel.style.minHeight = '';
+    let max = 0;
+    for (const key in SKILL_DESCRIPTIONS) {
+      const d = SKILL_DESCRIPTIONS[key];
+      title.textContent = d.title;
+      badge.textContent = d.selfTaught ? '✦ Self-taught' : '';
+      badge.hidden = !d.selfTaught;
+      text.textContent = d.text;
+      renderBullets(d.bullets);
+      max = Math.max(max, panel.scrollHeight);
+    }
+    panel.style.minHeight = `${max}px`;
+    // leave the currently open card's content in place; a closed panel is invisible anyway
+    if (activeSkillEl) {
+      const d = SKILL_DESCRIPTIONS[activeSkillEl.dataset.skill];
+      if (d) {
+        title.textContent = d.title;
+        badge.textContent = d.selfTaught ? '✦ Self-taught' : '';
+        badge.hidden = !d.selfTaught;
+        text.textContent = d.text;
+        renderBullets(d.bullets);
+      }
+    }
+  };
+
+  // "deal onto the stack" swap when jumping pill to pill: the current card is cloned and left
+  // frozen in place *under* the real panel, while the new card is dealt in from the side —
+  // sliding in with a rotation + scale settle, the way a card is dealt across a table — and
+  // lands on top. The old clone doesn't move, it just fades out where it sits. One easing, no
+  // per-row stagger, so it reads as a single dealt card. --deal-x/--deal-r/--deal-s feed the
+  // is-open transform in sections.css, so it composes with either layout's base position
+  // (desktop float / mobile modal) instead of hardcoding a transform.
+  // GSAP drives it instead of CSS transitions: its RAF ticker + eased interpolation read as a
+  // continuous glide rather than the mechanical feel of a fixed-curve transition. It tweens the
+  // --deal-* custom props (not the transform directly) so the base centering transform stays intact.
+  const DEAL_DUR = 0.7; // seconds — long enough for the glide to read
+  const DEAL_SHIFT = 220; // px the new card travels sideways as it's dealt onto the stack
+  const dealSwitch = (applyContent) => {
+    // a switch mid-animation: stop the running tweens and drop any clone still on screen
+    gsap.killTweensOf(panel);
+    document.querySelectorAll('.is-deal-clone').forEach((c) => c.remove());
+
+    // the outgoing card: a clone frozen on the old content, sitting *under* the real panel
+    // so the newly clicked card is dealt on top of it (see z-index on .is-deal-clone)
+    const clone = panel.cloneNode(true);
+    clone.classList.add('is-deal-clone');
+    clone.style.willChange = 'opacity';
+    document.body.appendChild(clone);
+
+    // real panel gets the new content and glides in over the clone. will-change promotes both
+    // cards to their own GPU layer so the big drop-shadow moves as a texture, not a repaint.
+    applyContent();
+    panel.style.willChange = 'transform';
+
+    const cleanup = () => {
+      clone.remove();
+      panel.style.willChange = '';
+      gsap.set(panel, { clearProps: '--deal-x,--deal-r,--deal-s' });
+    };
+
+    // new card: dealt in from the side with a rotation + scale settle, landing on top of the stack
+    gsap.fromTo(
+      panel,
+      { '--deal-x': `${-DEAL_SHIFT}px`, '--deal-r': '-8deg', '--deal-s': 0.92 },
+      {
+        '--deal-x': '0px', '--deal-r': '0deg', '--deal-s': 1,
+        duration: DEAL_DUR, ease: 'power2.out', overwrite: true, onComplete: cleanup,
+      }
+    );
+    // old card underneath: stays put, just fades away as the new one lands on it
+    gsap.to(clone, { opacity: 0, duration: 0.32, ease: 'power1.out' });
+  };
+
   let activeSkillEl = null;
 
   // "pick a skill" placeholder holding the gutter until a pill is clicked. It lives in
@@ -187,14 +265,9 @@ if (skillPills.length) {
       renderBullets(d.bullets);
       panel.style.setProperty('--skill-accent', d.color);
     };
-    if (wasOpen) {
-      // switching straight from one pill to another — cross-fade the content
-      // instead of an instant swap (the panel itself stays put, only the text fades)
-      panel.classList.add('is-switching');
-      setTimeout(() => {
-        applyContent();
-        panel.classList.remove('is-switching');
-      }, 150);
+    if (wasOpen && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // switching pill to pill — shuffle the rows out and deal the new ones in
+      dealSwitch(applyContent);
     } else {
       applyContent();
     }
@@ -234,6 +307,7 @@ if (skillPills.length) {
   // unconditional: the ghost sits in the same slot and has to follow the grid even
   // while the panel is closed
   window.addEventListener('resize', () => {
+    sizePanelToLargest();
     positionSkillPanel();
     updateGhostVisibility();
     // opened on a phone, then the window grew past the lock breakpoint — release the
@@ -241,6 +315,7 @@ if (skillPills.length) {
     if (!window.matchMedia(SCROLL_LOCK).matches) document.body.style.overflow = '';
   });
 
+  sizePanelToLargest();
   positionSkillPanel();
   updateGhostVisibility();
 
