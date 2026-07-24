@@ -99,19 +99,22 @@
 .skill-panel.is-open {
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(-50%) translateX(0);
+  /* --deal-x/--deal-r/--deal-s are 0/0/1 at rest; the pill-to-pill deal (main.js dealSwitch)
+     drives them so the new card slides in from the side and lands on the stack. Kept as
+     trailing translate/rotate/scale so it composes with the base position transform. */
+  transform: translateY(-50%) translateX(var(--deal-x, 0px)) rotate(var(--deal-r, 0deg))
+    scale(var(--deal-s, 1));
   /* the panel is opaque, so without this head start for the ghost card it would simply
      cover it rather than take over from it. Opening only — closing has no delay because
      the base rule above carries none. */
   transition-delay: 0.16s;
 }
 
-/* the whole card breathes (slight shrink + dim) while its content cross-fades */
-.skill-panel.is-open.is-switching {
-  opacity: 0.9;
-  transform: translateY(-50%) translateX(0) scale(0.97);
-  transition-duration: 0.15s;
-  transition-delay: 0s; /* already open: nothing to hand over, keep the switch snappy */
+/* the outgoing card during a pill-to-pill shuffle (main.js dealSwitch): a clone that sits
+   *below* the real panel (z 61) so the newly clicked card is dealt on top. Decorative. */
+.skill-panel.is-deal-clone {
+  z-index: 60;
+  pointer-events: none;
 }
 
 .skill-panel__title {
@@ -188,15 +191,6 @@
   content: '–';
   position: absolute;
   left: 0;
-}
-
-/* content cross-fade when jumping straight from one pill to another */
-.skill-panel.is-switching .skill-panel__title,
-.skill-panel.is-switching .skill-panel__badge,
-.skill-panel.is-switching .skill-panel__text,
-.skill-panel.is-switching .skill-panel__bullets {
-  opacity: 0;
-  transform: translateY(6px);
 }
 
 .skill-panel__close {
@@ -311,14 +305,11 @@
   }
 
   .skill-panel.is-open {
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) translateX(var(--deal-x, 0px)) rotate(var(--deal-r, 0deg))
+      scale(var(--deal-s, 1));
     /* no ghost card down here to hand the slot over to, so the panel opens immediately —
        the head start it gets above 1000px would just feel like lag */
     transition-delay: 0s;
-  }
-
-  .skill-panel.is-open.is-switching {
-    transform: translate(-50%, -50%) scale(0.97);
   }
 }
 
