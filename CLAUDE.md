@@ -57,6 +57,16 @@ Tablet specifics:
 - Below 1000px it is `display: none` in CSS, not JS, so no stuck class can ever render it on a phone.
 - The panel carries `transition-delay: 0.16s` **on open only** so the ghost has time to dissolve first; that delay is zeroed in the `max-width: 999px` block and in `is-switching`. The media query alone does not win against `.skill-panel.is-open`, so the reset needs the same specificity.
 
+## Skill pills and their panels
+
+Pill markup is in `index.html` (`<li data-skill="...">`), copy in `content.skills` in `src/content.js` — the `data-skill` value is the object key, change one and you must change the other.
+
+- Entry shape: `{ title, text, color, selfTaught?, bullets? }`. `color` is the brand color pulled from the icon; `selfTaught: true` renders the badge; `bullets` is a list of strings, or `{ label, subs: [...] }` objects for a nested list (only Substance 3D uses the nested form).
+- In the source, every `bullets`/`subs` array is written one entry per line. Keep it that way — Luca reads and edits this list directly.
+- **Agentic Workflow** is one pill covering Hermes Agent, Claude Code, OpenClaw and n8n (they used to be two brand pills). Its icon `public/icons/agentic-workflow.svg` is a hand-written generic node-graph glyph, deliberately brandless so it fits all four bullets. `claude-code.svg` and `hermes-agent.png` are now unused but kept.
+- The **Qt Designer** pill is commented out in `index.html` while its `content.skills` entry stays — uncomment to bring it back.
+- Copy style: use `-`, never an em dash.
+
 ## Hero cloud: drag interaction
 
 Press and drag the canvas to spin the cloud. Three things here are the way they are because
