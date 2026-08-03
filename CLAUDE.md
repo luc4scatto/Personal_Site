@@ -37,56 +37,47 @@ The site used to have a single `700px` query, which left every tablet on the des
 | Query | What it does | JS twin |
 | --- | --- | --- |
 | `max-width: 700px`, or `max-width: 1024px and (orientation: portrait)` | Hero stacks: the 3D canvas leaves absolute positioning and becomes a flow block under the text | `STACKED_HERO` in `hero3d.js` (camera distance) |
-| `max-width: 999px` | Skills section drops its second column: the detail card becomes a centered modal with a blurred backdrop, and the page locks behind it | `PANEL_MODAL` in `main.js` |
-| `min-width: 1000px` | Skills section is a two-column grid — pill list, then the sticky detail column | — |
+| `max-width: 560px` | Skill card bullets drop from two columns to one | — |
+| `max-width: 700px` | Skill tiles and their marks shrink | — |
 
-The skills section used to have three interlocking queries (999 modal / 700 scroll lock / 1000 grid). It is one now: above 1000px the card is a grid column, below it is a modal with the page locked. The pill grid itself uses `auto-fit` and needs no breakpoint at all.
+The skills section used to have three interlocking queries (999 modal / 700 scroll lock / 1000 grid) plus a JS twin for each. It has **none** now: the detail card is a normal grid item that unfolds in place, so the same markup works at every width. The two queries above are cosmetic, with no JS counterpart.
 
 Tablet specifics:
 - **Portrait tablets** (701–1024px): headline is `6.4vw` and `#hero-canvas` is `flex: 1 1 0` — a zero basis, not `auto`, because the `<canvas>` inside is sized by the renderer and an auto basis lets it drive (and keep growing) the band's height. Result: the hero is exactly one screen, no clipped kicker, no sphere off the bottom edge.
 - **Landscape tablets/small laptops** (701–1366px): headline drops to `6.2vw` and the text is capped at `26rem` so it never reaches the sphere.
 - `.hero .btn` is hidden **only** below 700px — tablets have room for it.
 
-## Skills layout: sticky detail column
+## Skills: the tool wall
 
-Above 1000px `#skills` is a two-column grid: `.skills-list` (the pill groups) and `.skill-detail`,
-a sticky column holding the detail card. Below 1000px the column collapses and the card is the
-centered modal it has always been. This replaced a `position: fixed` panel whose placement took
-~150 lines of rectangle maths in `main.js` — don't reintroduce a JS positioning path.
+The section is a wall of tool tiles grouped by category. Picking one blurs the rest of the
+wall and unfolds its card **in place**, inside the category that owns it — the same "focus
+one thing, let the rest recede" grammar as the 3D hero cloud, in CSS instead of WebGL.
 
-- **`.skill-detail` needs `align-self: start`.** Stretched to the row height it would have nothing
-  left to travel in and the sticky would do nothing.
-- **`--skill-card-h`** is written on `.skill-detail` by `sizePanelToLargest()` in `main.js`: the
-  height of the tallest card in the set. It does three jobs — reserves the column so switching
-  never resizes the box, sizes every card to match, and centers the column via
-  `top: max(6rem, calc((100vh - var(--skill-card-h)) / 2))`. The measuring loop blanks it to
-  `auto` first, or the cards would measure themselves.
-- The modal block must reset `min-height: 0` on `.skill-panel`: **min-height beats max-height**, so
-  leaving the reserved height on would let a long card grow past the `420px` cap instead of
-  scrolling inside it.
-- `.skill-ghost` (markup in `index.html`, copy in `content.skillsHint`) is the dashed placeholder
-  holding the column until a pill is picked. It shares the card's rectangle (`absolute`, same
-  `min-height`) and carries one class, `is-dismissed`. It is `display: none` below 1000px in CSS,
-  not JS, so no stuck class can ever render it on a phone.
+This replaced a `position: fixed` panel and, before that, a sticky second column. Both were
+deleted for the same reason: the card is now a normal grid item, so there is no positioning
+code, no modal, no scroll lock, and **no breakpoint twin between JS and CSS at all**. The
+section behaves the same from 390px to 1440px.
 
-## Skills: hover preview and the deal
+- **Selectors must be direct-child scoped.** The card is injected *inside* `.skills-grid`
+  and its title is an `<h3>` inside `.skill-group`. Written as descendant selectors,
+  `.skills-grid li` blurred the card's own bullets as if they were tiles, and
+  `.skill-group h3` gave the card title the category heading's hairline rule. Use
+  `.skills-grid > li` and `.skill-group > h3`.
+- **`--brand`** is the tile's own brand color, set per tile in `main.js` from
+  `content.skills[key].color`. CSS uses it for the tile's wash (`--tile-wash`: 6% at rest,
+  14% on hover, 22% active), the open card's gradient and border, and the bullet dots.
+- The category heading is the section's structural device: display scale, riding a hairline
+  rule that fades out to the right. It replaced six 0.85rem grey captions.
+- `.skill-card__badge` needs its own `[hidden] { display: none }` — `display: inline-block`
+  beats the `hidden` attribute, so unflagged cards rendered an empty pill.
+- The close control is a **drawn SVG**, not `&times;`, and the tiles carry no `+` glyph.
+  Unicode standing in for an icon system is a craft-floor violation.
+- Motion is one authored moment: the height unfold plus the wall going soft. Switching tools
+  inside the same category re-measures the height instead of unfolding again.
 
-Two bits of state in `main.js`: `lockedEl` (the pill that was clicked) and `shownEl` (whose card is
-actually on screen). Hover or focus a pill and its card previews; the pointer or focus leaving
-`.skills-list` restores `lockedEl`, or the ghost if nothing is pinned.
-
-- **Two switch animations, on purpose.** A click runs `dealSwitch()` — the 0.7s dealt-card glide,
-  GSAP tweening `--deal-*` custom props that feed the `is-open` transform. A hover preview runs
-  `fadeSwitch()`, a 0.18s crossfade: 0.7s of dealt card on every pill the pointer crosses is mush.
-- `fadeSwitch` blanks `.skill-panel__body` **with the transition off**, swaps the content in the
-  same frame, then fades back in. The obvious version (fade out, then swap on a timer) makes every
-  preview arrive 180ms late.
-- **A click re-deals even when the card is already up from its preview.** With a mouse that is the
-  only way a click ever lands, so without it the deal would never play on desktop at all. It reads
-  as the "pinned" confirmation.
-- Hover is gated on `(hover: hover)` — touch fires a stray `mouseenter` on tap. Focus is not gated:
-  keyboard users get the same preview. The pills are `<li>`, so `tabIndex`/`role`/Enter/Space are
-  set in JS.
+Known, out of scope: `.info-card` (the 3D hero object card, `sections.css:10`) still carries
+a `border-left: 3px solid var(--accent)` — the same side-tab tell that was removed from the
+skills card. One line to fix when someone touches that component.
 
 ## Skill pills and their panels
 
