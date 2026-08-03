@@ -28,6 +28,7 @@ Personal portfolio site for Luca Scattolin (English content), deployed to GitHub
 - `src/styles/sections.css` — per-section layout and styles. Breakpoints are **not** one mobile query — see "Responsive breakpoints" below
 - `public/models/*.glb` — Draco-compressed models; `public/draco/` holds the decoder files (GLTFLoader.setDRACOLoader wired in hero3d.js)
 - `public/icons/`, `public/images/`, `public/video/` — skill brand icons (SVG), Vivatech photos, compressed project video
+- `public/fonts/*.woff2` — self-hosted, no Google Fonts CDN and no `preconnect`. **Space Grotesk** is the display voice (one variable file, 300-700); **Switzer** takes every reading role, because a display grotesque set at 17px across a paragraph fights the reader. `'Switzer Fallback'` is Arial with `size-adjust`/`ascent-override` tuned to Switzer's metrics, so the swap window doesn't reflow. Both faces are declared in `base.css`; change the identity through `--font-display` / `--font-body`, never per-section. Switzer is under the ITF Free Font License (Fontshare) - verify the terms still allow self-hosting before a public deploy
 - `.github/workflows/deploy.yml` — builds and deploys to GitHub Pages on push to main
 
 ## Responsive breakpoints
