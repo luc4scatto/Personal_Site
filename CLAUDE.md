@@ -32,30 +32,61 @@ Personal portfolio site for Luca Scattolin (English content), deployed to GitHub
 
 ## Responsive breakpoints
 
-The site used to have a single `700px` query, which left every tablet on the desktop layout. There are now three bands, and **two of them are mirrored in JS** — change one side and you must change the other:
+The site used to have a single `700px` query, which left every tablet on the desktop layout. There are now three bands, and **one of them is mirrored in JS** — change one side and you must change the other:
 
 | Query | What it does | JS twin |
 | --- | --- | --- |
 | `max-width: 700px`, or `max-width: 1024px and (orientation: portrait)` | Hero stacks: the 3D canvas leaves absolute positioning and becomes a flow block under the text | `STACKED_HERO` in `hero3d.js` (camera distance) |
-| `max-width: 999px` | Skill detail panel is a centered modal with a blurred backdrop instead of floating beside the grid | `PANEL_MODAL` in `main.js` |
-| `max-width: 700px` | Page scroll is locked while a skill panel is open — phones only, where the card covers most of the screen | `SCROLL_LOCK` in `main.js` |
-| `min-width: 1000px` | Skills grid drops to 2 columns capped at `32rem`, freeing a gutter the detail panel/ghost card (420px wide) sit in | — |
+| `max-width: 999px` | Skills section drops its second column: the detail card becomes a centered modal with a blurred backdrop, and the page locks behind it | `PANEL_MODAL` in `main.js` |
+| `min-width: 1000px` | Skills section is a two-column grid — pill list, then the sticky detail column | — |
+
+The skills section used to have three interlocking queries (999 modal / 700 scroll lock / 1000 grid). It is one now: above 1000px the card is a grid column, below it is a modal with the page locked. The pill grid itself uses `auto-fit` and needs no breakpoint at all.
 
 Tablet specifics:
 - **Portrait tablets** (701–1024px): headline is `6.4vw` and `#hero-canvas` is `flex: 1 1 0` — a zero basis, not `auto`, because the `<canvas>` inside is sized by the renderer and an auto basis lets it drive (and keep growing) the band's height. Result: the hero is exactly one screen, no clipped kicker, no sphere off the bottom edge.
 - **Landscape tablets/small laptops** (701–1366px): headline drops to `6.2vw` and the text is capped at `26rem` so it never reaches the sphere.
 - `.hero .btn` is hidden **only** below 700px — tablets have room for it.
 
-## Skills "ghost card"
+## Skills layout: sticky detail column
 
-`.skill-ghost` (markup in `index.html`, copy in `content.skillsHint`) is a dashed placeholder filling the gutter until a pill is clicked, so the empty right half reads as an invitation. Notes for anyone touching it:
+Above 1000px `#skills` is a two-column grid: `.skills-list` (the pill groups) and `.skill-detail`,
+a sticky column holding the detail card. Below 1000px the column collapses and the card is the
+centered modal it has always been. This replaced a `position: fixed` panel whose placement took
+~150 lines of rectangle maths in `main.js` — don't reintroduce a JS positioning path.
 
-- It is `position: fixed` and gets its horizontal placement from the **existing** `positionSkillPanel()` in `main.js` — the ghost and the real panel must land in the same rectangle, so don't write a second positioning path.
-- Visibility is a **rectangle comparison in a throttled scroll handler**, not an IntersectionObserver: an observer fires as soon as the section touches the observed band, which made the card appear next to the About photo. `cardSlotInSection(cardHeight)` answers "is the viewport's middle — where both fixed cards sit — still inside `#skills`, with `GHOST_CLEARANCE` (96px) to spare?".
-- **The open detail panel uses the same test**, so above 700px it leaves with the section instead of hanging over About or Projects. One rule, not two to keep aligned. Below 700px the page is scroll-locked instead and the panel stays put.
-- Three classes, all set in `main.js`: `is-visible` (scroll position), `is-cramped` (gutter narrower than the card — happens ~1367–1420px, where the grid returns to 3 columns), `is-dismissed` (a real panel took the slot).
-- Below 1000px it is `display: none` in CSS, not JS, so no stuck class can ever render it on a phone.
-- The panel carries `transition-delay: 0.16s` **on open only** so the ghost has time to dissolve first; that delay is zeroed in the `max-width: 999px` block and in `is-switching`. The media query alone does not win against `.skill-panel.is-open`, so the reset needs the same specificity.
+- **`.skill-detail` needs `align-self: start`.** Stretched to the row height it would have nothing
+  left to travel in and the sticky would do nothing.
+- **`--skill-card-h`** is written on `.skill-detail` by `sizePanelToLargest()` in `main.js`: the
+  height of the tallest card in the set. It does three jobs — reserves the column so switching
+  never resizes the box, sizes every card to match, and centers the column via
+  `top: max(6rem, calc((100vh - var(--skill-card-h)) / 2))`. The measuring loop blanks it to
+  `auto` first, or the cards would measure themselves.
+- The modal block must reset `min-height: 0` on `.skill-panel`: **min-height beats max-height**, so
+  leaving the reserved height on would let a long card grow past the `420px` cap instead of
+  scrolling inside it.
+- `.skill-ghost` (markup in `index.html`, copy in `content.skillsHint`) is the dashed placeholder
+  holding the column until a pill is picked. It shares the card's rectangle (`absolute`, same
+  `min-height`) and carries one class, `is-dismissed`. It is `display: none` below 1000px in CSS,
+  not JS, so no stuck class can ever render it on a phone.
+
+## Skills: hover preview and the deal
+
+Two bits of state in `main.js`: `lockedEl` (the pill that was clicked) and `shownEl` (whose card is
+actually on screen). Hover or focus a pill and its card previews; the pointer or focus leaving
+`.skills-list` restores `lockedEl`, or the ghost if nothing is pinned.
+
+- **Two switch animations, on purpose.** A click runs `dealSwitch()` — the 0.7s dealt-card glide,
+  GSAP tweening `--deal-*` custom props that feed the `is-open` transform. A hover preview runs
+  `fadeSwitch()`, a 0.18s crossfade: 0.7s of dealt card on every pill the pointer crosses is mush.
+- `fadeSwitch` blanks `.skill-panel__body` **with the transition off**, swaps the content in the
+  same frame, then fades back in. The obvious version (fade out, then swap on a timer) makes every
+  preview arrive 180ms late.
+- **A click re-deals even when the card is already up from its preview.** With a mouse that is the
+  only way a click ever lands, so without it the deal would never play on desktop at all. It reads
+  as the "pinned" confirmation.
+- Hover is gated on `(hover: hover)` — touch fires a stray `mouseenter` on tap. Focus is not gated:
+  keyboard users get the same preview. The pills are `<li>`, so `tabIndex`/`role`/Enter/Space are
+  set in JS.
 
 ## Skill pills and their panels
 
@@ -110,7 +141,7 @@ Legacy Blender pipeline (previous models, kept for reference): `_originals/3d_fi
 
 ## Constraints
 
-- `vite.config.js` sets `base: '/Personal_Site/'` to match the repo name — change only if the repo is renamed
+- `vite.config.js` sets `base: '/'` — the site is served from the custom domain root (lucascattolin.com), not a repo-name subpath. The dev server therefore serves the site at `http://localhost:5173/`, not `/Personal_Site/`; hitting the wrong path still renders the page (HTML fallback) but every model 404s
 - All animations must respect `prefers-reduced-motion`
 - Mobile-first responsive; heavy animations are simplified or disabled on small viewports. Verify layout changes at real device sizes (iPad mini 744, iPad Air 820, iPad Pro 1024 portrait, 1180/1366 landscape, phone 390, desktop 1440) — Chrome DevTools emulation, since the browser window can't be made taller than the screen
 - Site copy is real (Thélios/Vivatech content) except the two placeholder project cards ("Project Two/Three") awaiting Luca's details

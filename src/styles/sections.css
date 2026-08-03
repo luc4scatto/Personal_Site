@@ -59,8 +59,9 @@
   }
 }
 
-/* skill detail panel: floats beside the grid on desktop (positioned in main.js against the
-   grid's actual bounding box so it never overlaps a pill), blurred backdrop on mobile only.
+/* skill detail card: a sticky second column beside the grid on desktop, centered modal
+   below 1000px. The column is a grid track (see the min-width: 1000px block further down),
+   so nothing in JS positions it — that used to take ~150 lines of rectangle maths.
    Backdrop is purely visual — pointer-events stay off so it never intercepts clicks meant
    for a pill; outside-click handling lives on the window listener in main.js instead. */
 .skill-panel-backdrop {
@@ -76,23 +77,29 @@
   opacity: 1;
 }
 
+/* absolute, pinned to the top of the column and left to size itself from its content:
+   the column reserves the tallest card's height (--skill-card-h, measured in main.js), so
+   every card lands in the same rectangle and the ghost underneath shares it exactly. */
 .skill-panel {
-  position: fixed;
-  top: 50%;
-  right: 10vw;
-  width: min(420px, 90vw);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* every card fills the height the column reserves for the tallest one, so switching
+     never resizes the box. main.js blanks the value to `auto` while it measures. */
+  min-height: var(--skill-card-h);
   max-height: min(680px, 82vh);
   overflow-y: auto;
   background: var(--surface);
   border: 1px solid #2a2a2a;
   border-left: 3px solid var(--skill-accent, var(--accent));
   border-radius: 1.25rem;
-  padding: 3rem;
+  padding: clamp(1.75rem, 3vw, 3rem);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
   z-index: 61;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-50%) translateX(20px);
+  transform: translateX(20px);
   transition: opacity 0.3s, transform 0.3s, border-color 0.15s;
 }
 
@@ -102,12 +109,20 @@
   /* --deal-x/--deal-r/--deal-s are 0/0/1 at rest; the pill-to-pill deal (main.js dealSwitch)
      drives them so the new card slides in from the side and lands on the stack. Kept as
      trailing translate/rotate/scale so it composes with the base position transform. */
-  transform: translateY(-50%) translateX(var(--deal-x, 0px)) rotate(var(--deal-r, 0deg))
+  transform: translateX(var(--deal-x, 0px)) rotate(var(--deal-r, 0deg))
     scale(var(--deal-s, 1));
-  /* the panel is opaque, so without this head start for the ghost card it would simply
-     cover it rather than take over from it. Opening only — closing has no delay because
-     the base rule above carries none. */
-  transition-delay: 0.16s;
+}
+
+/* per-skill content, faded as one block on a hover preview (main.js fadeSwitch). is-fading
+   drops the transition so the blank is instant and only the fade back in is animated —
+   the card is never late, it just arrives softly. */
+.skill-panel__body {
+  transition: opacity 0.18s ease;
+}
+
+.skill-panel__body.is-fading {
+  opacity: 0;
+  transition: none;
 }
 
 /* the outgoing card during a pill-to-pill shuffle (main.js dealSwitch): a clone that sits
@@ -210,11 +225,10 @@
   color: var(--accent);
 }
 
-/* ghost card: fills the gutter the real panel floats into, so the right half of the
-   skills section reads as an invitation instead of dead space. Geometry mirrors
-   .skill-panel above — keep the two in sync. Hidden by default and only switched on
-   from 1000px up, because below that the panel is a centered modal and there is no
-   gutter at all; that makes the phone/small-tablet case immune to a stuck class. */
+/* ghost card: holds the detail column until a pill is picked, so the right half of the
+   skills section reads as an invitation instead of dead space. Same rectangle as
+   .skill-panel above — keep the two in sync. Hidden below 1000px, where the panel is a
+   centered modal and there is no column at all. */
 .skill-ghost {
   display: none;
 }
@@ -222,33 +236,25 @@
 @media (min-width: 1000px) {
   .skill-ghost {
     display: block;
-    position: fixed;
-    top: 50%;
-    right: 10vw; /* fallback only — main.js sets left against the grid's right edge */
-    width: min(420px, 90vw);
-    padding: 3rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    min-height: var(--skill-card-h); /* same rectangle as the card it hands over to */
+    padding: clamp(1.75rem, 3vw, 3rem);
     border: 1px dashed #222;
     border-left: 3px dashed color-mix(in srgb, var(--accent) 40%, transparent);
     border-radius: 1.25rem;
-    z-index: 59; /* under the panel (61) — they are never both on screen anyway */
-    opacity: 0;
+    z-index: 59; /* under the panel (61) that crossfades over it */
     pointer-events: none; /* decorative: never intercepts a click meant for a pill */
-    transform: translateY(-50%);
     transition: opacity 0.28s ease-out, transform 0.28s ease-out;
   }
 
-  /* is-visible = skills section on screen, is-cramped = gutter too narrow for the card,
-     is-dismissed = a real panel has taken the slot. All three set in main.js. */
-  .skill-ghost.is-visible:not(.is-cramped):not(.is-dismissed) {
-    opacity: 1;
-    /* let the outgoing panel clear the slot first on the way back */
-    transition-delay: 0.12s;
-  }
-
-  /* handing the slot over to the real panel: shrink a touch while fading so the card
-     reads as dissolving, instead of just being covered by the panel landing on top */
+  /* handing the column over to the real card: shrink a touch while fading so the ghost
+     reads as dissolving, instead of just being covered by the card landing on top */
   .skill-ghost.is-dismissed {
-    transform: translateY(-50%) scale(0.97);
+    opacity: 0;
+    transform: scale(0.97);
   }
 }
 
@@ -282,9 +288,15 @@
 }
 
 /* phones + small tablets: below this width the grid can't give up a column wide enough
-   for a floating panel, so it becomes a centered modal. Keep in sync with PANEL_MODAL
-   in main.js. */
+   for the detail card, so it becomes a centered modal and the page locks behind it.
+   Keep in sync with PANEL_MODAL in main.js — the section's only breakpoint twin. */
 @media (max-width: 999px) {
+  /* the column stops reserving height: the card is fixed, out of flow */
+  .skill-detail {
+    position: static;
+    min-height: 0;
+  }
+
   /* small centered card with a blurred backdrop — same spot every time, matching
      the 3D-object info card rather than a fullscreen takeover */
   .skill-panel-backdrop {
@@ -293,11 +305,16 @@
   }
 
   .skill-panel {
+    position: fixed;
     top: 50%;
     left: 50%;
     right: auto;
     bottom: auto;
     width: min(320px, calc(100vw - 3rem));
+    /* the modal sizes to its content and scrolls past the cap. Releasing the reserved
+       column height matters: min-height beats max-height, so leaving it on would let a
+       long card grow past the cap instead of scrolling inside it. */
+    min-height: 0;
     max-height: min(70vh, 420px);
     border-top: none;
     padding: 2rem 1.75rem;
@@ -307,9 +324,6 @@
   .skill-panel.is-open {
     transform: translate(-50%, -50%) translateX(var(--deal-x, 0px)) rotate(var(--deal-r, 0deg))
       scale(var(--deal-s, 1));
-    /* no ghost card down here to hand the slot over to, so the panel opens immediately —
-       the head start it gets above 1000px would just feel like lag */
-    transition-delay: 0s;
   }
 }
 
@@ -608,6 +622,10 @@
     animation: none;
     opacity: 1;
   }
+
+  .skill-panel__body {
+    transition: none;
+  }
 }
 
 /* about */
@@ -637,7 +655,34 @@
   );
 }
 
-/* skills */
+/* skills: pill list on the left, detail card in a sticky column on the right. Below
+   1000px the section is a plain block again and the card becomes a modal. */
+@media (min-width: 1000px) {
+  .skills {
+    display: grid;
+    /* the card column shrinks with the viewport rather than eating the pill list at
+       1000px, where the split is at its tightest */
+    grid-template-columns: minmax(0, 1fr) clamp(300px, 34%, 420px);
+    column-gap: 2.5rem;
+    align-items: start;
+  }
+
+  .skills > h2 {
+    grid-column: 1 / -1;
+  }
+
+  /* align-self: start is what makes the sticky work — stretched to the row height it
+     would have nothing left to travel in. min-height reserves the tallest card
+     (--skill-card-h, measured in main.js) and the same value centers the column, with
+     a floor so it never slides under the fixed nav on a short window. */
+  .skill-detail {
+    position: sticky;
+    align-self: start;
+    top: max(6rem, calc((100vh - var(--skill-card-h, 480px)) / 2));
+    min-height: var(--skill-card-h, 480px);
+  }
+}
+
 .skill-group + .skill-group {
   margin-top: 2rem;
 }
@@ -655,21 +700,14 @@
   list-style: none;
   padding: 0;
   display: grid;
-  /* fixed 3 equal-width columns so every pill fills its column — the "+" then lands
-     flush at the right edge of each pill regardless of label length. max-width caps
-     pill width (columns would otherwise stretch to the 1200px section) */
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* equal-width columns so every pill fills its column — the "+" then lands flush at the
+     right edge of each pill regardless of label length. auto-fit picks the count from the
+     space the detail column leaves over: 2 beside it, 3 once it's gone. 15rem is the floor
+     that keeps "Adobe Substance 3D" on one line (the pills are white-space: nowrap).
+     max-width caps pill width — columns would otherwise stretch to the 1200px section. */
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
   max-width: 54rem;
   gap: 0.75rem;
-}
-
-/* from tablet width up: two columns, grid held narrow so the detail panel always has a
-   real gutter to sit in beside the last pill instead of running to the window edge */
-@media (min-width: 1000px) {
-  .skills-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-width: 32rem;
-  }
 }
 
 .skills-grid li {
@@ -686,9 +724,21 @@
   transition: border-color 0.2s, transform 0.2s;
 }
 
-.skills-grid li:hover {
+/* the pills are focusable (tabindex set in main.js), and focus previews a card the same
+   way hover does — so focus gets the same treatment, plus a ring for keyboard users */
+.skills-grid li:hover,
+.skills-grid li:focus-visible {
   border-color: var(--accent);
   transform: translateY(-3px);
+}
+
+.skills-grid li:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.skills-grid li:focus-visible::after {
+  color: var(--accent);
 }
 
 /* "+" affordance: signals the pill expands; rotates into a × while its panel is open.
