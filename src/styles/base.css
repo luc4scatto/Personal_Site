@@ -7,8 +7,11 @@
   --accent: #ccff00;
   --accent-2: #a78bfa;
 
+  /* one family, two jobs. Inter used to sit under --font-body and added nothing the
+     display face wasn't already saying, at the cost of a second file and a second set
+     of metrics. Aliased rather than renamed so every existing rule keeps working. */
   --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  --font-body: var(--font-display);
 
   --space: clamp(4rem, 10vh, 8rem);
   --pad-x: clamp(1.25rem, 5vw, 4rem);
