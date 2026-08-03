@@ -272,6 +272,10 @@ export function initHero3D(container) {
   const tmpV = new THREE.Vector3();
   let focusedItem = null;
   let hoveredItem = null;
+  // measured live in positionCard() rather than hardcoded — the fixed header's height
+  // isn't a constant the layout owns anywhere, and guessing it drifts the moment the nav
+  // copy or padding changes
+  const navEl = document.querySelector('.nav');
 
   function pick(clientX, clientY) {
     const rect = renderer.domElement.getBoundingClientRect();
@@ -546,6 +550,20 @@ export function initHero3D(container) {
     const rect = renderer.domElement.getBoundingClientRect();
     const px = rect.left + (tmpV.x * 0.5 + 0.5) * rect.width;
     const py = rect.top + (-tmpV.y * 0.5 + 0.5) * rect.height;
+
+    // px/py are the object's raw position, before the edge clamp below pins the card
+    // inside the viewport. #hero-canvas scrolls with the page like anything else, so as
+    // the hero moves off-screen this is what actually tracks the object leaving — the
+    // clamp alone would otherwise keep pinning the card to the top edge forever, reading
+    // as "stuck" rather than gone. Closing here plays the same fade unfocus() already
+    // uses for a manual dismiss; OFFSCREEN_MARGIN is slack so it doesn't snap shut the
+    // instant the object grazes the edge.
+    const OFFSCREEN_MARGIN = 40;
+    if (py < -OFFSCREEN_MARGIN || py > window.innerHeight + OFFSCREEN_MARGIN) {
+      unfocus();
+      return;
+    }
+
     const cw = info.el.offsetWidth;
     const ch = info.el.offsetHeight;
     const M = 24; // keep this much clearance from the viewport edges
@@ -555,7 +573,11 @@ export function initHero3D(container) {
     let x = px + gap;
     if (x + cw > window.innerWidth - M) x = px - gap - cw;
     x = Math.min(Math.max(x, M), window.innerWidth - cw - M);
-    const y = Math.min(Math.max(py - ch / 2, M), window.innerHeight - ch - M);
+    // the plain M clearance let the card wedge itself flush under the fixed nav whenever
+    // an object near the top of the sphere put py close to 0 — measure the nav's actual
+    // bottom edge instead of guessing its height, so the card always clears it
+    const topClearance = Math.max(M, (navEl?.getBoundingClientRect().bottom ?? 0) + 16);
+    const y = Math.min(Math.max(py - ch / 2, topClearance), window.innerHeight - ch - M);
     info.el.style.left = `${x}px`;
     info.el.style.top = `${y}px`;
   }
