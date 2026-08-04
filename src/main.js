@@ -44,6 +44,37 @@ sections.forEach((s) => observer.observe(s));
 
 initAnimations();
 
+// vivatech gallery: reveal each image as it scrolls into view. A plain
+// IntersectionObserver rather than the GSAP data-reveal system the rest of the site
+// uses, so this is self-contained and keeps working correctly if the gallery ever ends
+// up above something else whose own size resolves asynchronously (a video's real
+// dimensions, another lazy image) — a scroll-position calculation taken before that
+// settles reads the whole page at the wrong offset, whereas the live browser-native
+// intersection check here just re-evaluates once things do.
+// Hidden state lives on .gallery.is-observed, added only once JS confirms it can reveal
+// them — without it (or with prefers-reduced-motion) the images are just there, visible,
+// which is the correct no-JS/no-motion fallback rather than stuck invisible.
+const gallery = document.querySelector('.gallery');
+if (gallery && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  gallery.classList.add('is-observed');
+  const revealImage = (entries, obs) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      obs.unobserve(entry.target);
+    });
+  };
+  const galleryObserver = new IntersectionObserver(revealImage, { rootMargin: '0px 0px -10% 0px' });
+  // CSS multi-column balances its columns' heights across two layout passes — an
+  // estimate, then a correction once every image's aspect-ratio has actually resolved.
+  // Observing on the estimate meant a couple of images could sit inside the viewport
+  // for that one transitional frame and permanently unobserve themselves as "revealed"
+  // long before they scroll anywhere near it. A frame of slack lets it settle first.
+  requestAnimationFrame(() => {
+    gallery.querySelectorAll('img').forEach((img) => galleryObserver.observe(img));
+  });
+}
+
 // card spotlight: radial glow following the pointer
 document.querySelectorAll('.card').forEach((card) => {
   card.addEventListener('pointermove', (e) => {

@@ -809,6 +809,8 @@
 
 .project-video video {
   width: 100%;
+  /* pairs with the width/height attributes in the markup — see the comment there */
+  height: auto;
   border-radius: 1rem;
   display: block;
 }
@@ -820,9 +822,29 @@
 
 .gallery img {
   width: 100%;
+  /* explicit, not relying on the initial value: without it the width/height HTML
+     attributes' aspect-ratio didn't resolve against the column's percentage width
+     before the image loaded, and height came out as the raw attribute pixels instead
+     of a scaled value — collapsing the masonry column short until the image actually
+     loaded, which shifted everything below it down the page */
+  height: auto;
   border-radius: 0.75rem;
   margin-bottom: 1rem;
   display: block;
+}
+
+/* reveal-on-scroll for the gallery (IntersectionObserver, main.js) — scoped to
+   .is-observed so a no-JS or prefers-reduced-motion visitor just gets the images,
+   visible, rather than a hidden state nothing ever removes */
+.gallery.is-observed img {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.gallery.is-observed img.is-visible {
+  opacity: 1;
+  transform: none;
 }
 
 .featured-links {

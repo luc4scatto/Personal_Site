@@ -43,7 +43,12 @@
       </section>
 
       <section id="video" class="project-video">
-        <video controls playsinline preload="metadata" data-reveal>
+        <!-- width/height are the real pixel size (same reasoning as the gallery images
+             above): without them the video has no box until its metadata arrives over
+             the network, so everything below it — the whole gallery — sits higher up
+             the page for that window and the IntersectionObserver reveals below can
+             fire against the wrong, temporary position. -->
+        <video controls playsinline preload="metadata" width="1920" height="1080" data-reveal>
           <source src="video/vivatech-2026.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
@@ -51,20 +56,29 @@
 
       <section id="gallery" class="project-gallery">
         <h2 data-reveal>Gallery</h2>
+        <!-- width/height set to each file's real pixel size: with only CSS width:100%
+             the browser has no intrinsic aspect ratio to reserve space with before a
+             loading="lazy" image actually loads, so the column collapses short until it
+             does, causing a layout jump. Reveal-on-scroll for this grid (main.js) is a
+             plain IntersectionObserver rather than the site's usual GSAP ScrollTrigger —
+             ScrollTrigger's pixel-position math reads the first item or two of a CSS
+             multi-column layout inconsistently (column-balancing repositions them in a
+             way normal-flow elements never do), so it fired for those before they were
+             anywhere near the viewport. Native intersection tracking sidesteps that. -->
         <div class="gallery">
-          <img src="images/1781713633735.jpeg" alt="Overview of the LVMH Dream Gallery pavilion at Vivatech" loading="lazy" />
-          <img src="images/1782142830220.jpeg" alt="Visitor interacting with the Thélios experience" loading="lazy" />
-          <img src="images/1781713638345.jpeg" alt="LVMH Dream Gallery pavilion" loading="lazy" />
-          <img src="images/1781812845098.jpeg" alt="Thélios booth at Vivatech" loading="lazy" />
-          <img src="images/1781713647186.jpeg" alt="LVMH Dream Gallery pavilion" loading="lazy" />
-          <img src="images/1781812853655.jpeg" alt="Thélios interactive installation" loading="lazy" />
-          <img src="images/1782142834480.jpeg" alt="Thélios booth at Vivatech" loading="lazy" />
-          <img src="images/vivatech-11.jpg" alt="Thélios booth at Vivatech" loading="lazy" />
-          <img src="images/vivatech-12.jpg" alt="Thélios booth at Vivatech" loading="lazy" />
-          <img src="images/vivatech-10.jpg" alt="Thélios booth at Vivatech" loading="lazy" />
-          <img src="images/vivatech-13.jpg" alt="Thélios booth at Vivatech" loading="lazy" />
-          <img src="images/vivatech-14.jpg" alt="Thélios booth at Vivatech" loading="lazy" />
-          <img src="images/vivatech-15.jpg" alt="Thélios booth at Vivatech" loading="lazy" />
+          <img src="images/1781713633735.jpeg" alt="Overview of the LVMH Dream Gallery pavilion at Vivatech" width="2048" height="1358" loading="lazy" />
+          <img src="images/1782142830220.jpeg" alt="Visitor interacting with the Thélios experience" width="1280" height="2276" loading="lazy" />
+          <img src="images/1781713638345.jpeg" alt="LVMH Dream Gallery pavilion" width="2048" height="1358" loading="lazy" />
+          <img src="images/1781812845098.jpeg" alt="Thélios booth at Vivatech" width="960" height="1280" loading="lazy" />
+          <img src="images/1781713647186.jpeg" alt="LVMH Dream Gallery pavilion" width="2048" height="1358" loading="lazy" />
+          <img src="images/1781812853655.jpeg" alt="Thélios interactive installation" width="1280" height="2276" loading="lazy" />
+          <img src="images/1782142834480.jpeg" alt="Thélios booth at Vivatech" width="2048" height="1365" loading="lazy" />
+          <img src="images/vivatech-11.jpg" alt="Thélios booth at Vivatech" width="1200" height="1600" loading="lazy" />
+          <img src="images/vivatech-12.jpg" alt="Thélios booth at Vivatech" width="1200" height="1600" loading="lazy" />
+          <img src="images/vivatech-10.jpg" alt="Thélios booth at Vivatech" width="1179" height="774" loading="lazy" />
+          <img src="images/vivatech-13.jpg" alt="Thélios booth at Vivatech" width="1200" height="1600" loading="lazy" />
+          <img src="images/vivatech-14.jpg" alt="Thélios booth at Vivatech" width="1200" height="1600" loading="lazy" />
+          <img src="images/vivatech-15.jpg" alt="Thélios booth at Vivatech" width="1200" height="1600" loading="lazy" />
         </div>
       </section>
 
