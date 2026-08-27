@@ -20,7 +20,6 @@ const GLB_MODELS = [
   'synthesizer',
   'classical_computer_mouse_03',
   'gaming_gpu',
-  'connector_iec_c19_coiled',
   '3d_printer',
   'knob_44',
   'concert_speaker_02',
@@ -29,7 +28,8 @@ const GLB_MODELS = [
   'sunglasses_04',
   'mixing_board_03',
   'cable_ethernet_coiled',
-  'concert_speaker_02',
+  'server_console_station',
+  'compact_camera',
 ];
 
 // blurbs shown when an object is clicked — copy lives in src/content.js
@@ -50,9 +50,9 @@ const SIZE_TWEAKS = {
   gaming_gpu: 1.2,
   pile_of_vinyl: 1.1,
   mixing_board_03: 1.1,
+  server_console_station: 1.15,
   sunglasses_04: 0.9,
   classical_computer_mouse_03: 0.8,
-  connector_iec_c19_coiled: 0.8,
   integrated_circuit_01: 0.7,
   integrated_circuit_02: 0.7,
   knob_39: 0.45,
@@ -94,12 +94,14 @@ function fibonacciSphere(count, radius) {
 const SHADE_OFFSETS = [0, -0.18, 0.12, -0.09, 0.07, -0.24, 0.16];
 const NEUTRAL = 0x9a9797; // dark-gray parts interleaved for contrast (high metalness reads near-black without an envmap)
 
-function recolor(object, baseColor) {
+function recolor(object, baseColor, isNeutral) {
   let i = 0;
   object.traverse((child) => {
     if (!child.isMesh) return;
-    // every 4th part goes dark neutral + metallic, the rest are shades of the base
-    const neutral = i % 4 === 3;
+    // every 4th part goes dark neutral + metallic, the rest are shades of the base —
+    // isNeutral lets one model override that pick (server_console_station: front cabinet
+    // panels go neutral, legs/bolts/lights carry the accent color instead)
+    const neutral = isNeutral ? isNeutral(child) : i % 4 === 3;
     const color = new THREE.Color(neutral ? NEUTRAL : baseColor);
     if (!neutral) color.offsetHSL(0, 0, SHADE_OFFSETS[i % SHADE_OFFSETS.length]);
     child.material = new THREE.MeshStandardMaterial({
@@ -167,7 +169,13 @@ export function initHero3D(container) {
 
   function addItem(object, index) {
     normalize(object, ITEM_SIZE * (SIZE_TWEAKS[GLB_MODELS[index]] ?? 1));
-    recolor(object, COLORS[index % COLORS.length]);
+    recolor(
+      object,
+      COLORS[index % COLORS.length],
+      GLB_MODELS[index] === 'server_console_station'
+        ? (child) => child.material?.name === 'server_cabinet'
+        : undefined
+    );
     // each mesh glows its own color during the click-me pulse (emissiveIntensity animated in the loop)
     const mats = [];
     object.traverse((child) => {
