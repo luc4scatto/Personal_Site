@@ -30,7 +30,9 @@ export const content = {
   },
   about: {
     paragraph:
-      'I work in the 3D R&D team at Thélios (LVMH eyewear), where I develop and maintain the 3D pipeline - from 2D design all the way to renders, 3D configurators and video.\nI recently built an interactive experience with TouchDesigner and Unreal Engine, showcased at Vivatech in Paris. Python ties it all together, across the whole 3D stack.',
+      'My path into 3D started at **EssilorLuxottica**, where I spent over four years as a 3D Render Specialist working on **Prada Group**, **Burberry** and **Oliver Peoples** eyewear lines. \n' +
+      'In my last two years there I moved into improving and building new features for the 3D pipeline itself, a focus I carried forward into **Thélios**.\n' +
+      'Today I\'m part of the 3D R&D team at **Thélios** (**LVMH** eyewear), where I develop and maintain the 3D pipeline, from 2D design all the way to renders, 3D configurators and video.\n'
   },
   projects: {
     vivatech: {
@@ -70,20 +72,20 @@ export const content = {
     mixing_board_01: { title: 'Mixing', text: 'Mixing audio across vinyl and digital gives me the flexibility and refinement I\'m seeking.' },
     mixing_board_03: { title: 'CDJs', text: 'Where vinyl brings warmth and fragility, digital brings versatility. I like working the line between them.' },
     synthesizer: { title: 'Music Production', text: 'When I have time, I like messing around with music production too, with Ableton and all the plugins out there..' },
-    knob_39: { title: 'Sound Design', text: 'Placeholder - I tweak knobs until a patch finally clicks.' },
+    knob_39: { title: 'Tweaking', text: 'Endless fine-tuning is half the fun.' },
     knob_44: { title: 'Tweaking', text: 'Endless fine-tuning is half the fun.' },
     gaming_computer: { title: 'PC & Technology', text: 'Always been a fan of computers and technology, forever chasing what\'s new in the field.' },
-    gaming_gpu: { title: 'Hardware', text: 'Placeholder - GPUs, benchmarks and the occasional upgrade rabbit hole.' },
-    integrated_circuit_01: { title: 'Electronics', text: 'Placeholder - tinkering with circuits and small hardware projects.' },
-    integrated_circuit_02: { title: 'Chips & Boards', text: 'Placeholder - I like understanding how the silicon actually works.' },
-    transistor_03: { title: 'Tinkering', text: 'Placeholder - soldering, breadboards and figuring things out by hand.' },
-    '3d_printer': { title: '3D Printing', text: 'lets me give concrete shape to my craziest ideas, one layer at a time.' },
-    classical_computer_mouse_03: { title: 'Everyday Tools', text: 'Placeholder - the trusty tools I work with every day.' },
+    gaming_gpu: { title: 'Hardware', text: 'Always hunting for the best deal on PC and server components. Sadly they\'re very expensive right now!' },
+    integrated_circuit_01: { title: 'Electronics', text: 'Tinkering with circuits and small hardware projects.' },
+    integrated_circuit_02: { title: 'Chips & Boards', text: 'Tinkering with circuits and small hardware projects.' },
+    transistor_03: { title: 'Tinkering', text: 'Tinkering with circuits and small hardware projects.' },
+    '3d_printer': { title: '3D Printing', text: 'Lets me give concrete shape to my craziest ideas, one layer at a time.' },
+    classical_computer_mouse_03: { title: 'Everyday Tools', text: 'The trusty tools I work with every day.' },
     cable_ethernet_coiled: { title: 'Connectivity', text: 'A tidy network is a happy network.' },
     sunglasses_04: { title: 'Eyewear', text: 'Eyewear is where my day job at Thélios meets technology.' },
-    concert_speaker_02: { title: 'Live Music', text: 'Placeholder - gigs, festivals and chasing the perfect drop.' },
+    concert_speaker_02: { title: 'Speakers', text: 'I like listening to music wherever I am.' },
     server_console_station: { title: 'Server', text: 'My self-hosted homelab. Head to the Projects section for more info!' },
-    compact_camera: { title: 'Photography', text: 'Placeholder - always keeping an eye out for a good shot.' },
+    compact_camera: { title: 'Photography/Video', text: 'I like documenting the trips I take with photos and videos.' },
     _default: { title: 'One of my things', text: 'Placeholder description - this object represents one of my interests.' },
   },
   // invitation filling the empty gutter beside the skills grid until a pill is clicked
@@ -289,6 +291,17 @@ export const content = {
         'Product-oriented workflows',
         'Placing real products on human models',
         'Integration with other DCCs',
+      ],
+    },
+    'ableton-live': {
+      title: 'Ableton Live',
+      text: 'Digital audio workstation for producing, arranging and performing music.',
+      color: '#FFFFFF',
+      selfTaught: true,
+      bullets: [
+        'Mixing and Arrangement',
+        'Sound Design',
+        'Plugins and Instruments',
       ],
     },
   },

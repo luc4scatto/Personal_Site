@@ -233,7 +233,7 @@ export function initHero3D(container) {
     const shades = [ACCENT, WHITE, VIOLET, ACCENT, WHITE];
     const placed = [];
     let guard = 0;
-    while (placed.length < 110 && guard++ < 4000) {
+    while (placed.length < 160 && guard++ < 8000) {
       const p = new THREE.Vector3(
         Math.random() * 2 - 1,
         Math.random() * 2 - 1,
@@ -242,7 +242,7 @@ export function initHero3D(container) {
       if (p.length() > 1) continue;
       p.multiplyScalar(SPHERE_RADIUS + 0.4);
       if (homes.some((h) => h.distanceTo(p) < 0.9)) continue;
-      if (placed.some((q) => q.distanceTo(p) < 0.12)) continue;
+      if (placed.some((q) => q.distanceTo(p) < 0.1)) continue;
       placed.push(p);
 
       const color = new THREE.Color(shades[placed.length % shades.length]);
@@ -257,7 +257,7 @@ export function initHero3D(container) {
           flatShading: geoIdx === shapeGeos.length - 1, // icosahedra look better faceted
         })
       );
-      mesh.scale.setScalar(0.02 + Math.random() * 0.045);
+      mesh.scale.setScalar(0.015 + Math.random() ** 1.6 * 0.09);
       mesh.position.copy(p);
       mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
       group.add(mesh);

@@ -514,6 +514,11 @@
   color: var(--text-dim);
 }
 
+.about-grid p strong {
+  color: color-mix(in srgb, var(--text) 50%, var(--text-dim));
+  font-weight: 600;
+}
+
 .about-photo {
   width: 100%;
   aspect-ratio: 1;

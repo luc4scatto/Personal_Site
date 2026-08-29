@@ -4,8 +4,13 @@ import './styles/sections.css';
 import { initAnimations } from './animations.js';
 import { content } from './content.js';
 
+// content.js copy is developer-authored, not user input, so **bold** markup is safe to allow
 function escapeHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 }
 
 // fill every [data-copy="a.b.c"] element from content.js — runs before any animation
