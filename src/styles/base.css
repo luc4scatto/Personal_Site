@@ -100,6 +100,18 @@ a {
   text-decoration: none;
 }
 
+/* global fallback — components with their own focus treatment (skill tiles,
+   magnetic buttons) override this with a tighter/branded outline */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 .accent {
   color: var(--accent);
 }
