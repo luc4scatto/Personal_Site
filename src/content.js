@@ -81,6 +81,12 @@ export const content = {
     description2: 'Hardware, services and stack details coming soon.',
     backCta: '← Back to projects',
   },
+  notFound: {
+    kicker: 'Error',
+    meta: 'That page doesn\'t exist',
+    description1: 'The link might be broken, or the page moved. Head back home and try again.',
+    backCta: '← Back home',
+  },
   // shown when a 3D hero object is clicked (src/hero3d.js) — keyed by model filename
   hero3dObjects: {
     turntable: { title: 'Vinyl Playing', text: 'I spin records and love the ritual of mixing on a real turntable in my studio.' },

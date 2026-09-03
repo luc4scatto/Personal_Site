@@ -10,6 +10,7 @@ export default defineConfig({
         vivatech: 'vivatech.html',
         projectTwo: 'project-two.html',
         homelab: 'homelab.html',
+        notFound: '404.html',
       },
     },
   },
