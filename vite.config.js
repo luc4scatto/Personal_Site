@@ -8,6 +8,8 @@ export default defineConfig({
       input: {
         main: 'index.html',
         vivatech: 'vivatech.html',
+        projectTwo: 'project-two.html',
+        homelab: 'homelab.html',
       },
     },
   },

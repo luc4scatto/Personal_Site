@@ -65,6 +65,22 @@ export const content = {
       'For the Thélios space I developed the real-time interactive experience: a live 3D showcase of eyewear digital twins, built with TouchDesigner and Unreal Engine, letting visitors explore frames, materials and details up close as they interact with the installation.',
     backCta: '← Back to projects',
   },
+  // placeholder page - Luca hasn't picked the project yet, fill in kicker/meta/description when he does
+  projectTwo: {
+    kicker: 'Project',
+    meta: 'Details coming soon',
+    description1: 'This page is a placeholder - content for this project is on its way.',
+    backCta: '← Back to projects',
+  },
+  homelab: {
+    kicker: 'Project',
+    meta: 'Personal project · Self-hosted · Ongoing',
+    description1:
+      'A homelab I run for the sake of learning: self-hosting, networking and sysadmin work, outside of anything work-related.',
+    // TODO Luca: swap this in once hardware/services are settled - what's running, why, what it does
+    description2: 'Hardware, services and stack details coming soon.',
+    backCta: '← Back to projects',
+  },
   // shown when a 3D hero object is clicked (src/hero3d.js) — keyed by model filename
   hero3dObjects: {
     turntable: { title: 'Vinyl Playing', text: 'I spin records and love the ritual of mixing on a real turntable in my studio.' },
