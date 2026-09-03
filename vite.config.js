@@ -16,6 +16,7 @@ export default defineConfig({
         projectTwo: 'project-two.html',
         homelab: 'homelab.html',
         notFound: '404.html',
+        privacy: 'privacy.html',
       },
     },
   },

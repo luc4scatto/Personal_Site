@@ -919,6 +919,12 @@
   border-top: 1px solid #1c1c1c;
 }
 
+.footer a {
+  color: inherit;
+  text-decoration: underline;
+  margin-left: 0.75rem;
+}
+
 .footer .credits {
   margin-top: 0.5rem;
   font-size: 0.7rem;

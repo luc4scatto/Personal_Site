@@ -83,6 +83,15 @@ export const content = {
     description2: 'Hardware, services and stack details coming soon.',
     backCta: '← Back to projects',
   },
+  privacy: {
+    kicker: 'Privacy',
+    meta: "What this site collects, and what it doesn't",
+    description1:
+      'This site uses Google Analytics (GA4) to understand traffic - page views, general location, device type - but only after you accept the cookie banner. Decline or ignore it and nothing loads, nothing is tracked.',
+    description2:
+      "Beyond that: no ads, no other trackers, no data stored on this site's own servers, nothing sold. Questions or a removal request? Email scattolinluca2@gmail.com.",
+    backCta: '← Back home',
+  },
   notFound: {
     kicker: 'Error',
     meta: "That page doesn't exist",
