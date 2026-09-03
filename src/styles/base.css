@@ -126,9 +126,13 @@ textarea:focus-visible,
   padding: 0.9em 1.8em;
   border: 1px solid var(--accent);
   border-radius: 999px;
+  background: none;
   color: var(--accent);
   font-family: var(--font-display);
+  font-size: 1rem;
   font-weight: 500;
+  appearance: none;
+  cursor: pointer;
   transition: background 0.25s, color 0.25s;
 }
 
