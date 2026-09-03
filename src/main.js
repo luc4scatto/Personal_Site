@@ -2,6 +2,7 @@ import gsap from 'gsap';
 import './styles/base.css';
 import './styles/sections.css';
 import { initAnimations } from './animations.js';
+import { initAnalytics } from './analytics.js';
 import { content } from './content.js';
 
 // content.js copy is developer-authored, not user input, so **bold** markup is safe to allow
@@ -48,6 +49,7 @@ const observer = new IntersectionObserver(
 sections.forEach((s) => observer.observe(s));
 
 initAnimations();
+initAnalytics();
 
 // vivatech gallery: reveal each image as it scrolls into view. A plain
 // IntersectionObserver rather than the GSAP data-reveal system the rest of the site

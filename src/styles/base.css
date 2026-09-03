@@ -143,6 +143,59 @@ section {
   margin: 0 auto;
 }
 
+/* cookie consent — injected by src/analytics.js, only when no choice is stored yet */
+.cookie-banner {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem var(--pad-x);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #1c1c1c;
+}
+
+.cookie-banner p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  max-width: 60ch;
+}
+
+.cookie-banner p a {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+.cookie-banner__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.cookie-banner__decline {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.cookie-banner__decline:hover {
+  color: var(--text);
+}
+
+.cookie-banner__accept {
+  padding: 0.55em 1.4em;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
