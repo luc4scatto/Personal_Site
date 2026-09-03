@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint .",
+    "lint": "eslint . --ignore-pattern .claude/ --ignore-pattern .impeccable/",
     "format:check": "prettier --check ."
   },
   "dependencies": {
@@ -16,8 +16,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "css-select": "^7.0.0",
+    "css-tree": "^3.2.1",
+    "domutils": "^4.0.2",
     "eslint": "^10.9.1",
     "globals": "^17.12.0",
+    "htmlparser2": "^12.0.0",
     "prettier": "^3.9.6",
     "vite": "^6.0.0"
   }

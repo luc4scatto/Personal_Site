@@ -273,3 +273,16 @@ if (heroCanvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (hint) hint.hidden = false;
   });
 }
+
+// homelab network diagram (homelab.html only) — real content, always renders;
+// only the connection-line pulse is gated by reduced-motion, in CSS
+const homelabDiagram = document.querySelector('#homelab-diagram');
+if (homelabDiagram) {
+  import('./homelabDiagram.js').then((m) => m.initHomelabDiagram(homelabDiagram));
+}
+
+// homelab hardware diagram (homelab.html only) — same reasoning as above
+const homelabHardware = document.querySelector('#homelab-hardware');
+if (homelabHardware) {
+  import('./homelabHardware.js').then((m) => m.initHomelabHardware(homelabHardware));
+}

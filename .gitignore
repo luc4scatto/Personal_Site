@@ -3,4 +3,8 @@ dist
 .DS_Store
 _originals
 .agents/skills/
+.claude/skills/
+.claude/settings.local.json
+.impeccable/config.local.json
+.impeccable/hook.cache.json
 skills-lock.json

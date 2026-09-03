@@ -1,0 +1,51 @@
+{
+  "hook": {
+    "enabled": true,
+    "limits": {
+      "maxFindings": 5,
+      "maxChars": 8000
+    }
+  },
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "homelab.html"
+        ],
+        "createdAt": "2026-09-03T13:58:01.743Z",
+        "reason": "Agent: detector misresolved type scale as flat (all 16px); live computed styles are h1 40px / h2 32px / body 16px (h2:body 2:1, h1:h2 1.25:1), verified via devtools"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-09-03T14:01:24.560Z",
+        "reason": "Agent: detector misresolved type scale as flat; live computed styles are h1 45px / h2 32px / body 16px, verified via devtools"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "vivatech.html"
+        ],
+        "createdAt": "2026-09-03T14:01:24.615Z",
+        "reason": "Agent: detector misresolved type scale as flat; live computed styles are h1 40px / h2 32px / body 16px, verified via devtools"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/styles/sections.css"
+        ],
+        "createdAt": "2026-09-03T14:19:50.677Z",
+        "reason": "pre-existing .info-card (3D hero object card) border-left at L10, documented as known-but-unfixed in CLAUDE.md; unrelated to homelab.html work this session"
+      }
+    ]
+  }
+}

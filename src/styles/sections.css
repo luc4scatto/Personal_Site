@@ -512,6 +512,21 @@
   .skills.is-focused .skills-grid > li:not(.is-active) {
     filter: none;
   }
+
+  /* the diagram itself always renders (it's real content, not decoration) —
+     only the traveling pulse drops, leaving static connection lines */
+  .hd-line-pulse {
+    animation: none;
+    opacity: 0;
+  }
+
+  /* the base line always carries the color/meaning — only the pulse overlay drops */
+  .hw-line--power-pulse,
+  .hw-line--lan-pulse,
+  .hw-line--ftth-pulse {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /* about */
@@ -813,6 +828,21 @@
   padding-top: calc(var(--space) + 4rem);
 }
 
+/* homelab.html's content is diagrams-and-text, thinner than vivatech's cover
+   photo/video/gallery sections — the shared --space rhythm (a full dose on
+   both sides of every seam) compounds into dead space with nothing to bridge
+   it. Trim only the trailing edge of each section instead of the shared
+   token: scrolling INTO a section still gets a full breath on its leading
+   edge, but two thin sections in a row on this page stop stacking two full
+   doses back to back. Scoped to homelab.html only (body class), so vivatech's
+   own rhythm — which has real imagery filling those seams — is untouched. */
+.homelab-page #project,
+.homelab-page #description,
+.homelab-page #hardware,
+.homelab-page #services {
+  padding-bottom: calc(var(--space) * 0.4);
+}
+
 .page-hero h1 {
   font-size: clamp(2.5rem, 7vw, 5rem);
 }
@@ -910,6 +940,358 @@
   text-align: center;
 }
 
+/* homelab network diagram — hub-and-spoke SVG + an HTML label layer stacked
+   on top of it via grid overlap, so labels always track the SVG's own scaling
+   with no resize listener. Built in src/homelabDiagram.js from content.js data. */
+.homelab-diagram {
+  max-width: 52rem;
+  margin-inline: auto;
+}
+
+.homelab-diagram__inner {
+  display: grid;
+}
+
+.homelab-diagram__graphic,
+.homelab-diagram__labels {
+  grid-area: 1 / 1;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+}
+
+.homelab-diagram__labels {
+  position: relative;
+}
+
+.hd-line {
+  stroke: var(--text-dim);
+  stroke-width: 1.5;
+  opacity: 0.35;
+}
+
+.hd-line-pulse {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 8 200;
+  animation: hd-travel 2.2s linear infinite;
+}
+
+@keyframes hd-travel {
+  to {
+    stroke-dashoffset: -208;
+  }
+}
+
+.hd-node-hub {
+  fill: var(--bg);
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.hd-node-spoke {
+  fill: var(--bg);
+  stroke: var(--accent-2);
+  stroke-width: 2;
+}
+
+.hd-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  max-width: 8rem;
+}
+
+/* opaque, page-colored backing so a crossing connector line never runs
+   through the text — invisible at the mobile stacked layout since the
+   background there already matches */
+.hd-label:not(.hd-label--hub) {
+  background: var(--bg);
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.35rem;
+}
+
+.hd-label__title {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.hd-label--hub .hd-label__title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.hd-label__services {
+  list-style: none;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+/* homelab hardware diagram — transcribed from a physical wiring sketch, so the
+   layout is fixed/hand-authored (src/homelabHardware.js), not data-driven like
+   the services diagram above. Wide on purpose (two rooms side by side) — it
+   scrolls horizontally in its own container rather than reflowing, since
+   reflowing a real wiring diagram would misrepresent it. */
+.homelab-hardware-scroll {
+  overflow-x: auto;
+  padding-bottom: 0.75rem;
+  scrollbar-color: color-mix(in srgb, var(--accent-2) 55%, transparent) transparent;
+  scrollbar-width: thin;
+}
+
+.homelab-hardware-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.homelab-hardware-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.homelab-hardware-scroll::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent-2) 55%, transparent);
+  border-radius: 999px;
+}
+
+.homelab-hardware {
+  --hw-lan: #22c3d1;
+  position: relative;
+  min-width: 45rem;
+  aspect-ratio: 1000 / 525;
+  margin: 0 auto;
+}
+
+.homelab-hardware > svg,
+.homelab-hardware__labels {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* blueprint grid, drawn inside the svg itself (the hw-grid <pattern> in
+   homelabHardware.js) so it shares the diagram's own coordinate space —
+   every room/node edge is a multiple of GRID and lands exactly on a line,
+   instead of a CSS background merely floating over unrelated coordinates */
+.hw-grid-line {
+  fill: none;
+  stroke: var(--border, #2a2a2a);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.hw-grid-mask {
+  fill: var(--bg);
+}
+
+.hw-room {
+  fill: color-mix(in srgb, var(--border, #2a2a2a) 12%, transparent);
+  stroke: var(--border, #2a2a2a);
+  stroke-width: 1.5;
+}
+
+.hw-room--accent {
+  fill: color-mix(in srgb, var(--accent-2) 5%, transparent);
+  stroke: color-mix(in srgb, var(--accent-2) 55%, var(--border, #2a2a2a));
+}
+
+/* brackets are the room's registration marks — always a shade more visible
+   than the room's own outline, even the neutral (Studio) room */
+.hw-room-bracket {
+  fill: none;
+  stroke: var(--text-dim);
+  stroke-width: 3;
+  stroke-linecap: square;
+}
+
+.hw-room-bracket--accent {
+  stroke: var(--accent-2);
+}
+
+.hw-group {
+  fill: color-mix(in srgb, var(--accent) 6%, transparent);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+/* power strip: a real capsule silhouette with a thin outline (an object, not a
+   card) plus one lit socket dot per device it actually powers */
+.hw-node-strip {
+  fill: color-mix(in srgb, var(--text) 15%, var(--bg));
+  stroke: var(--text-dim);
+  stroke-width: 1;
+}
+
+.hw-node-socket {
+  fill: var(--accent);
+}
+
+.hw-line {
+  fill: none;
+}
+
+.hw-line--power {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
+  opacity: 0.6;
+}
+
+.hw-line--power-pulse {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 4 30;
+  animation: hd-travel 2.6s linear infinite;
+}
+
+.hw-line--lan {
+  stroke: var(--hw-lan);
+  stroke-width: 1.5;
+  opacity: 0.55;
+}
+
+.hw-line--lan-pulse {
+  stroke: var(--hw-lan);
+  stroke-width: 2;
+  stroke-dasharray: 6 40;
+  animation: hd-travel 1.6s linear infinite;
+}
+
+.hw-line--ftth {
+  stroke: var(--accent-2);
+  stroke-width: 3;
+  opacity: 0.6;
+}
+
+.hw-line--ftth-pulse {
+  stroke: var(--accent-2);
+  stroke-width: 3;
+  stroke-dasharray: 8 50;
+  animation: hd-travel 1.4s linear infinite;
+}
+
+.hw-line--data {
+  stroke: var(--text-dim);
+  stroke-width: 1.5;
+}
+
+.hw-line--usb {
+  stroke: var(--text-dim);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 4;
+}
+
+.hw-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  text-align: center;
+  font-size: 0.66rem;
+  color: var(--text);
+  max-width: 6rem;
+  line-height: 1.25;
+}
+
+.hw-label__text {
+  background: var(--bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+}
+
+/* the icon's circular backdrop is sized in the SAME unit as the icon (rem) —
+   it was previously drawn in the svg's viewBox coordinate space while the icon
+   itself was CSS-sized, so the two scaled independently and the icon spilled
+   past the circle at some viewport widths. Padding here defines the circle,
+   so icon and backdrop are locked together at every width by construction. */
+.hw-label svg {
+  flex: none;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0.7rem;
+  box-sizing: content-box;
+  border-radius: 50%;
+  background: var(--bg);
+  stroke: var(--text);
+}
+
+/* the icon+caption block is centered as a whole by .hw-label's -50%/-50%
+   transform, which puts the BLOCK's midpoint — not the icon — on the node's
+   true center, so connection lines (which target that center) met the icon
+   low. This anchors the icon's own center there instead: -1.75rem is exactly
+   half the icon's 3.5rem diameter above (icon width 2.1rem + 0.7rem padding
+   on each side), so the icon's midpoint lands on the anchor and the caption
+   hangs below it. */
+.hw-label--icon {
+  transform: translate(-50%, -1.75rem);
+}
+
+.hw-label--room {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid color-mix(in srgb, var(--border, #2a2a2a) 90%, transparent);
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  max-width: none;
+  white-space: nowrap;
+}
+
+.hw-label--group {
+  transform: translate(0, -50%);
+  text-align: left;
+  font-size: 0.6rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  max-width: none;
+  white-space: nowrap;
+}
+
+.hw-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  max-width: 45rem;
+  margin: 1rem auto 0;
+  padding-top: 1rem;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.hw-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hw-legend__swatch {
+  width: 1.4rem;
+  height: 2px;
+}
+
+.hw-legend__swatch--power {
+  background: repeating-linear-gradient(to right, var(--accent) 0 4px, transparent 4px 8px);
+}
+
+.hw-legend__swatch--ftth {
+  background: var(--accent-2);
+  height: 3px;
+}
+
+.hw-legend__swatch--lan {
+  background: var(--hw-lan, #22c3d1);
+}
+
 /* footer */
 .footer {
   text-align: center;
@@ -959,5 +1341,51 @@
 
   .skill-label {
     font-size: 0.875rem;
+  }
+
+  /* the radial layout has no room on a phone — the graphic becomes a small
+     decorative glyph and the same label elements just reflow into a stacked
+     list (one DOM tree, no separate mobile markup) */
+  .homelab-diagram__inner {
+    display: block;
+  }
+
+  .homelab-diagram__graphic {
+    max-width: 10rem;
+    margin: 0 auto 2rem;
+  }
+
+  .homelab-diagram__labels {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .hd-label {
+    position: static;
+    transform: none;
+    text-align: left;
+    max-width: none;
+    padding-left: 1.1rem;
+  }
+
+  .hd-label__title {
+    position: relative;
+  }
+
+  .hd-label__title::before {
+    content: '';
+    position: absolute;
+    left: -1.1rem;
+    top: 0.5em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-2);
+  }
+
+  .hd-label--hub {
+    display: none;
   }
 }

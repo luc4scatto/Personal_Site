@@ -79,9 +79,24 @@ export const content = {
     meta: 'Personal project · Self-hosted · Ongoing',
     description1:
       'A homelab I run for the sake of learning: self-hosting, networking and sysadmin work, outside of anything work-related.',
-    // TODO Luca: swap this in once hardware/services are settled - what's running, why, what it does
-    description2: 'Hardware, services and stack details coming soon.',
+    description2:
+      'Virtualized on Proxmox: TrueNAS SCALE runs the containerized stack on ZFS storage - media streaming and automation, photo backup, personal finance, network tooling - while Hermes handles agentic workflows.',
     backCta: '← Back to projects',
+    // Powers the network diagram in src/homelabDiagram.js. Labels only - no IPs,
+    // ports, hostnames or versions (this page is public).
+    diagram: {
+      hub: 'Proxmox',
+      categories: [
+        { label: 'Media Streaming', services: ['Jellyfin', 'Navidrome', 'Jellyseerr'] },
+        { label: 'Media Automation', services: ['Sonarr', 'Radarr', 'Prowlarr'] },
+        { label: 'Downloads & Networking', services: ['qBittorrent', 'Tailscale', 'WireGuard'] },
+        { label: 'Photos & Backup', services: ['Immich'] },
+        { label: 'Dashboard', services: ['Homarr'] },
+        { label: 'Personal Finance', services: ['Actual Budget'] },
+        { label: 'Infra & Dev Tools', services: ['Dockge', 'code-server'] },
+        { label: 'Hermes', services: ['Hermes Agent'] },
+      ],
+    },
   },
   privacy: {
     kicker: 'Privacy',

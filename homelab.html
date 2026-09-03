@@ -20,7 +20,7 @@
     <meta name="twitter:description" content="Personal self-hosted homelab - networking and sysadmin learning project." />
     <meta name="twitter:image" content="https://lucascattolin.com/images/Profile_pic.jpg" />
   </head>
-  <body>
+  <body class="homelab-page">
     <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="nav">
       <a class="nav-logo" href="index.html">LS</a>
@@ -42,7 +42,22 @@
         <p data-reveal data-copy="homelab.description2">Hardware, services and stack details coming soon.</p>
       </section>
 
-      <!-- add project-gallery (photos of the rack/setup) or a "stack" list here once hardware/services are settled -->
+      <section id="hardware" class="homelab-hardware-section">
+        <h2 data-reveal>Hardware</h2>
+        <div class="homelab-hardware-scroll">
+          <div id="homelab-hardware" data-reveal aria-label="Homelab hardware architecture"></div>
+        </div>
+        <ul class="hw-legend" data-reveal>
+          <li><span class="hw-legend__swatch hw-legend__swatch--power"></span>Power</li>
+          <li><span class="hw-legend__swatch hw-legend__swatch--ftth"></span>FTTH 10G</li>
+          <li><span class="hw-legend__swatch hw-legend__swatch--lan"></span>2.5G con.</li>
+        </ul>
+      </section>
+
+      <section id="services" class="homelab-services-section">
+        <h2 data-reveal>Services</h2>
+        <div id="homelab-diagram" class="homelab-diagram" data-reveal aria-label="Homelab service map"></div>
+      </section>
 
       <section id="back" class="project-back">
         <a class="btn" href="index.html#projects" data-reveal data-copy="homelab.backCta">← Back to projects</a>
