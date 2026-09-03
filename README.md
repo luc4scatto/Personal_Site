@@ -29,6 +29,18 @@ npm run build     # production build to dist/
 npm run preview   # serve the production build locally
 ```
 
+## Before pushing
+
+`deploy.yml` gates the build on lint + format — a broken push won't deploy. If you hand-edit any `.js`/`.css` file, run before pushing:
+
+```bash
+npm run lint            # catches real bugs (undefined refs, unused vars)
+npm run format:check    # reports formatting issues
+npx prettier --write .  # auto-fixes formatting (JS/CSS only — HTML is intentionally excluded, see .prettierignore)
+```
+
+Editing copy in `src/content.js` or plain text in the `.html` files doesn't need this — only relevant if you touch code structure.
+
 ## Deployment
 
 Every push to `main` builds and deploys to GitHub Pages via `.github/workflows/deploy.yml`.
