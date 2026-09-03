@@ -13,7 +13,9 @@
   box-shadow: 0 14px 44px rgba(0, 0, 0, 0.55);
   opacity: 0;
   transform: translateY(8px) scale(0.98);
-  transition: opacity 0.25s, transform 0.25s;
+  transition:
+    opacity 0.25s,
+    transform 0.25s;
 }
 
 .info-card.is-open {
@@ -76,7 +78,11 @@
   /* the picked tool's brand color, washed across the top of the card and fading out —
      the same wash the tile itself carries, at the scale of the whole card */
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--brand, var(--accent)) 12%, transparent), transparent 55%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--brand, var(--accent)) 12%, transparent),
+      transparent 55%
+    ),
     var(--surface);
   border: 1px solid color-mix(in srgb, var(--brand, var(--accent)) 22%, #1e1e1e);
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
@@ -188,7 +194,10 @@
   border-radius: 50%;
   color: var(--text-dim);
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s, transform 0.2s;
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    transform 0.2s;
 }
 
 .skill-card__close:hover,
@@ -325,7 +334,6 @@
   .hero {
     padding-bottom: 2.5rem;
   }
-
 }
 
 @media (max-width: 700px) {
@@ -357,8 +365,13 @@
 }
 
 @keyframes hero-hint-breathe {
-  0%, 100% { opacity: 0.55; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 @media (max-width: 700px), (max-width: 1024px) and (orientation: portrait) {
@@ -581,12 +594,20 @@
   gap: 0.9rem;
   padding: 1.15rem 1.15rem 1rem;
   background:
-    linear-gradient(0deg, color-mix(in srgb, var(--brand, var(--accent)) var(--tile-wash), transparent), transparent 70%),
+    linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--brand, var(--accent)) var(--tile-wash), transparent),
+      transparent 70%
+    ),
     var(--surface);
   border: 1px solid #1e1e1e;
   border-radius: 0.9rem;
   cursor: pointer;
-  transition: border-color 0.25s, transform 0.25s, background 0.35s, opacity 0.35s,
+  transition:
+    border-color 0.25s,
+    transform 0.25s,
+    background 0.35s,
+    opacity 0.35s,
     filter 0.35s;
 }
 
@@ -664,8 +685,15 @@
 }
 
 @keyframes skills-hint-pulse {
-  0%, 100% { opacity: 0.35; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1); }
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* projects */
@@ -683,7 +711,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  transition: border-color 0.2s, transform 0.2s;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
   position: relative;
   overflow: hidden;
 }
@@ -844,7 +874,9 @@
 .gallery.is-observed img {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
 }
 
 .gallery.is-observed img.is-visible {

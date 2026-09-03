@@ -19,20 +19,22 @@ export const content = {
   // scrolling marquee band between hero and about (src/main.js builds the loop from this array)
   // keep an even number of words or the lime/violet alternation jumps at the loop seam
   marquee: {
-    words: ['USD Enthusiast', 
-            'Omniverse Wizard', 
-            'Blender Endorser', 
-            'Unreal Engine Explorer', 
-            'Maya Wrangler', 
-            'TouchDesigner Lover',
-            'Adobe Suite Aficionado',
-            'Python Ninja'],
+    words: [
+      'USD Enthusiast',
+      'Omniverse Wizard',
+      'Blender Endorser',
+      'Unreal Engine Explorer',
+      'Maya Wrangler',
+      'TouchDesigner Lover',
+      'Adobe Suite Aficionado',
+      'Python Ninja',
+    ],
   },
   about: {
     paragraph:
       'My path into 3D started at **EssilorLuxottica**, where I spent over four years as a 3D Render Specialist working on **Prada Group**, **Burberry** and **Oliver Peoples** eyewear lines. \n' +
       'In my last two years there I moved into improving and building new features for the 3D pipeline itself, a focus I carried forward into **Thélios**.\n' +
-      'Today I\'m part of the 3D R&D team at **Thélios** (**LVMH** eyewear), where I develop and maintain the 3D pipeline, from 2D design all the way to renders, 3D configurators and video.\n'
+      "Today I'm part of the 3D R&D team at **Thélios** (**LVMH** eyewear), where I develop and maintain the 3D pipeline, from 2D design all the way to renders, 3D configurators and video.\n",
   },
   projects: {
     vivatech: {
@@ -83,32 +85,80 @@ export const content = {
   },
   notFound: {
     kicker: 'Error',
-    meta: 'That page doesn\'t exist',
+    meta: "That page doesn't exist",
     description1: 'The link might be broken, or the page moved. Head back home and try again.',
     backCta: '← Back home',
   },
   // shown when a 3D hero object is clicked (src/hero3d.js) — keyed by model filename
   hero3dObjects: {
-    turntable: { title: 'Vinyl Playing', text: 'I spin records and love the ritual of mixing on a real turntable in my studio.' },
-    pile_of_vinyl: { title: 'Vinyl Collection', text: 'An ever-growing crate of records I hunt for on weekends.' },
-    mixing_board_01: { title: 'Mixing', text: 'Mixing audio across vinyl and digital gives me the flexibility and refinement I\'m seeking.' },
-    mixing_board_03: { title: 'CDJs', text: 'Where vinyl brings warmth and fragility, digital brings versatility. I like working the line between them.' },
-    synthesizer: { title: 'Music Production', text: 'When I have time, I like messing around with music production too, with Ableton and all the plugins out there..' },
+    turntable: {
+      title: 'Vinyl Playing',
+      text: 'I spin records and love the ritual of mixing on a real turntable in my studio.',
+    },
+    pile_of_vinyl: {
+      title: 'Vinyl Collection',
+      text: 'An ever-growing crate of records I hunt for on weekends.',
+    },
+    mixing_board_01: {
+      title: 'Mixing',
+      text: "Mixing audio across vinyl and digital gives me the flexibility and refinement I'm seeking.",
+    },
+    mixing_board_03: {
+      title: 'CDJs',
+      text: 'Where vinyl brings warmth and fragility, digital brings versatility. I like working the line between them.',
+    },
+    synthesizer: {
+      title: 'Music Production',
+      text: 'When I have time, I like messing around with music production too, with Ableton and all the plugins out there..',
+    },
     knob_39: { title: 'Tweaking', text: 'Endless fine-tuning is half the fun.' },
     knob_44: { title: 'Tweaking', text: 'Endless fine-tuning is half the fun.' },
-    gaming_computer: { title: 'PC & Technology', text: 'Always been a fan of computers and technology, forever chasing what\'s new in the field.' },
-    gaming_gpu: { title: 'Hardware', text: 'Always hunting for the best deal on PC and server components. Sadly they\'re very expensive right now!' },
-    integrated_circuit_01: { title: 'Electronics', text: 'Tinkering with circuits and small hardware projects.' },
-    integrated_circuit_02: { title: 'Chips & Boards', text: 'Tinkering with circuits and small hardware projects.' },
-    transistor_03: { title: 'Tinkering', text: 'Tinkering with circuits and small hardware projects.' },
-    '3d_printer': { title: '3D Printing', text: 'Lets me give concrete shape to my craziest ideas, one layer at a time.' },
-    classical_computer_mouse_03: { title: 'Everyday Tools', text: 'The trusty tools I work with every day.' },
+    gaming_computer: {
+      title: 'PC & Technology',
+      text: "Always been a fan of computers and technology, forever chasing what's new in the field.",
+    },
+    gaming_gpu: {
+      title: 'Hardware',
+      text: "Always hunting for the best deal on PC and server components. Sadly they're very expensive right now!",
+    },
+    integrated_circuit_01: {
+      title: 'Electronics',
+      text: 'Tinkering with circuits and small hardware projects.',
+    },
+    integrated_circuit_02: {
+      title: 'Chips & Boards',
+      text: 'Tinkering with circuits and small hardware projects.',
+    },
+    transistor_03: {
+      title: 'Tinkering',
+      text: 'Tinkering with circuits and small hardware projects.',
+    },
+    '3d_printer': {
+      title: '3D Printing',
+      text: 'Lets me give concrete shape to my craziest ideas, one layer at a time.',
+    },
+    classical_computer_mouse_03: {
+      title: 'Everyday Tools',
+      text: 'The trusty tools I work with every day.',
+    },
     cable_ethernet_coiled: { title: 'Connectivity', text: 'A tidy network is a happy network.' },
-    sunglasses_04: { title: 'Eyewear', text: 'Eyewear is where my day job at Thélios meets technology.' },
+    sunglasses_04: {
+      title: 'Eyewear',
+      text: 'Eyewear is where my day job at Thélios meets technology.',
+    },
     concert_speaker_02: { title: 'Speakers', text: 'I like listening to music wherever I am.' },
-    server_console_station: { title: 'Server', text: 'My self-hosted homelab. Head to the Projects section for more info!' },
-    compact_camera: { title: 'Photography/Video', text: 'I like documenting the trips I take with photos and videos.' },
-    _default: { title: 'One of my things', text: 'Placeholder description - this object represents one of my interests.' },
+    server_console_station: {
+      title: 'Server',
+      text: 'My self-hosted homelab. Head to the Projects section for more info!',
+    },
+    compact_camera: {
+      title: 'Photography/Video',
+      text: 'I like documenting the trips I take with photos and videos.',
+    },
+    _default: {
+      title: 'One of my things',
+      text: 'Placeholder description - this object represents one of my interests.',
+    },
   },
   // invitation filling the empty gutter beside the skills grid until a pill is clicked
   // (.skill-ghost in index.html — only rendered from 1000px up, see sections.css)
@@ -154,11 +204,7 @@ export const content = {
       bullets: [
         {
           label: 'Substance Painter',
-          subs: [
-            'UV based texture',
-            'Triplanar Textures',
-            'Bake Textures',
-          ],
+          subs: ['UV based texture', 'Triplanar Textures', 'Bake Textures'],
         },
         {
           label: 'Substance Designer',
@@ -215,51 +261,32 @@ export const content = {
       text: "Adobe's motion graphics and compositing tool for animation and video effects.",
       color: '#9999FF',
       selfTaught: true,
-      bullets: [
-        'Post Production',
-        'Motion Design',
-        'Scripting, UI custom panels and Tools',
-      ],
+      bullets: ['Post Production', 'Motion Design', 'Scripting, UI custom panels and Tools'],
     },
     'premiere-pro': {
       title: 'Premiere Pro',
       text: "Adobe's non-linear video editing software for cutting and finishing footage.",
       color: '#9999FF',
-      bullets: [
-        'Video Editing',
-        'Color Correction',
-        'Color Grading',
-      ],
+      bullets: ['Video Editing', 'Color Correction', 'Color Grading'],
     },
     'davinci-resolve': {
       title: 'DaVinci Resolve',
       text: 'Editing, color grading and finishing suite built around a professional color pipeline.',
       color: '#F0506B',
       selfTaught: true,
-      bullets: [
-        'Editing',
-        'Post Production',
-        'Color Correction',
-        'Color Grading',
-      ],
+      bullets: ['Editing', 'Post Production', 'Color Correction', 'Color Grading'],
     },
     photoshop: {
       title: 'Photoshop',
       text: "Adobe's raster image editor for photo retouching, compositing and texture work.",
       color: '#31A8FF',
-      bullets: [
-        'General Post Production',
-        '3D Multipass Shots',
-      ],
+      bullets: ['General Post Production', '3D Multipass Shots'],
     },
     illustrator: {
       title: 'Illustrator',
       text: "Adobe's vector graphics editor for logos, icons and scalable artwork.",
       color: '#FF9A00',
-      bullets: [
-        'Assets creation for Motion Design',
-        '2D Assets for presentation',
-      ],
+      bullets: ['Assets creation for Motion Design', '2D Assets for presentation'],
     },
     python: {
       title: 'Python',
@@ -284,12 +311,7 @@ export const content = {
       text: 'AI agents wired into the daily pipeline: coding, automation and repetitive tasks handled end to end.',
       color: '#D97757',
       selfTaught: true,
-      bullets: [
-        'Hermes Agent',
-        'Claude Code',
-        'OpenClaw',
-        'n8n',
-      ],
+      bullets: ['Hermes Agent', 'Claude Code', 'OpenClaw', 'n8n'],
     },
     'second-brain': {
       title: 'Second Brain',
@@ -320,11 +342,7 @@ export const content = {
       text: 'Digital audio workstation for producing, arranging and performing music.',
       color: '#FFFFFF',
       selfTaught: true,
-      bullets: [
-        'Mixing and Arrangement',
-        'Sound Design',
-        'Plugins and Instruments',
-      ],
+      bullets: ['Mixing and Arrangement', 'Sound Design', 'Plugins and Instruments'],
     },
   },
 };

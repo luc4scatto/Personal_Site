@@ -28,7 +28,7 @@ export function initAnalytics() {
   const banner = document.createElement('div');
   banner.className = 'cookie-banner';
   banner.innerHTML =
-    '<p>This site uses Google Analytics to see how it\'s used. No data is sold or shared. ' +
+    "<p>This site uses Google Analytics to see how it's used. No data is sold or shared. " +
     '<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Learn more</a></p>' +
     '<div class="cookie-banner__actions">' +
     '<button type="button" class="cookie-banner__decline">Decline</button>' +

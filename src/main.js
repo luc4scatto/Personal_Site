@@ -28,7 +28,9 @@ if (emailLink) emailLink.href = `mailto:${content.contact.email}`;
 const marqueeTrack = document.getElementById('marquee-track');
 if (marqueeTrack) {
   const words = content.marquee.words;
-  marqueeTrack.innerHTML = [...words, ...words].map((w) => `<span>${escapeHtml(w)}</span>`).join('');
+  marqueeTrack.innerHTML = [...words, ...words]
+    .map((w) => `<span>${escapeHtml(w)}</span>`)
+    .join('');
 }
 
 // highlight the nav link of the section currently in view
@@ -39,12 +41,10 @@ const observer = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
-      navLinks.forEach((a) =>
-        a.classList.toggle('active', a.hash === `#${entry.target.id}`)
-      );
+      navLinks.forEach((a) => a.classList.toggle('active', a.hash === `#${entry.target.id}`));
     });
   },
-  { rootMargin: '-40% 0px -55% 0px' }
+  { rootMargin: '-40% 0px -55% 0px' },
 );
 sections.forEach((s) => observer.observe(s));
 
@@ -103,7 +103,8 @@ if (skillsSection && skillTiles.length) {
   // the invitation, in the same place the hero puts its own "click on an object" line
   const hint = document.createElement('p');
   hint.className = 'skills-hint';
-  hint.textContent = content.skillsHint?.text ?? 'Click any tool to see what I actually do with it.';
+  hint.textContent =
+    content.skillsHint?.text ?? 'Click any tool to see what I actually do with it.';
   skillsSection.querySelector('h2')?.after(hint);
 
   const card = document.createElement('div');
@@ -178,7 +179,10 @@ if (skillsSection && skillTiles.length) {
       return;
     }
     gsap.to(card, {
-      height: 0, opacity: 0, duration: 0.32, ease: 'power2.in',
+      height: 0,
+      opacity: 0,
+      duration: 0.32,
+      ease: 'power2.in',
       onComplete: () => card.remove(),
     });
   };
@@ -210,12 +214,18 @@ if (skillsSection && skillTiles.length) {
     gsap.fromTo(
       card,
       { height: movingRow ? 0 : card.offsetHeight, opacity: movingRow ? 0 : 1 },
-      { height: 'auto', opacity: 1, duration: 0.55, ease: 'power3.out' }
+      { height: 'auto', opacity: 1, duration: 0.55, ease: 'power3.out' },
     );
     gsap.fromTo(
       inner,
       { y: movingRow ? 18 : 8, opacity: movingRow ? 0 : 0.4 },
-      { y: 0, opacity: 1, duration: movingRow ? 0.5 : 0.32, delay: movingRow ? 0.08 : 0, ease: 'power3.out' }
+      {
+        y: 0,
+        opacity: 1,
+        duration: movingRow ? 0.5 : 0.32,
+        delay: movingRow ? 0.08 : 0,
+        ease: 'power3.out',
+      },
     );
   };
 

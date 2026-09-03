@@ -133,7 +133,9 @@ textarea:focus-visible,
   font-weight: 500;
   appearance: none;
   cursor: pointer;
-  transition: background 0.25s, color 0.25s;
+  transition:
+    background 0.25s,
+    color 0.25s;
 }
 
 .btn:hover {

@@ -50,7 +50,7 @@ export function initAnimations() {
         duration: 0.9,
         ease: 'power3.out',
         scrollTrigger: { trigger: el, start: 'top 85%' },
-      }
+      },
     );
   });
 

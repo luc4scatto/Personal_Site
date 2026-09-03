@@ -174,7 +174,7 @@ export function initHero3D(container) {
       COLORS[index % COLORS.length],
       GLB_MODELS[index] === 'server_console_station'
         ? (child) => child.material?.name === 'server_cabinet'
-        : undefined
+        : undefined,
     );
     // each mesh glows its own color during the click-me pulse (emissiveIntensity animated in the loop)
     const mats = [];
@@ -237,7 +237,7 @@ export function initHero3D(container) {
       const p = new THREE.Vector3(
         Math.random() * 2 - 1,
         Math.random() * 2 - 1,
-        Math.random() * 2 - 1
+        Math.random() * 2 - 1,
       );
       if (p.length() > 1) continue;
       p.multiplyScalar(SPHERE_RADIUS + 0.4);
@@ -255,7 +255,7 @@ export function initHero3D(container) {
           roughness: 0.4,
           metalness: 0.1,
           flatShading: geoIdx === shapeGeos.length - 1, // icosahedra look better faceted
-        })
+        }),
       );
       mesh.scale.setScalar(0.015 + Math.random() ** 1.6 * 0.09);
       mesh.position.copy(p);
@@ -430,7 +430,7 @@ export function initHero3D(container) {
       hoveredItem = focusedItem || dragging ? null : pick(e.clientX, e.clientY);
       document.body.style.cursor = dragging ? 'grabbing' : hoveredItem ? 'pointer' : '';
     },
-    { passive: false }
+    { passive: false },
   );
   window.addEventListener('click', (e) => {
     if (dragged) {
@@ -452,7 +452,7 @@ export function initHero3D(container) {
     const p = renderer.getPixelRatio();
     return new THREE.Vector2(
       Math.max(1, Math.round(container.clientWidth * p)),
-      Math.max(1, Math.round(container.clientHeight * p))
+      Math.max(1, Math.round(container.clientHeight * p)),
     );
   }
   function ensureBlur() {
@@ -473,7 +473,8 @@ export function initHero3D(container) {
     // composite the linear blurred texture to screen: darken + encode to sRGB
     compMat = new THREE.ShaderMaterial({
       uniforms: { tDiffuse: { value: null }, brightness: { value: 0.5 } },
-      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+      vertexShader:
+        'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
       fragmentShader:
         'uniform sampler2D tDiffuse; uniform float brightness; varying vec2 vUv;' +
         'void main(){ vec4 t = texture2D(tDiffuse, vUv);' +
@@ -619,11 +620,11 @@ export function initHero3D(container) {
   renderer.setAnimationLoop(() => {
     const t = clock.getElapsedTime();
     items.forEach((it) => {
-      const wander = it === focusedItem ? 0 : it.wander ?? WANDER;
+      const wander = it === focusedItem ? 0 : (it.wander ?? WANDER);
       it.wrapper.position.set(
         it.home.x + Math.sin(t * it.freq + it.phase) * wander,
         it.home.y + Math.sin(t * it.freq * 0.8 + it.phase * 2) * wander,
-        it.home.z + Math.cos(t * it.freq * 0.6 + it.phase) * wander
+        it.home.z + Math.cos(t * it.freq * 0.6 + it.phase) * wander,
       );
       it.wrapper.rotation.x += it.spin.x;
       it.wrapper.rotation.y += it.spin.y;

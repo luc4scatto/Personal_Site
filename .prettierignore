@@ -1,0 +1,9 @@
+dist/
+public/draco/
+package-lock.json
+.impeccable/
+*.md
+# hand-tuned inline-whitespace-sensitive markup (masked hero lines, etc) —
+# Prettier's HTML formatter breaks tags onto their own lines in a way that
+# makes this markup harder to read without changing any rendered output
+*.html
