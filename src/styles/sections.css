@@ -227,10 +227,17 @@
 }
 
 .nav-logo {
+  display: inline-block;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.25rem;
   color: var(--accent);
+  /* WCAG 2.5.8 wants a 24px minimum hit target; the glyphs alone measure
+     ~23x33. Padding grows the clickable box without growing the visible
+     mark, and the matching negative margin keeps it from pushing the rest
+     of the nav row. */
+  padding: 0 0.25rem;
+  margin: 0 -0.25rem;
 }
 
 .nav nav {
@@ -511,13 +518,6 @@
   /* the wall still steps back so the open card is legible, it just doesn't go soft */
   .skills.is-focused .skills-grid > li:not(.is-active) {
     filter: none;
-  }
-
-  /* the diagram itself always renders (it's real content, not decoration) —
-     only the traveling pulse drops, leaving static connection lines */
-  .hd-line-pulse {
-    animation: none;
-    opacity: 0;
   }
 
   /* the base line always carries the color/meaning — only the pulse overlay drops */
@@ -862,6 +862,30 @@
   display: block;
 }
 
+/* stand-in for a real cover photo, swapped for an <img class="project-cover">
+   once Luca has one (or more — homelab.html is the only page using this
+   modifier, so it drops with the placeholder and needs no cleanup elsewhere) */
+.project-cover--placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border: 1px dashed color-mix(in srgb, var(--text-dim) 40%, transparent);
+  background: color-mix(in srgb, var(--text) 4%, var(--bg));
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.project-cover--placeholder svg {
+  width: 32px;
+  height: 32px;
+}
+
+.project-cover--placeholder p {
+  margin: 0;
+}
+
 .project-description p {
   font-size: 1.2rem;
   color: var(--text-dim);
@@ -940,93 +964,406 @@
   text-align: center;
 }
 
-/* homelab network diagram — hub-and-spoke SVG + an HTML label layer stacked
-   on top of it via grid overlap, so labels always track the SVG's own scaling
-   with no resize listener. Built in src/homelabDiagram.js from content.js data. */
+/* homelab service tree — everything runs on one Proxmox host, so this draws a
+   hierarchy (hub → category → service), not a star. Connectors are orthogonal
+   elbows, matching the hardware wiring diagram below it, so the page reads in
+   one drawing language. Built in src/homelabDiagram.js from content.js data.
+
+   The lines are borders on the list items, not SVG: the rows are text, so the
+   browser's own layout is what makes the tree reflow onto a phone with no
+   second markup path. Each level trims its trunk at the first/last stub with a
+   pseudo-element, otherwise the line overshoots past the outermost branch. */
+/* left-aligned, not centered: the tree reads left-to-right from its root, and
+   it is narrower than the section, so centering it would float the root into
+   the middle of the page away from the heading it belongs under */
 .homelab-diagram {
-  max-width: 52rem;
-  margin-inline: auto;
+  width: fit-content;
+  max-width: 100%;
 }
 
-.homelab-diagram__inner {
-  display: grid;
+/* Hardware fills the sitewide 1200px section width because its diagram is
+   genuinely that wide. The services tree is ~472px at rest and ~976px with a
+   card open (see .hd-card's ≥1200px width) — inheriting the same 1200px cap
+   left up to 660px of dead gutter beside it, making the two sections read as
+   different layout systems. Capping this section to its own footprint (plus
+   this file's --pad-x on each side) removes the gutter instead of papering
+   over it. Only bites above 1200px; narrower viewports are already
+   constrained by the viewport itself. */
+.homelab-services-section {
+  max-width: calc(472px + 3.5rem + 28rem + 2 * var(--pad-x));
 }
 
-.homelab-diagram__graphic,
-.homelab-diagram__labels {
-  grid-area: 1 / 1;
-  aspect-ratio: 1 / 1;
-  width: 100%;
+/* the rows are buttons but nothing about a tree says "tap me", and on touch
+   there is no hover to discover it with — so the invitation is written down */
+.homelab-services-section .section-hint {
+  margin-bottom: 2.5rem;
+  font-size: 0.9rem;
+  color: var(--text-dim);
 }
 
-.homelab-diagram__labels {
+.hd-tree {
   position: relative;
+  display: flex;
+  /* the hub only centres against the branches where the card is out of flow
+     (see the min-width rule below). Anywhere else the card grows the list when
+     it opens, and a centred hub would jump every time */
+  align-items: flex-start;
+  --hd-rule: color-mix(in srgb, var(--text-dim) 50%, transparent);
+  --hd-stub: 0.78rem; /* where a branch's elbow meets its label's first line */
+  --hd-branch-pad: 0.9rem;
+  --hd-hub-size: 8.5rem;
+  --hd-gap: 3.5rem; /* hub to trunk, and trunk to card, so both reads are equal */
+  /* 16 leaves stacked are what drives the block's height, so they stay a step
+     below the category labels: those are only 8, and they are what sets its
+     width instead */
+  --hd-leaf-h: 1.95rem;
+  --hd-leaf-icon: 23px;
+  --hd-card-pad: 1.5rem;
+  --hd-card-icon: 36px;
+  --hd-hub-icon: 36px; /* separate from --hd-card-icon: the open card's own
+    header icon needs to stay full size, only the hub disc's icon shrinks */
 }
 
-.hd-line {
-  stroke: var(--text-dim);
-  stroke-width: 1.5;
-  opacity: 0.35;
+/* the one filled node in the diagram — the thing every branch answers to */
+.hd-hub {
+  position: relative;
+  flex: none;
+  width: var(--hd-hub-size);
+  height: var(--hd-hub-size);
+  margin-right: var(--hd-gap);
+  border: 1px solid var(--text);
+  border-radius: 50%;
 }
 
-.hd-line-pulse {
-  stroke: var(--accent);
-  stroke-width: 2;
-  stroke-dasharray: 8 200;
-  animation: hd-travel 2.2s linear infinite;
-}
-
-@keyframes hd-travel {
-  to {
-    stroke-dashoffset: -208;
-  }
-}
-
-.hd-node-hub {
-  fill: var(--bg);
-  stroke: var(--text);
-  stroke-width: 2;
-}
-
-.hd-node-spoke {
-  fill: var(--bg);
-  stroke: var(--accent-2);
-  stroke-width: 2;
-}
-
-.hd-label {
+.hd-hub::after {
+  content: '';
   position: absolute;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  max-width: 8rem;
+  left: 100%;
+  top: 50%;
+  width: var(--hd-gap);
+  border-top: 1px solid var(--hd-rule);
 }
 
-/* opaque, page-colored backing so a crossing connector line never runs
-   through the text — invisible at the mobile stacked layout since the
-   background there already matches */
-.hd-label:not(.hd-label--hub) {
-  background: var(--bg);
-  padding: 0.25rem 0.4rem;
-  border-radius: 0.35rem;
-}
-
-.hd-label__title {
+/* the whole disc is the target, not just the mark inside it */
+.hd-hub__button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--text);
 }
 
-.hd-label--hub .hd-label__title {
-  font-weight: 700;
-  letter-spacing: -0.01em;
+.hd-hub .hd-icon {
+  width: var(--hd-hub-icon);
+  height: var(--hd-hub-icon);
 }
 
-.hd-label__services {
+.hd-branches,
+.hd-leaves {
   list-style: none;
-  margin: 0.2rem 0 0;
+  margin: 0;
   padding: 0;
-  font-size: 0.78rem;
+}
+
+.hd-branch {
+  position: relative;
+  padding: var(--hd-branch-pad) 0 var(--hd-branch-pad) 2.25rem;
+  border-left: 1px solid var(--hd-rule);
+}
+
+/* the elbow from the trunk to this branch's label */
+.hd-branch::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: calc(var(--hd-branch-pad) + var(--hd-stub));
+  width: 1.6rem;
+  border-top: 1px solid var(--hd-rule);
+}
+
+/* trunk trimmed to the outermost elbows instead of running past them */
+.hd-branch:first-of-type,
+.hd-branch:last-of-type {
+  border-left-color: transparent;
+}
+
+.hd-branch:first-of-type::after,
+.hd-branch:last-of-type::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  border-left: 1px solid var(--hd-rule);
+}
+
+.hd-branch:first-of-type::after {
+  top: calc(var(--hd-branch-pad) + var(--hd-stub));
+  bottom: 0;
+}
+
+.hd-branch:last-of-type::after {
+  top: 0;
+  height: calc(var(--hd-branch-pad) + var(--hd-stub));
+}
+
+.hd-branch__label {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.hd-leaves {
+  margin-top: 0.5rem;
+}
+
+/* the leaf trunk descends out of the label above it — no top trim, so the
+   sub-level visibly hangs off its category rather than floating beside it */
+.hd-leaf {
+  position: relative;
+  padding-left: 1.6rem;
+  border-left: 1px solid var(--hd-rule);
+}
+
+.hd-leaf__button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: var(--hd-leaf-h);
+  padding-right: 0.4rem;
+  font-size: 1rem;
   color: var(--text-dim);
+}
+
+.hd-leaf::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1.1rem;
+  border-top: 1px solid var(--hd-rule);
+}
+
+/* :only-child is a last one too, so a single-service category gets exactly the
+   top half: the elbow, no line hanging below it. Matched by -of-type, not
+   -child, because the open card is a div inserted after a leaf, which would
+   otherwise steal :last-child from it and leave the trunk un-trimmed. */
+.hd-leaf:last-of-type {
+  border-left-color: transparent;
+}
+
+.hd-leaf:last-of-type::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 0;
+  height: 50%;
+  border-left: 1px solid var(--hd-rule);
+}
+
+/* Rows are real buttons, so they get a real reset and real states. Nothing
+   here fights the tree lines: the <li> draws those, the <button> only carries
+   the mark and the name. */
+.hd-hub__button,
+.hd-leaf__button {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.hd-hub__button:disabled,
+.hd-leaf__button:disabled {
+  cursor: default;
+}
+
+.hd-leaf__button:hover:not(:disabled),
+.hd-leaf__button[aria-expanded='true'] {
+  color: var(--text);
+}
+
+/* The rest of the wall recedes so the open card has somewhere to be read from
+   — the same move the skills wall and the 3D hero make. Only the icon (a
+   decorative brand mark, not a text run) drops to a hard 0.4 opacity; the name
+   is real text, so it gets an actual dimmer color instead of a transparency
+   trick — 0.4 opacity on `--text-dim` over this near-black background lands
+   at ~2:1, well under the 4.5:1 a reader needs. */
+.hd-tree.is-focused .hd-leaf__button:not([aria-expanded='true']) .hd-icon,
+.hd-tree.is-focused .hd-hub__button:not([aria-expanded='true']) .hd-icon {
+  opacity: 0.4;
+}
+
+/* ~5:1 against --bg — dim enough to read as receded, still real text */
+.hd-tree.is-focused .hd-leaf__button:not([aria-expanded='true']) .hd-row-label,
+.hd-tree.is-focused .hd-hub__button:not([aria-expanded='true']) .hd-row-label {
+  color: color-mix(in srgb, var(--text-dim) 83%, var(--bg));
+}
+
+/* full brightness when open, same as a leaf row — not the accent color,
+   which is reserved for the trunk lines lighting up (see :has() below) */
+.hd-hub__button[aria-expanded='true'] {
+  color: var(--text);
+}
+
+/* Opening a row lights up the trunk lines back to it, the tree's own version
+   of the hardware diagram's animated power lines — same "the active path
+   glows" idea, no animation loop needed since state changes are discrete. */
+.hd-hub:has(.hd-hub__button[aria-expanded='true'])::after {
+  border-top-color: var(--accent);
+}
+
+.hd-branch:has(.hd-leaf__button[aria-expanded='true']) {
+  border-left-color: var(--accent);
+}
+
+.hd-branch:has(.hd-leaf__button[aria-expanded='true'])::before {
+  border-top-color: var(--accent);
+}
+
+.hd-leaf:has(.hd-leaf__button[aria-expanded='true']) {
+  border-left-color: var(--accent);
+}
+
+.hd-leaf:has(.hd-leaf__button[aria-expanded='true'])::before {
+  border-top-color: var(--accent);
+}
+
+/* brand marks carry their own color: the services are what you're meant to
+   recognise, the rules and labels are the plumbing around them */
+.hd-icon {
+  flex: none;
+  width: var(--hd-leaf-icon);
+  height: var(--hd-leaf-icon);
+  object-fit: contain;
+}
+
+/* The card is one element, moved in the DOM to sit right after the active row.
+   By default it just opens there, in flow — which is the whole layout on a
+   phone. Only where there is actually a column free beside the tree (see the
+   min-width rule below) is it lifted out of flow into it. */
+/* GSAP animates this shell's height/opacity (see homelabDiagram.js) — the
+   look (padding/border/background) lives on .hd-card__inner instead, same
+   split as .skill-card / .skill-card__inner, so the box doesn't render a
+   bare padded rectangle for a frame while it's still at height 0. */
+.hd-card {
+  position: relative;
+  max-width: 32rem;
+  margin: 0.75rem 0 0.35rem;
+  overflow: hidden;
+}
+
+.hd-card__inner {
+  position: relative;
+  padding: var(--hd-card-pad) calc(var(--hd-card-pad) + 0.1rem) calc(var(--hd-card-pad) + 0.15rem);
+  border: 1px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+  border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--text) 4%, var(--bg));
+}
+
+.hd-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-right: 1.75rem;
+}
+
+.hd-card__head .hd-icon {
+  width: var(--hd-card-icon);
+  height: var(--hd-card-icon);
+}
+
+.hd-card__title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.hd-card__text {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+/* drawn, not a × glyph */
+.hd-card__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.35rem;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.hd-card__close:hover {
+  color: var(--text);
+}
+
+.hd-card__close svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Only from here up is there room beside the tree for the card to live in, and
+   the number is arithmetic, not a device: the tree is ~473px at this scale, the
+   gutter 56, the card 448, the section's own padding 2x64 — which needs about
+   1100px of viewport, so 1200 leaves slack. Widen the tree or the card and this
+   has to move with them, or the card runs off the right edge.
+   `top: auto` keeps the static position it already had — level with the row
+   that opened it — so nothing measures anything. The containing block is
+   .hd-branch (it is positioned, for its own connectors) whose right edge is
+   the tree's right edge, so `left: 100% + gap` lands just clear of the tree. */
+@media (min-width: 1200px) {
+  /* the card hangs out of flow, so a card opened on one of the last rows would
+     run past the tree and into the section below. Room is reserved only while
+     one is open, rather than as permanent dead space under the tree. Padding
+     sits outside the flex content box, so the hub stays centred on the branches */
+  .hd-tree {
+    align-items: center;
+  }
+
+  .hd-tree.is-focused {
+    padding-bottom: 5rem;
+  }
+
+  .hd-card {
+    position: absolute;
+    left: calc(100% + var(--hd-gap));
+    top: auto;
+    width: 28rem;
+    /* The static position puts the card's top at the row's bottom; this pulls
+       it back up until the card's own mark sits level with the row's mark,
+       which is what ties the two together across the gap. Written out of the
+       same tokens the two are built from, so scaling the tree cannot silently
+       knock the alignment out: half a row, plus the card's top padding, plus
+       half the card's mark. */
+    margin: calc(-1 * (var(--hd-leaf-h) / 2 + var(--hd-card-pad) + var(--hd-card-icon) / 2)) 0 0;
+  }
 }
 
 /* homelab hardware diagram — transcribed from a physical wiring sketch, so the
@@ -1039,6 +1376,18 @@
   padding-bottom: 0.75rem;
   scrollbar-color: color-mix(in srgb, var(--accent-2) 55%, transparent) transparent;
   scrollbar-width: thin;
+}
+
+/* The aspect-ratio/min-width below were only on .homelab-hardware, the class
+   the JS-built SVG wrapper carries — but that wrapper doesn't exist until
+   the dynamically-imported homelabDiagram module runs, so the static
+   #homelab-hardware div in the HTML sat at 0 height until then, causing a
+   real layout shift (part of the audit's CLS 0.0990). Reserving the same
+   footprint on the static container removes that shift; the inner element's
+   own rule still applies once JS appends it, harmlessly redundant. */
+#homelab-hardware {
+  min-width: 45rem;
+  aspect-ratio: 1000 / 525;
 }
 
 .homelab-hardware-scroll::-webkit-scrollbar {
@@ -1054,6 +1403,14 @@
   border-radius: 999px;
 }
 
+/* A third, diagram-local color, declared on purpose: the legend below draws
+   three distinct connection types (Power, FTTH, LAN), and the site's own
+   two-color system is already spent — power uses --accent, FTTH uses
+   --accent-2. Reusing --accent-2 for LAN would make two different connection
+   types look identical on the one diagram where telling them apart is the
+   entire point. Scoped to this component only, the same way the services
+   tree scopes its own --hd-* tokens, so it never bleeds into the site's
+   two-accent palette elsewhere. */
 .homelab-hardware {
   --hw-lan: #22c3d1;
   position: relative;
@@ -1129,6 +1486,17 @@
 
 .hw-line {
   fill: none;
+}
+
+/* shared travel keyframe for the pulsing connectors below. The -208 came from
+   the old radial service diagram, where it was exactly one dash period (8 200);
+   for these dasharrays it is not a whole period, so each loop restart shifts the
+   dash by the remainder. Small enough to read as continuous at this scale, but
+   that is why it is a leftover constant and not a tuned one. */
+@keyframes hd-travel {
+  to {
+    stroke-dashoffset: -208;
+  }
 }
 
 .hw-line--power {
@@ -1302,9 +1670,15 @@
 }
 
 .footer a {
+  display: inline-block;
   color: inherit;
   text-decoration: underline;
   margin-left: 0.75rem;
+  /* same 24px touch-target fix as .nav-logo: padding grows the hit box,
+     negative margin keeps the visible line unchanged */
+  padding: 0.35rem 0;
+  margin-top: -0.35rem;
+  margin-bottom: -0.35rem;
 }
 
 .footer .credits {
@@ -1343,49 +1717,60 @@
     font-size: 0.875rem;
   }
 
-  /* the radial layout has no room on a phone — the graphic becomes a small
-     decorative glyph and the same label elements just reflow into a stacked
-     list (one DOM tree, no separate mobile markup) */
-  .homelab-diagram__inner {
-    display: block;
-  }
-
-  .homelab-diagram__graphic {
-    max-width: 10rem;
-    margin: 0 auto 2rem;
-  }
-
-  .homelab-diagram__labels {
-    position: static;
-    display: flex;
+  /* the tree keeps its shape on a phone, it just stops sitting side by side:
+     the hub moves above the trunk and its connector turns vertical. The trunk
+     is indented by exactly half the hub so it lands under the hub's center —
+     change one of these two values and the connector stops meeting the trunk */
+  .hd-tree {
     flex-direction: column;
-    gap: 0.9rem;
+    align-items: flex-start;
+    --hd-branch-pad: 0.7rem;
+    --hd-hub-size: 5rem;
+    --hd-leaf-icon: 22px;
+    --hd-leaf-h: 1.85rem;
   }
 
-  .hd-label {
-    position: static;
-    transform: none;
-    text-align: left;
-    max-width: none;
-    padding-left: 1.1rem;
+  /* the desktop scale is set by how much room "Downloads & Networking" needs
+     beside a card; on a phone it is the only thing that has to fit at all, and
+     at 1.3rem it lands within 20px of the edge at 390 */
+  .hd-branch__label {
+    font-size: 1.15rem;
   }
 
-  .hd-label__title {
-    position: relative;
+  .hd-leaf__button {
+    font-size: 0.95rem;
   }
 
-  .hd-label__title::before {
-    content: '';
-    position: absolute;
-    left: -1.1rem;
-    top: 0.5em;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent-2);
+  .hd-hub {
+    margin: 0 0 2rem;
   }
 
-  .hd-label--hub {
-    display: none;
+  /* at 8.5rem down to 5rem, the hub shrinks by nearly half but its label
+     never did — "Proxmox" at the desktop 1rem/700-weight overflowed past
+     the circle's own edge. Smaller type + a tighter gap keep icon and
+     label inside the stroke instead of spilling below it. */
+  .hd-hub__button {
+    gap: 0.25rem;
+    font-size: 0.7rem;
+  }
+
+  .hd-hub .hd-icon {
+    --hd-hub-icon: 28px;
+  }
+
+  /* runs past the gap all the way to the first branch's elbow, which sits one
+     branch-pad plus one stub into the list — stopping at the margin leaves a
+     visible break between the hub and the trunk */
+  .hd-hub::after {
+    left: 50%;
+    top: 100%;
+    width: 0;
+    height: calc(2rem + var(--hd-branch-pad) + var(--hd-stub));
+    border-top: 0;
+    border-left: 1px solid var(--hd-rule);
+  }
+
+  .hd-branches {
+    margin-left: calc(var(--hd-hub-size) / 2);
   }
 }

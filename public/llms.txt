@@ -1,0 +1,10 @@
+# Luca Scattolin
+
+> Portfolio of Luca Scattolin, a 3D Technical Artist & Creative Technologist working across real-time 3D pipelines, interactive experiences, renders and configurators.
+
+## Pages
+
+- [Home](https://lucascattolin.com/): Profile, skills and project overview.
+- [Vivatech](https://lucascattolin.com/vivatech.html): Real-time interactive installation built with TouchDesigner and Unreal Engine, showcased at Vivatech in Paris.
+- [Homelab](https://lucascattolin.com/homelab.html): Personal self-hosted homelab project - hardware wiring diagram and service map.
+- [Privacy](https://lucascattolin.com/privacy.html): Privacy notice.

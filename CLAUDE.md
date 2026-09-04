@@ -87,7 +87,7 @@ Pill markup is in `index.html` (`<li data-skill="...">`), copy in `content.skill
 
 - Entry shape: `{ title, text, color, selfTaught?, bullets? }`. `color` is the brand color pulled from the icon; `selfTaught: true` renders the badge; `bullets` is a list of strings, or `{ label, subs: [...] }` objects for a nested list (only Substance 3D uses the nested form).
 - In the source, every `bullets`/`subs` array is written one entry per line. Keep it that way — Luca reads and edits this list directly.
-- **Agentic Workflow** is one pill covering Hermes Agent, Claude Code, OpenClaw and n8n (they used to be two brand pills). Its icon `public/icons/agentic-workflow.svg` is a hand-written generic node-graph glyph, deliberately brandless so it fits all four bullets. `claude-code.svg` and `hermes-agent.png` are now unused but kept.
+- **Agentic Workflow** is one pill covering Hermes Agent, Claude Code, OpenClaw and n8n (they used to be two brand pills). Its icon `public/icons/agentic-workflow.svg` is a hand-written generic node-graph glyph, deliberately brandless so it fits all four bullets. `claude-code.svg` is now unused but kept; `hermes-agent.png` was moved to `public/icons/services/` and recolored white-on-transparent for use as the "Hermes Agent" service icon on `homelab.html` (`src/homelabDiagram.js`'s `ICON_OVERRIDES`).
 - The **Qt Designer** pill is commented out in `index.html` while its `content.skills` entry stays — uncomment to bring it back.
 - The **Audio** category (`index.html`, after 2D Softwares) holds **Ableton Live** — icon is the official simple-icons mark (`public/icons/ableton-live.svg`), recolored white like Unreal Engine since Ableton's brand is monochrome black/white.
 - Copy style: use `-`, never an em dash.

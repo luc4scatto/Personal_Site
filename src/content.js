@@ -82,20 +82,74 @@ export const content = {
     description2:
       'Virtualized on Proxmox: TrueNAS SCALE runs the containerized stack on ZFS storage - media streaming and automation, photo backup, personal finance, network tooling - while Hermes handles agentic workflows.',
     backCta: '← Back to projects',
-    // Powers the network diagram in src/homelabDiagram.js. Labels only - no IPs,
-    // ports, hostnames or versions (this page is public).
+    coverPlaceholder: 'Photos of the rack are on their way.',
+    // Powers the service tree in src/homelabDiagram.js. Labels only - no IPs,
+    // ports, hostnames or versions (this page is public). Each service name maps
+    // to public/icons/services/<slug>.svg by slug (lowercased, spaces to
+    // dashes) - add a service here and drop its mark in that folder.
     diagram: {
       hub: 'Proxmox',
       categories: [
         { label: 'Media Streaming', services: ['Jellyfin', 'Navidrome', 'Jellyseerr'] },
         { label: 'Media Automation', services: ['Sonarr', 'Radarr', 'Prowlarr'] },
-        { label: 'Downloads & Networking', services: ['qBittorrent', 'Tailscale', 'WireGuard'] },
+        {
+          label: 'Downloads & Networking',
+          services: ['qBittorrent', 'Qui', 'Tailscale', 'WireGuard'],
+        },
         { label: 'Photos & Backup', services: ['Immich'] },
-        { label: 'Dashboard', services: ['Homarr'] },
+        { label: 'Home Automation', services: ['Home Assistant'] },
+        { label: 'Dashboard', services: ['Homarr', 'Beszel'] },
         { label: 'Personal Finance', services: ['Actual Budget'] },
-        { label: 'Infra & Dev Tools', services: ['Dockge', 'code-server'] },
-        { label: 'Hermes', services: ['Hermes Agent'] },
+        { label: 'Infra & Dev Tools', services: ['TrueNAS', 'Dockge', 'code-server'] },
+        { label: 'Agent', services: ['Hermes Agent'] },
       ],
+    },
+    servicesHint: 'Pick a service to read what it does.',
+    // Card copy for the service tree, keyed by the same name used above - a
+    // service with no entry here simply isn't clickable. Kept as a flat map
+    // rather than inline in `categories` so that list stays a scannable
+    // one-per-line index (same split as hero3dObjects further down).
+    // These describe what each tool IS. The personal angle - why it's in this
+    // rack, what it replaced, what it's for here - is Luca's to add.
+    serviceInfo: {
+      Proxmox:
+        'The hypervisor the whole lab runs on. One machine split into VMs and containers, so every service below is isolated from the others and can be snapshotted or rolled back on its own.',
+      Jellyfin:
+        'Open-source media server. Streams a personal film and TV library to any device, with no subscription and nothing reporting back to a vendor.',
+      Navidrome:
+        'Music streaming for a local library. Subsonic-compatible, so any of the existing Subsonic clients works against it without a custom app.',
+      Jellyseerr:
+        'Request front-end for Jellyfin. Turns "can you add this title" into an entry the automation stack below picks up on its own.',
+      Sonarr:
+        'Follows TV series and watches for new episodes, then hands each one to the download client without anyone checking manually.',
+      Radarr: 'The same job as Sonarr, for films: a wanted list, watched until a release shows up.',
+      Prowlarr:
+        'Indexer manager. Sources are configured once here and synced out to Sonarr and Radarr, instead of being set up twice and drifting apart.',
+      qBittorrent:
+        'The download client the rest of the stack hands work to. Open source, no ads, and controllable over its own API.',
+      Qui: 'Web dashboard for qBittorrent, built for running more than one instance from a single screen. Cross-seed automation, scheduled backups and orphan-file cleanup, in one Go binary.',
+      Tailscale:
+        'Mesh VPN built on WireGuard. Puts every device on one private network without opening a single port on the router.',
+      WireGuard:
+        'The VPN protocol underneath Tailscale. Small enough to audit in an afternoon, which is why it displaced the older, heavier stacks.',
+      Immich:
+        'Self-hosted photo and video backup. Phone gallery sync, search and albums, without handing the library to a cloud provider.',
+      Homarr:
+        'The dashboard in front of everything else: one page with the status of each service and a way into it.',
+      Beszel:
+        'Resource monitor for the host and its containers: CPU, memory, disk, network, Docker stats and alerts, recorded over time instead of read once and forgotten.',
+      'Home Assistant':
+        'Home automation hub. Pulls smart-home devices from different brands onto one local dashboard and rule engine, instead of a separate app per manufacturer.',
+      'Actual Budget':
+        'Local-first envelope budgeting. The data lives on the server and the app syncs to it, rather than to somebody else.',
+      TrueNAS:
+        'Storage operating system. Runs the ZFS pools everything else reads and writes, with snapshots and scheduled scrubs underneath.',
+      Dockge:
+        'Manager for Docker Compose stacks. Edits the compose file and tails the logs from a browser instead of over ssh.',
+      'code-server':
+        'VS Code running on the server and reached through a browser, so a config can be edited from any machine without setting one up first.',
+      'Hermes Agent':
+        'Self-hosted AI agent from Nous Research, reachable over Telegram and Discord instead of a web UI. Builds its own skills from experience and keeps memory across sessions, rather than starting blank every chat.',
     },
   },
   privacy: {

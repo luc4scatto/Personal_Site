@@ -45,6 +45,21 @@
         ],
         "createdAt": "2026-09-03T14:19:50.677Z",
         "reason": "pre-existing .info-card (3D hero object card) border-left at L10, documented as known-but-unfixed in CLAUDE.md; unrelated to homelab.html work this session"
+      },
+      {
+        "rule": "overused-font",
+        "value": "space grotesk",
+        "createdAt": "2026-09-04T14:32:07.393Z",
+        "reason": "Deliberate display face, documented in CLAUDE.md and already judged non-defect in the Impeccable audit (finding #13: taste judgment, not a flaw)"
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/styles/sections.css"
+        ],
+        "createdAt": "2026-09-04T14:32:07.443Z",
+        "reason": "project-cover--placeholder is the drawn SVG stand-in for the hero photo Luca hasn't provided yet (audit finding #08, explicitly excluded from this pass); swaps for a real <img> once the photo lands"
       }
     ]
   }
