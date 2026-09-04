@@ -1390,6 +1390,17 @@
   aspect-ratio: 1000 / 525;
 }
 
+/* mirrors homelabHardware.js's STACKED_HW: the stacked layout is taller and
+   narrower, so the pre-JS reservation has to match it or this box causes a
+   bigger shift than having no reservation at all */
+@media (max-width: 700px), (max-width: 1024px) and (orientation: portrait) {
+  #homelab-hardware {
+    min-width: 0;
+    max-width: 26rem;
+    aspect-ratio: 700 / 1025;
+  }
+}
+
 .homelab-hardware-scroll::-webkit-scrollbar {
   height: 6px;
 }
@@ -1417,6 +1428,45 @@
   min-width: 45rem;
   aspect-ratio: 1000 / 525;
   margin: 0 auto;
+}
+
+/* Below the phone/tablet-portrait boundary (see STACKED_HW in
+   homelabHardware.js), Studio Room drops beneath Server Room instead of
+   sitting beside it, so the diagram no longer needs the min-width above —
+   it was what forced horizontal scroll for what rendered as half a room. */
+.homelab-hardware.is-stacked {
+  min-width: 0;
+  max-width: 26rem;
+  aspect-ratio: 700 / 1025;
+}
+
+/* Icon/caption sizing is fixed-rem (see .hw-label svg's own comment), so it
+   doesn't scale down with the smaller stacked canvas the way the SVG-drawn
+   rooms/lines do — at full size, icons and text cover a much bigger share of
+   the diagram here than on desktop. Shrink both, and re-derive
+   .hw-label--icon's anchor offset from the new icon diameter (1.4rem width +
+   0.45rem padding each side = 2.3rem, half = 1.15rem) the same way the
+   un-stacked value is half of 3.5rem, or the icon drifts off its own node's
+   connector point. */
+.homelab-hardware.is-stacked .hw-label {
+  gap: 0.2rem;
+  font-size: 0.52rem;
+  max-width: 4.5rem;
+}
+
+.homelab-hardware.is-stacked .hw-label svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0.45rem;
+}
+
+.homelab-hardware.is-stacked .hw-label--icon {
+  transform: translate(-50%, -1.15rem);
+}
+
+.homelab-hardware.is-stacked .hw-label--room {
+  font-size: 0.68rem;
+  padding: 0.22rem 0.55rem;
 }
 
 .homelab-hardware > svg,

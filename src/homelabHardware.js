@@ -3,11 +3,24 @@
 // editable service copy. Coordinates are a design-space approximation of the
 // sketch, not pixel-exact.
 const SVG_NS = 'http://www.w3.org/2000/svg';
-const VB_W = 1000;
-const VB_H = 525;
 // every room/node coordinate below is a multiple of this — the diagram is drawn
 // ON the blueprint grid (same <svg>, same coordinate space), not just over it
 const GRID = 25;
+
+// Same phone/tablet-portrait boundary as hero3d.js's STACKED_HERO (and the
+// breakpoint table in CLAUDE.md) — below it the two rooms no longer fit side
+// by side at a legible scale, so Studio Room drops below Server Room instead
+// of forcing horizontal scroll for what used to render as "half a diagram".
+const STACKED_HW = '(max-width: 700px), (max-width: 1024px) and (orientation: portrait)';
+const STUDIO_NODE_IDS = new Set(['strip-studio', 'computer', 'laptop', 'switch-studio']);
+// server room's own footprint (x50..650, y75..475) sets the stacked canvas
+// width and where Studio Room's translated block starts vertically
+const STACK_DX = 225 - 700; // centers Studio Room's 250-wide box under the 700-wide stacked canvas
+const STACK_DY = 550 - 75; // 75-unit gap below server room's y75..475 footprint
+const VB_W = 1000;
+const VB_H = 525;
+const VB_W_STACKED = 700;
+const VB_H_STACKED = 1025; // Studio Room's new y550..950 footprint + a 75-unit bottom margin
 
 function svgEl(tag, attrs) {
   const el = document.createElementNS(SVG_NS, tag);
@@ -112,13 +125,30 @@ function nodeCenter(node) {
   return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
 }
 
+// Rigid-translates Studio Room (and its four devices) below Server Room
+// instead of beside it — every node keeps its own arrangement relative to
+// the others in its room, only the room's own offset on the page changes,
+// so CONNECTIONS (which reference node ids, not coordinates) need no edits:
+// the FTTH line between the two switches just becomes a longer diagonal.
+function stackStudioRoom(rooms, nodes) {
+  const shift = (item) => ({ ...item, x: item.x + STACK_DX, y: item.y + STACK_DY });
+  return {
+    rooms: rooms.map((r) => (r.label === 'Studio Room' ? shift(r) : r)),
+    nodes: nodes.map((n) => (STUDIO_NODE_IDS.has(n.id) ? shift(n) : n)),
+  };
+}
+
 export function initHomelabHardware(container) {
-  const nodesById = Object.fromEntries(NODES.map((n) => [n.id, n]));
+  const stacked = window.matchMedia(STACKED_HW).matches;
+  const vbW = stacked ? VB_W_STACKED : VB_W;
+  const vbH = stacked ? VB_H_STACKED : VB_H;
+  const { rooms, nodes } = stacked ? stackStudioRoom(ROOMS, NODES) : { rooms: ROOMS, nodes: NODES };
+  const nodesById = Object.fromEntries(nodes.map((n) => [n.id, n]));
 
   const inner = document.createElement('div');
-  inner.className = 'homelab-hardware';
+  inner.className = stacked ? 'homelab-hardware is-stacked' : 'homelab-hardware';
 
-  const svg = svgEl('svg', { viewBox: `0 0 ${VB_W} ${VB_H}`, 'aria-hidden': 'true' });
+  const svg = svgEl('svg', { viewBox: `0 0 ${vbW} ${vbH}`, 'aria-hidden': 'true' });
 
   const defs = svgEl('defs', {});
   const marker = svgEl('marker', {
@@ -145,19 +175,19 @@ export function initHomelabHardware(container) {
   gridPattern.append(svgEl('path', { class: 'hw-grid-line', d: `M ${GRID} 0 L 0 0 L 0 ${GRID}` }));
   defs.append(gridPattern);
   svg.append(defs);
-  svg.append(svgEl('rect', { x: 0, y: 0, width: VB_W, height: VB_H, fill: 'url(#hw-grid)' }));
+  svg.append(svgEl('rect', { x: 0, y: 0, width: vbW, height: vbH, fill: 'url(#hw-grid)' }));
   // the pattern's first row/column lands its line exactly on the canvas edge, reading
   // as an outer frame around the whole diagram — mask just those two outermost lines
   // so the grid still ends flush with the canvas, unbordered
-  svg.append(svgEl('rect', { class: 'hw-grid-mask', x: 0, y: 0, width: VB_W, height: 2 }));
-  svg.append(svgEl('rect', { class: 'hw-grid-mask', x: 0, y: 0, width: 2, height: VB_H }));
+  svg.append(svgEl('rect', { class: 'hw-grid-mask', x: 0, y: 0, width: vbW, height: 2 }));
+  svg.append(svgEl('rect', { class: 'hw-grid-mask', x: 0, y: 0, width: 2, height: vbH }));
 
   // rooms + the Proxmox Cluster sub-group, drawn first so everything else sits on top.
   // Corner brackets are a technical-drawing tell (registration marks on a schematic) —
   // the one detail that says "wiring diagram" rather than "generic node graph".
   const bracketCls = (room) =>
     room.cls.includes('accent') ? 'hw-room-bracket hw-room-bracket--accent' : 'hw-room-bracket';
-  ROOMS.forEach((room) => {
+  rooms.forEach((room) => {
     svg.append(
       svgEl('rect', {
         class: room.cls,
@@ -202,20 +232,22 @@ export function initHomelabHardware(container) {
   // both the connector pass below (line start point) and the strip-drawing pass
   // further down (dot placement) read the exact same numbers
   const stripSockets = new Map(); // node.id -> [{ conn, x, y }]
-  NODES.filter((n) => n.id.startsWith('strip-')).forEach((node) => {
-    const conns = CONNECTIONS.filter((c) => c.type === 'power' && c.from === node.id);
-    const vertical = node.h > node.w;
-    const span = vertical ? node.h : node.w;
-    const step = span / (conns.length + 1);
-    stripSockets.set(
-      node.id,
-      conns.map((conn, idx) => ({
-        conn,
-        x: vertical ? node.x + node.w / 2 : node.x + step * (idx + 1),
-        y: vertical ? node.y + step * (idx + 1) : node.y + node.h / 2,
-      })),
-    );
-  });
+  nodes
+    .filter((n) => n.id.startsWith('strip-'))
+    .forEach((node) => {
+      const conns = CONNECTIONS.filter((c) => c.type === 'power' && c.from === node.id);
+      const vertical = node.h > node.w;
+      const span = vertical ? node.h : node.w;
+      const step = span / (conns.length + 1);
+      stripSockets.set(
+        node.id,
+        conns.map((conn, idx) => ({
+          conn,
+          x: vertical ? node.x + node.w / 2 : node.x + step * (idx + 1),
+          y: vertical ? node.y + step * (idx + 1) : node.y + node.h / 2,
+        })),
+      );
+    });
   const socketFor = (conn) => stripSockets.get(conn.from)?.find((s) => s.conn === conn);
 
   // connectors, drawn before the node boxes so their ends disappear under them.
@@ -247,7 +279,7 @@ export function initHomelabHardware(container) {
   // nothing. Every other device's icon (drawn in the HTML label layer, below)
   // carries its own fixed-size circular backdrop in CSS — same coordinate system
   // as the icon itself, so it can't drift out of alignment at different widths.
-  NODES.forEach((node) => {
+  nodes.forEach((node) => {
     if (!node.id.startsWith('strip-')) return;
     const capRadius = Math.min(node.w, node.h) / 2;
     svg.append(
@@ -273,8 +305,8 @@ export function initHomelabHardware(container) {
     if (!text) return;
     const el = document.createElement('p');
     el.className = className;
-    el.style.left = `${(x / VB_W) * 100}%`;
-    el.style.top = `${(y / VB_H) * 100}%`;
+    el.style.left = `${(x / vbW) * 100}%`;
+    el.style.top = `${(y / vbH) * 100}%`;
     if (icon)
       el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon}</svg>`;
     if (chip) {
@@ -292,16 +324,22 @@ export function initHomelabHardware(container) {
     labels.append(el);
   };
 
-  ROOMS.forEach((room) =>
+  rooms.forEach((room) =>
     addLabel('hw-label hw-label--room', room.x + room.w / 2, room.y - 14, room.label),
   );
   // sits outside the box's right edge, near its top — the strip's power lines
   // sweep diagonally through the whole left/lower approach to the box, and the
-  // data lines converge on its top-center, but nothing reaches this corner
-  GROUPS.forEach((group) =>
-    addLabel('hw-label hw-label--group', group.x + group.w + 10, group.y + 8, group.label),
-  );
-  NODES.forEach((node) => {
+  // data lines converge on its top-center, but nothing reaches this corner.
+  // Skipped when stacked: fixed-rem icon/caption offsets (see .hw-label--icon)
+  // cover proportionally more of the smaller stacked canvas, so HDD's caption
+  // and Jet KVM's own icon+caption both drift into whatever corner this label
+  // tries next — the box border alone still shows the grouping at that size.
+  if (!stacked) {
+    GROUPS.forEach((group) =>
+      addLabel('hw-label hw-label--group', group.x + group.w + 10, group.y + 8, group.label),
+    );
+  }
+  nodes.forEach((node) => {
     const isStrip = node.id.startsWith('strip-');
     const c = nodeCenter(node);
     // the strip caption sits just below the bar instead of on top of its sockets
