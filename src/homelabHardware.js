@@ -139,219 +139,231 @@ function stackStudioRoom(rooms, nodes) {
 }
 
 export function initHomelabHardware(container) {
-  const stacked = window.matchMedia(STACKED_HW).matches;
-  const vbW = stacked ? VB_W_STACKED : VB_W;
-  const vbH = stacked ? VB_H_STACKED : VB_H;
-  const { rooms, nodes } = stacked ? stackStudioRoom(ROOMS, NODES) : { rooms: ROOMS, nodes: NODES };
-  const nodesById = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  const mql = window.matchMedia(STACKED_HW);
 
-  const inner = document.createElement('div');
-  inner.className = stacked ? 'homelab-hardware is-stacked' : 'homelab-hardware';
+  function render() {
+    container.replaceChildren();
+    const stacked = mql.matches;
+    const vbW = stacked ? VB_W_STACKED : VB_W;
+    const vbH = stacked ? VB_H_STACKED : VB_H;
+    const { rooms, nodes } = stacked
+      ? stackStudioRoom(ROOMS, NODES)
+      : { rooms: ROOMS, nodes: NODES };
+    const nodesById = Object.fromEntries(nodes.map((n) => [n.id, n]));
 
-  const svg = svgEl('svg', { viewBox: `0 0 ${vbW} ${vbH}`, 'aria-hidden': 'true' });
+    const inner = document.createElement('div');
+    inner.className = stacked ? 'homelab-hardware is-stacked' : 'homelab-hardware';
 
-  const defs = svgEl('defs', {});
-  const marker = svgEl('marker', {
-    id: 'hw-arrow',
-    viewBox: '0 0 10 10',
-    refX: 7,
-    refY: 5,
-    markerWidth: 7.5,
-    markerHeight: 7.5,
-    orient: 'auto-start-reverse',
-  });
-  marker.append(svgEl('path', { d: 'M0,0 L10,5 L0,10 Z', fill: 'context-stroke' }));
-  defs.append(marker);
+    const svg = svgEl('svg', { viewBox: `0 0 ${vbW} ${vbH}`, 'aria-hidden': 'true' });
 
-  // the blueprint grid, drawn IN the diagram's own coordinate space (not a CSS
-  // background layer) — every room/node coordinate is a multiple of GRID, so
-  // edges land exactly on these lines instead of merely floating over them
-  const gridPattern = svgEl('pattern', {
-    id: 'hw-grid',
-    width: GRID,
-    height: GRID,
-    patternUnits: 'userSpaceOnUse',
-  });
-  gridPattern.append(svgEl('path', { class: 'hw-grid-line', d: `M ${GRID} 0 L 0 0 L 0 ${GRID}` }));
-  defs.append(gridPattern);
-  svg.append(defs);
-  svg.append(svgEl('rect', { x: 0, y: 0, width: vbW, height: vbH, fill: 'url(#hw-grid)' }));
-  // the pattern's first row/column lands its line exactly on the canvas edge, reading
-  // as an outer frame around the whole diagram — mask just those two outermost lines
-  // so the grid still ends flush with the canvas, unbordered
-  svg.append(svgEl('rect', { class: 'hw-grid-mask', x: 0, y: 0, width: vbW, height: 2 }));
-  svg.append(svgEl('rect', { class: 'hw-grid-mask', x: 0, y: 0, width: 2, height: vbH }));
+    const defs = svgEl('defs', {});
+    const marker = svgEl('marker', {
+      id: 'hw-arrow',
+      viewBox: '0 0 10 10',
+      refX: 7,
+      refY: 5,
+      markerWidth: 7.5,
+      markerHeight: 7.5,
+      orient: 'auto-start-reverse',
+    });
+    marker.append(svgEl('path', { d: 'M0,0 L10,5 L0,10 Z', fill: 'context-stroke' }));
+    defs.append(marker);
 
-  // rooms + the Proxmox Cluster sub-group, drawn first so everything else sits on top.
-  // Corner brackets are a technical-drawing tell (registration marks on a schematic) —
-  // the one detail that says "wiring diagram" rather than "generic node graph".
-  const bracketCls = (room) =>
-    room.cls.includes('accent') ? 'hw-room-bracket hw-room-bracket--accent' : 'hw-room-bracket';
-  rooms.forEach((room) => {
-    svg.append(
-      svgEl('rect', {
-        class: room.cls,
-        x: room.x,
-        y: room.y,
-        width: room.w,
-        height: room.h,
-        rx: 14,
-      }),
+    // the blueprint grid, drawn IN the diagram's own coordinate space (not a CSS
+    // background layer) — every room/node coordinate is a multiple of GRID, so
+    // edges land exactly on these lines instead of merely floating over them
+    const gridPattern = svgEl('pattern', {
+      id: 'hw-grid',
+      width: GRID,
+      height: GRID,
+      patternUnits: 'userSpaceOnUse',
+    });
+    gridPattern.append(
+      svgEl('path', { class: 'hw-grid-line', d: `M ${GRID} 0 L 0 0 L 0 ${GRID}` }),
     );
-    const len = 16;
-    const corners = [
-      { cx: room.x, cy: room.y, dx: 1, dy: 1 },
-      { cx: room.x + room.w, cy: room.y, dx: -1, dy: 1 },
-      { cx: room.x, cy: room.y + room.h, dx: 1, dy: -1 },
-      { cx: room.x + room.w, cy: room.y + room.h, dx: -1, dy: -1 },
-    ];
-    corners.forEach(({ cx, cy, dx, dy }) => {
+    defs.append(gridPattern);
+    svg.append(defs);
+    svg.append(svgEl('rect', { x: 0, y: 0, width: vbW, height: vbH, fill: 'url(#hw-grid)' }));
+    // the pattern's first row/column lands its line exactly on the canvas edge, reading
+    // as an outer frame around the whole diagram — mask just those two outermost lines
+    // so the grid still ends flush with the canvas, unbordered
+    svg.append(svgEl('rect', { class: 'hw-grid-mask', x: 0, y: 0, width: vbW, height: 2 }));
+    svg.append(svgEl('rect', { class: 'hw-grid-mask', x: 0, y: 0, width: 2, height: vbH }));
+
+    // rooms + the Proxmox Cluster sub-group, drawn first so everything else sits on top.
+    // Corner brackets are a technical-drawing tell (registration marks on a schematic) —
+    // the one detail that says "wiring diagram" rather than "generic node graph".
+    const bracketCls = (room) =>
+      room.cls.includes('accent') ? 'hw-room-bracket hw-room-bracket--accent' : 'hw-room-bracket';
+    rooms.forEach((room) => {
       svg.append(
-        svgEl('path', {
-          class: bracketCls(room),
-          d: `M ${cx} ${cy + dy * len} L ${cx} ${cy} L ${cx + dx * len} ${cy}`,
+        svgEl('rect', {
+          class: room.cls,
+          x: room.x,
+          y: room.y,
+          width: room.w,
+          height: room.h,
+          rx: 14,
+        }),
+      );
+      const len = 16;
+      const corners = [
+        { cx: room.x, cy: room.y, dx: 1, dy: 1 },
+        { cx: room.x + room.w, cy: room.y, dx: -1, dy: 1 },
+        { cx: room.x, cy: room.y + room.h, dx: 1, dy: -1 },
+        { cx: room.x + room.w, cy: room.y + room.h, dx: -1, dy: -1 },
+      ];
+      corners.forEach(({ cx, cy, dx, dy }) => {
+        svg.append(
+          svgEl('path', {
+            class: bracketCls(room),
+            d: `M ${cx} ${cy + dy * len} L ${cx} ${cy} L ${cx + dx * len} ${cy}`,
+          }),
+        );
+      });
+    });
+    GROUPS.forEach((group) => {
+      svg.append(
+        svgEl('rect', {
+          class: 'hw-group',
+          x: group.x,
+          y: group.y,
+          width: group.w,
+          height: group.h,
+          rx: 8,
         }),
       );
     });
-  });
-  GROUPS.forEach((group) => {
-    svg.append(
-      svgEl('rect', {
-        class: 'hw-group',
-        x: group.x,
-        y: group.y,
-        width: group.w,
-        height: group.h,
-        rx: 8,
-      }),
-    );
-  });
 
-  // each strip's power-out lines start from their own socket dot instead of
-  // converging on the strip's bounding-box center — computed once, upfront, so
-  // both the connector pass below (line start point) and the strip-drawing pass
-  // further down (dot placement) read the exact same numbers
-  const stripSockets = new Map(); // node.id -> [{ conn, x, y }]
-  nodes
-    .filter((n) => n.id.startsWith('strip-'))
-    .forEach((node) => {
-      const conns = CONNECTIONS.filter((c) => c.type === 'power' && c.from === node.id);
-      const vertical = node.h > node.w;
-      const span = vertical ? node.h : node.w;
-      const step = span / (conns.length + 1);
-      stripSockets.set(
-        node.id,
-        conns.map((conn, idx) => ({
-          conn,
-          x: vertical ? node.x + node.w / 2 : node.x + step * (idx + 1),
-          y: vertical ? node.y + step * (idx + 1) : node.y + node.h / 2,
-        })),
+    // each strip's power-out lines start from their own socket dot instead of
+    // converging on the strip's bounding-box center — computed once, upfront, so
+    // both the connector pass below (line start point) and the strip-drawing pass
+    // further down (dot placement) read the exact same numbers
+    const stripSockets = new Map(); // node.id -> [{ conn, x, y }]
+    nodes
+      .filter((n) => n.id.startsWith('strip-'))
+      .forEach((node) => {
+        const conns = CONNECTIONS.filter((c) => c.type === 'power' && c.from === node.id);
+        const vertical = node.h > node.w;
+        const span = vertical ? node.h : node.w;
+        const step = span / (conns.length + 1);
+        stripSockets.set(
+          node.id,
+          conns.map((conn, idx) => ({
+            conn,
+            x: vertical ? node.x + node.w / 2 : node.x + step * (idx + 1),
+            y: vertical ? node.y + step * (idx + 1) : node.y + node.h / 2,
+          })),
+        );
+      });
+    const socketFor = (conn) => stripSockets.get(conn.from)?.find((s) => s.conn === conn);
+
+    // connectors, drawn before the node boxes so their ends disappear under them.
+    // power/lan/ftth get a solid/dashed BASE line (always fully visible, carries
+    // the color/meaning) plus a thin animated PULSE line riding on top — a bare
+    // sparse-dash line with no base underneath reads as almost invisible.
+    const ANIMATED_TYPES = new Set(['power', 'lan', 'ftth']);
+    CONNECTIONS.forEach((conn) => {
+      const from = nodesById[conn.from];
+      const to = nodesById[conn.to];
+      const a = (conn.type === 'power' && socketFor(conn)) || nodeCenter(from);
+      const b = nodeCenter(to);
+      const coords = { x1: a.x, y1: a.y, x2: b.x, y2: b.y };
+
+      const base = svgEl('line', { class: `hw-line hw-line--${conn.type}`, ...coords });
+      if (conn.arrow === 'end' || conn.arrow === 'both')
+        base.setAttribute('marker-end', 'url(#hw-arrow)');
+      if (conn.arrow === 'both') base.setAttribute('marker-start', 'url(#hw-arrow)');
+      svg.append(base);
+
+      if (ANIMATED_TYPES.has(conn.type)) {
+        svg.append(svgEl('line', { class: `hw-line hw-line--${conn.type}-pulse`, ...coords }));
+      }
+    });
+
+    // strips are drawn as a real power-strip silhouette — a capsule with one socket
+    // dot per device it actually powers (read off CONNECTIONS, not a fixed count),
+    // per the reference photo Luca sent, instead of a plain grey box that told him
+    // nothing. Every other device's icon (drawn in the HTML label layer, below)
+    // carries its own fixed-size circular backdrop in CSS — same coordinate system
+    // as the icon itself, so it can't drift out of alignment at different widths.
+    nodes.forEach((node) => {
+      if (!node.id.startsWith('strip-')) return;
+      const capRadius = Math.min(node.w, node.h) / 2;
+      svg.append(
+        svgEl('rect', {
+          class: 'hw-node-strip',
+          x: node.x,
+          y: node.y,
+          width: node.w,
+          height: node.h,
+          rx: capRadius,
+        }),
       );
+      const socketR = capRadius - 2;
+      (stripSockets.get(node.id) || []).forEach(({ x, y }) => {
+        svg.append(svgEl('circle', { class: 'hw-node-socket', cx: x, cy: y, r: socketR }));
+      });
     });
-  const socketFor = (conn) => stripSockets.get(conn.from)?.find((s) => s.conn === conn);
 
-  // connectors, drawn before the node boxes so their ends disappear under them.
-  // power/lan/ftth get a solid/dashed BASE line (always fully visible, carries
-  // the color/meaning) plus a thin animated PULSE line riding on top — a bare
-  // sparse-dash line with no base underneath reads as almost invisible.
-  const ANIMATED_TYPES = new Set(['power', 'lan', 'ftth']);
-  CONNECTIONS.forEach((conn) => {
-    const from = nodesById[conn.from];
-    const to = nodesById[conn.to];
-    const a = (conn.type === 'power' && socketFor(conn)) || nodeCenter(from);
-    const b = nodeCenter(to);
-    const coords = { x1: a.x, y1: a.y, x2: b.x, y2: b.y };
+    const labels = document.createElement('div');
+    labels.className = 'homelab-hardware__labels';
 
-    const base = svgEl('line', { class: `hw-line hw-line--${conn.type}`, ...coords });
-    if (conn.arrow === 'end' || conn.arrow === 'both')
-      base.setAttribute('marker-end', 'url(#hw-arrow)');
-    if (conn.arrow === 'both') base.setAttribute('marker-start', 'url(#hw-arrow)');
-    svg.append(base);
+    const addLabel = (className, x, y, text, icon, chip = false) => {
+      if (!text) return;
+      const el = document.createElement('p');
+      el.className = className;
+      el.style.left = `${(x / vbW) * 100}%`;
+      el.style.top = `${(y / vbH) * 100}%`;
+      if (icon)
+        el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon}</svg>`;
+      if (chip) {
+        // an opaque chip behind the caption only (the icon already carries its own
+        // circular backdrop) — with icons packed 75 units apart in the top row,
+        // captions floating directly on the grid blended into it and into each
+        // other; a chip per caption keeps each one legible on its own
+        const span = document.createElement('span');
+        span.className = 'hw-label__text';
+        span.textContent = text;
+        el.append(span);
+      } else {
+        el.append(document.createTextNode(text));
+      }
+      labels.append(el);
+    };
 
-    if (ANIMATED_TYPES.has(conn.type)) {
-      svg.append(svgEl('line', { class: `hw-line hw-line--${conn.type}-pulse`, ...coords }));
-    }
-  });
-
-  // strips are drawn as a real power-strip silhouette — a capsule with one socket
-  // dot per device it actually powers (read off CONNECTIONS, not a fixed count),
-  // per the reference photo Luca sent, instead of a plain grey box that told him
-  // nothing. Every other device's icon (drawn in the HTML label layer, below)
-  // carries its own fixed-size circular backdrop in CSS — same coordinate system
-  // as the icon itself, so it can't drift out of alignment at different widths.
-  nodes.forEach((node) => {
-    if (!node.id.startsWith('strip-')) return;
-    const capRadius = Math.min(node.w, node.h) / 2;
-    svg.append(
-      svgEl('rect', {
-        class: 'hw-node-strip',
-        x: node.x,
-        y: node.y,
-        width: node.w,
-        height: node.h,
-        rx: capRadius,
-      }),
+    rooms.forEach((room) =>
+      addLabel('hw-label hw-label--room', room.x + room.w / 2, room.y - 14, room.label),
     );
-    const socketR = capRadius - 2;
-    (stripSockets.get(node.id) || []).forEach(({ x, y }) => {
-      svg.append(svgEl('circle', { class: 'hw-node-socket', cx: x, cy: y, r: socketR }));
+    // sits outside the box's right edge, near its top — the strip's power lines
+    // sweep diagonally through the whole left/lower approach to the box, and the
+    // data lines converge on its top-center, but nothing reaches this corner.
+    // Skipped when stacked: fixed-rem icon/caption offsets (see .hw-label--icon)
+    // cover proportionally more of the smaller stacked canvas, so HDD's caption
+    // and Jet KVM's own icon+caption both drift into whatever corner this label
+    // tries next — the box border alone still shows the grouping at that size.
+    if (!stacked) {
+      GROUPS.forEach((group) =>
+        addLabel('hw-label hw-label--group', group.x + group.w + 10, group.y + 8, group.label),
+      );
+    }
+    nodes.forEach((node) => {
+      const isStrip = node.id.startsWith('strip-');
+      const c = nodeCenter(node);
+      // the strip caption sits just below the bar instead of on top of its sockets
+      const y = isStrip ? node.y + node.h + 16 : c.y;
+      // icon nodes get a class that anchors the ICON's own center on the node's
+      // true center point — connections target that same point (nodeCenter), but
+      // centering the whole icon+caption block there (the base .hw-label rule)
+      // put the block's midpoint, not the icon, on it, so lines met the icon low
+      const cls = node.icon ? 'hw-label hw-label--icon' : 'hw-label';
+      addLabel(cls, c.x, y, node.label, ICONS[node.icon], true);
     });
-  });
 
-  const labels = document.createElement('div');
-  labels.className = 'homelab-hardware__labels';
-
-  const addLabel = (className, x, y, text, icon, chip = false) => {
-    if (!text) return;
-    const el = document.createElement('p');
-    el.className = className;
-    el.style.left = `${(x / vbW) * 100}%`;
-    el.style.top = `${(y / vbH) * 100}%`;
-    if (icon)
-      el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon}</svg>`;
-    if (chip) {
-      // an opaque chip behind the caption only (the icon already carries its own
-      // circular backdrop) — with icons packed 75 units apart in the top row,
-      // captions floating directly on the grid blended into it and into each
-      // other; a chip per caption keeps each one legible on its own
-      const span = document.createElement('span');
-      span.className = 'hw-label__text';
-      span.textContent = text;
-      el.append(span);
-    } else {
-      el.append(document.createTextNode(text));
-    }
-    labels.append(el);
-  };
-
-  rooms.forEach((room) =>
-    addLabel('hw-label hw-label--room', room.x + room.w / 2, room.y - 14, room.label),
-  );
-  // sits outside the box's right edge, near its top — the strip's power lines
-  // sweep diagonally through the whole left/lower approach to the box, and the
-  // data lines converge on its top-center, but nothing reaches this corner.
-  // Skipped when stacked: fixed-rem icon/caption offsets (see .hw-label--icon)
-  // cover proportionally more of the smaller stacked canvas, so HDD's caption
-  // and Jet KVM's own icon+caption both drift into whatever corner this label
-  // tries next — the box border alone still shows the grouping at that size.
-  if (!stacked) {
-    GROUPS.forEach((group) =>
-      addLabel('hw-label hw-label--group', group.x + group.w + 10, group.y + 8, group.label),
-    );
+    inner.append(svg, labels);
+    container.append(inner);
   }
-  nodes.forEach((node) => {
-    const isStrip = node.id.startsWith('strip-');
-    const c = nodeCenter(node);
-    // the strip caption sits just below the bar instead of on top of its sockets
-    const y = isStrip ? node.y + node.h + 16 : c.y;
-    // icon nodes get a class that anchors the ICON's own center on the node's
-    // true center point — connections target that same point (nodeCenter), but
-    // centering the whole icon+caption block there (the base .hw-label rule)
-    // put the block's midpoint, not the icon, on it, so lines met the icon low
-    const cls = node.icon ? 'hw-label hw-label--icon' : 'hw-label';
-    addLabel(cls, c.x, y, node.label, ICONS[node.icon], true);
-  });
 
-  inner.append(svg, labels);
-  container.append(inner);
+  render();
+  mql.addEventListener('change', render);
 }

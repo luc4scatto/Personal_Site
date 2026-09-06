@@ -35,19 +35,58 @@
         <p class="hero-kicker" data-stagger data-copy="homelab.kicker">Project</p>
         <h1 data-stagger><span class="accent">Homelab</span></h1>
         <p class="project-meta" data-stagger data-copy="homelab.meta">Personal project · Self-hosted · Ongoing</p>
-        <div class="project-cover project-cover--placeholder" data-stagger>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="3" y="7" width="18" height="13" rx="2" />
-            <path d="M8 7l1.6-2.5h4.8L16 7" />
-            <circle cx="12" cy="13.5" r="3.4" />
-          </svg>
-          <p data-copy="homelab.coverPlaceholder">Photos of the rack are on their way.</p>
-        </div>
       </section>
 
       <section id="description" class="project-description">
-        <p data-reveal data-copy="homelab.description1">A homelab I run for the sake of learning: self-hosting, networking and sysadmin work, outside of anything work-related.</p>
-        <p data-reveal data-copy="homelab.description2">Virtualized on Proxmox: TrueNAS SCALE runs the containerized stack on ZFS storage - media streaming and automation, photo backup, personal finance, network tooling - while Hermes handles agentic workflows.</p>
+        <div class="project-description-grid">
+          <div class="project-description-text">
+            <p data-reveal data-copy="homelab.description1">It started with something simple: a shared folder my Windows machine and my Mac could both reach, instead of shuffling files between them by hand with an external hard drive, inconvenient enough over time, that I went looking for a better way. That one NAS folder opened a door into self-hosted software, and I never really came back out.</p>
+            <p data-reveal data-copy="homelab.description2">The rack runs on an HP EliteDesk 800G5 mini PC with 32GB of RAM, 2.5G custom Network card and an unmanaged switch, wired into a 3D-printed rack case: an open design I found and adapted, swapping in other printable parts until it fit what I actually needed. A JetKVM sits on top for headless remote management; BIOS access and reboots from anywhere, no monitor or keyboard needed on-site.</p>
+            <p data-reveal data-copy="homelab.description3">Virtualized on Proxmox: TrueNAS SCALE runs the containerized stack on ZFS storage, media streaming and automation, photo backup, personal finance, network tooling, while Hermes handles agentic workflows.</p>
+            <p data-reveal data-copy="homelab.description4">Most of what I know about networking and sysadmin work, I picked up here, one broken config at a time.</p>
+          </div>
+          <div class="project-description-photos" data-reveal>
+            <div class="project-photo-row">
+              <img class="project-photo" src="images/homelab-rack.webp" alt="Rear view of the homelab rack: router, unmanaged switch and HP EliteDesk mini PC wired together" loading="lazy" />
+              <img class="project-photo" src="images/homelab-case.webp" alt="Open mini-ITX case mid-build, showing motherboard and cabling" loading="lazy" />
+            </div>
+            <div class="project-specs">
+              <p class="project-specs__kicker">Build sheet</p>
+              <dl class="project-specs__list">
+                <div>
+                  <dt>Mini PC</dt>
+                  <dd>HP EliteDesk 800G5, 32GB RAM</dd>
+                </div>
+                <div>
+                  <dt>Storage</dt>
+                  <dd>2x NVMe + 2x 4TB HDD (USB)</dd>
+                </div>
+                <div>
+                  <dt>Network</dt>
+                  <dd>2.5G NIC, 2.5G/10G unmanaged switch</dd>
+                </div>
+                <div>
+                  <dt>Remote access</dt>
+                  <dd>JetKVM</dd>
+                </div>
+                <div>
+                  <dt>Case</dt>
+                  <dd>3D-printed, custom design</dd>
+                </div>
+              </dl>
+              <p class="project-specs__credit">
+                Rack case adapted from
+                <a
+                  href="https://makerworld.com/it/models/1464819-lab-rax-10-server-rack-bolted-version-5u#profileId-1527883"
+                  target="_blank"
+                  rel="noopener"
+                  >Lab Rax 10 server rack</a
+                >
+                on MakerWorld.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section id="hardware" class="homelab-hardware-section">

@@ -509,10 +509,11 @@
     animation: none;
   }
 
-  /* the invitation still reads — it's information, not decoration — just without the pulse */
-  .skills-hint::before {
+  /* the invitation still reads — it's information, not decoration — just without the shine */
+  .skills-hint {
     animation: none;
-    opacity: 1;
+    background: none;
+    color: var(--text-dim);
   }
 
   /* the wall still steps back so the open card is legible, it just doesn't go soft */
@@ -675,40 +676,33 @@
   opacity: 0.32;
 }
 
-/* the invitation, on the same 2.6s breath as the hero's "click on an object" hint */
+/* the invitation, carrying the same shine sweep as homelab's service-tree hint
+   (hint-shine, defined once, reused here) */
 .skills-hint {
   margin-bottom: 2.5rem;
-  color: var(--text-dim);
-  font-size: 0.9375rem;
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
   transition: opacity 0.4s ease;
-}
-
-.skills-hint::before {
-  content: '';
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  margin-right: 0.7rem;
-  vertical-align: middle;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: skills-hint-pulse 2.6s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    var(--text-dim) 0%,
+    var(--text-dim) 40%,
+    var(--accent) 50%,
+    var(--accent-2) 60%,
+    var(--text-dim) 70%,
+    var(--text-dim) 100%
+  );
+  background-size: 300% 100%;
+  background-position: 110% center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hint-shine 3s linear infinite;
 }
 
 .skills.is-focused .skills-hint {
   opacity: 0;
-}
-
-@keyframes skills-hint-pulse {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: scale(0.8);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 /* projects */
@@ -764,6 +758,25 @@
   background: linear-gradient(135deg, #1d1d1d, #101010);
   object-fit: cover;
   display: block;
+}
+
+/* stand-in for a real cover, same idiom as homelab's old cover placeholder -
+   dashed box + a hand-drawn icon, swapped for a real thumb once there's a project */
+.card-thumb--soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px dashed color-mix(in srgb, var(--text-dim) 40%, transparent);
+  background: color-mix(in srgb, var(--text) 4%, var(--bg));
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.card-thumb--soon svg {
+  width: 28px;
+  height: 28px;
 }
 
 .card p {
@@ -862,38 +875,101 @@
   display: block;
 }
 
-/* stand-in for a real cover photo, swapped for an <img class="project-cover">
-   once Luca has one (or more — homelab.html is the only page using this
-   modifier, so it drops with the placeholder and needs no cleanup elsewhere) */
-.project-cover--placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  border: 1px dashed color-mix(in srgb, var(--text-dim) 40%, transparent);
-  background: color-mix(in srgb, var(--text) 4%, var(--bg));
-  color: var(--text-dim);
-  font-size: 0.9rem;
-}
-
-.project-cover--placeholder svg {
-  width: 32px;
-  height: 32px;
-}
-
-.project-cover--placeholder p {
-  margin: 0;
-}
-
 .project-description p {
   font-size: 1.2rem;
   color: var(--text-dim);
   max-width: 44rem;
 }
 
+.project-description-text p strong {
+  color: color-mix(in srgb, var(--text) 50%, var(--text-dim));
+  font-weight: 600;
+}
+
 .project-description p + p {
   margin-top: 1.5rem;
+}
+
+.project-description-grid {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.project-description-text,
+.project-description-photos {
+  min-width: 0;
+}
+
+.project-description-photos {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.project-photo-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.project-photo {
+  flex: 1;
+  min-width: 0;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 1rem;
+  display: block;
+}
+
+p.project-specs__kicker {
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.project-specs__list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.project-specs__list > div {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 1rem;
+}
+
+.project-specs__list dt {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.project-specs__list dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.project-specs__credit {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.project-specs__credit a {
+  color: var(--text-dim);
+  transition: color 0.2s;
+}
+
+.project-specs__credit a:hover {
+  color: var(--accent);
+}
+
+.project-specs__credit a::before {
+  content: '↗ ';
+  color: var(--accent-2);
 }
 
 .project-video video {
@@ -994,11 +1070,45 @@
 }
 
 /* the rows are buttons but nothing about a tree says "tap me", and on touch
-   there is no hover to discover it with — so the invitation is written down */
+   there is no hover to discover it with — so the invitation is written down,
+   and a slow shine sweeps across it so it reads as alive, not a caption */
 .homelab-services-section .section-hint {
   margin-bottom: 2.5rem;
-  font-size: 0.9rem;
-  color: var(--text-dim);
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  background: linear-gradient(
+    90deg,
+    var(--text-dim) 0%,
+    var(--text-dim) 40%,
+    var(--accent) 50%,
+    var(--accent-2) 60%,
+    var(--text-dim) 70%,
+    var(--text-dim) 100%
+  );
+  background-size: 300% 100%;
+  background-position: 110% center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hint-shine 3s linear infinite;
+}
+
+@keyframes hint-shine {
+  from {
+    background-position: 110% center;
+  }
+  to {
+    background-position: 10% center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .homelab-services-section .section-hint {
+    animation: none;
+    background: none;
+    color: var(--text-dim);
+  }
 }
 
 .hd-tree {
@@ -1740,6 +1850,11 @@
 @media (max-width: 700px) {
   .about-grid {
     grid-template-columns: 1fr;
+  }
+
+  .project-description-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .nav nav {

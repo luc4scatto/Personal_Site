@@ -113,7 +113,7 @@ export function initHomelabDiagram(container) {
     });
   }
 
-  function openCard(button, name) {
+  function openCard(button, name, { focusWall = true } = {}) {
     if (active === button) return closeCard();
     if (active) active.setAttribute('aria-expanded', 'false');
     active = button;
@@ -128,7 +128,7 @@ export function initHomelabDiagram(container) {
     gsap.killTweensOf(card);
     gsap.killTweensOf(inner);
     button.closest('li, .hd-hub').after(card);
-    tree.classList.add('is-focused');
+    if (focusWall) tree.classList.add('is-focused');
 
     if (isReduced()) {
       gsap.set(card, { height: 'auto', opacity: 1 });
@@ -204,7 +204,10 @@ export function initHomelabDiagram(container) {
   // gutter the card layout otherwise leaves empty next to a short tree (see
   // sections.css's side-column media query), and it demonstrates the
   // click-a-row interaction before a visitor has to discover it themselves.
-  openCard(hubButton, hub);
+  // focusWall: false skips the wall-dim for this automatic open, so every
+  // service icon still shows its real brand color until a visitor actually
+  // clicks something.
+  openCard(hubButton, hub, { focusWall: false });
 
   close.addEventListener('click', () => {
     const previous = active;

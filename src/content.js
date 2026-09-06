@@ -43,8 +43,8 @@ export const content = {
         'Real-time interactive installation built with TouchDesigner and Unreal Engine, showcased at Vivatech in Paris.',
     },
     two: {
-      title: 'Project Two',
-      description: 'Short description of the project, what it does and why it matters.',
+      title: 'More Projects',
+      description: 'New projects are in the works - check back soon.',
     },
     three: {
       title: 'Homelab',
@@ -67,22 +67,26 @@ export const content = {
       'For the Thélios space I developed the real-time interactive experience: a live 3D showcase of eyewear digital twins, built with TouchDesigner and Unreal Engine, letting visitors explore frames, materials and details up close as they interact with the installation.',
     backCta: '← Back to projects',
   },
-  // placeholder page - Luca hasn't picked the project yet, fill in kicker/meta/description when he does
+  // coming-soon page - a standing placeholder for whatever gets added next, not one named project
   projectTwo: {
-    kicker: 'Project',
-    meta: 'Details coming soon',
-    description1: 'This page is a placeholder - content for this project is on its way.',
+    kicker: "What's next",
+    meta: 'New work in progress',
+    description1:
+      'A few more projects are underway - more 3D pipeline work, interactive builds and self-hosted experiments like the homelab. This page will fill in as they land.',
     backCta: '← Back to projects',
   },
   homelab: {
     kicker: 'Project',
     meta: 'Personal project · Self-hosted · Ongoing',
     description1:
-      'A homelab I run for the sake of learning: self-hosting, networking and sysadmin work, outside of anything work-related.',
+      'It started with something simple: a shared folder my Windows machine and my Mac could both reach, instead of shuffling files between them by hand with an external hard drive, inconvenient enough over time, that I went looking for a better way. That one NAS folder opened a door into **self-hosted software**, and I never really came back out.',
     description2:
-      'Virtualized on Proxmox: TrueNAS SCALE runs the containerized stack on ZFS storage - media streaming and automation, photo backup, personal finance, network tooling - while Hermes handles agentic workflows.',
+      'The rack runs on an **HP EliteDesk 800G5** mini PC with **32GB of RAM**, 2.5G custom Network card and an unmanaged switch, wired into a **3D-printed rack case**: an open design I found and adapted, swapping in other printable parts until it fit what I actually needed. A **JetKVM** sits on top for headless remote management; BIOS access and reboots from anywhere, no monitor or keyboard needed on-site.',
+    description3:
+      'Virtualized on **Proxmox**: **TrueNAS SCALE** runs the containerized stack on **ZFS** storage, media streaming and automation, photo backup, personal finance, network tooling, while **Hermes** handles agentic workflows.',
+    description4:
+      'Most of what I know about networking and sysadmin work, I picked up here, one broken config at a time.',
     backCta: '← Back to projects',
-    coverPlaceholder: 'Photos of the rack are on their way.',
     // Powers the service tree in src/homelabDiagram.js. Labels only - no IPs,
     // ports, hostnames or versions (this page is public). Each service name maps
     // to public/icons/services/<slug>.svg by slug (lowercased, spaces to
