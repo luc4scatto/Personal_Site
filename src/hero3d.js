@@ -138,6 +138,7 @@ function createInfoCard(onClose) {
     el: card,
     title: card.querySelector('.info-card__title'),
     text: card.querySelector('.info-card__text'),
+    closeBtn: card.querySelector('.info-card__close'),
   };
 }
 
@@ -166,6 +167,24 @@ export function initHero3D(container) {
   const homes = fibonacciSphere(GLB_MODELS.length, SPHERE_RADIUS);
   const items = [];
   const clickable = []; // GLB wrappers only (decorative shapes stay non-interactive)
+
+  // ---- keyboard path: the canvas is aria-hidden + pointer-events:none, so the pointer/
+  // touch picking below has no keyboard equivalent on its own. One real button per model,
+  // built up front in a fixed order so tab order stays stable while models load in
+  // whatever order their fetches finish; each stays disabled until its model arrives.
+  const objectNav = document.createElement('div');
+  objectNav.className = 'hero-objects';
+  objectNav.setAttribute('role', 'group');
+  objectNav.setAttribute('aria-label', '3D showcase objects');
+  const objectButtons = GLB_MODELS.map((model) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.disabled = true;
+    btn.textContent = (DESCRIPTIONS[model] || DESCRIPTIONS._default).title;
+    objectNav.appendChild(btn);
+    return btn;
+  });
+  container.insertAdjacentElement('afterend', objectNav);
 
   function addItem(object, index) {
     normalize(object, ITEM_SIZE * (SIZE_TWEAKS[GLB_MODELS[index]] ?? 1));
@@ -209,6 +228,10 @@ export function initHero3D(container) {
     wrapper.userData.item = item;
     items.push(item);
     clickable.push(wrapper);
+
+    const btn = objectButtons[index];
+    btn.disabled = false;
+    btn.addEventListener('click', () => focus(item, btn));
   }
 
   const dracoLoader = new DRACOLoader();
@@ -280,6 +303,7 @@ export function initHero3D(container) {
   const tmpV = new THREE.Vector3();
   let focusedItem = null;
   let hoveredItem = null;
+  let returnFocusTo = null; // the .hero-objects button that opened the card via keyboard, if any
   // measured live in positionCard() rather than hardcoded — the fixed header's height
   // isn't a constant the layout owns anywhere, and guessing it drifts the moment the nav
   // copy or padding changes
@@ -301,7 +325,7 @@ export function initHero3D(container) {
 
   const info = createInfoCard(unfocus);
 
-  function focus(item) {
+  function focus(item, triggerEl) {
     if (focusedItem === item) return;
     document.querySelector('.hero-hint')?.classList.add('is-hidden');
     if (focusedItem) focusedItem.wrapper.traverse((o) => o.layers.set(0));
@@ -312,7 +336,13 @@ export function initHero3D(container) {
     info.title.textContent = d.title;
     info.text.textContent = d.text;
     info.el.hidden = false;
-    requestAnimationFrame(() => info.el.classList.add('is-open'));
+    // only a keyboard trigger asks for focus back on close — a mouse click has nowhere
+    // meaningful to return it to
+    returnFocusTo = triggerEl || null;
+    requestAnimationFrame(() => {
+      info.el.classList.add('is-open');
+      if (triggerEl) info.closeBtn.focus();
+    });
   }
 
   function unfocus() {
@@ -321,6 +351,10 @@ export function initHero3D(container) {
     focusedItem = null;
     camera.layers.set(0);
     info.el.classList.remove('is-open');
+    if (returnFocusTo) {
+      returnFocusTo.focus();
+      returnFocusTo = null;
+    }
     setTimeout(() => {
       if (!focusedItem) info.el.hidden = true;
     }, 260);
@@ -437,7 +471,10 @@ export function initHero3D(container) {
       dragged = false; // this click is the tail end of a drag — swallow it
       return;
     }
-    if (e.target instanceof Node && info.el.contains(e.target)) return; // interacting with the card itself
+    // interacting with the card itself, or activating one of the keyboard buttons (whose
+    // own click handler already calls focus() — this listener only handles clicking away)
+    if (e.target instanceof Node && (info.el.contains(e.target) || objectNav.contains(e.target)))
+      return;
     const hit = pick(e.clientX, e.clientY);
     if (hit) focus(hit);
     else if (focusedItem) unfocus();
@@ -610,15 +647,18 @@ export function initHero3D(container) {
   resize();
   new ResizeObserver(resize).observe(container);
 
-  const clock = new THREE.Clock();
+  // Clock is deprecated since three r183 in favor of Timer, which needs an explicit
+  // update() each frame (fed the animation loop's own timestamp) before getElapsed() reads it
+  const timer = new THREE.Timer();
   let autoSpin = 0;
   let parallaxX = 0;
   let parallaxY = 0;
   const baseEuler = new THREE.Euler();
   let blurH = 0; // current smear radius per axis, eased toward the rotation speed
   let blurV = 0;
-  renderer.setAnimationLoop(() => {
-    const t = clock.getElapsedTime();
+  renderer.setAnimationLoop((time) => {
+    timer.update(time);
+    const t = timer.getElapsed();
     items.forEach((it) => {
       const wander = it === focusedItem ? 0 : (it.wander ?? WANDER);
       it.wrapper.position.set(

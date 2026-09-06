@@ -34,7 +34,7 @@ export const content = {
     paragraph:
       'My path into 3D started at **EssilorLuxottica**, where I spent over four years as a 3D Render Specialist working on **Prada Group**, **Burberry** and **Oliver Peoples** eyewear lines. \n' +
       'In my last two years there I moved into improving and building new features for the 3D pipeline itself, a focus I carried forward into **Thélios**.\n' +
-      "Today I'm part of the 3D R&D team at **Thélios** (**LVMH** eyewear), where I develop and maintain the 3D pipeline, from 2D design all the way to renders, 3D configurators and video.\n",
+      "Today I'm part of the 3D R&D team at **Thélios** (**LVMH** eyewear), where I develop and maintain the 3D pipeline, from 2D design all the way to renders, 3D configurators and videos.\n",
   },
   projects: {
     vivatech: {
@@ -48,7 +48,8 @@ export const content = {
     },
     three: {
       title: 'Homelab',
-      description: 'Short description of the project, what it does and why it matters.',
+      description:
+        'A self-hosted rack running on Proxmox and TrueNAS - media, backups, automation and an AI agent, built from a 3D-printed case and one spare mini PC.',
     },
   },
   contact: {
@@ -242,8 +243,8 @@ export const content = {
       text: 'Placeholder description - this object represents one of my interests.',
     },
   },
-  // invitation filling the empty gutter beside the skills grid until a pill is clicked
-  // (.skill-ghost in index.html — only rendered from 1000px up, see sections.css)
+  // invitation shown above the skills grid until a tile is clicked (.skills-hint,
+  // built in main.js)
   skillsHint: {
     title: 'Pick a skill',
     text: 'Click any tool to see what I actually do with it.',

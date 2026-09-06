@@ -33,6 +33,21 @@ if (marqueeTrack) {
     .join('');
 }
 
+// arriving with a hash already in the URL (e.g. a project sub-page's footer Contact link)
+// the browser's native fragment scroll fires against the pre-JS layout, before the
+// [data-copy] substitutions above resize everything below the hero — so it lands short.
+// Re-scroll once the page (images included, now all sized) has finished loading.
+if (location.hash) {
+  const hashTarget = document.querySelector(location.hash);
+  if (hashTarget) {
+    window.addEventListener('load', () => {
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => hashTarget.scrollIntoView({ block: 'start' })),
+      );
+    });
+  }
+}
+
 // highlight the nav link of the section currently in view
 const sections = document.querySelectorAll('main section[id]');
 const navLinks = document.querySelectorAll('.nav nav a');

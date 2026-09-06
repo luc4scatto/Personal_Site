@@ -36,13 +36,27 @@ export function initAnalytics() {
     '</div>';
   document.body.appendChild(banner);
 
-  banner.querySelector('.cookie-banner__accept').addEventListener('click', () => {
-    localStorage.setItem(CONSENT_KEY, 'granted');
-    loadGA();
+  // exposes the banner's real height so .hero-hint (sections.css) can clear it instead
+  // of sitting underneath; ResizeObserver also catches the banner wrapping to two lines
+  // on narrower widths.
+  const root = document.documentElement;
+  const syncHeight = () => root.style.setProperty('--cookie-banner-h', `${banner.offsetHeight}px`);
+  syncHeight();
+  const heightObserver = new ResizeObserver(syncHeight);
+  heightObserver.observe(banner);
+
+  const dismiss = (choice) => {
+    localStorage.setItem(CONSENT_KEY, choice);
+    heightObserver.disconnect();
+    root.style.removeProperty('--cookie-banner-h');
     banner.remove();
+  };
+
+  banner.querySelector('.cookie-banner__accept').addEventListener('click', () => {
+    dismiss('granted');
+    loadGA();
   });
   banner.querySelector('.cookie-banner__decline').addEventListener('click', () => {
-    localStorage.setItem(CONSENT_KEY, 'denied');
-    banner.remove();
+    dismiss('denied');
   });
 }

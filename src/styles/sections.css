@@ -316,6 +316,45 @@
   display: block;
 }
 
+/* keyboard path to the 3D objects (hero3d.js): one real button per model, invisible
+   until it receives focus, since the canvas itself is aria-hidden + pointer-events:none */
+.hero-objects button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+  padding: 0;
+}
+
+.hero-objects button:focus {
+  top: 5.5rem;
+  left: var(--pad-x);
+  width: auto;
+  height: auto;
+  max-width: calc(100vw - 2 * var(--pad-x));
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  z-index: 15;
+  padding: 0.5em 0.9em;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.hero-objects button:disabled {
+  cursor: default;
+}
+
 /* phones + tablets held in portrait: on any viewport this narrow the headline is wider
    than the free half of the screen, so the side-by-side hero always collides with the
    sphere. Keep in sync with STACKED_HERO in hero3d.js (camera distance). */
@@ -354,31 +393,24 @@
 /* "click the objects" invite — sits under the 3D sphere, fades out after the first focus */
 .hero-hint {
   position: absolute;
-  bottom: 2.2rem;
+  /* --cookie-banner-h is set by analytics.js while the consent banner is on screen —
+     without it the hint sits under the fixed banner at common desktop heights */
+  bottom: calc(2.2rem + var(--cookie-banner-h, 0px));
   right: 25%;
   transform: translateX(50%);
+  /* quieter than the skills-wall hint on purpose — decorative feature, not the
+     professional signal the skills wall carries, so it doesn't animate for attention */
   color: var(--text-dim);
   font-family: var(--font-display);
   font-size: 0.85rem;
   letter-spacing: 0.04em;
-  animation: hero-hint-breathe 2.6s ease-in-out infinite;
+  opacity: 0.75;
   transition: opacity 0.4s;
 }
 
 .hero-hint.is-hidden {
   opacity: 0;
   pointer-events: none;
-  animation: none;
-}
-
-@keyframes hero-hint-breathe {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 1;
-  }
 }
 
 @media (max-width: 700px), (max-width: 1024px) and (orientation: portrait) {
@@ -550,6 +582,9 @@
 
 .about-photo {
   width: 100%;
+  /* explicit height:auto beats the img's height="" attribute (a low-specificity
+     presentational hint) so aspect-ratio, not the attribute, sizes the box */
+  height: auto;
   aspect-ratio: 1;
   border-radius: 1rem;
   object-fit: cover;
@@ -681,7 +716,7 @@
 .skills-hint {
   margin-bottom: 2.5rem;
   font-size: clamp(1.1rem, 2vw, 1.35rem);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.01em;
   transition: opacity 0.4s ease;
   background: linear-gradient(
@@ -753,6 +788,9 @@
 
 .card-thumb {
   width: 100%;
+  /* explicit height:auto beats the img's height="" attribute (a low-specificity
+     presentational hint) so aspect-ratio, not the attribute, sizes the box */
+  height: auto;
   aspect-ratio: 16 / 10;
   border-radius: 0.5rem;
   background: linear-gradient(135deg, #1d1d1d, #101010);
@@ -917,6 +955,9 @@
 .project-photo {
   flex: 1;
   min-width: 0;
+  /* explicit height:auto beats the img's height="" attribute (a low-specificity
+     presentational hint) so aspect-ratio, not the attribute, sizes the box */
+  height: auto;
   aspect-ratio: 3 / 4;
   object-fit: cover;
   border-radius: 1rem;
@@ -1593,7 +1634,7 @@ p.project-specs__kicker {
    instead of a CSS background merely floating over unrelated coordinates */
 .hw-grid-line {
   fill: none;
-  stroke: var(--border, #2a2a2a);
+  stroke: #2a2a2a;
   stroke-width: 1;
   opacity: 0.6;
 }
@@ -1603,14 +1644,14 @@ p.project-specs__kicker {
 }
 
 .hw-room {
-  fill: color-mix(in srgb, var(--border, #2a2a2a) 12%, transparent);
-  stroke: var(--border, #2a2a2a);
+  fill: color-mix(in srgb, #2a2a2a 12%, transparent);
+  stroke: #2a2a2a;
   stroke-width: 1.5;
 }
 
 .hw-room--accent {
   fill: color-mix(in srgb, var(--accent-2) 5%, transparent);
-  stroke: color-mix(in srgb, var(--accent-2) 55%, var(--border, #2a2a2a));
+  stroke: color-mix(in srgb, var(--accent-2) 55%, #2a2a2a);
 }
 
 /* brackets are the room's registration marks — always a shade more visible
@@ -1765,7 +1806,7 @@ p.project-specs__kicker {
   text-transform: uppercase;
   color: var(--text);
   background: var(--bg);
-  border: 1px solid color-mix(in srgb, var(--border, #2a2a2a) 90%, transparent);
+  border: 1px solid color-mix(in srgb, #2a2a2a 90%, transparent);
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
   max-width: none;

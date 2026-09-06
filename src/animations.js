@@ -137,6 +137,9 @@ function initWordCycler(el) {
     // enter from above, exit downward (top → bottom cascade)
     gsap.set(incoming, { yPercent: -100, opacity: 0 });
     const outgoing = current;
+    // hidden immediately, not after the tween: assistive tech otherwise announces both
+    // words for the ~0.5s both spans coexist in the DOM mid-crossfade
+    outgoing.setAttribute('aria-hidden', 'true');
     gsap.to(outgoing, {
       yPercent: 100,
       opacity: 0,
