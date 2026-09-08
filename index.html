@@ -28,7 +28,6 @@
         "jobTitle": "3D Technical Artist & Creative Technologist",
         "url": "https://lucascattolin.com/",
         "image": "https://lucascattolin.com/images/Profile_pic.jpg",
-        "email": "mailto:scattolinluca2@gmail.com",
         "sameAs": [
           "https://github.com/luc4scatto",
           "https://www.linkedin.com/in/luca-scattolin-a41a3b180"
@@ -158,7 +157,7 @@
           <article class="card" data-reveal>
             <img class="card-thumb" src="images/homelab-rack.webp" alt="Rear view of the homelab rack: router, unmanaged switch and HP EliteDesk mini PC wired together" width="1800" height="2400" loading="lazy" />
             <h3 data-copy="projects.three.title">Homelab</h3>
-            <p data-copy="projects.three.description">Short description of the project, what it does and why it matters.</p>
+            <p data-copy="projects.three.description">A self-hosted rack running on Proxmox and TrueNAS, media, backups, automation and an AI agent, built from a 3D-printed case and one spare mini PC.</p>
             <div class="card-links">
               <a href="homelab.html">View project →</a>
             </div>
@@ -173,9 +172,6 @@
             </div>
             <h3 data-copy="projects.two.title">More Projects</h3>
             <p data-copy="projects.two.description">New projects are in the works - check back soon.</p>
-            <div class="card-links">
-              <a href="project-two.html">What's next →</a>
-            </div>
           </article>
         </div>
       </section>
@@ -183,7 +179,22 @@
       <section id="contact" class="contact">
         <h2 data-reveal>Let's talk</h2>
         <p data-reveal data-copy="contact.tagline">Got a project in mind or just want to say hi?</p>
-        <a class="btn" href="mailto:scattolinluca2@gmail.com" data-reveal data-copy="contact.email">scattolinluca2@gmail.com</a>
+        <form class="contact-form" id="contact-form" data-reveal>
+          <div class="contact-field">
+            <label for="contact-name">Name</label>
+            <input type="text" id="contact-name" name="name" autocomplete="name" required />
+          </div>
+          <div class="contact-field">
+            <label for="contact-from">Your email</label>
+            <input type="email" id="contact-from" name="email" autocomplete="email" required />
+          </div>
+          <div class="contact-field">
+            <label for="contact-message">Message</label>
+            <textarea id="contact-message" name="message" rows="4" required></textarea>
+          </div>
+          <button class="btn" type="submit">Send message</button>
+          <p class="contact-status" aria-live="polite"></p>
+        </form>
         <div class="contact-links" data-reveal>
           <a href="https://github.com/luc4scatto" target="_blank" rel="noopener">GitHub</a>
           <a href="https://www.linkedin.com/in/luca-scattolin-a41a3b180" target="_blank" rel="noopener">LinkedIn</a>

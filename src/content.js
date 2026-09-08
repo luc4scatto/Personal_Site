@@ -49,12 +49,13 @@ export const content = {
     three: {
       title: 'Homelab',
       description:
-        'A self-hosted rack running on Proxmox and TrueNAS - media, backups, automation and an AI agent, built from a 3D-printed case and one spare mini PC.',
+        'A self-hosted rack running on Proxmox and TrueNAS, media, backups, automation and an AI agent, built from a 3D-printed case and one spare mini PC.',
     },
   },
   contact: {
     tagline: 'Got a project in mind or just want to say hi?',
-    email: 'scattolinluca2@gmail.com',
+    // Formspree endpoint — keeps the address off the page entirely instead of just obfuscating it
+    formEndpoint: 'https://formspree.io/f/mqpkyvlq',
   },
   footer: {
     copyright: '© 2026 Luca Scattolin',

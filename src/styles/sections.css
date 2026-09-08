@@ -382,14 +382,6 @@
   }
 }
 
-@media (max-width: 700px) {
-  /* "See my work" duplicates the nav's Projects link and crowds the mobile hero.
-     Tablets have the room, so it stays there. */
-  .hero .btn {
-    display: none;
-  }
-}
-
 /* "click the objects" invite — sits under the 3D sphere, fades out after the first focus */
 .hero-hint {
   position: absolute;
@@ -857,6 +849,55 @@
 .contact p {
   color: var(--text-dim);
   margin-bottom: 2rem;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 28rem;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.contact-field label {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.contact-field input,
+.contact-field textarea {
+  background: none;
+  border: 1px solid #1c1c1c;
+  border-radius: 0.4rem;
+  padding: 0.7em 0.9em;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.contact-field input:focus,
+.contact-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.contact-form .btn {
+  align-self: center;
+}
+
+.contact-status {
+  min-height: 1.2em;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  text-align: center;
 }
 
 .contact-links {

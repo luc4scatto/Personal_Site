@@ -21,8 +21,33 @@ document.querySelectorAll('[data-copy]').forEach((el) => {
   if (typeof value !== 'string') return;
   el.innerHTML = value.split('\n').map(escapeHtml).join('<br>');
 });
-const emailLink = document.querySelector('[data-copy="contact.email"]');
-if (emailLink) emailLink.href = `mailto:${content.contact.email}`;
+const contactForm = document.getElementById('contact-form');
+if (contactForm) {
+  const status = contactForm.querySelector('.contact-status');
+  const submitBtn = contactForm.querySelector('button[type="submit"]');
+  contactForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    submitBtn.disabled = true;
+    status.textContent = 'Sending...';
+    try {
+      const res = await fetch(content.contact.formEndpoint, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: new FormData(contactForm),
+      });
+      if (res.ok) {
+        status.textContent = "Thanks! I'll get back to you soon.";
+        contactForm.reset();
+      } else {
+        status.textContent = 'Something went wrong - please try again.';
+      }
+    } catch {
+      status.textContent = 'Something went wrong - please try again.';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+}
 
 // marquee band — duplicate the word list once for the seamless CSS loop
 const marqueeTrack = document.getElementById('marquee-track');
