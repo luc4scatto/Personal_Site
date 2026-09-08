@@ -74,6 +74,12 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
   nothing a visitor reads ever needs to be drawn behind the metal. That matters: a CSS3D
   layer cannot be occluded by the WebGL canvas, and this is what makes the two layers
   co-exist without a second render pass.
+- **`cull()` is the reveal, not just a guard.** A CSS3D layer is always painted over the
+  WebGL canvas, so a folder still inside the cabinet rides on top of the metal instead of
+  being hidden by it. Each folder fades in as it crosses `CAB_MOUTH`, which is why the
+  opening reads as the drawer being pulled out of the cabinet rather than the whole index
+  sliding along above it. There is deliberately no opacity tween on open — it would fight
+  this.
 - **Selection moves the card, never the rail.** Sliding the whole index forward to bring the
   chosen folder to the front pushed every folder ahead of it out through the drawer's face.
   `cull()` still hides anything a manual drag pushes past the front lip.

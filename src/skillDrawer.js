@@ -258,11 +258,30 @@ export function initSkillDrawer(host, strip) {
     camera.updateProjectionMatrix();
   }
 
+  // Where the cabinet's mouth is. A CSS3D layer is always painted over the WebGL canvas, so
+  // a folder still inside the cabinet would ride on top of the metal instead of being hidden
+  // by it. Fading each one in as it crosses this plane is what makes them read as coming out
+  // of the drawer rather than sliding along above it — and it is the reveal animation too,
+  // which is why there is no separate opacity tween on open.
+  const CAB_MOUTH = -D / 2 - 0.05;
+
   function cull() {
     for (const f of folders) {
-      const past = f !== active && rail.position.z + f.z0 > D / 2 + 0.15;
-      f.el.style.opacity = past ? '0' : '';
-      f.el.style.pointerEvents = past ? 'none' : '';
+      if (f === active) {
+        f.el.style.opacity = '';
+        f.el.style.pointerEvents = '';
+        continue;
+      }
+      // pushed out through the drawer's own face by a drag
+      const past = rail.position.z + f.z0 > D / 2 + 0.15;
+      // still swallowed by the cabinet
+      const emerged = THREE.MathUtils.clamp(
+        (drawer.position.z + rail.position.z + f.z0 - CAB_MOUTH) / 0.9,
+        0,
+        1,
+      );
+      f.el.style.opacity = past ? '0' : emerged.toFixed(3);
+      f.el.style.pointerEvents = past || emerged < 0.6 ? 'none' : '';
     }
   }
 
