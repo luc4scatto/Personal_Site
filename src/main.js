@@ -139,7 +139,17 @@ const SKILL_DESCRIPTIONS = content.skills;
 
 const skillsSection = document.querySelector('.skills');
 const skillTiles = document.querySelectorAll('.skills-grid li[data-skill]');
-if (skillsSection && skillTiles.length) {
+
+// The drawer takes the section over completely when it can run: it turns each folder into
+// its own detail card, so the flat wall's tile-and-card wiring must not also bind. Decided
+// synchronously, before the dynamic import, so there is never a window with both live.
+const DRAWER_MODE =
+  !!document.querySelector('#skill-drawer') &&
+  !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+  window.matchMedia('(min-width: 701px)').matches;
+
+function initSkillsWall() {
+  if (!skillsSection || !skillTiles.length) return;
   // the invitation, in the same place the hero puts its own "click on an object" line
   const hint = document.createElement('p');
   hint.className = 'skills-hint';
@@ -307,6 +317,8 @@ if (skillsSection && skillTiles.length) {
   });
 }
 
+if (!DRAWER_MODE) initSkillsWall();
+
 // floating 3D hobby icons — lazy, respects reduced motion
 const heroCanvas = document.querySelector('#hero-canvas');
 if (heroCanvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -320,24 +332,20 @@ if (heroCanvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 // the skill drawer's metal shell — lazy, same gate as the hero: under reduced motion the
 // three.js chunk is never fetched and the section falls back to the flat wall
-const skillDrawer = document.querySelector('#skill-drawer');
-if (
-  skillDrawer &&
-  !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
-  // a perspective drawer on a phone is unreadable; below this width the wall is simply the
-  // better layout, so the chunk is not even fetched
-  window.matchMedia('(min-width: 701px)').matches
-) {
+// below 701px a perspective drawer is unreadable, so the chunk is not even fetched there
+if (DRAWER_MODE) {
+  const skillDrawer = document.querySelector('#skill-drawer');
   const scene = skillDrawer.querySelector('.drawer__scene');
   const strip = skillDrawer.querySelector('.drawer__strip');
   import('./skillDrawer.js')
     .then((m) => {
       m.initSkillDrawer(scene, strip);
-      // only claim the drawer once the metal is actually there; CSS keys the whole
-      // perspective layout off this class, so a failed import leaves the wall intact
+      // only claim the drawer once the metal is actually there; CSS keys the whole layout
+      // off this class
       skillDrawer.classList.add('is-live');
     })
-    .catch(() => {});
+    // the metal failed, so hand the section back to the wall it would have replaced
+    .catch(() => initSkillsWall());
 }
 
 // homelab network diagram (homelab.html only) — real content, always renders;

@@ -1,48 +1,55 @@
-// The skill drawer: an office filing drawer in brushed steel, rendered in WebGL, with the
-// tool folders standing in it. The folders themselves are NOT in this scene — they are the
-// same <li data-skill> elements the wall has always used, kept in the DOM so they stay
-// clickable, tabbable and readable by a screen reader. This module only draws the metal and
-// tells the DOM strip where the drawer's mouth landed on screen.
+// The skill drawer: one long office drawer in brushed steel, seen at three quarters, with
+// the tools filed in it front-to-back the way a real card index is.
 //
-// Two things here are deliberate and should not be "simplified":
+// The folders are the page's own <li data-skill> elements, moved into a CSS3DObject each.
+// That is the whole point of CSS3DRenderer here: at three quarters every folder sits at a
+// different depth, so a flat DOM strip cannot line up any more — but billboarding them in
+// WebGL would cost the text, the links, the keyboard and the screen reader. CSS3D keeps
+// real DOM and still puts it in the scene's perspective.
 //
-// - The canvas sits BEHIND the strip, and the camera is framed so the drawer's front rim
-//   lands where the folders begin. That is why no occlusion machinery is needed: a canvas
-//   overlay cannot selectively cover the folders' bottoms without a second render layer,
-//   and framing the shot correctly costs nothing.
-// - Rendering is on demand. The scene is static once the drawer has slid open, so the loop
-//   stops entirely instead of burning a rAF next to hero3d.js's own permanent loop.
+// A folder IS its own detail card. At rest only the tab shows above the rim; picking one
+// grows the sheet upward and brings it forward to read. Nothing ever needs to be drawn
+// behind the metal, which matters because a CSS3D layer cannot be occluded by the WebGL
+// canvas — everything the visitor reads lives above the drawer's rim by construction.
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 import gsap from 'gsap';
+import { content } from './content.js';
 
-// world units. Wide and shallow, like a real card-index drawer.
-const W = 10; // width
-const D = 4.2; // depth
-const H = 1.5; // side height
-const T = 0.16; // wall thickness
-const FILL = 0.9; // how much of the container width the drawer spans
+// CSS3D works in CSS pixels, so the cards are authored at their real size and the whole
+// rail is scaled into world units.
+const CARD_W = 250;
+const CARD_H = 320;
+const PX = 0.011; // px -> world
+const CW = CARD_W * PX; // ~2.75
+const CH = CARD_H * PX; // ~3.52
+
+const GAP = 0.5; // spacing between folders, front to back
+const W = CW + 1.0; // drawer is a little wider than a folder
+const H = 1.6; // side height
+const T = 0.14; // wall thickness
+const AZIMUTH = THREE.MathUtils.degToRad(34);
+const ELEVATION = THREE.MathUtils.degToRad(27);
 
 /** Brushed steel, not chrome: a mirror would render RoomEnvironment's fake room legibly,
- *  which reads as a bug. Horizontal streaks break the reflection into a machined surface. */
+ *  which reads as a bug. Streaks break the reflection into a machined surface. */
 function brushedRoughness() {
   const c = document.createElement('canvas');
-  c.width = 512;
-  c.height = 512;
+  c.width = c.height = 512;
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#5a5a5a';
   ctx.fillRect(0, 0, 512, 512);
   for (let i = 0; i < 5000; i++) {
     const y = Math.random() * 512;
     const x = Math.random() * 512;
-    const len = 12 + Math.random() * 90;
     const v = 60 + Math.random() * 90;
     ctx.strokeStyle = `rgba(${v},${v},${v},0.35)`;
     ctx.lineWidth = Math.random() < 0.5 ? 1 : 2;
     ctx.beginPath();
     ctx.moveTo(x, y);
-    ctx.lineTo(x + len, y);
+    ctx.lineTo(x + 12 + Math.random() * 90, y);
     ctx.stroke();
   }
   const tex = new THREE.CanvasTexture(c);
@@ -51,9 +58,75 @@ function brushedRoughness() {
   return tex;
 }
 
+/** Turn a plain tile into a folder: the mark and name become the tab, and the copy from
+ *  content.js becomes the sheet that unfolds above it. */
+function buildFolder(li) {
+  const d = content.skills[li.dataset.skill];
+  const icon = li.querySelector('.skill-icon');
+  const label = li.querySelector('.skill-label');
+  li.textContent = '';
+  li.className = 'folder';
+  if (d?.color) li.style.setProperty('--brand', d.color);
+
+  const sheet = document.createElement('div');
+  sheet.className = 'folder__sheet';
+
+  const tab = document.createElement('div');
+  tab.className = 'folder__tab';
+  if (icon) tab.append(icon);
+  if (label) tab.append(label);
+  sheet.append(tab);
+
+  const body = document.createElement('div');
+  body.className = 'folder__body';
+  if (d?.selfTaught) {
+    const badge = document.createElement('p');
+    badge.className = 'folder__badge';
+    badge.textContent = 'Self-taught';
+    body.append(badge);
+  }
+  if (d?.text) {
+    const p = document.createElement('p');
+    p.className = 'folder__text';
+    p.textContent = d.text;
+    body.append(p);
+  }
+  if (d?.bullets?.length) {
+    const ul = document.createElement('ul');
+    ul.className = 'folder__bullets';
+    for (const b of d.bullets) {
+      const item = document.createElement('li');
+      if (typeof b === 'string') {
+        item.textContent = b;
+      } else {
+        item.textContent = b.label;
+        const sub = document.createElement('ul');
+        for (const s of b.subs ?? []) {
+          const si = document.createElement('li');
+          si.textContent = s;
+          sub.append(si);
+        }
+        item.append(sub);
+      }
+      ul.append(item);
+    }
+    body.append(ul);
+  }
+  sheet.append(body);
+  li.append(sheet);
+
+  li.tabIndex = 0;
+  li.setAttribute('role', 'button');
+  li.setAttribute('aria-expanded', 'false');
+  return li;
+}
+
 export function initSkillDrawer(host, strip) {
+  const tiles = [...strip.querySelectorAll('li[data-skill]')];
+  if (!tiles.length) return () => {};
+
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 200);
 
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -64,7 +137,10 @@ export function initSkillDrawer(host, strip) {
   renderer.toneMappingExposure = 1.15;
   host.appendChild(renderer.domElement);
 
-  // metal needs something to reflect. Generated at runtime, so no HDRI ships.
+  const css = new CSS3DRenderer();
+  css.domElement.className = 'drawer__css';
+  host.appendChild(css.domElement);
+
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envRT = pmrem.fromScene(new RoomEnvironment(), 0.04);
   scene.environment = envRT.texture;
@@ -77,16 +153,15 @@ export function initSkillDrawer(host, strip) {
     roughnessMap,
     envMapIntensity: 1.1,
   });
-  // the inside is the same metal, dulled: it sits in its own shadow, and a bright interior
-  // would fight the folders standing in it
   const steelInner = new THREE.MeshStandardMaterial({
-    color: 0x3c4046,
+    color: 0x3a3e44,
     metalness: 0.9,
     roughness: 0.55,
     roughnessMap,
     envMapIntensity: 0.5,
   });
 
+  const D = GAP * tiles.length + CW * 0.6; // long enough to hold the whole index
   const drawer = new THREE.Group();
   scene.add(drawer);
 
@@ -97,80 +172,117 @@ export function initSkillDrawer(host, strip) {
   drawer.add(bottom);
 
   const back = box(W, H, T, steelInner);
-  back.position.set(0, 0, -D / 2 + T / 2);
+  back.position.z = -D / 2 + T / 2;
   drawer.add(back);
 
   for (const sx of [-1, 1]) {
     const side = box(T, H, D, steel);
-    side.position.set(sx * (W / 2 - T / 2), 0, 0);
+    side.position.x = sx * (W / 2 - T / 2);
     drawer.add(side);
   }
 
-  // the front: a proud panel with a pull. This is the piece that reads as office furniture
-  // rather than open box.
-  const front = box(W + 0.35, H * 1.35, 0.24, steel);
-  front.position.set(0, -0.12, D / 2 + 0.12);
+  const front = box(W + 0.3, H * 1.4, 0.22, steel);
+  front.position.set(0, -0.15, D / 2 + 0.11);
   drawer.add(front);
 
-  const handle = box(2.8, 0.2, 0.26, steel);
-  handle.position.set(0, -0.12, D / 2 + 0.36);
+  const handle = box(W * 0.45, 0.18, 0.24, steel);
+  handle.position.set(0, -0.15, D / 2 + 0.33);
   drawer.add(handle);
 
-  // one hard key on top of the environment, so the rim has a specular edge to catch
-  const key = new THREE.DirectionalLight(0xffffff, 1.1);
-  key.position.set(-3, 6, 5);
+  const key = new THREE.DirectionalLight(0xffffff, 1.15);
+  key.position.set(-4, 7, 6);
   scene.add(key);
 
-  // The two front corners of the mouth. Everything the DOM needs in order to line up is
-  // derived by projecting these, never from a hardcoded breakpoint — CLAUDE.md's
-  // STACKED_HERO note is the trap this avoids.
-  const anchorL = new THREE.Object3D();
-  const anchorR = new THREE.Object3D();
-  anchorL.position.set(-W / 2 + T, H / 2, D / 2 - T);
-  anchorR.position.set(W / 2 - T, H / 2, D / 2 - T);
-  drawer.add(anchorL, anchorR);
+  // ---- the folders -------------------------------------------------------------------
+  // The rail slides through the drawer; the cards keep their own place on it.
+  const rail = new THREE.Group();
+  drawer.add(rail);
 
-  const v = new THREE.Vector3();
-  const toScreen = (obj, cw, ch) => {
-    obj.getWorldPosition(v).project(camera);
-    return { x: ((v.x + 1) / 2) * cw, y: ((1 - v.y) / 2) * ch };
-  };
+  const RIM = H / 2; // the cards' bottom edge rests here, so nothing dips below the metal
+  const folders = tiles.map((li, i) => {
+    const el = buildFolder(li);
+    const obj = new CSS3DObject(el);
+    obj.scale.setScalar(PX);
+    obj.position.set(0, RIM + CH / 2, D / 2 - CW * 0.3 - i * GAP);
+    rail.add(obj);
+    return { el, obj, i, z0: obj.position.z };
+  });
 
+  let active = null;
+  let railZ = 0;
+  const maxZ = Math.max(0, (folders.length - 1) * GAP - D * 0.34);
+
+  // ---- rendering ---------------------------------------------------------------------
   let w = 0;
   let h = 0;
+  let dist = 20;
+  let frame = 0;
 
-  /** Put the folder strip exactly on the drawer's front rim. */
-  function placeStrip() {
-    if (!strip || !w || !h) return;
-    // dragged down past the drawer's breakpoint: hand the row back to the CSS wall, which
-    // cannot win against inline styles on its own
-    if (!window.matchMedia('(min-width: 701px)').matches) {
-      // opacity too: resizing down before the drawer ever opened would otherwise leave the
-      // whole wall at zero
-      strip.style.left = strip.style.width = strip.style.top = strip.style.opacity = '';
-      return;
+  function aim() {
+    camera.position.set(
+      dist * Math.cos(ELEVATION) * Math.sin(AZIMUTH),
+      dist * Math.sin(ELEVATION),
+      dist * Math.cos(ELEVATION) * Math.cos(AZIMUTH),
+    );
+    camera.lookAt(0, 0, 0);
+    camera.updateProjectionMatrix();
+  }
+
+  function cull() {
+    for (const f of folders) {
+      const past = f !== active && rail.position.z + f.z0 > D / 2 + 0.15;
+      f.el.style.opacity = past ? '0' : '';
+      f.el.style.pointerEvents = past ? 'none' : '';
     }
-    const l = toScreen(anchorL, w, h);
-    const r = toScreen(anchorR, w, h);
-    // host is inset from the top of #skill-drawer, and the strip is positioned against
-    // #skill-drawer, so the canvas offset has to come back in
-    strip.style.left = `${host.offsetLeft + l.x}px`;
-    strip.style.width = `${Math.max(0, r.x - l.x)}px`;
-    // the folders stand up out of the drawer, so the rim is their baseline
-    strip.style.top = `${host.offsetTop + l.y}px`;
   }
 
   function render() {
+    cull();
     renderer.render(scene, camera);
-    placeStrip();
+    css.render(scene, camera);
   }
 
-  let dist = 20;
+  /** Render for a moment rather than forever: the scene is static between interactions,
+   *  so there is no standing rAF here the way hero3d.js has one. */
+  function pump(ms = 900) {
+    const until = performance.now() + ms;
+    if (frame) return;
+    const tick = () => {
+      render();
+      frame = performance.now() < until ? requestAnimationFrame(tick) : 0;
+    };
+    frame = requestAnimationFrame(tick);
+  }
 
-  function aim() {
-    camera.position.set(0, dist * 0.42, dist);
-    camera.lookAt(0, -0.1, 0);
-    camera.updateProjectionMatrix();
+  // every corner of what the visitor actually sees: the metal, plus the height a folder
+  // reaches when it is standing open
+  const CORNERS = [];
+  for (const x of [-W / 2 - 0.2, W / 2 + 0.2]) {
+    for (const y of [-H, RIM + CH + 0.25]) {
+      for (const z of [-D / 2, D / 2 + 0.45]) CORNERS.push(new THREE.Vector3(x, y, z));
+    }
+  }
+
+  function fit() {
+    // Solve the distance numerically against those corners. At three quarters the projected
+    // extent depends on the azimuth as well as the aspect, so trigonometry that assumed a
+    // front-on camera framed the drawer at roughly half the width it could have used.
+    dist = Math.max(W, D) * 1.4;
+    const p = new THREE.Vector3();
+    for (let i = 0; i < 10; i++) {
+      aim();
+      let spanX = 0;
+      let spanY = 0;
+      for (const c of CORNERS) {
+        p.copy(c).project(camera);
+        spanX = Math.max(spanX, Math.abs(p.x));
+        spanY = Math.max(spanY, Math.abs(p.y));
+      }
+      const over = Math.max(spanX, spanY) / 0.96;
+      if (!Number.isFinite(over) || over <= 0) break;
+      dist *= over;
+      if (Math.abs(over - 1) < 0.005) break;
+    }
   }
 
   function resize() {
@@ -178,85 +290,150 @@ export function initSkillDrawer(host, strip) {
     h = host.clientHeight;
     if (!w || !h) return;
     camera.aspect = w / h;
-
-    // Frame from the anchors themselves rather than from trigonometry. The analytic
-    // distance is wrong here because the mouth sits proud of the drawer's centre and the
-    // camera looks down at it, so the front edge projects wider than the body. Projected
-    // width is inversely proportional to distance, so scaling by the error converges in a
-    // couple of passes and stays correct at any aspect.
-    // Solve against the OPEN position: while the drawer is still pushed in, the mouth sits
-    // farther from the camera and projects narrower, so framing on it would leave the row
-    // overflowing once the drawer slides forward.
-    const z = drawer.position.z;
-    drawer.position.z = 0;
-    drawer.updateMatrixWorld(true);
-
-    dist = W / FILL / (2 * Math.tan((camera.fov * Math.PI) / 360) * camera.aspect);
-    for (let i = 0; i < 6; i++) {
-      aim();
-      const got = toScreen(anchorR, w, h).x - toScreen(anchorL, w, h).x;
-      if (got <= 1) break;
-      dist *= got / (FILL * w);
-      if (Math.abs(got - FILL * w) < 1) break;
-    }
-
-    drawer.position.z = z;
-    drawer.updateMatrixWorld(true);
-
-    // Where the rim lands vertically is CSS's job, not the camera's: .drawer__scene only
-    // occupies the lower part of #skill-drawer, so the folders rise into the empty space
-    // above it. Solving that here too would fight the width solve, because moving the
-    // camera vertically changes how wide the front edge projects.
-
+    fit();
     renderer.setSize(w, h);
+    css.setSize(w, h);
     render();
   }
 
-  // The drawer is pulled open once, when the section arrives. After that the scene never
-  // changes, so nothing renders again until a resize.
-  let opened = false;
-  drawer.position.z = -D * 0.62;
-  if (strip) strip.style.opacity = '0';
-
-  function open() {
-    if (opened) return;
-    opened = true;
-    gsap.to(drawer.position, { z: 0, duration: 1.1, ease: 'power3.out', onUpdate: render });
-    if (!strip) return;
-    gsap.to(strip, { opacity: 1, duration: 0.5, delay: 0.35, ease: 'power2.out' });
-    // fromTo, not from: a `from` here leaves the folders parked on their start values if
-    // anything interrupts it, and a wall of invisible skills is a worse failure than a
-    // missing animation. clearProps hands the elements back to the stylesheet.
-    gsap.fromTo(
-      strip.querySelectorAll('.skills-grid > li, .skill-group > h3'),
-      { y: 26, opacity: 0 },
-      {
-        y: 0,
-        opacity: 1,
-        duration: 0.5,
-        stagger: 0.018,
-        delay: 0.4,
-        ease: 'power3.out',
-        clearProps: 'opacity,transform',
-      },
-    );
+  // ---- browsing the index ------------------------------------------------------------
+  function slideTo(z, snap = false) {
+    railZ = THREE.MathUtils.clamp(z, 0, maxZ);
+    if (snap) {
+      rail.position.z = railZ;
+      render();
+      return;
+    }
+    gsap.to(rail.position, { z: railZ, duration: 0.5, ease: 'power3.out', onUpdate: render });
+    pump(600);
   }
 
-  const io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && open(), {
-    threshold: 0.25,
+  function select(f) {
+    if (active === f) return close();
+    if (active) collapse(active);
+    active = f;
+    f.el.classList.add('is-open');
+    f.el.setAttribute('aria-expanded', 'true');
+    host.classList.add('has-open');
+    // out of the file and forward to the front of the drawer, so a card filed at the back
+    // is just as readable as one at the front. Moving the rail instead pushed everything in
+    // front of it out through the drawer's face.
+    gsap.to(f.obj.position, {
+      x: CW * 0.3,
+      y: RIM + CH / 2 + 0.45,
+      z: D / 2 + 0.9,
+      duration: 0.6,
+      ease: 'power3.out',
+      onUpdate: render,
+    });
+    // square up to the camera: a card read at the drawer's own angle is foreshortened, and
+    // the whole reason it comes up is to be read
+    gsap.to(f.obj.rotation, {
+      y: AZIMUTH,
+      x: -ELEVATION * 0.55,
+      duration: 0.55,
+      ease: 'power3.out',
+      onUpdate: render,
+    });
+    pump(1200);
+  }
+
+  function collapse(f) {
+    f.el.classList.remove('is-open');
+    f.el.setAttribute('aria-expanded', 'false');
+    gsap.to(f.obj.position, {
+      x: 0,
+      y: RIM + CH / 2,
+      z: f.z0,
+      duration: 0.45,
+      ease: 'power3.inOut',
+      onUpdate: render,
+    });
+    gsap.to(f.obj.rotation, { y: 0, x: 0, duration: 0.4, ease: 'power3.inOut', onUpdate: render });
+  }
+
+  function close() {
+    if (!active) return;
+    collapse(active);
+    active = null;
+    host.classList.remove('has-open');
+    pump(700);
+  }
+
+  for (const f of folders) {
+    f.el.addEventListener('click', () => select(f));
+    f.el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault(); // Space would scroll the page
+        select(f);
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        folders[THREE.MathUtils.clamp(f.i + (e.key === 'ArrowRight' ? 1 : -1), 0, folders.length - 1)].el.focus();
+      }
+    });
+  }
+
+  // drag to browse the index, the way you'd walk fingers through the files
+  let dragging = false;
+  let startX = 0;
+  let startZ = 0;
+  host.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.folder')) return; // let the folders take their own clicks
+    dragging = true;
+    startX = e.clientX;
+    startZ = railZ;
+    host.setPointerCapture(e.pointerId);
   });
+  host.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    slideTo(startZ + ((e.clientX - startX) / host.clientWidth) * maxZ * 1.6, true);
+  });
+  const release = () => (dragging = false);
+  host.addEventListener('pointerup', release);
+  host.addEventListener('pointercancel', release);
+
+  const onKey = (e) => e.key === 'Escape' && active && (active.el.focus(), close());
+  window.addEventListener('keydown', onKey);
+
+  const onOutside = (e) => {
+    if (active && !e.target.closest('.folder')) close();
+  };
+  window.addEventListener('click', onOutside);
+
+  // ---- open once, when the section arrives -------------------------------------------
+  let opened = false;
+  drawer.position.z = -D * 0.5;
+  function openDrawer() {
+    if (opened) return;
+    opened = true;
+    gsap.to(drawer.position, { z: 0, duration: 1.2, ease: 'power3.out', onUpdate: render });
+    gsap.fromTo(
+      folders.map((f) => f.el),
+      { opacity: 0 },
+      { opacity: 1, duration: 0.5, stagger: 0.02, delay: 0.35, ease: 'power2.out', clearProps: 'opacity' },
+    );
+    pump(2200);
+  }
+
+  const io = new IntersectionObserver(
+    (entries) => entries.some((e) => e.isIntersecting) && openDrawer(),
+    { threshold: 0.2 },
+  );
   io.observe(host);
 
   const ro = new ResizeObserver(resize);
   ro.observe(host);
   resize();
 
-  // hero3d.js has no teardown at all; this module establishes the pattern.
+  // hero3d.js has no teardown at all; this module keeps one.
   return function dispose() {
     io.disconnect();
     ro.disconnect();
+    cancelAnimationFrame(frame);
+    window.removeEventListener('keydown', onKey);
+    window.removeEventListener('click', onOutside);
     gsap.killTweensOf(drawer.position);
-    if (strip) gsap.killTweensOf(strip);
+    folders.forEach((f) => (gsap.killTweensOf(f.obj.position), gsap.killTweensOf(f.obj.rotation)));
     scene.traverse((o) => o.geometry?.dispose());
     steel.dispose();
     steelInner.dispose();
@@ -265,5 +442,6 @@ export function initSkillDrawer(host, strip) {
     pmrem.dispose();
     renderer.dispose();
     renderer.domElement.remove();
+    css.domElement.remove();
   };
 }
