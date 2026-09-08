@@ -30,6 +30,7 @@ const GAP = 0.44; // spacing front to back. Tighter and the tabs cover each othe
 const W = CW + 1.0; // drawer is a little wider than a folder
 const H = 1.6; // side height
 const T = 0.14; // wall thickness
+const FACE_W = 4.05; // the front face - drawer and cabinet share it so the edges line up
 const AZIMUTH = THREE.MathUtils.degToRad(34);
 const ELEVATION = THREE.MathUtils.degToRad(27);
 
@@ -126,7 +127,11 @@ export function initSkillDrawer(host, strip) {
   if (!tiles.length) return () => {};
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 200);
+  // A long lens on purpose. At 32 degrees the drawer's front panel rendered half again
+  // larger than the cabinet face 11 units behind it, and the two stopped reading as the
+  // same piece of furniture. Flattening the perspective closes that gap; fit() re-solves
+  // the distance, so nothing else has to change.
+  const camera = new THREE.PerspectiveCamera(17, 1, 0.1, 400);
 
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -153,15 +158,10 @@ export function initSkillDrawer(host, strip) {
     roughnessMap,
     envMapIntensity: 1.1,
   });
-  // The inside is near-black on purpose. A lit floor under the folders reads as a tray;
-  // letting the interior fall away turns it into depth, and the cards climb out of it.
-  const steelInner = new THREE.MeshStandardMaterial({
-    color: 0x0c0d10,
-    metalness: 0.75,
-    roughness: 0.8,
-    roughnessMap,
-    envMapIntensity: 0.18,
-  });
+  // A void, not dark metal. Anything lit down there catches the environment and reads as a
+  // floor again however far it is dimmed, so the inside takes no light at all and the cards
+  // climb out of nothing.
+  const steelInner = new THREE.MeshBasicMaterial({ color: 0x000000 });
 
   const D = GAP * tiles.length + CW * 0.6; // long enough to hold the whole index
   const drawer = new THREE.Group();
@@ -183,7 +183,7 @@ export function initSkillDrawer(host, strip) {
     drawer.add(side);
   }
 
-  const front = box(W + 0.3, H * 1.4, 0.22, steel);
+  const front = box(FACE_W, H * 1.4, 0.22, steel);
   front.position.set(0, -0.15, D / 2 + 0.11);
   drawer.add(front);
 
@@ -195,9 +195,11 @@ export function initSkillDrawer(host, strip) {
   // Behind the drawer's back end, never over it: the whole index has to stay visible, and a
   // carcass wrapping the drawer would swallow the folders filed at the back. It runs well
   // past the top of the frame; .drawer__scene's mask is what ends it.
-  const CAB_W = W + 1.9;
+  const CAB_W = FACE_W;
   const CAB_H = 16;
-  const CAB_D = 5;
+  // deep enough to actually swallow this drawer. A shallow carcass sat so far behind a
+  // drawer this long that perspective shrank it, and the two stopped reading as one object.
+  const CAB_D = D * 0.85;
   const cabinet = new THREE.Group();
   cabinet.position.z = -D / 2 - CAB_D / 2 - 0.05;
   drawer.add(cabinet);
@@ -209,7 +211,7 @@ export function initSkillDrawer(host, strip) {
   // closed drawer fronts stacked above the open one - without them the carcass is just a
   // slab and the object stops reading as office furniture
   for (let i = 0; i < 4; i++) {
-    const face = box(CAB_W + 0.12, H * 1.5, 0.2, steel);
+    const face = box(CAB_W, H * 1.5, 0.2, steel);
     face.position.set(0, H * 0.95 + i * (H * 1.62), CAB_D / 2 + 0.06);
     cabinet.add(face);
     const pull = box(W * 0.45, 0.16, 0.22, steel);

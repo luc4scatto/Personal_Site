@@ -81,6 +81,14 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
   actually on screen. Trigonometry that assumed a front-on camera framed the drawer at about
   half the width it could use, because at three quarters the projected extent depends on the
   azimuth as well as the aspect.
+- **The camera is a long lens (17 degrees) on purpose.** At 32 the drawer's front panel
+  rendered half again larger than the cabinet face eleven units behind it and the two
+  stopped reading as one piece of furniture. Flattening the perspective closes that gap;
+  `fit()` re-solves the distance, so nothing else needs touching. `FACE_W` is the single
+  width the drawer front, the carcass and every closed front share.
+- **The drawer's interior is `MeshBasicMaterial` black**, not dimmed metal. Anything that
+  takes light down there catches the environment and reads as a floor again however far it
+  is darkened.
 - **The cabinet sits behind the drawer's back end, never over it.** A carcass that wrapped
   the drawer would swallow the folders filed at the back. It runs far past the top of the
   frame on purpose: `.drawer__scene canvas` carries a `mask-image` that dissolves the metal
@@ -88,8 +96,6 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
   a cut edge, and the drawer's underside sinks away instead of floating. Masking the canvas
   rather than fading in the shader is what keeps the CSS3D folders out of it — they are a
   separate layer with no mask.
-- The drawer's interior material is near-black (`steelInner`). A lit floor under the folders
-  reads as a tray; letting it fall away turns it into depth.
 - `GAP` is at its floor. Below roughly 0.4 each full-width tab covers the label of the one
   behind it, which is what a real index avoids by staggering its tabs sideways.
 - Rendering is **on demand**: `pump()` runs a short rAF burst around each interaction and
