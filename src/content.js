@@ -47,7 +47,7 @@ export const content = {
       description: 'New projects are in the works - check back soon.',
     },
     three: {
-      title: 'Homelab',
+      title: 'Personal project: Homelab',
       description:
         'A self-hosted rack running on Proxmox and TrueNAS, media, backups, automation and an AI agent, built from a 3D-printed case and one spare mini PC.',
     },
@@ -78,8 +78,8 @@ export const content = {
     backCta: '← Back to projects',
   },
   homelab: {
-    kicker: 'Project',
-    meta: 'Personal project · Self-hosted · Ongoing',
+    kicker: 'Personal Project',
+    meta: 'Self-hosted · Ongoing',
     description1:
       'It started with something simple: a shared folder my Windows machine and my Mac could both reach, instead of shuffling files between them by hand with an external hard drive, inconvenient enough over time, that I went looking for a better way. That one NAS folder opened a door into **self-hosted software**, and I never really came back out.',
     description2:
