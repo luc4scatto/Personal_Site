@@ -81,6 +81,17 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
   actually on screen. Trigonometry that assumed a front-on camera framed the drawer at about
   half the width it could use, because at three quarters the projected extent depends on the
   azimuth as well as the aspect.
+- **The cabinet sits behind the drawer's back end, never over it.** A carcass that wrapped
+  the drawer would swallow the folders filed at the back. It runs far past the top of the
+  frame on purpose: `.drawer__scene canvas` carries a `mask-image` that dissolves the metal
+  into the page at both ends, so the cabinet continues up into black rather than stopping on
+  a cut edge, and the drawer's underside sinks away instead of floating. Masking the canvas
+  rather than fading in the shader is what keeps the CSS3D folders out of it — they are a
+  separate layer with no mask.
+- The drawer's interior material is near-black (`steelInner`). A lit floor under the folders
+  reads as a tray; letting it fall away turns it into depth.
+- `GAP` is at its floor. Below roughly 0.4 each full-width tab covers the label of the one
+  behind it, which is what a real index avoids by staggering its tabs sideways.
 - Rendering is **on demand**: `pump()` runs a short rAF burst around each interaction and
   then stops. `hero3d.js` by contrast runs its loop for the life of the page.
 - `main.js` adds `is-live` to `#skill-drawer` only after the module has initialised, and

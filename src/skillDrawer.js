@@ -26,7 +26,7 @@ const PX = 0.011; // px -> world
 const CW = CARD_W * PX; // ~2.75
 const CH = CARD_H * PX; // ~3.52
 
-const GAP = 0.5; // spacing between folders, front to back
+const GAP = 0.44; // spacing front to back. Tighter and the tabs cover each other
 const W = CW + 1.0; // drawer is a little wider than a folder
 const H = 1.6; // side height
 const T = 0.14; // wall thickness
@@ -153,12 +153,14 @@ export function initSkillDrawer(host, strip) {
     roughnessMap,
     envMapIntensity: 1.1,
   });
+  // The inside is near-black on purpose. A lit floor under the folders reads as a tray;
+  // letting the interior fall away turns it into depth, and the cards climb out of it.
   const steelInner = new THREE.MeshStandardMaterial({
-    color: 0x3a3e44,
-    metalness: 0.9,
-    roughness: 0.55,
+    color: 0x0c0d10,
+    metalness: 0.75,
+    roughness: 0.8,
     roughnessMap,
-    envMapIntensity: 0.5,
+    envMapIntensity: 0.18,
   });
 
   const D = GAP * tiles.length + CW * 0.6; // long enough to hold the whole index
@@ -188,6 +190,32 @@ export function initSkillDrawer(host, strip) {
   const handle = box(W * 0.45, 0.18, 0.24, steel);
   handle.position.set(0, -0.15, D / 2 + 0.33);
   drawer.add(handle);
+
+  // ---- the cabinet ---------------------------------------------------------------------
+  // Behind the drawer's back end, never over it: the whole index has to stay visible, and a
+  // carcass wrapping the drawer would swallow the folders filed at the back. It runs well
+  // past the top of the frame; .drawer__scene's mask is what ends it.
+  const CAB_W = W + 1.9;
+  const CAB_H = 16;
+  const CAB_D = 5;
+  const cabinet = new THREE.Group();
+  cabinet.position.z = -D / 2 - CAB_D / 2 - 0.05;
+  drawer.add(cabinet);
+
+  const carcass = box(CAB_W, CAB_H, CAB_D, steel);
+  carcass.position.y = CAB_H / 2 - H * 1.25;
+  cabinet.add(carcass);
+
+  // closed drawer fronts stacked above the open one - without them the carcass is just a
+  // slab and the object stops reading as office furniture
+  for (let i = 0; i < 4; i++) {
+    const face = box(CAB_W + 0.12, H * 1.5, 0.2, steel);
+    face.position.set(0, H * 0.95 + i * (H * 1.62), CAB_D / 2 + 0.06);
+    cabinet.add(face);
+    const pull = box(W * 0.45, 0.16, 0.22, steel);
+    pull.position.set(0, face.position.y, CAB_D / 2 + 0.22);
+    cabinet.add(pull);
+  }
 
   const key = new THREE.DirectionalLight(0xffffff, 1.15);
   key.position.set(-4, 7, 6);
@@ -368,7 +396,9 @@ export function initSkillDrawer(host, strip) {
         select(f);
       } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
         e.preventDefault();
-        folders[THREE.MathUtils.clamp(f.i + (e.key === 'ArrowRight' ? 1 : -1), 0, folders.length - 1)].el.focus();
+        folders[
+          THREE.MathUtils.clamp(f.i + (e.key === 'ArrowRight' ? 1 : -1), 0, folders.length - 1)
+        ].el.focus();
       }
     });
   }
@@ -410,7 +440,14 @@ export function initSkillDrawer(host, strip) {
     gsap.fromTo(
       folders.map((f) => f.el),
       { opacity: 0 },
-      { opacity: 1, duration: 0.5, stagger: 0.02, delay: 0.35, ease: 'power2.out', clearProps: 'opacity' },
+      {
+        opacity: 1,
+        duration: 0.5,
+        stagger: 0.02,
+        delay: 0.35,
+        ease: 'power2.out',
+        clearProps: 'opacity',
+      },
     );
     pump(2200);
   }
