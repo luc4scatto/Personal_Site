@@ -312,6 +312,24 @@ export const content = {
         'Manage USD complex files',
       ],
     },
+    pixyz: {
+      title: 'Pixyz',
+      text: 'CAD-to-mesh conversion and optimization tool for real-time pipelines and configurators.',
+      color: '#fab10d',
+      bullets: ['CAD-to-Mesh Conversion', 'Import/Export for Real-Time Pipelines'],
+    },
+    vray: {
+      title: 'V-Ray',
+      text: 'Production renderer plugin for Maya, used for photorealistic lighting and shading.',
+      color: '#FFFFFF',
+      bullets: ['Rendering', 'Lighting'],
+    },
+    redshift: {
+      title: 'Redshift',
+      text: 'GPU-accelerated renderer by Maxon, built for fast, production-quality 3D rendering.',
+      color: '#F92A57',
+      bullets: ['Rendering', 'Lighting', 'GPU-Accelerated Rendering'],
+    },
     'unreal-engine': {
       title: 'Unreal Engine',
       text: 'Real-time 3D engine for interactive experiences, virtual production and high-fidelity visualization.',
@@ -427,6 +445,20 @@ export const content = {
       color: '#FFFFFF',
       selfTaught: true,
       bullets: ['Mixing and Arrangement', 'Sound Design', 'Plugins and Instruments'],
+    },
+    traktor: {
+      title: 'Traktor',
+      text: "Native Instruments' DJ software for live mixing and performance.",
+      color: '#FFFFFF',
+      selfTaught: true,
+      bullets: ['DJing', 'Live Mixing'],
+    },
+    rekordbox: {
+      title: 'rekordbox',
+      text: "Pioneer DJ's software for track preparation, library management and performance.",
+      color: '#FFFFFF',
+      selfTaught: true,
+      bullets: ['DJing', 'Track Prep and Library Management'],
     },
   },
 };
