@@ -41,8 +41,9 @@ The site used to have a single `700px` query, which left every tablet on the des
 | `max-width: 700px`, or `max-width: 1024px and (orientation: portrait)` | Hero stacks: the 3D canvas leaves absolute positioning and becomes a flow block under the text | `STACKED_HERO` in `hero3d.js` (camera distance) |
 | `max-width: 560px` | Skill card bullets drop from two columns to one | — |
 | `max-width: 700px` | Skill tiles and their marks shrink | — |
+| `min-width: 701px` | Skills become the 3D drawer instead of the flat wall | **two**: the import gate in `main.js`, and the guard in `placeStrip()` in `skillDrawer.js` |
 
-The skills section used to have three interlocking queries (999 modal / 700 scroll lock / 1000 grid) plus a JS twin for each. It has **none** now: the detail card is a normal grid item that unfolds in place, so the same markup works at every width. The two queries above are cosmetic, with no JS counterpart.
+The skills section used to have three interlocking queries (999 modal / 700 scroll lock / 1000 grid) plus a JS twin for each, and for a while it had none at all. The drawer brought **one** back, and it is a threesome: `701px` is written in `sections.css`, in the `main.js` import gate, and in `skillDrawer.js`'s `placeStrip()`. Change one and you must change all three. The guard in `placeStrip()` is the non-obvious member: it clears the inline `left/width/top/opacity` the module wrote, because a stylesheet cannot beat inline styles on its own, and without it a desktop-to-mobile resize leaves the wall positioned for a drawer that is no longer being drawn.
 
 Tablet specifics:
 - **Portrait tablets** (701–1024px): headline is `6.4vw` and `#hero-canvas` is `flex: 1 1 0` — a zero basis, not `auto`, because the `<canvas>` inside is sized by the renderer and an auto basis lets it drive (and keep growing) the band's height. Result: the hero is exactly one screen, no clipped kicker, no sphere off the bottom edge.
@@ -57,8 +58,31 @@ one thing, let the rest recede" grammar as the 3D hero cloud, in CSS instead of 
 
 This replaced a `position: fixed` panel and, before that, a sticky second column. Both were
 deleted for the same reason: the card is now a normal grid item, so there is no positioning
-code, no modal, no scroll lock, and **no breakpoint twin between JS and CSS at all**. The
-section behaves the same from 390px to 1440px.
+code, no modal and no scroll lock.
+
+**Above 701px the wall is filed into a drawer** (`src/skillDrawer.js`): a brushed-steel
+office drawer rendered in WebGL, with the same `<li data-skill>` folders standing in it. The
+whole thing hangs off one class:
+
+- `main.js` adds `is-live` to `#skill-drawer` **only after** the three.js module has
+  initialised. Every drawer rule in `sections.css` is scoped to `#skill-drawer.is-live`, so
+  reduced motion, a missing WebGL context and a failed dynamic import all land on the flat
+  wall without a single override. Do not move a drawer rule outside that scope.
+- The strip's `left/width/top` are written by `placeStrip()` from the **projected 3D corners
+  of the drawer's mouth**, never from a breakpoint. That is deliberate: it is the same trap
+  `STACKED_HERO` documents, and projecting real anchors is what keeps the folder row on the
+  metal at any width.
+- The camera solve runs against the drawer's **open** position (`drawer.position.z = 0`),
+  restoring it afterwards. Framing it while the drawer is still pushed in projects the mouth
+  narrower, and the row then overflows the moment it slides forward.
+- The canvas covers only the lower part of the block (`inset: 25% 0 0`). The empty band above
+  it is where the folders stand up. Solving the rim's vertical position in the camera as well
+  fights the width solve, because moving the camera vertically changes how wide the front
+  edge projects — that was tried and removed.
+- Rendering is **on demand**: one pass per resize plus the opening tween, then nothing.
+  `hero3d.js` by contrast runs its loop for the life of the page.
+- The reveal uses `gsap.fromTo`, not `from`. A `from` here left the folders parked on their
+  start values, and an invisible wall of skills is a worse failure than a missing animation.
 
 - **Selectors must be direct-child scoped.** The card is injected *inside* `.skills-grid`
   and its title is an `<h3>` inside `.skill-group`. Written as descendant selectors,

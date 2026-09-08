@@ -89,7 +89,12 @@
 
       <section id="skills" class="skills">
         <h2 data-reveal>Skills</h2>
-        <div class="skill-group" data-reveal>
+        <!-- the drawer: WebGL metal behind, the real <li> folders in the strip on top,
+             so every tool stays clickable and reachable by keyboard -->
+        <div id="skill-drawer" class="drawer" data-reveal>
+          <div class="drawer__scene" aria-hidden="true"></div>
+          <div class="drawer__strip">
+        <div class="skill-group">
           <h3>3D Software</h3>
           <ul class="skills-grid">
             <li data-skill="blender"><img class="skill-icon" src="icons/blender.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">Blender</span></li>
@@ -101,14 +106,14 @@
             <li data-skill="redshift"><img class="skill-icon" src="icons/redshift.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">Redshift</span></li>
           </ul>
         </div>
-        <div class="skill-group" data-reveal>
+        <div class="skill-group">
           <h3>Real-time &amp; Interactive</h3>
           <ul class="skills-grid">
             <li data-skill="unreal-engine"><img class="skill-icon" src="icons/unreal-engine.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">Unreal Engine</span></li>
             <li data-skill="touchdesigner"><img class="skill-icon" src="icons/touchdesigner.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">TouchDesigner</span></li>
           </ul>
         </div>
-        <div class="skill-group" data-reveal>
+        <div class="skill-group">
           <h3>Code &amp; Automation</h3>
           <ul class="skills-grid">
             <li data-skill="python"><img class="skill-icon" src="icons/python.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">Python</span></li>
@@ -117,7 +122,7 @@
             <!-- hidden for now, keep for later: <li data-skill="qt-designer"><img class="skill-icon" src="icons/qt-designer.svg" alt="" loading="lazy" /> <span class="skill-label">Qt Designer</span></li> -->
           </ul>
         </div>
-        <div class="skill-group" data-reveal>
+        <div class="skill-group">
           <h3>AI</h3>
           <ul class="skills-grid">
             <li data-skill="agentic-workflow"><img class="skill-icon" src="icons/agentic-workflow.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">Agentic Workflow</span></li>
@@ -125,7 +130,7 @@
             <!-- hidden for now, keep for later: <li data-skill="comfyui"><img class="skill-icon" src="icons/comfyui.png" alt="" loading="lazy" /> <span class="skill-label">ComfyUI</span></li> -->
           </ul>
         </div>
-        <div class="skill-group" data-reveal>
+        <div class="skill-group">
           <h3>Motion &amp; Video</h3>
           <ul class="skills-grid">
             <li data-skill="after-effects"><img class="skill-icon" src="icons/after-effects.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">After Effects</span></li>
@@ -133,14 +138,14 @@
             <li data-skill="premiere-pro"><img class="skill-icon" src="icons/premiere-pro.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">Premiere Pro</span></li>
           </ul>
         </div>
-        <div class="skill-group" data-reveal>
+        <div class="skill-group">
           <h3>2D Softwares</h3>
           <ul class="skills-grid">
             <li data-skill="photoshop"><img class="skill-icon" src="icons/photoshop.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">Photoshop</span></li>
             <li data-skill="illustrator"><img class="skill-icon" src="icons/illustrator.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">Illustrator</span></li>
           </ul>
         </div>
-        <div class="skill-group" data-reveal>
+        <div class="skill-group">
           <h3>Audio</h3>
           <ul class="skills-grid">
             <li data-skill="ableton-live"><img class="skill-icon" src="icons/ableton-live.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">Ableton Live</span></li>
@@ -148,6 +153,10 @@
             <li data-skill="rekordbox"><img class="skill-icon" src="icons/rekordbox.svg" alt="" width="34" height="34" loading="lazy" /> <span class="skill-label">rekordbox</span></li>
           </ul>
         </div>
+          </div>
+        </div>
+        <!-- the detail card opens here: a horizontal drawer has no row to unfold into -->
+        <div id="skill-card-slot"></div>
       </section>
 
       <section id="projects" class="projects">

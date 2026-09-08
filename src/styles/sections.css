@@ -733,6 +733,175 @@
   opacity: 0;
 }
 
+
+/* skill drawer — the wall, filed. A brushed-steel drawer is drawn in WebGL by
+   src/skillDrawer.js; the folders standing in it are the same <li data-skill> elements as
+   the wall, so every tool stays clickable, tabbable and readable.
+
+   Everything here is gated on #skill-drawer.is-live, a class main.js only adds once the
+   three.js module has actually initialised. Reduced motion, no WebGL, or a failed import
+   therefore all land on the flat wall above without a single override. */
+#skill-card-slot {
+  display: grid;
+}
+
+@media (min-width: 701px) {
+  #skill-drawer.is-live {
+    position: relative;
+    aspect-ratio: 5 / 2.15;
+    min-height: 26rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* the canvas holds only the lower part of the block: the empty space above it is where
+     the folders stand up out of the drawer */
+  #skill-drawer.is-live .drawer__scene {
+    position: absolute;
+    inset: 25% 0 0;
+  }
+
+  #skill-drawer.is-live .drawer__scene canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* left/width/top are written by skillDrawer.js from the projected 3D corners of the
+     drawer's mouth — never from a breakpoint, so the row cannot drift off the metal */
+  #skill-drawer.is-live .drawer__strip {
+    position: absolute;
+    height: 14rem;
+    transform: translateY(-100%);
+    display: flex;
+    align-items: flex-end;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: #2f2f2f transparent;
+    padding-bottom: 0.4rem;
+  }
+
+  #skill-drawer.is-live .drawer__strip::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  #skill-drawer.is-live .drawer__strip::-webkit-scrollbar-thumb {
+    background: #2f2f2f;
+    border-radius: 99px;
+  }
+
+  /* the groups stop being stacked bands and become stretches of one continuous row */
+  #skill-drawer.is-live .skill-group,
+  #skill-drawer.is-live .skill-group + .skill-group {
+    display: flex;
+    align-items: flex-end;
+    margin: 0;
+  }
+
+  #skill-drawer.is-live .skills-grid {
+    display: flex;
+    align-items: flex-end;
+    gap: 0;
+    margin: 0;
+  }
+
+  /* the category divider: a card-stock tab, taller than the folders and read vertically,
+     the way a real index divider is */
+  #skill-drawer.is-live .skill-group > h3 {
+    flex: 0 0 auto;
+    width: 2.5rem;
+    height: 13.4rem;
+    margin: 0 0.55rem 0 1.1rem;
+    padding: 0.9rem 0;
+    display: block;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+    text-align: end;
+    color: var(--text-dim);
+    background: #131313;
+    border: 1px solid #262626;
+    border-bottom-color: transparent;
+    border-radius: 0.3rem 0.3rem 0 0;
+  }
+
+  #skill-drawer.is-live .skill-group:first-child > h3 {
+    margin-left: 0;
+  }
+
+  /* the hairline rule is a device for a stacked wall; in the drawer it would run through
+     the folders */
+  #skill-drawer.is-live .skill-group > h3::after {
+    display: none;
+  }
+
+  /* the folder: black body like the rest of the site, brand colour kept to the tab */
+  #skill-drawer.is-live .skills-grid > li {
+    flex: 0 0 auto;
+    width: 7.6rem;
+    height: 12.6rem;
+    margin-right: -1.1rem;
+    padding: 0.85rem 0.8rem;
+    gap: 0.55rem;
+    scroll-snap-align: center;
+    border: 1px solid #232323;
+    border-top: 2px solid color-mix(in srgb, var(--brand, var(--accent)) 75%, transparent);
+    border-radius: 0.4rem 0.4rem 0.15rem 0.15rem;
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--brand, var(--accent)) 18%, transparent) 0 3.7rem,
+        transparent 3.7rem
+      ),
+      #0b0b0b;
+    transform: none;
+    transition:
+      transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.25s,
+      opacity 0.35s,
+      filter 0.35s;
+  }
+
+  /* the ruled sheet inside the folder, straight off the sketch */
+  #skill-drawer.is-live .skills-grid > li::after {
+    content: '';
+    position: absolute;
+    inset: 4.5rem 0.8rem 1rem;
+    background: repeating-linear-gradient(
+      180deg,
+      #1c1c1c 0 1px,
+      transparent 1px 0.72rem
+    );
+    opacity: 0.75;
+    pointer-events: none;
+  }
+
+  /* picking one lifts it out of the drawer - the arrows in the sketch */
+  #skill-drawer.is-live .skills-grid > li:hover,
+  #skill-drawer.is-live .skills-grid > li:focus-visible {
+    transform: translateY(-1.5rem);
+    z-index: 2;
+  }
+
+  #skill-drawer.is-live .skills-grid > li.is-active {
+    transform: translateY(-2.1rem);
+    z-index: 3;
+    border-color: color-mix(in srgb, var(--brand, var(--accent)) 60%, transparent);
+  }
+
+  #skill-drawer.is-live .skill-label {
+    font-size: 0.8125rem;
+    line-height: 1.2;
+  }
+
+  #skill-drawer.is-live .skill-icon {
+    width: 26px;
+    height: 26px;
+  }
+}
+
 /* projects */
 .projects-grid {
   display: grid;

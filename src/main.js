@@ -230,7 +230,11 @@ if (skillsSection && skillTiles.length) {
   const openCard = (li) => {
     const grid = li.closest('.skills-grid');
     if (!applyContent(li) || !grid) return;
-    const movingRow = card.parentElement !== grid;
+    // In drawer mode the folders sit in one horizontal row, so there is no row for the card
+    // to unfold inside: it opens in a slot below the drawer instead. With no slot (the
+    // mobile / no-WebGL wall) it still unfolds under the category that owns the pick.
+    const mount = document.querySelector('#skill-card-slot') || grid;
+    const movingRow = card.parentElement !== mount;
 
     activeEl?.classList.remove('is-active');
     activeEl = li;
@@ -243,7 +247,7 @@ if (skillsSection && skillTiles.length) {
     // pick — so it always unfolds under the tool, never somewhere else on the wall
     gsap.killTweensOf(card);
     gsap.killTweensOf(inner);
-    grid.append(card);
+    mount.append(card);
     if (isReduced()) {
       gsap.set(card, { height: 'auto', opacity: 1 });
       gsap.set(inner, { y: 0, opacity: 1 });
@@ -312,6 +316,28 @@ if (heroCanvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const hint = document.querySelector('.hero-hint');
     if (hint) hint.hidden = false;
   });
+}
+
+// the skill drawer's metal shell — lazy, same gate as the hero: under reduced motion the
+// three.js chunk is never fetched and the section falls back to the flat wall
+const skillDrawer = document.querySelector('#skill-drawer');
+if (
+  skillDrawer &&
+  !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
+  // a perspective drawer on a phone is unreadable; below this width the wall is simply the
+  // better layout, so the chunk is not even fetched
+  window.matchMedia('(min-width: 701px)').matches
+) {
+  const scene = skillDrawer.querySelector('.drawer__scene');
+  const strip = skillDrawer.querySelector('.drawer__strip');
+  import('./skillDrawer.js')
+    .then((m) => {
+      m.initSkillDrawer(scene, strip);
+      // only claim the drawer once the metal is actually there; CSS keys the whole
+      // perspective layout off this class, so a failed import leaves the wall intact
+      skillDrawer.classList.add('is-live');
+    })
+    .catch(() => {});
 }
 
 // homelab network diagram (homelab.html only) — real content, always renders;
