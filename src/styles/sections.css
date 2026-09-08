@@ -832,6 +832,8 @@
   border-top: 2px solid var(--brand, var(--accent));
   border-radius: 0.35rem 0.35rem 0.2rem 0.2rem;
   box-shadow: 0 12px 26px -14px rgba(0, 0, 0, 0.9);
+  mask-image: linear-gradient(to top, transparent 0, #000 13%, #000 100%);
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 13%, #000 100%);
   transition:
     height 0.45s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.25s;

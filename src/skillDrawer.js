@@ -202,7 +202,7 @@ export function initSkillDrawer(host, strip) {
   const CAB_D = D * 0.85;
   const cabinet = new THREE.Group();
   cabinet.position.z = -D / 2 - CAB_D / 2 - 0.05;
-  drawer.add(cabinet);
+  scene.add(cabinet);
 
   const carcass = box(CAB_W, CAB_H, CAB_D, steel);
   carcass.position.y = CAB_H / 2 - H * 1.25;
@@ -212,7 +212,7 @@ export function initSkillDrawer(host, strip) {
   // slab and the object stops reading as office furniture
   for (let i = 0; i < 4; i++) {
     const face = box(CAB_W, H * 1.5, 0.2, steel);
-    face.position.set(0, H * 0.95 + i * (H * 1.62), CAB_D / 2 + 0.06);
+    face.position.set(0, H * 1.62 + i * (H * 1.62), CAB_D / 2 + 0.06);
     cabinet.add(face);
     const pull = box(W * 0.45, 0.16, 0.22, steel);
     pull.position.set(0, face.position.y, CAB_D / 2 + 0.22);
@@ -434,11 +434,11 @@ export function initSkillDrawer(host, strip) {
 
   // ---- open once, when the section arrives -------------------------------------------
   let opened = false;
-  drawer.position.z = -D * 0.5;
+  drawer.position.z = -D * 0.86;
   function openDrawer() {
     if (opened) return;
     opened = true;
-    gsap.to(drawer.position, { z: 0, duration: 1.2, ease: 'power3.out', onUpdate: render });
+    gsap.to(drawer.position, { z: 0, duration: 1.5, ease: 'power3.out', onUpdate: render });
     gsap.fromTo(
       folders.map((f) => f.el),
       { opacity: 0 },
@@ -451,7 +451,7 @@ export function initSkillDrawer(host, strip) {
         clearProps: 'opacity',
       },
     );
-    pump(2200);
+    pump(2600);
   }
 
   const io = new IntersectionObserver(
