@@ -675,6 +675,7 @@
 .skill-icon {
   width: 34px;
   height: 34px;
+  object-fit: contain;
   transition: transform 0.25s;
 }
 

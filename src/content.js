@@ -402,6 +402,27 @@ export const content = {
         'PyQt5/6 and PySide for the UI',
       ],
     },
+    usd: {
+      title: 'USD',
+      text: "Pixar's Universal Scene Description format for scene composition and interchange across 3D pipelines.",
+      color: '#00A99D',
+      selfTaught: true,
+      bullets: [
+        'Non-destructive composition: layers, variants, references',
+        'Scene assembly and interchange across DCCs',
+        'Pipeline format for real-time and configurator tools',
+      ],
+    },
+    materialx: {
+      title: 'MaterialX',
+      text: 'Open standard for portable material and look-development data across renderers and applications.',
+      color: '#EE7623',
+      selfTaught: true,
+      bullets: [
+        'Shading graphs portable between DCCs and renderers',
+        'Look-dev data for real-time and offline pipelines',
+      ],
+    },
     'qt-designer': {
       title: 'Qt Designer',
       text: 'Visual layout tool for building Qt-based desktop application interfaces.',
