@@ -764,32 +764,41 @@
   inset: 0;
 }
 
-/* The metal dissolves into the page at both ends: the cabinet keeps going up out of frame
-   instead of stopping on a cut edge, and the drawer's underside sinks away so the folders
-   are standing in something rather than floating. Masking the canvas rather than fading in
+/* The metal dissolves into the page on three sides: the cabinet keeps going up out of frame
+   instead of stopping on a cut edge, the drawer's underside sinks away so the folders are
+   standing in something rather than floating, and the carcass runs off into the dark at the
+   back rather than ending on the right edge of the canvas — deep enough to swallow the whole
+   drawer it reaches that edge exactly, and a long lens leaves its far end barely converged,
+   so a hard cut there read as broken perspective. Masking the canvas rather than fading in
    the shader keeps the CSS3D folders untouched — they are a separate layer. */
 #skill-drawer.is-live .drawer__scene canvas {
   display: block;
   width: 100%;
   height: 100%;
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.4) 9%,
-    #000 26%,
-    #000 70%,
-    rgba(0, 0, 0, 0.45) 88%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.4) 9%,
-    #000 26%,
-    #000 70%,
-    rgba(0, 0, 0, 0.45) 88%,
-    transparent 100%
-  );
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.4) 9%,
+      #000 26%,
+      #000 70%,
+      rgba(0, 0, 0, 0.45) 88%,
+      transparent 100%
+    ),
+    linear-gradient(to right, #000 0%, #000 62%, rgba(0, 0, 0, 0.5) 84%, transparent 100%);
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.4) 9%,
+      #000 26%,
+      #000 70%,
+      rgba(0, 0, 0, 0.45) 88%,
+      transparent 100%
+    ),
+    linear-gradient(to right, #000 0%, #000 62%, rgba(0, 0, 0, 0.5) 84%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
 }
 
 /* the CSS3D layer rides above the metal; it must not swallow the drag, so only the folders
