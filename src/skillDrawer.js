@@ -168,9 +168,32 @@ function buildFolder(li) {
   return li;
 }
 
+/** A card-index divider: a plain tab standing between two categories, never itself a
+ *  folder. Taller than a folder's own rest-state tab so its label survives everything
+ *  filed in front of it, the way a real index divider is cut proud of the cards it sorts. */
+function buildDivider(label) {
+  const el = document.createElement('div');
+  el.className = 'folder folder--divider';
+  el.setAttribute('aria-hidden', 'true');
+
+  const tab = document.createElement('div');
+  tab.className = 'folder__tab--divider';
+  tab.textContent = label;
+  el.append(tab);
+  return el;
+}
+
 export function initSkillDrawer(host, strip) {
-  const tiles = [...strip.querySelectorAll('li[data-skill]')];
-  if (!tiles.length) return () => {};
+  // Walk the strip's own .skill-group divs rather than flatly querying every <li> so the
+  // rail can carry the same category boundaries the flat wall shows via its <h3>s — a card
+  // index files by subject, it doesn't run everything together.
+  const railSource = [];
+  for (const group of strip.querySelectorAll('.skill-group')) {
+    const label = group.querySelector('h3')?.textContent;
+    if (label && railSource.length) railSource.push({ divider: label });
+    for (const li of group.querySelectorAll('li[data-skill]')) railSource.push({ li });
+  }
+  if (!railSource.some((r) => r.li)) return () => {};
 
   const scene = new THREE.Scene();
   // A long lens on purpose. At 32 degrees the drawer's front panel rendered half again
@@ -211,9 +234,10 @@ export function initSkillDrawer(host, strip) {
 
   // The tray is cut to the index plus a margin at each end, rather than to a headroom figure
   // that had nothing to do with the folders: the old one left a full GAP of empty tray behind
-  // the last folder and a different amount in front of the first.
+  // the last folder and a different amount in front of the first. Dividers sit on the same
+  // GAP pitch as folders, so they count toward this length too.
   const MARGIN = 0.55;
-  const D = GAP * (tiles.length - 1) + MARGIN * 2;
+  const D = GAP * (railSource.length - 1) + MARGIN * 2;
   // A drawer whose back edge comes level with the cabinet face is a drawer that has fallen
   // out. The shell is longer than the index by TAIL, and that tail is empty: it stays in the
   // cabinet at full extension, so the furniture is still holding the drawer while every
@@ -269,8 +293,10 @@ export function initSkillDrawer(host, strip) {
 
   // ---- the cabinet ---------------------------------------------------------------------
   // Behind the drawer's back end, never over it: the whole index has to stay visible, and a
-  // carcass wrapping the drawer would swallow the folders filed at the back. It runs well
-  // past the top of the frame; .drawer__scene's mask is what ends it.
+  // carcass wrapping the drawer would swallow the folders filed at the back. It is a whole
+  // piece of furniture, top included: it used to run far past the top of the frame under
+  // five closed fronts, and the frame spent so much of itself on steel that the drawer - the
+  // thing actually being read - came out small.
   // The frame is built the way a real open cube is: one board thickness, used both for how
   // deep the reveal runs back and for how wide the border sits on the face. The two being
   // the same number is what makes it read as a board rather than as a groove cut in a sheet.
@@ -282,53 +308,18 @@ export function initSkillDrawer(host, strip) {
   const OPEN_H = MOUTH_H;
   const OPEN_Y = MOUTH_Y;
   const CAB_W = OPEN_W + BOARD * 2; // the carcass frames the mouth, it doesn't end at it
-  const CAB_H = 16;
+  const CAB_BOTTOM = -H * 1.25;
   // Deep enough to actually swallow this drawer whole, shell and tail: at 0.85 * D the
   // drawer bottomed out against the back of the bay with its front still standing a third of
   // the way out, which is a drawer that cannot shut rather than one left open.
   const CAB_D = DL + 0.3;
+  const PITCH = FRONT_H + 0.15; // one face plus the reveal between two of them
+  // The top of a cabinet holding `total` drawers: the highest front, plus the same border
+  // the frame runs down its sides, so the top rail reads as the same board.
+  const cabTop = (total) => MOUTH_Y + PITCH * (total - 1) + FRONT_H / 2 + (CAB_W - FACE_W) / 2;
   const cabinet = new THREE.Group();
   cabinet.position.z = -D / 2 - CAB_D / 2 - 0.05;
   scene.add(cabinet);
-
-  // The opening is a real hole with a board's worth of material around it, not a black panel
-  // on a slab. Painted on, it read as one flat layer: at three quarters the eye expects to
-  // see the cut edge on the near side of the mouth and the inner face of the board on the
-  // far side. So the carcass is pushed back by BOARD and the face is rebuilt as four slabs
-  // around the hole - it is their own sides, front edge and reveal, that carry the thickness.
-  // An earlier version ran this at 0.16 with a chamfer faked on top, because a thin lip has
-  // no reveal to show and needed a highlight standing in for one. At a board's thickness the
-  // reveal is simply there and the chamfer is gone.
-  const carcass = box(CAB_W, CAB_H, CAB_D, steel);
-  carcass.position.set(0, CAB_H / 2 - H * 1.25, -BOARD);
-  cabinet.add(carcass);
-
-  // The face is one piece, flush: the whole cabinet front with the mouth cut out of it and
-  // extruded to the board's thickness, so the reveal around the hole is the only edge in it.
-  // Four separate slabs framing the opening were tried first and read as four boards laid
-  // on the face - a seam at every corner, and the frame standing proud of the panel around
-  // it. A shape with a hole has no seams to show and nothing to stand proud of.
-  const CAB_TOP = CAB_H - H * 1.25;
-  const CAB_BOTTOM = -H * 1.25;
-  const faceShape = new THREE.Shape();
-  faceShape.moveTo(-CAB_W / 2, CAB_BOTTOM);
-  faceShape.lineTo(CAB_W / 2, CAB_BOTTOM);
-  faceShape.lineTo(CAB_W / 2, CAB_TOP);
-  faceShape.lineTo(-CAB_W / 2, CAB_TOP);
-  faceShape.closePath();
-  const mouth = new THREE.Path();
-  mouth.moveTo(-OPEN_W / 2, OPEN_Y - OPEN_H / 2);
-  mouth.lineTo(-OPEN_W / 2, OPEN_Y + OPEN_H / 2);
-  mouth.lineTo(OPEN_W / 2, OPEN_Y + OPEN_H / 2);
-  mouth.lineTo(OPEN_W / 2, OPEN_Y - OPEN_H / 2);
-  mouth.closePath();
-  faceShape.holes.push(mouth);
-  const faceMesh = new THREE.Mesh(
-    new THREE.ExtrudeGeometry(faceShape, { depth: BOARD, bevelEnabled: false }),
-    steel,
-  );
-  faceMesh.position.z = CAB_D / 2 - BOARD;
-  cabinet.add(faceMesh);
 
   // The bay at the back of the hole. Same reason as the drawer's own liners: lit metal down
   // there reads as a floor, so the cavity takes no light at all.
@@ -341,19 +332,67 @@ export function initSkillDrawer(host, strip) {
   // wash only sat on the steel dimming it, which is half of why the pale bevel looked stuck
   // on. mouthFalloff() is still here if the shading is ever wanted back.
 
-  // closed drawer fronts stacked above the open one - without them the carcass is just a
-  // slab and the object stops reading as office furniture
-  const PITCH = FRONT_H + 0.15; // one face plus the reveal between two of them
-  for (let i = 0; i < 5; i++) {
-    // The same face as the open drawer's, on the same pitch: they are the same furniture, and
-    // sized on their own the stack drifted out of step with the drawer below it. FACE_W, not
-    // CAB_W, so the frame's border runs round them as it runs round the mouth.
-    const face = box(FACE_W, FRONT_H, 0.2, steel);
-    face.position.set(0, MOUTH_Y + PITCH * (i + 1), CAB_D / 2 + 0.06);
-    cabinet.add(face);
-    const pull = box(W * 0.45, 0.16, 0.22, steel);
-    pull.position.set(0, face.position.y, CAB_D / 2 + 0.22);
-    cabinet.add(pull);
+  // Rebuilt, not scaled, when the drawer count changes: the face is a shape with a hole in
+  // it, and stretching it would stretch the mouth with it. resize() picks the count and only
+  // lands here when it actually differs, so this runs about once per visit.
+  let drawerCount = 0;
+  function buildCabinet(total) {
+    if (total === drawerCount) return;
+    drawerCount = total;
+    for (const o of [...cabinet.children]) {
+      if (o === bay) continue;
+      cabinet.remove(o);
+      o.geometry.dispose();
+    }
+    const top = cabTop(total);
+
+    // The opening is a real hole with a board's worth of material around it, not a black
+    // panel on a slab. Painted on, it read as one flat layer: at three quarters the eye
+    // expects to see the cut edge on the near side of the mouth and the inner face of the
+    // board on the far side. So the carcass is pushed back by BOARD and the face carries the
+    // thickness. An earlier version ran this at 0.16 with a chamfer faked on top, because a
+    // thin lip has no reveal to show. At a board's thickness the reveal is simply there.
+    const carcass = box(CAB_W, top - CAB_BOTTOM, CAB_D, steel);
+    carcass.position.set(0, (top + CAB_BOTTOM) / 2, -BOARD);
+    cabinet.add(carcass);
+
+    // The face is one piece, flush: the whole cabinet front with the mouth cut out of it and
+    // extruded to the board's thickness, so the reveal around the hole is the only edge in
+    // it. Four separate slabs framing the opening were tried first and read as four boards
+    // laid on the face - a seam at every corner, and the frame standing proud of the panel.
+    const faceShape = new THREE.Shape();
+    faceShape.moveTo(-CAB_W / 2, CAB_BOTTOM);
+    faceShape.lineTo(CAB_W / 2, CAB_BOTTOM);
+    faceShape.lineTo(CAB_W / 2, top);
+    faceShape.lineTo(-CAB_W / 2, top);
+    faceShape.closePath();
+    const mouth = new THREE.Path();
+    mouth.moveTo(-OPEN_W / 2, OPEN_Y - OPEN_H / 2);
+    mouth.lineTo(-OPEN_W / 2, OPEN_Y + OPEN_H / 2);
+    mouth.lineTo(OPEN_W / 2, OPEN_Y + OPEN_H / 2);
+    mouth.lineTo(OPEN_W / 2, OPEN_Y - OPEN_H / 2);
+    mouth.closePath();
+    faceShape.holes.push(mouth);
+    const faceMesh = new THREE.Mesh(
+      new THREE.ExtrudeGeometry(faceShape, { depth: BOARD, bevelEnabled: false }),
+      steel,
+    );
+    faceMesh.position.z = CAB_D / 2 - BOARD;
+    cabinet.add(faceMesh);
+
+    // closed drawer fronts stacked above the open one - without them the carcass is just a
+    // slab and the object stops reading as office furniture
+    for (let i = 1; i < total; i++) {
+      // The same face as the open drawer's, on the same pitch: they are the same furniture,
+      // and sized on their own the stack drifted out of step with the drawer below it.
+      // FACE_W, not CAB_W, so the frame's border runs round them as it runs round the mouth.
+      const face = box(FACE_W, FRONT_H, 0.2, steel);
+      face.position.set(0, MOUTH_Y + PITCH * i, CAB_D / 2 + 0.06);
+      cabinet.add(face);
+      const pull = box(W * 0.45, 0.16, 0.22, steel);
+      pull.position.set(0, face.position.y, CAB_D / 2 + 0.22);
+      cabinet.add(pull);
+    }
   }
 
   const key = new THREE.DirectionalLight(0xffffff, 1.15);
@@ -366,24 +405,57 @@ export function initSkillDrawer(host, strip) {
   drawer.add(rail);
 
   const RIM = H / 2; // the cards' bottom edge rests here, so nothing dips below the metal
-  const folders = tiles.map((li, i) => {
-    const el = buildFolder(li);
+  const items = railSource.map((r, i) => {
+    const el = r.li ? buildFolder(r.li) : buildDivider(r.divider);
     const obj = new CSS3DObject(el);
     obj.scale.setScalar(PX);
     obj.position.set(0, RIM + CH / 2, D / 2 - MARGIN - i * GAP);
     rail.add(obj);
-    return { el, obj, i, z0: obj.position.z };
+    return { interactive: !!r.li, el, obj, i, z0: obj.position.z };
   });
+  // keyboard Left/Right and select()/close() only ever act on real folders — dividers are
+  // positional-only, so they need their own sequential index within just this list
+  const folders = items.filter((it) => it.interactive);
+  folders.forEach((f, fi) => (f.fi = fi));
 
   let active = null;
   let railZ = 0;
-  const maxZ = Math.max(0, (folders.length - 1) * GAP - D * 0.34);
+  const maxZ = Math.max(0, (items.length - 1) * GAP - D * 0.34);
 
   // ---- rendering ---------------------------------------------------------------------
   let w = 0;
   let h = 0;
   let dist = 20;
   let frame = 0;
+  // A picked card's "face the camera" target, read straight off the camera itself rather
+  // than hand-set as Euler(x: -ELEVATION * k, y: AZIMUTH). THREE's default Euler order
+  // (XYZ, intrinsic) composes yaw and pitch in the opposite order from what camera.lookAt()
+  // actually produces for this azimuth/elevation orbit (yaw around world Y, then pitch about
+  // the yawed frame's own X) — no scalar factor on a mismatched composition order can land on
+  // the camera's real orientation, which is why tuning that factor only ever changed how
+  // wrong the skew looked, never removed it. Slerping toward the camera's own quaternion is
+  // the actual billboard: exactly parallel to the camera's image plane.
+  const billboardQuat = new THREE.Quaternion();
+  const RESTING_QUAT = new THREE.Quaternion(); // identity — a filed folder carries no rotation
+
+  /** Slerps f's own orientation toward `target`. Tweens a per-folder plain object rather than
+   *  f.obj.rotation directly — component-wise Euler tweening is exactly the wrong-composition
+   *  bug this replaces — so dispose() kills f.rotP, not f.obj.rotation, to reach it. */
+  function rotateTo(f, target, duration, ease) {
+    const p = f.rotP ?? (f.rotP = {});
+    gsap.killTweensOf(p);
+    const start = f.obj.quaternion.clone();
+    p.t = 0;
+    gsap.to(p, {
+      t: 1,
+      duration,
+      ease,
+      onUpdate: () => {
+        f.obj.quaternion.slerpQuaternions(start, target, p.t);
+        render();
+      },
+    });
+  }
 
   function aim() {
     camera.position.set(
@@ -392,6 +464,7 @@ export function initSkillDrawer(host, strip) {
       dist * Math.cos(ELEVATION) * Math.cos(AZIMUTH),
     );
     camera.lookAt(0, 0, 0);
+    camera.updateMatrixWorld(); // project()/unproject() read these before any render does
     camera.updateProjectionMatrix();
   }
 
@@ -410,7 +483,7 @@ export function initSkillDrawer(host, strip) {
   const FADE_OVER = 0.35;
 
   function cull() {
-    for (const f of folders) {
+    for (const f of items) {
       if (f === active) {
         f.el.style.opacity = '';
         f.el.style.pointerEvents = '';
@@ -452,36 +525,126 @@ export function initSkillDrawer(host, strip) {
     frame = requestAnimationFrame(tick);
   }
 
-  // every corner of what the visitor actually sees: the metal, plus the height a folder
-  // reaches when it is standing open
-  // widest thing in frame is the cabinet now, not the drawer - fit() has to see its edges
-  const CORNERS = [];
-  for (const x of [-CAB_W / 2 - 0.1, CAB_W / 2 + 0.1]) {
-    for (const y of [-H, RIM + CH + 0.25]) {
-      for (const z of [-D / 2, D / 2 + 0.45 + OPEN_Z]) CORNERS.push(new THREE.Vector3(x, y, z));
-    }
+  // Where a picked folder goes: out of the file and up into the free corner above the
+  // drawer's front, under the section heading. Placed in screen space rather than in the
+  // scene, so it lands in the same spot on the page at any framing: a world position tuned
+  // at one aspect drifted off the heading, or onto the drawer, at every other.
+  const PICK_W = 0.34; // share of the frame's width the card takes
+  const PICK_TOP = 0.03; // gap above it, as a share of the frame's height
+  const PICK_PULL = 2; // world units in front of the drawer's face, so it rides over every folder
+  const pickPos = new THREE.Vector3();
+  const pickRay = new THREE.Vector3();
+  const camFwd = new THREE.Vector3();
+  function cardSize() {
+    const cardH = Math.min(h * (1 - PICK_TOP * 2), (w * PICK_W * CARD_H) / CARD_W);
+    return [(cardH * CARD_W) / CARD_H, cardH];
+  }
+  // how far the furniture steps right so the card gets a column of its own, clear of the
+  // drawer's front instead of laid over the folders filed there
+  const pickShift = () => Math.max(0, cardSize()[0] + w * 0.025 - view.left);
+
+  function pickTarget() {
+    const [cardW, cardH] = cardSize();
+    const face = pickPos.set(0, 0, D / 2 + OPEN_Z).applyMatrix4(camera.matrixWorldInverse);
+    const depth = -face.z - PICK_PULL;
+    // left edge on the frame's own left edge, which is the heading's: centre in NDC, cast
+    // through the camera (so the view offset fit() sets is honoured) out to that depth
+    pickRay
+      .set(cardW / w - 1, 1 - (2 * (h * PICK_TOP + cardH / 2)) / h, 0.5)
+      .unproject(camera)
+      .sub(camera.position)
+      .normalize();
+    camera.getWorldDirection(camFwd);
+    pickPos.copy(camera.position).addScaledVector(pickRay, depth / pickRay.dot(camFwd));
+    const pxPerUnit = h / (2 * depth * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+    return { pos: pickPos, scale: cardW / pxPerUnit / CARD_W };
   }
 
-  function fit() {
-    // Solve the distance numerically against those corners. At three quarters the projected
-    // extent depends on the azimuth as well as the aspect, so trigonometry that assumed a
-    // front-on camera framed the drawer at roughly half the width it could have used.
+  // Solve the distance numerically against the corners of what is on screen: the cabinet,
+  // top included, and the drawer at full extension. At three quarters the projected extent
+  // depends on the azimuth as well as the aspect, so trigonometry that assumed a front-on
+  // camera framed the drawer at roughly half the width it could have used. The picked card is
+  // left out on purpose: it lives in the corner the drawer's silhouette leaves empty, and
+  // framing its reach as well is what used to shrink the furniture to half the frame.
+  const corner = new THREE.Vector3();
+
+  // The frame's own centring, solved by fit(), and how far the furniture has been slid right
+  // to make room for a picked card. Kept apart so the slide can be tweened without re-solving
+  // the fit; `left` is the furniture's left edge in px once centred.
+  const view = { baseX: 0, baseY: 0, left: 0, shift: 0 };
+  function frameFor(shift) {
+    camera.setViewOffset(w, h, view.baseX - shift, view.baseY, w, h);
+    // the canvas mask's right-hand fade rides along, or it dims the cabinet's face instead
+    // of the carcass running off behind it
+    host.style.setProperty('--slide', `${shift}px`);
+  }
+
+  /** Slide the furniture to `shift`. `solve` runs against the frame being slid to, so a card
+   *  placed in it lands where the frame will be rather than where it was. */
+  function slideFrame(shift, solve) {
+    gsap.killTweensOf(view);
+    frameFor(shift);
+    solve?.();
+    frameFor(view.shift);
+    gsap.to(view, {
+      shift,
+      duration: 0.6,
+      ease: 'power3.out',
+      onUpdate: () => {
+        frameFor(view.shift);
+        render();
+      },
+    });
+  }
+
+  function fit(total) {
+    camera.clearViewOffset();
     dist = Math.max(W, D) * 1.4;
-    const p = new THREE.Vector3();
+    let cx = 0;
+    let cy = 0;
     for (let i = 0; i < 10; i++) {
       aim();
-      let spanX = 0;
-      let spanY = 0;
-      for (const c of CORNERS) {
-        p.copy(c).project(camera);
-        spanX = Math.max(spanX, Math.abs(p.x));
-        spanY = Math.max(spanY, Math.abs(p.y));
+      let x0 = Infinity;
+      let x1 = -Infinity;
+      let y0 = Infinity;
+      let y1 = -Infinity;
+      for (const x of [-CAB_W / 2 - 0.1, CAB_W / 2 + 0.1]) {
+        for (const y of [-H, cabTop(total) + 0.1]) {
+          for (const z of [-D / 2, D / 2 + 0.45 + OPEN_Z]) {
+            corner.set(x, y, z).project(camera);
+            x0 = Math.min(x0, corner.x);
+            x1 = Math.max(x1, corner.x);
+            y0 = Math.min(y0, corner.y);
+            y1 = Math.max(y1, corner.y);
+          }
+        }
       }
-      const over = Math.max(spanX, spanY) / 0.96;
+      cx = (x0 + x1) / 2;
+      cy = (y0 + y1) / 2;
+      const over = Math.max(x1 - x0, y1 - y0) / 2 / 0.96;
       if (!Number.isFinite(over) || over <= 0) break;
       dist *= over;
       if (Math.abs(over - 1) < 0.005) break;
     }
+    // Centred on what is there, not on the point the camera looks at: at three quarters the
+    // silhouette sits well off that point, and framing it symmetrically about it left a band
+    // of the frame empty on one side.
+    view.baseX = (cx * w) / 2;
+    view.baseY = (-cy * h) / 2;
+    frameFor(0);
+    // the drawer front's own left edge, not the carcass's: the front is the narrower of the
+    // two, and measured off the carcass the furniture stepped further aside than it needed to
+    corner.set(-FACE_W / 2, FRONT_Y + FRONT_H / 2, D / 2 + 0.22 + OPEN_Z).project(camera);
+    view.left = ((corner.x + 1) / 2) * w;
+    return dist;
+  }
+
+  // Three drawers, give or take one for the room there is: a fourth when the frame has
+  // height to spare and it costs the drawer nothing in size, two only when the frame is so
+  // short that a third would shrink everything by more than a third.
+  function pickDrawerCount() {
+    const [d2, d3, d4] = [2, 3, 4].map((n) => fit(n));
+    return d4 <= d3 * 1.02 ? 4 : d3 <= d2 * 1.35 ? 3 : 2;
   }
 
   function resize() {
@@ -489,10 +652,18 @@ export function initSkillDrawer(host, strip) {
     h = host.clientHeight;
     if (!w || !h) return;
     camera.aspect = w / h;
-    fit();
+    const total = pickDrawerCount();
+    buildCabinet(total);
+    fit(total);
+    billboardQuat.copy(camera.quaternion);
     measureZAxis();
     renderer.setSize(w, h);
     css.setSize(w, h);
+    // the card's spot is in screen space, so it and the room made for it follow the frame
+    gsap.killTweensOf(view);
+    view.shift = active ? pickShift() : 0;
+    frameFor(view.shift);
+    if (active) lift(active, 0);
     render();
   }
 
@@ -505,6 +676,17 @@ export function initSkillDrawer(host, strip) {
     render();
   }
 
+  // ---- picking a folder ----------------------------------------------------------------
+  /** Carry f to the pick spot and square it up to the camera: a card read at the drawer's
+   *  own angle is foreshortened, and the whole reason it comes up is to be read. */
+  function lift(f, duration) {
+    const { pos, scale } = pickTarget();
+    const ease = 'power3.out';
+    gsap.to(f.obj.position, { x: pos.x, y: pos.y, z: pos.z, duration, ease, onUpdate: render });
+    gsap.to(f.obj.scale, { x: scale, y: scale, z: scale, duration, ease, onUpdate: render });
+    rotateTo(f, billboardQuat, duration * 0.92, ease);
+  }
+
   function select(f) {
     if (active === f) return close();
     if (active) collapse(active);
@@ -512,32 +694,22 @@ export function initSkillDrawer(host, strip) {
     f.el.classList.add('is-open');
     f.el.setAttribute('aria-expanded', 'true');
     host.classList.add('has-open');
-    // out of the file and forward to the front of the drawer, so a card filed at the back
-    // is just as readable as one at the front. Moving the rail instead pushed everything in
-    // front of it out through the drawer's face.
-    gsap.to(f.obj.position, {
-      x: CW * 0.3,
-      y: RIM + CH / 2 + 0.45,
-      z: D / 2 + 0.9,
-      duration: 0.6,
-      ease: 'power3.out',
-      onUpdate: render,
-    });
-    // square up to the camera: a card read at the drawer's own angle is foreshortened, and
-    // the whole reason it comes up is to be read
-    gsap.to(f.obj.rotation, {
-      y: AZIMUTH,
-      x: -ELEVATION * 0.55,
-      duration: 0.55,
-      ease: 'power3.out',
-      onUpdate: render,
-    });
+    // Out of the file and into the scene itself: left on the rail, a drag through the index
+    // carried the open card along with it. Moving the rail to bring the card forward instead
+    // pushed everything in front of it out through the drawer's face.
+    gsap.killTweensOf([f.obj.position, f.obj.scale]);
+    scene.attach(f.obj);
+    slideFrame(pickShift(), () => lift(f, 0.6));
     pump(1200);
   }
 
   function collapse(f) {
     f.el.classList.remove('is-open');
     f.el.setAttribute('aria-expanded', 'false');
+    // back into the file, so it rides with the index again; a lift still running would
+    // otherwise keep writing world coordinates into what is now rail space
+    gsap.killTweensOf([f.obj.position, f.obj.scale]);
+    rail.attach(f.obj);
     gsap.to(f.obj.position, {
       x: 0,
       y: RIM + CH / 2,
@@ -546,7 +718,15 @@ export function initSkillDrawer(host, strip) {
       ease: 'power3.inOut',
       onUpdate: render,
     });
-    gsap.to(f.obj.rotation, { y: 0, x: 0, duration: 0.4, ease: 'power3.inOut', onUpdate: render });
+    rotateTo(f, RESTING_QUAT, 0.4, 'power3.inOut');
+    gsap.to(f.obj.scale, {
+      x: PX,
+      y: PX,
+      z: PX,
+      duration: 0.4,
+      ease: 'power3.inOut',
+      onUpdate: render,
+    });
   }
 
   function close() {
@@ -554,6 +734,7 @@ export function initSkillDrawer(host, strip) {
     collapse(active);
     active = null;
     host.classList.remove('has-open');
+    slideFrame(0);
     pump(700);
   }
 
@@ -565,8 +746,10 @@ export function initSkillDrawer(host, strip) {
         select(f);
       } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
         e.preventDefault();
+        // steps between real folders only — f.fi is this folder's index within that
+        // filtered list, not its position in the full rail, so dividers are never a stop
         folders[
-          THREE.MathUtils.clamp(f.i + (e.key === 'ArrowRight' ? 1 : -1), 0, folders.length - 1)
+          THREE.MathUtils.clamp(f.fi + (e.key === 'ArrowRight' ? 1 : -1), 0, folders.length - 1)
         ].el.focus();
       }
     });
@@ -680,7 +863,7 @@ export function initSkillDrawer(host, strip) {
     opened = true;
     gsap.to(drawer.position, { z: OPEN_Z, duration: 1.5, ease: 'power3.out', onUpdate: render });
     gsap.fromTo(
-      folders.map((f) => f.el),
+      items.map((f) => f.el),
       { opacity: 0 },
       {
         opacity: 1,
@@ -712,7 +895,12 @@ export function initSkillDrawer(host, strip) {
     window.removeEventListener('keydown', onKey);
     window.removeEventListener('click', onOutside);
     gsap.killTweensOf(drawer.position);
-    folders.forEach((f) => (gsap.killTweensOf(f.obj.position), gsap.killTweensOf(f.obj.rotation)));
+    gsap.killTweensOf(view);
+    items.forEach((f) => {
+      gsap.killTweensOf(f.obj.position);
+      gsap.killTweensOf(f.obj.scale);
+      if (f.rotP) gsap.killTweensOf(f.rotP);
+    });
     scene.traverse((o) => o.geometry?.dispose());
     steel.dispose();
     steelInner.dispose();

@@ -4,6 +4,7 @@ import './styles/sections.css';
 import { initAnimations, refreshScrollTriggers } from './animations.js';
 import { initAnalytics } from './analytics.js';
 import { content } from './content.js';
+import { buildSkillCardInner, applySkillContent } from './skillCard.js';
 
 // content.js copy is developer-authored, not user input, so **bold** markup is safe to allow
 function escapeHtml(str) {
@@ -159,58 +160,14 @@ function initSkillsWall() {
 
   const card = document.createElement('div');
   card.className = 'skill-card';
-  card.innerHTML =
-    '<div class="skill-card__inner">' +
-    // drawn, not a unicode glyph: one stroke weight, one line cap, scales with the button
-    '<button class="skill-card__close" aria-label="Close">' +
-    '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">' +
-    '<path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
-    '</svg></button>' +
-    '<h3 class="skill-card__title"></h3>' +
-    '<p class="skill-card__badge"></p>' +
-    '<p class="skill-card__text"></p>' +
-    '<ul class="skill-card__bullets"></ul>' +
-    '</div>';
-  const inner = card.querySelector('.skill-card__inner');
-  const title = card.querySelector('.skill-card__title');
-  const badge = card.querySelector('.skill-card__badge');
-  const text = card.querySelector('.skill-card__text');
-  const bullets = card.querySelector('.skill-card__bullets');
+  const inner = buildSkillCardInner();
+  card.append(inner);
 
   const isReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // bullets entries are either a plain string or { label, subs: [] } for a nested group
-  // (e.g. Substance Painter / Designer under the Substance 3D card)
-  const renderBullets = (items) => {
-    bullets.innerHTML = '';
-    bullets.hidden = !items || !items.length;
-    if (!items) return;
-    for (const item of items) {
-      const li = document.createElement('li');
-      if (typeof item === 'string') {
-        li.textContent = item;
-      } else {
-        li.textContent = item.label;
-        const sub = document.createElement('ul');
-        for (const s of item.subs) {
-          const subLi = document.createElement('li');
-          subLi.textContent = s;
-          sub.append(subLi);
-        }
-        li.append(sub);
-      }
-      bullets.append(li);
-    }
-  };
-
   const applyContent = (li) => {
     const d = SKILL_DESCRIPTIONS[li.dataset.skill];
-    if (!d) return false;
-    title.textContent = d.title;
-    badge.textContent = d.selfTaught ? 'Self-taught' : '';
-    badge.hidden = !d.selfTaught;
-    text.textContent = d.text;
-    renderBullets(d.bullets);
+    if (!applySkillContent(inner, d)) return false;
     card.style.setProperty('--brand', d.color);
     return true;
   };

@@ -69,7 +69,12 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
   them as billboards in WebGL would cost the text, the focus ring, the keyboard and the
   screen reader. CSS3D keeps real DOM inside the scene's perspective.
 - **A folder IS its own detail card.** At rest only the tab shows; picking one unrolls the
-  sheet upward and flies the card to the front of the drawer, squared up to the camera.
+  sheet upward and lifts the card out of the rail (`scene.attach`) into the left column
+  under the section heading, squared up to the camera. Its spot is solved in **screen
+  space** (`pickTarget()`), so it lands under the heading at any framing; a world-space spot
+  tuned at one aspect drifted onto the drawer at every other. The furniture slides right
+  just enough to give the card that column (`slideFrame()`, a tweened `setViewOffset`) and
+  slides back on close; the canvas mask's right-hand fade follows it through `--slide`.
   There is no separate card and no `#skill-card-slot` in drawer mode.
 - The sheet is anchored to the **bottom** of a fixed-size box and only ever grows upward, so
   nothing a visitor reads ever needs to be drawn behind the metal. That matters: a CSS3D
@@ -84,10 +89,13 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
 - **Selection moves the card, never the rail.** Sliding the whole index forward to bring the
   chosen folder to the front pushed every folder ahead of it out through the drawer's face.
   `cull()` still hides anything a manual drag pushes past the front lip.
-- `fit()` solves the camera distance **numerically**, against the eight corners of what is
-  actually on screen. Trigonometry that assumed a front-on camera framed the drawer at about
-  half the width it could use, because at three quarters the projected extent depends on the
-  azimuth as well as the aspect.
+- `fit()` solves the camera distance **numerically**, against the corners of the furniture
+  (cabinet top included, drawer at full extension), then centres that silhouette with
+  `setViewOffset` rather than on the point the camera looks at. Trigonometry that assumed a
+  front-on camera framed the drawer at about half the width it could use, because at three
+  quarters the projected extent depends on the azimuth as well as the aspect. The picked
+  card is deliberately **not** in those corners: framing its reach too is what used to
+  shrink the furniture to half the frame.
 - **The camera is a long lens (17 degrees) on purpose.** At 32 the drawer's front panel
   rendered half again larger than the cabinet face eleven units behind it and the two
   stopped reading as one piece of furniture. Flattening the perspective closes that gap;
@@ -97,12 +105,15 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
   takes light down there catches the environment and reads as a floor again however far it
   is darkened.
 - **The cabinet sits behind the drawer's back end, never over it.** A carcass that wrapped
-  the drawer would swallow the folders filed at the back. It runs far past the top of the
-  frame on purpose: `.drawer__scene canvas` carries a `mask-image` that dissolves the metal
-  into the page at both ends, so the cabinet continues up into black rather than stopping on
-  a cut edge, and the drawer's underside sinks away instead of floating. Masking the canvas
-  rather than fading in the shader is what keeps the CSS3D folders out of it — they are a
-  separate layer with no mask.
+  the drawer would swallow the folders filed at the back. It is a finite piece of furniture
+  with a top: **3 drawers** by default (the open one included), 4 when the frame has height
+  to spare at no cost in size, 2 only when a third would shrink everything by more than a
+  third (`pickDrawerCount()`). `buildCabinet()` rebuilds rather than scales, because the face
+  is a shape with the mouth cut in it. `.drawer__scene canvas` still carries a `mask-image`:
+  a short fade at the top where the cabinet's top face recedes out of frame, the drawer's
+  underside sinking away at the bottom, and the carcass running off to the right. Masking the
+  canvas rather than fading in the shader is what keeps the CSS3D folders out of it - they
+  are a separate layer with no mask.
 - `GAP` is at its floor. Below roughly 0.4 each full-width tab covers the label of the one
   behind it, which is what a real index avoids by staggering its tabs sideways.
 - Rendering is **on demand**: `pump()` runs a short rAF burst around each interaction and
