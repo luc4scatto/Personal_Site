@@ -437,12 +437,17 @@ export function initSkillDrawer(host, strip) {
 
   /** Render for a moment rather than forever: the scene is static between interactions,
    *  so there is no standing rAF here the way hero3d.js has one. */
+  let pumpUntil = 0;
   function pump(ms = 900) {
-    const until = performance.now() + ms;
+    // extend the window rather than bail: a second interaction landing inside an already-
+    // running burst (e.g. opening a folder near the tail end of the drawer's opening tween)
+    // used to be dropped by `if (frame) return`, so its own tween could keep animating past
+    // the point rendering had already stopped.
+    pumpUntil = Math.max(pumpUntil, performance.now() + ms);
     if (frame) return;
     const tick = () => {
       render();
-      frame = performance.now() < until ? requestAnimationFrame(tick) : 0;
+      frame = performance.now() < pumpUntil ? requestAnimationFrame(tick) : 0;
     };
     frame = requestAnimationFrame(tick);
   }
@@ -492,15 +497,12 @@ export function initSkillDrawer(host, strip) {
   }
 
   // ---- browsing the index ------------------------------------------------------------
-  function slideTo(z, snap = false) {
+  // Only ever called mid-drag, so it always snaps — there is no tweened path to a target
+  // left in the index browsing gesture (the drawer's own open/shut run is tweened separately).
+  function slideTo(z) {
     railZ = THREE.MathUtils.clamp(z, 0, maxZ);
-    if (snap) {
-      rail.position.z = railZ;
-      render();
-      return;
-    }
-    gsap.to(rail.position, { z: railZ, duration: 0.5, ease: 'power3.out', onUpdate: render });
-    pump(600);
+    rail.position.z = railZ;
+    render();
   }
 
   function select(f) {
@@ -641,7 +643,7 @@ export function initSkillDrawer(host, strip) {
   host.addEventListener('pointermove', (e) => {
     if (!dragMode) return;
     if (dragMode === 'index') {
-      slideTo(startZ + ((e.clientX - startX) / host.clientWidth) * maxZ * 1.6, true);
+      slideTo(startZ + ((e.clientX - startX) / host.clientWidth) * maxZ * 1.6);
       return;
     }
     const dx = e.clientX - startX;

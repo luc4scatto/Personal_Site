@@ -1,7 +1,7 @@
 import gsap from 'gsap';
 import './styles/base.css';
 import './styles/sections.css';
-import { initAnimations } from './animations.js';
+import { initAnimations, refreshScrollTriggers } from './animations.js';
 import { initAnalytics } from './analytics.js';
 import { content } from './content.js';
 
@@ -232,7 +232,9 @@ function initSkillsWall() {
       height: 0,
       opacity: 0,
       duration: 0.32,
-      ease: 'power2.in',
+      // exits read as responsive starting fast, same as entrances — power2.in delayed the
+      // moment the card actually started collapsing, right when the click expects a reaction
+      ease: 'power2.out',
       onComplete: () => card.remove(),
     });
   };
@@ -343,6 +345,12 @@ if (DRAWER_MODE) {
       // only claim the drawer once the metal is actually there; CSS keys the whole layout
       // off this class
       skillDrawer.classList.add('is-live');
+      // .is-live swaps the flat .drawer__strip grid (tall) for the drawer's own much
+      // shorter aspect-ratio box — every ScrollTrigger below this point (Projects' h2 clip
+      // reveal, its [data-reveal] cards, Contact) was measured against the taller layout a
+      // moment ago in initAnimations() and is now stale, firing at pixel offsets well past
+      // where those sections actually sit. See refreshScrollTriggers() in animations.js.
+      refreshScrollTriggers();
     })
     // the metal failed, so hand the section back to the wall it would have replaced
     .catch(() => initSkillsWall());

@@ -4,6 +4,19 @@ import { content } from './content.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// The skill drawer's chunk loads async and, once live, hides the flat `.drawer__strip`
+// grid in favour of a much shorter `aspect-ratio` box (src/styles/sections.css). Every
+// ScrollTrigger below it — the h2 clip reveals and [data-reveal] cards on Projects/Contact
+// included — was measured against the taller flat-grid layout that was on the page when
+// initAnimations() ran, moments before that swap. GSAP never re-measures on its own for a
+// class-driven height change (only on window resize or its own load-event refresh, and the
+// drawer's chunk often isn't done by then), so those triggers keep firing at their old,
+// too-far-down pixel offsets — the section behind them scrolls past empty until the stale
+// threshold is finally crossed. main.js calls this the moment `.is-live` lands.
+export function refreshScrollTriggers() {
+  ScrollTrigger.refresh();
+}
+
 export function initAnimations() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 

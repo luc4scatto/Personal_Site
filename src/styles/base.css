@@ -55,6 +55,15 @@
 
   --space: clamp(4rem, 10vh, 8rem);
   --pad-x: clamp(1.25rem, 5vw, 4rem);
+
+  /* motion: strong curves for anything that moves or fades on its own (GSAP's power3/4
+     already cover JS-driven motion — these are for the CSS transitions in this file and
+     sections.css, which had been riding the browser's default `ease` everywhere). */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --duration-fast: 160ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
 }
 
 *,
@@ -102,7 +111,7 @@ a {
 
 .skip-link {
   position: absolute;
-  top: -3rem;
+  top: 1rem;
   left: 1rem;
   z-index: 30;
   padding: 0.6rem 1.2rem;
@@ -111,11 +120,16 @@ a {
   font-family: var(--font-display);
   font-weight: 600;
   border-radius: 0.4rem;
-  transition: top 0.2s ease;
+  /* a keyboard-only affordance has to be there the instant Tab lands on it, not ease in
+     after — transform/opacity instead of the old `top` tween, which also animated layout */
+  transform: translateY(-4rem);
+  opacity: 0;
+  transition: none;
 }
 
 .skip-link:focus-visible {
-  top: 1rem;
+  transform: none;
+  opacity: 1;
   outline-color: var(--bg);
 }
 
@@ -153,13 +167,18 @@ textarea:focus-visible,
   appearance: none;
   cursor: pointer;
   transition:
-    background 0.25s,
-    color 0.25s;
+    background var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
 }
 
 .btn:hover {
   background: var(--accent);
   color: var(--bg);
+}
+
+.btn:active {
+  transform: scale(0.97);
 }
 
 section {

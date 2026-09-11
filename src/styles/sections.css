@@ -14,8 +14,8 @@
   opacity: 0;
   transform: translateY(8px) scale(0.98);
   transition:
-    opacity 0.25s,
-    transform 0.25s;
+    opacity var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
 }
 
 .info-card.is-open {
@@ -46,7 +46,7 @@
   font-size: 1.3rem;
   line-height: 1;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--duration-base) var(--ease-out);
 }
 
 .info-card__close:hover {
@@ -195,9 +195,9 @@
   color: var(--text-dim);
   cursor: pointer;
   transition:
-    color 0.2s,
-    border-color 0.2s,
-    transform 0.2s;
+    color var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
 }
 
 .skill-card__close:hover,
@@ -552,6 +552,14 @@
     animation: none;
     opacity: 0;
   }
+
+  /* movement drops, the color/border feedback that carries the actual state stays */
+  .skills-grid > li:hover,
+  .skills-grid li:focus-visible,
+  .skills-grid > li.is-active,
+  .card:hover {
+    transform: none;
+  }
 }
 
 /* about */
@@ -647,18 +655,33 @@
   border-radius: 0.9rem;
   cursor: pointer;
   transition:
-    border-color 0.25s,
-    transform 0.25s,
-    background 0.35s,
-    opacity 0.35s,
-    filter 0.35s;
+    border-color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    background var(--duration-slow) var(--ease-out),
+    opacity var(--duration-slow) var(--ease-out),
+    filter var(--duration-slow) var(--ease-out);
 }
 
 .skills-grid > li:hover,
 .skills-grid > li:focus-visible {
   --tile-wash: 14%;
   border-color: color-mix(in srgb, var(--brand, var(--accent)) 45%, #1e1e1e);
+}
+
+/* the lift is a hover flourish, not feedback the tap needs — gated so a touch tap doesn't
+   fire it and then have nothing to hover it back off with */
+.skills-grid li:focus-visible {
   transform: translateY(-3px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .skills-grid > li:hover {
+    transform: translateY(-3px);
+  }
+}
+
+.skills-grid > li:active {
+  transform: scale(0.98);
 }
 
 .skills-grid li:focus-visible {
@@ -676,12 +699,17 @@
   width: 34px;
   height: 34px;
   object-fit: contain;
-  transition: transform 0.25s;
+  transition: transform var(--duration-base) var(--ease-out);
 }
 
-.skills-grid > li:hover .skill-icon,
 .skills-grid > li.is-active .skill-icon {
   transform: scale(1.08);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .skills-grid > li:hover .skill-icon {
+    transform: scale(1.08);
+  }
 }
 
 .skill-label {
@@ -733,7 +761,6 @@
   opacity: 0;
 }
 
-
 /* skill drawer — the tool wall, filed. src/skillDrawer.js draws a brushed-steel drawer in
    WebGL and files the folders into it at three quarters, front to back. The folders are the
    page's own <li data-skill> elements carried into CSS3DObjects, so they keep real text,
@@ -750,7 +777,11 @@
   position: relative;
   aspect-ratio: 3 / 2;
   max-height: 76vh;
-  margin-bottom: 1rem;
+  /* negative on purpose: the canvas mask (below) already fades the last ~30% of this box's
+     own height toward black for the "sinks away" effect, so the box reads as empty well
+     before its true bottom edge. Left at a normal positive margin, that dead tail stacked
+     with .skills' own padding-bottom *and* #projects' padding-top read as one big gap. */
+  margin-bottom: -5rem;
   touch-action: pan-y;
   cursor: grab;
 }
@@ -843,9 +874,11 @@
   box-shadow: 0 12px 26px -14px rgba(0, 0, 0, 0.9);
   mask-image: linear-gradient(to top, transparent 0, #000 13%, #000 100%);
   -webkit-mask-image: linear-gradient(to top, transparent 0, #000 13%, #000 100%);
+  /* 200ms, not the 450ms this shipped with: this is a hover preview on a grid of tiles,
+     hit far more than once per visit, and 450ms is 1.5x the budget for that frequency */
   transition:
-    height 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.25s;
+    height 200ms var(--ease-out),
+    border-color var(--duration-base) var(--ease-out);
 }
 
 .folder:hover .folder__sheet,
@@ -973,8 +1006,8 @@
   flex-direction: column;
   gap: 0.75rem;
   transition:
-    border-color 0.2s,
-    transform 0.2s;
+    border-color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
   position: relative;
   overflow: hidden;
 }
@@ -1000,7 +1033,16 @@
 
 .card:hover {
   border-color: var(--accent);
-  transform: translateY(-4px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-4px);
+  }
+}
+
+.card:active {
+  transform: scale(0.99);
 }
 
 .card-thumb {
