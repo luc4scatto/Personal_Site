@@ -31,12 +31,23 @@ const W = CW + 1.0; // drawer is a little wider than a folder
 const H = 1.6; // side height
 const T = 0.14; // wall thickness
 const LINER_GAP = 0.03; // how far the black inner liners stand off the steel, clear of z-fighting
-const FACE_W = 4.05; // the front face - drawer and cabinet share it so the edges line up
-// The front is an overlay panel: taller than the box behind it and hung a little low, the
-// way a filing drawer's face laps over the carcass. The cabinet's mouth is cut to clear
-// this, not the box, which is why both numbers live up here.
-const FRONT_H = H * 1.4;
-const FRONT_Y = -0.15;
+// The hole is the measurement everything else is cut from, and the front laps over it by
+// LAP on every side. Derived the other way round - a mouth sized from the front plus a
+// gap - the front was the smaller of the two, so a shut drawer showed a hairline of the
+// black bay all the way round it. A real drawer face overlaps its frame; it never fits
+// inside it. The front is taller than the box behind it and hung a little low, which is why
+// these live up here with FACE_W rather than next to the cabinet.
+// Cut to the shell that actually passes through it - including the bottom panel, which hangs
+// half its thickness below the sides. Sized to the front instead, the hole stood 0.18 proud
+// of the drawer at the sides and half a unit below it, and an open drawer showed a band of
+// the black bay all down its flank and under its belly.
+const MOUTH_W = W + 0.06;
+const MOUTH_H = H + T / 2 + 0.06;
+const MOUTH_Y = (H / 2 + (-H / 2 - T / 2)) / 2;
+const LAP = 0.12;
+const FACE_W = MOUTH_W + LAP * 2; // the front face - every closed front shares it
+const FRONT_H = MOUTH_H + LAP * 2;
+const FRONT_Y = MOUTH_Y;
 const AZIMUTH = THREE.MathUtils.degToRad(34);
 const ELEVATION = THREE.MathUtils.degToRad(27);
 
@@ -198,7 +209,11 @@ export function initSkillDrawer(host, strip) {
   // climb out of nothing.
   const steelInner = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
 
-  const D = GAP * tiles.length + CW * 0.6; // long enough to hold the whole index
+  // The tray is cut to the index plus a margin at each end, rather than to a headroom figure
+  // that had nothing to do with the folders: the old one left a full GAP of empty tray behind
+  // the last folder and a different amount in front of the first.
+  const MARGIN = 0.55;
+  const D = GAP * (tiles.length - 1) + MARGIN * 2;
   // A drawer whose back edge comes level with the cabinet face is a drawer that has fallen
   // out. The shell is longer than the index by TAIL, and that tail is empty: it stays in the
   // cabinet at full extension, so the furniture is still holding the drawer while every
@@ -206,11 +221,11 @@ export function initSkillDrawer(host, strip) {
   const TAIL = D * 0.2;
   const DL = D + TAIL;
   const TAIL_Z = -TAIL / 2; // the shell's centre; the index keeps the old one
-  // Open is half the tail out, not flush. Stopping at 0 left the last folder of the index
-  // sitting right on the point where its tab crosses the top of the mouth, with no room for
-  // cull() to have faded it first. Half the tail is still enough of the shell in the cabinet
-  // for the furniture to read as holding the drawer.
-  const OPEN_Z = TAIL / 2;
+  // Open runs a little past flush, and only as far as the fade needs. Stopping at 0 left the
+  // last folder sitting on the point where its tab crosses the top of the mouth, with no room
+  // for cull() to have faded it first; half the tail, which is what this was, bought far more
+  // room than that costs and spent it on empty tray standing out of the cabinet.
+  const OPEN_Z = 1.0;
   const drawer = new THREE.Group();
   scene.add(drawer);
 
@@ -263,9 +278,9 @@ export function initSkillDrawer(host, strip) {
   // The mouth clears the drawer's front panel, not the box behind it: the front is an
   // overlay and hangs lower, so a hole cut to the box left the panel dangling below the
   // frame with nothing framing it.
-  const OPEN_W = FACE_W + 0.06;
-  const OPEN_H = FRONT_H + 0.06;
-  const OPEN_Y = FRONT_Y;
+  const OPEN_W = MOUTH_W;
+  const OPEN_H = MOUTH_H;
+  const OPEN_Y = MOUTH_Y;
   const CAB_W = OPEN_W + BOARD * 2; // the carcass frames the mouth, it doesn't end at it
   const CAB_H = 16;
   // Deep enough to actually swallow this drawer whole, shell and tail: at 0.85 * D the
@@ -328,11 +343,13 @@ export function initSkillDrawer(host, strip) {
 
   // closed drawer fronts stacked above the open one - without them the carcass is just a
   // slab and the object stops reading as office furniture
-  for (let i = 0; i < 4; i++) {
-    // FACE_W, not CAB_W: they are drawer fronts sitting inside the same frame, so the
-    // board's border has to run round them exactly as it runs round the open mouth
-    const face = box(FACE_W, H * 1.5, 0.2, steel);
-    face.position.set(0, H * 1.62 + i * (H * 1.62), CAB_D / 2 + 0.06);
+  const PITCH = FRONT_H + 0.15; // one face plus the reveal between two of them
+  for (let i = 0; i < 5; i++) {
+    // The same face as the open drawer's, on the same pitch: they are the same furniture, and
+    // sized on their own the stack drifted out of step with the drawer below it. FACE_W, not
+    // CAB_W, so the frame's border runs round them as it runs round the mouth.
+    const face = box(FACE_W, FRONT_H, 0.2, steel);
+    face.position.set(0, MOUTH_Y + PITCH * (i + 1), CAB_D / 2 + 0.06);
     cabinet.add(face);
     const pull = box(W * 0.45, 0.16, 0.22, steel);
     pull.position.set(0, face.position.y, CAB_D / 2 + 0.22);
@@ -353,7 +370,7 @@ export function initSkillDrawer(host, strip) {
     const el = buildFolder(li);
     const obj = new CSS3DObject(el);
     obj.scale.setScalar(PX);
-    obj.position.set(0, RIM + CH / 2, D / 2 - CW * 0.3 - i * GAP);
+    obj.position.set(0, RIM + CH / 2, D / 2 - MARGIN - i * GAP);
     rail.add(obj);
     return { el, obj, i, z0: obj.position.z };
   });
@@ -389,8 +406,8 @@ export function initSkillDrawer(host, strip) {
   // face plane a folder was still ~90% opaque while its tab was already painted over the
   // metal above the hole. Measured at this framing the crossing happens 0.86 in front of
   // the face, so the fade is finished by then and made shorter to fit in what is left.
-  const FADE_AT = CAB_MOUTH + 0.85;
-  const FADE_OVER = 0.6;
+  const FADE_AT = CAB_MOUTH + 1.2;
+  const FADE_OVER = 0.35;
 
   function cull() {
     for (const f of folders) {
@@ -579,15 +596,31 @@ export function initSkillDrawer(host, strip) {
     return raycaster.intersectObjects([front, handle], false).length > 0;
   }
 
+  /** A click on the face runs the drawer the rest of the way on its own. It toggles rather
+   *  than only shutting: a handle that closes and then does nothing leaves the drawer with
+   *  no way back except a drag, and the affordance reads the same either way. */
+  function runDrawer() {
+    const shut = drawer.position.z < (SHUT_Z + OPEN_Z) / 2;
+    gsap.to(drawer.position, {
+      z: shut ? OPEN_Z : SHUT_Z,
+      duration: 1.1,
+      ease: 'power3.inOut',
+      onUpdate: render,
+    });
+    pump(1400);
+  }
+
   let dragMode = null; // 'drawer' | 'index'
   let startX = 0;
   let startY = 0;
   let startZ = 0;
   let startDrawerZ = 0;
+  let travel = 0; // how far the pointer went, so a click can be told from a drag
   host.addEventListener('pointerdown', (e) => {
     if (e.target.closest('.folder')) return; // let the folders take their own clicks
     startX = e.clientX;
     startY = e.clientY;
+    travel = 0;
     if (grabsDrawer(e)) {
       dragMode = 'drawer';
       gsap.killTweensOf(drawer.position); // a hand on the handle beats the opening tween
@@ -611,15 +644,21 @@ export function initSkillDrawer(host, strip) {
       slideTo(startZ + ((e.clientX - startX) / host.clientWidth) * maxZ * 1.6, true);
       return;
     }
-    const along = (e.clientX - startX) * zAxis.x + (e.clientY - startY) * zAxis.y;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    travel = Math.max(travel, Math.hypot(dx, dy));
     drawer.position.z = THREE.MathUtils.clamp(
-      startDrawerZ + along / (zAxis.lengthSq() || 1),
+      startDrawerZ + (dx * zAxis.x + dy * zAxis.y) / (zAxis.lengthSq() || 1),
       SHUT_Z,
       OPEN_Z,
     );
     render();
   });
-  const release = () => (dragMode = null);
+  const release = () => {
+    // a grab that never went anywhere was a click on the face, not a drag of it
+    if (dragMode === 'drawer' && travel < 5) runDrawer();
+    dragMode = null;
+  };
   host.addEventListener('pointerup', release);
   host.addEventListener('pointercancel', release);
 
