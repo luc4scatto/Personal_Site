@@ -840,7 +840,26 @@
   pointer-events: none;
 }
 
-#skill-drawer.is-live .drawer__css .folder {
+/* Nor may a folder's own box take it: the box is the whole 320px card, transparent above the
+   tab, and left hit-testable it sat in front of the tabs of the next four or five folders
+   back, so pointing at a label picked a folder filed ahead of it. The target is a strip over
+   the tab's rest position instead, and it stays put: a hovered folder lifting its tab must
+   not grow its target up over the ones behind, or the pointer skips them on the way up. */
+#skill-drawer.is-live .drawer__css .folder:not(.folder--divider)::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 3.4rem;
+  pointer-events: auto;
+}
+
+/* still inside the cabinet, or pushed out through the drawer's face - cull() sets this */
+#skill-drawer.is-live .drawer__css .folder.is-culled::before {
+  pointer-events: none;
+}
+
+/* open, the whole card is the target again */
+#skill-drawer.is-live .drawer__css .folder.is-open .folder__sheet {
   pointer-events: auto;
 }
 
@@ -851,39 +870,114 @@
 
 /* ---- a folder ---- */
 
-/* The box is always the full card. What changes is how much of the sheet is unrolled, and
-   the sheet is anchored to the bottom so it only ever grows upward — away from the rim, so
-   nothing has to be drawn behind the metal. */
+/* The box is always the full card, and so is the sheet inside it. At rest the sheet sits
+   pushed down into the box with only its tab above the rim, and opening slides it up out of
+   the drawer: a transform, where it used to grow its height and relayout every frame. The
+   box clips whatever is still below the rim, so nothing has to be drawn behind the metal. */
 .folder {
   position: relative;
   width: 250px;
   height: 320px;
+  overflow: hidden;
   cursor: pointer;
   list-style: none;
 }
 
+/* the fade at the rim: the sheet's own bottom edge is out of sight now, so the fade moved up
+   to the box, which is where the rim actually is. Dividers have no sheet and never had it. */
+.folder:not(.folder--divider) {
+  mask-image: linear-gradient(to top, transparent 0, #000 0.45rem);
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 0.45rem);
+}
+
 .folder__sheet {
   position: absolute;
-  inset: auto 0 0;
-  height: 3.4rem;
+  inset: 0;
   overflow: hidden;
   background: #0b0b0b;
   border: 1px solid color-mix(in srgb, var(--brand, var(--accent)) 32%, #232323);
   border-top: 2px solid var(--brand, var(--accent));
   border-radius: 0.35rem 0.35rem 0.2rem 0.2rem;
   box-shadow: 0 12px 26px -14px rgba(0, 0, 0, 0.9);
-  mask-image: linear-gradient(to top, transparent 0, #000 13%, #000 100%);
-  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 13%, #000 100%);
+  /* translate percentages are the sheet's own height, so this leaves exactly the tab above
+     the rim whatever size the card is authored at */
+  transform: translateY(calc(100% - 3.4rem));
   /* 200ms, not the 450ms this shipped with: this is a hover preview on a grid of tiles,
      hit far more than once per visit, and 450ms is 1.5x the budget for that frequency */
   transition:
-    height 200ms var(--ease-out),
+    transform 200ms var(--ease-out),
     border-color var(--duration-base) var(--ease-out);
 }
 
-.folder:hover .folder__sheet,
-.folder:focus-visible .folder__sheet {
-  height: 4.4rem;
+/* the open card's own control - hidden at rest and on the hover peek, since there is
+   nothing to close yet; fades and scales in once .is-open lands, same drawn-X language as
+   .skill-card__close in the flat wall, sized down for this card's smaller footprint */
+.folder__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  background: #0b0b0b;
+  border: 1px solid #262626;
+  border-radius: 50%;
+  color: var(--text-dim);
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.94);
+  pointer-events: none;
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out);
+}
+
+.folder.is-open .folder__close {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+  /* the entrance waits for the sheet; a hover's color change does not */
+  transition-delay: 150ms, 150ms, 0s, 0s;
+}
+
+/* the turn lives on the glyph, not the button: the button's own transform is its entrance,
+   and sharing it made every hover wait out the entrance delay */
+.folder__close svg {
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.folder__close:focus-visible {
+  color: var(--text);
+  border-color: var(--brand, var(--accent));
+}
+
+.folder__close:focus-visible svg {
+  transform: rotate(90deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .folder__close:hover {
+    color: var(--text);
+    border-color: var(--brand, var(--accent));
+  }
+
+  .folder__close:hover svg {
+    transform: rotate(90deg);
+  }
+}
+
+/* gated like every other hover in this file: a tap on touch fires a false hover, which
+   peeked the sheet ahead of the click that actually opens it. 2rem of lift, not the 1rem it
+   had: each tab only shows a sliver above the one filed in front of it, and 1rem left the
+   logo and title half hidden - the peek is there to read which folder you're on. */
+@media (hover: hover) and (pointer: fine) {
+  .folder:hover .folder__sheet {
+    transform: translateY(calc(100% - 5.4rem));
+  }
 }
 
 .folder:focus-visible {
@@ -891,17 +985,22 @@
 }
 
 .folder:focus-visible .folder__sheet {
+  transform: translateY(calc(100% - 5.4rem));
   border-color: var(--brand, var(--accent));
   box-shadow: 0 0 0 2px var(--brand, var(--accent));
 }
 
 .folder.is-open .folder__sheet,
 .folder.is-open:hover .folder__sheet {
-  height: 100%;
-  /* the mask above fades the sheet's own bottom edge so a folder growing from nothing (a
-     hover peek, or the sheet unrolling from the rim) never shows a hard cut. A fully open
-     card isn't growing from anything - it's the one thing meant to be read in full, so the
-     same fade read as an unexplained fog across its own lower half. */
+  transform: none;
+}
+
+/* The rim fade is for a folder coming out of the drawer - a hover peek, or the sheet sliding
+   up past the rim - so it never shows a hard cut. A fully open card isn't coming out of
+   anything: it's the one thing meant to be read in full, and the same fade read as an
+   unexplained fog along its bottom. Later than the rule that sets it, which it ties on
+   specificity with. */
+.folder.is-open {
   mask-image: none;
   -webkit-mask-image: none;
 }
@@ -926,7 +1025,7 @@
 
 .folder__tab .skill-label {
   font-family: var(--font-display);
-  font-size: 0.9375rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.15;
   letter-spacing: -0.01em;
@@ -940,7 +1039,7 @@
   display: inline-block;
   margin-bottom: 0.5rem;
   padding: 0.15rem 0.5rem;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-2);
@@ -949,17 +1048,17 @@
 }
 
 .folder__text {
-  font-size: 0.8125rem;
-  line-height: 1.5;
+  font-size: 0.75rem;
+  line-height: 1.45;
   color: var(--text-dim);
 }
 
 .folder__bullets {
   list-style: none;
   padding: 0;
-  margin: 0.7rem 0 0;
-  font-size: 0.8125rem;
-  line-height: 1.45;
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
 }
 
 .folder__bullets > li {
@@ -991,8 +1090,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .folder__sheet {
+  .folder__sheet,
+  .folder__close {
     transition-duration: 0.01ms;
+    transition-delay: 0s;
   }
 }
 

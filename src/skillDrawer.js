@@ -115,6 +115,19 @@ function buildFolder(li) {
   li.className = 'folder';
   if (d?.color) li.style.setProperty('--brand', d.color);
 
+  // Only shown once the sheet is actually open (CSS gates it on .is-open) - at rest and on
+  // hover-peek there is nothing here to close yet.
+  const close = document.createElement('button');
+  close.className = 'folder__close';
+  close.type = 'button';
+  close.setAttribute('aria-label', 'Close');
+  close.tabIndex = -1;
+  close.innerHTML =
+    '<svg width="10" height="10" viewBox="0 0 14 14" fill="none" aria-hidden="true">' +
+    '<path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
+    '</svg>';
+  li.append(close);
+
   const sheet = document.createElement('div');
   sheet.className = 'folder__sheet';
 
@@ -408,10 +421,16 @@ export function initSkillDrawer(host, strip) {
   const items = railSource.map((r, i) => {
     const el = r.li ? buildFolder(r.li) : buildDivider(r.divider);
     const obj = new CSS3DObject(el);
+    // CSS3DObject stamps pointer-events: auto inline on the element, which no stylesheet rule
+    // can beat - so the whole transparent 320px box took the pointer, in front of the next
+    // few tabs back. Cleared, the CSS decides: only the ::before strip over the tab is a target.
+    el.style.pointerEvents = '';
     obj.scale.setScalar(PX);
     obj.position.set(0, RIM + CH / 2, D / 2 - MARGIN - i * GAP);
     rail.add(obj);
-    return { interactive: !!r.li, el, obj, i, z0: obj.position.z };
+    // reveal: the opening stagger's share of the opacity, multiplied in by cull(). op/pe: the
+    // last opacity and pointer-events cull() wrote, so it can skip writes that change nothing
+    return { interactive: !!r.li, el, obj, i, z0: obj.position.z, reveal: 1, op: null, pe: null };
   });
   // keyboard Left/Right and select()/close() only ever act on real folders — dividers are
   // positional-only, so they need their own sequential index within just this list
@@ -437,6 +456,15 @@ export function initSkillDrawer(host, strip) {
   // the actual billboard: exactly parallel to the camera's image plane.
   const billboardQuat = new THREE.Quaternion();
   const RESTING_QUAT = new THREE.Quaternion(); // identity — a filed folder carries no rotation
+  // A hovered folder turns about its own vertical centre line toward the camera, which sits
+  // off to the right. The ceiling is the neighbour in front: the turn swings the near edge
+  // forward by sin(angle) * CW / 2, and past ~17 degrees that is more than GAP, so the folder
+  // would cut through the one filed ahead of it.
+  const HOVER_TURN = THREE.MathUtils.degToRad(14);
+  const HOVER_QUAT = new THREE.Quaternion().setFromAxisAngle(
+    new THREE.Vector3(0, 1, 0),
+    HOVER_TURN,
+  );
 
   /** Slerps f's own orientation toward `target`. Tweens a per-folder plain object rather than
    *  f.obj.rotation directly — component-wise Euler tweening is exactly the wrong-composition
@@ -482,23 +510,32 @@ export function initSkillDrawer(host, strip) {
   const FADE_AT = CAB_MOUTH + 1.2;
   const FADE_OVER = 0.35;
 
+  // The only thing that writes a folder's opacity. The opening stagger used to tween the same
+  // style.opacity alongside this, and which of the two landed last each frame came down to the
+  // order GSAP and pump() happened to tick in; it now tweens f.reveal, which is multiplied in
+  // here. Writes that change nothing are skipped: every render walks all the folders, and
+  // nearly all of them are standing still.
   function cull() {
     for (const f of items) {
-      if (f === active) {
-        f.el.style.opacity = '';
-        f.el.style.pointerEvents = '';
-        continue;
+      let op = '';
+      let pe = '';
+      if (f !== active) {
+        // pushed out through the drawer's own face by a drag
+        const past = rail.position.z + f.z0 > D / 2 + 0.15;
+        // still swallowed by the cabinet
+        const emerged = THREE.MathUtils.clamp(
+          (drawer.position.z + rail.position.z + f.z0 - FADE_AT) / FADE_OVER,
+          0,
+          1,
+        );
+        const shown = past ? 0 : emerged * f.reveal;
+        op = shown.toFixed(3);
+        pe = shown < 0.6 ? 'none' : '';
       }
-      // pushed out through the drawer's own face by a drag
-      const past = rail.position.z + f.z0 > D / 2 + 0.15;
-      // still swallowed by the cabinet
-      const emerged = THREE.MathUtils.clamp(
-        (drawer.position.z + rail.position.z + f.z0 - FADE_AT) / FADE_OVER,
-        0,
-        1,
-      );
-      f.el.style.opacity = past ? '0' : emerged.toFixed(3);
-      f.el.style.pointerEvents = past || emerged < 0.6 ? 'none' : '';
+      if (op !== f.op) f.el.style.opacity = f.op = op;
+      // a class rather than inline pointer-events: the hit target is the folder's ::before
+      // strip, which an inline value on the folder itself can't reach
+      if (pe !== f.pe) f.el.classList.toggle('is-culled', (f.pe = pe) === 'none');
     }
   }
 
@@ -529,7 +566,7 @@ export function initSkillDrawer(host, strip) {
   // drawer's front, under the section heading. Placed in screen space rather than in the
   // scene, so it lands in the same spot on the page at any framing: a world position tuned
   // at one aspect drifted off the heading, or onto the drawer, at every other.
-  const PICK_W = 0.34; // share of the frame's width the card takes
+  const PICK_W = 0.28; // share of the frame's width the card takes
   const PICK_TOP = 0.03; // gap above it, as a share of the frame's height
   const PICK_PULL = 2; // world units in front of the drawer's face, so it rides over every folder
   const pickPos = new THREE.Vector3();
@@ -580,15 +617,19 @@ export function initSkillDrawer(host, strip) {
   }
 
   /** Slide the furniture to `shift`. `solve` runs against the frame being slid to, so a card
-   *  placed in it lands where the frame will be rather than where it was. */
-  function slideFrame(shift, solve) {
+   *  placed in it lands where the frame will be rather than where it was. `duration` has to
+   *  match whatever card tween this call is paired with - left at its own fixed 0.6s, the
+   *  furniture kept sliding for ~250ms after collapse()'s shorter tweens had already settled
+   *  the folder, so a card that looked done sat there while the background kept moving under
+   *  it. */
+  function slideFrame(shift, solve, duration = 0.48) {
     gsap.killTweensOf(view);
     frameFor(shift);
     solve?.();
     frameFor(view.shift);
     gsap.to(view, {
       shift,
-      duration: 0.6,
+      duration,
       ease: 'power3.out',
       onUpdate: () => {
         frameFor(view.shift);
@@ -693,19 +734,21 @@ export function initSkillDrawer(host, strip) {
     active = f;
     f.el.classList.add('is-open');
     f.el.setAttribute('aria-expanded', 'true');
+    f.el.querySelector('.folder__close').tabIndex = 0;
     host.classList.add('has-open');
     // Out of the file and into the scene itself: left on the rail, a drag through the index
     // carried the open card along with it. Moving the rail to bring the card forward instead
     // pushed everything in front of it out through the drawer's face.
     gsap.killTweensOf([f.obj.position, f.obj.scale]);
     scene.attach(f.obj);
-    slideFrame(pickShift(), () => lift(f, 0.6));
+    slideFrame(pickShift(), () => lift(f, 0.48));
     pump(1200);
   }
 
   function collapse(f) {
-    f.el.classList.remove('is-open');
+    // aria updates now, the visual close deferred - see below
     f.el.setAttribute('aria-expanded', 'false');
+    f.el.querySelector('.folder__close').tabIndex = -1;
     // back into the file, so it rides with the index again; a lift still running would
     // otherwise keep writing world coordinates into what is now rail space
     gsap.killTweensOf([f.obj.position, f.obj.scale]);
@@ -714,17 +757,31 @@ export function initSkillDrawer(host, strip) {
       x: 0,
       y: RIM + CH / 2,
       z: f.z0,
-      duration: 0.45,
-      ease: 'power3.inOut',
+      duration: 0.35,
+      // A stronger curve than the scale/rotation tweens below, on purpose: position has
+      // the farthest to travel, so power3's tail was still visibly (if barely) creeping
+      // for ~150ms after the card already looked flat and file-sized, reading as two
+      // separate motions instead of one landing. power4 front-loads harder, so by the
+      // point rotation/scale settle, position has too.
+      ease: 'power4.out',
       onUpdate: render,
+      // .is-open drives the sheet's own CSS slide and the rim mask, which used to drop the moment
+      // this tween started: the mask flipping back on at full CSS size, while the object
+      // was still large mid-flight in world space, read as a jump. Held until the card is
+      // actually back and small again, that same CSS change happens at rail scale, where
+      // it is too small to see.
+      onComplete: () => f.el.classList.remove('is-open'),
     });
-    rotateTo(f, RESTING_QUAT, 0.4, 'power3.inOut');
+    rotateTo(f, RESTING_QUAT, 0.35, 'power3.out');
     gsap.to(f.obj.scale, {
       x: PX,
       y: PX,
       z: PX,
-      duration: 0.4,
-      ease: 'power3.inOut',
+      duration: 0.35,
+      // matches position's power4.out above: scale has the biggest relative change of the
+      // three (pick size down to a filed tile), and power3's tail left it visibly still
+      // shrinking after the rotation already read as flat and settled
+      ease: 'power4.out',
       onUpdate: render,
     });
   }
@@ -734,12 +791,28 @@ export function initSkillDrawer(host, strip) {
     collapse(active);
     active = null;
     host.classList.remove('has-open');
-    slideFrame(0);
+    slideFrame(0, undefined, 0.35);
     pump(700);
   }
 
   for (const f of folders) {
     f.el.addEventListener('click', () => select(f));
+    // Turned a little toward the camera under the mouse, so its tab opens up wider than the
+    // ones around it and is easier to hit. Mouse only: a tap has no hover to show, and focus
+    // moves with the arrow keys far too often to animate every step. Never the open card -
+    // that one is squared up to the camera already.
+    f.el.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'mouse' && f !== active) rotateTo(f, HOVER_QUAT, 0.2, 'power3.out');
+    });
+    f.el.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse' && f !== active) rotateTo(f, RESTING_QUAT, 0.2, 'power3.out');
+    });
+    // its own control: a bare click on the folder already toggles shut via select(), but the
+    // X has to win over that bubbling to the same handler and reopening what it just closed
+    f.el.querySelector('.folder__close').addEventListener('click', (e) => {
+      e.stopPropagation();
+      close();
+    });
     f.el.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault(); // Space would scroll the page
@@ -862,16 +935,21 @@ export function initSkillDrawer(host, strip) {
     if (opened) return;
     opened = true;
     gsap.to(drawer.position, { z: OPEN_Z, duration: 1.5, ease: 'power3.out', onUpdate: render });
+    // fromTo, not from: a from() left the folders parked on their start values. It tweens
+    // f.reveal, which cull() multiplies into the opacity it already owns, 40ms apart - 20ms
+    // was under the floor where a stagger reads as one. onComplete renders once more, so a
+    // reveal that finishes after pump() has stopped (a backgrounded tab) can't leave the
+    // index half faded.
     gsap.fromTo(
-      items.map((f) => f.el),
-      { opacity: 0 },
+      items,
+      { reveal: 0 },
       {
-        opacity: 1,
+        reveal: 1,
         duration: 0.5,
-        stagger: 0.02,
+        stagger: 0.04,
         delay: 0.35,
         ease: 'power2.out',
-        clearProps: 'opacity',
+        onComplete: render,
       },
     );
     pump(2600);
@@ -896,6 +974,7 @@ export function initSkillDrawer(host, strip) {
     window.removeEventListener('click', onOutside);
     gsap.killTweensOf(drawer.position);
     gsap.killTweensOf(view);
+    gsap.killTweensOf(items);
     items.forEach((f) => {
       gsap.killTweensOf(f.obj.position);
       gsap.killTweensOf(f.obj.scale);

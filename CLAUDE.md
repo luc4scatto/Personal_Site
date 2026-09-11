@@ -76,19 +76,32 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
   just enough to give the card that column (`slideFrame()`, a tweened `setViewOffset`) and
   slides back on close; the canvas mask's right-hand fade follows it through `--slide`.
   There is no separate card and no `#skill-card-slot` in drawer mode.
-- The sheet is anchored to the **bottom** of a fixed-size box and only ever grows upward, so
+- The sheet is always the full card and **slides up** out of the rim (`translateY`, never
+  `height`: animating height relaid the card out every frame, on top of the WebGL pass). At
+  rest it sits pushed down so only the tab shows, and `.folder` has `overflow: hidden`, so
   nothing a visitor reads ever needs to be drawn behind the metal. That matters: a CSS3D
   layer cannot be occluded by the WebGL canvas, and this is what makes the two layers
-  co-exist without a second render pass.
+  co-exist without a second render pass. The rim fade is `.folder`'s `mask-image`, not the
+  sheet's, since the sheet's own bottom edge is out of sight at rest.
 - **`cull()` is the reveal, not just a guard.** A CSS3D layer is always painted over the
   WebGL canvas, so a folder still inside the cabinet rides on top of the metal instead of
   being hidden by it. Each folder fades in as it crosses `CAB_MOUTH`, which is why the
   opening reads as the drawer being pulled out of the cabinet rather than the whole index
-  sliding along above it. There is deliberately no opacity tween on open — it would fight
-  this.
+  sliding along above it. `cull()` is also the **only** writer of a folder's opacity: the
+  opening stagger tweens `f.reveal`, a factor `cull()` multiplies in, never `style.opacity`
+  itself - with two writers on one property, which won each frame came down to tick order.
 - **Selection moves the card, never the rail.** Sliding the whole index forward to bring the
   chosen folder to the front pushed every folder ahead of it out through the drawer's face.
   `cull()` still hides anything a manual drag pushes past the front lip.
+- **A folder's hit target is a `::before` strip over its tab's rest position**, not its box.
+  The box is the whole 320px card, transparent above the tab, and left hit-testable it sat
+  in front of the next four or five tabs back: pointing at a label picked a folder filed
+  ahead of it. `CSS3DObject` stamps `pointer-events: auto` inline on every element, which is
+  why the box was a target at all: the constructor's inline value is cleared right after, or
+  no stylesheet rule reaches it. The strip doesn't move with the hover lift, so a lifted tab can't swallow the
+  ones behind it. `cull()` switches it off with `.is-culled`; an open card's whole sheet
+  takes the pointer again. Hover lifts the tab 2rem (enough to read logo and title) and
+  turns it `HOVER_TURN` toward the camera, mouse only.
 - `fit()` solves the camera distance **numerically**, against the corners of the furniture
   (cabinet top included, drawer at full extension), then centres that silhouette with
   `setViewOffset` rather than on the point the camera looks at. Trigonometry that assumed a
@@ -121,8 +134,10 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
 - `main.js` adds `is-live` to `#skill-drawer` only after the module has initialised, and
   every drawer rule is scoped to it. `initSkillsWall()` is a named function precisely so the
   import's `.catch` can hand the section back to the flat wall.
-- The opening reveal uses `gsap.fromTo`, not `from`. A `from` here left the folders parked on
-  their start values, and an invisible wall of skills is a worse failure than no animation.
+- The opening reveal uses `gsap.fromTo`, not `from` (on `f.reveal`, 40ms stagger). A `from`
+  here left the folders parked on their start values, and an invisible wall of skills is a
+  worse failure than no animation; the tween's `onComplete` renders once more for the same
+  reason, in case it finishes after `pump()` has stopped.
 
 - **Selectors must be direct-child scoped.** The card is injected *inside* `.skills-grid`
   and its title is an `<h3>` inside `.skill-group`. Written as descendant selectors,
