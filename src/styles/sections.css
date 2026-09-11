@@ -845,7 +845,7 @@
    back, so pointing at a label picked a folder filed ahead of it. The target is a strip over
    the tab's rest position instead, and it stays put: a hovered folder lifting its tab must
    not grow its target up over the ones behind, or the pointer skips them on the way up. */
-#skill-drawer.is-live .drawer__css .folder:not(.folder--divider)::before {
+#skill-drawer.is-live .drawer__css .folder::before {
   content: '';
   position: absolute;
   inset: auto 0 0;
@@ -884,8 +884,8 @@
 }
 
 /* the fade at the rim: the sheet's own bottom edge is out of sight now, so the fade moved up
-   to the box, which is where the rim actually is. Dividers have no sheet and never had it. */
-.folder:not(.folder--divider) {
+   to the box, which is where the rim actually is */
+.folder {
   mask-image: linear-gradient(to top, transparent 0, #000 0.45rem);
   -webkit-mask-image: linear-gradient(to top, transparent 0, #000 0.45rem);
 }
@@ -1097,33 +1097,34 @@
   }
 }
 
-/* a card-index divider: not a folder, just a tab standing between two categories. Taller
-   than a folder's own rest-state tab (3.4rem) so its label survives everything filed in
-   front of it — a real index divider is cut proud of the cards it sorts, for the same
-   reason. Neutral, not brand-washed: it belongs to no single tool. */
-.folder--divider {
-  cursor: default;
-  pointer-events: none;
+/* A category's name and rule, just outside the drawer's left rim (skillDrawer.js, "category
+   labels"). The name is a zero-size anchor at the rule's midpoint with the text set above
+   and to the left of it: the rule climbs from lower left to upper right, so that is the one
+   quarter round the midpoint it never crosses. Same voice as the flat wall's category
+   headings, at the size of a label. */
+.drawer__label {
+  width: 0;
+  height: 0;
 }
 
-.folder__tab--divider {
+.drawer__label span {
   position: absolute;
-  inset: auto 0 0;
-  height: 4.6rem;
-  display: flex;
-  align-items: flex-end;
-  padding: 0 0.9rem 0.85rem;
-  background: #16171a;
-  border: 1px solid #2c2d31;
-  border-top: 2px solid var(--text-dim);
-  border-radius: 0.35rem 0.35rem 0.2rem 0.2rem;
-  box-shadow: 0 12px 26px -14px rgba(0, 0, 0, 0.9);
+  right: 0.3rem;
+  bottom: 0.3rem;
+  white-space: nowrap;
   font-family: var(--font-display);
-  font-size: 0.8125rem;
+  font-size: 1.35rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-dim);
+}
+
+/* authored 100px long; cull() scales it to the stretch of the category that is showing */
+.drawer__rule {
+  width: 100px;
+  height: 2px;
+  background: color-mix(in srgb, var(--text-dim) 70%, transparent);
 }
 
 /* projects */

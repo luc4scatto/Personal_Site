@@ -181,32 +181,23 @@ function buildFolder(li) {
   return li;
 }
 
-/** A card-index divider: a plain tab standing between two categories, never itself a
- *  folder. Taller than a folder's own rest-state tab so its label survives everything
- *  filed in front of it, the way a real index divider is cut proud of the cards it sorts. */
-function buildDivider(label) {
-  const el = document.createElement('div');
-  el.className = 'folder folder--divider';
-  el.setAttribute('aria-hidden', 'true');
-
-  const tab = document.createElement('div');
-  tab.className = 'folder__tab--divider';
-  tab.textContent = label;
-  el.append(tab);
-  return el;
-}
-
 export function initSkillDrawer(host, strip) {
-  // Walk the strip's own .skill-group divs rather than flatly querying every <li> so the
-  // rail can carry the same category boundaries the flat wall shows via its <h3>s — a card
-  // index files by subject, it doesn't run everything together.
-  const railSource = [];
+  // Walk the strip's own .skill-group divs rather than flatly querying every <li>, so the rail
+  // keeps the category boundaries the flat wall shows with its <h3>s - a card index files by
+  // subject. A boundary is an empty slot in the file, which groups on its own; the name goes
+  // outside the drawer (see "category labels" below).
+  const railSource = []; // an <li> per slot, or null for the gap between two categories
+  const categories = [];
   for (const group of strip.querySelectorAll('.skill-group')) {
+    const lis = group.querySelectorAll('li[data-skill]');
+    if (!lis.length) continue;
+    if (railSource.length) railSource.push(null);
+    const first = railSource.length;
+    railSource.push(...lis);
     const label = group.querySelector('h3')?.textContent;
-    if (label && railSource.length) railSource.push({ divider: label });
-    for (const li of group.querySelectorAll('li[data-skill]')) railSource.push({ li });
+    if (label) categories.push({ label, first, last: railSource.length - 1 });
   }
-  if (!railSource.some((r) => r.li)) return () => {};
+  if (!railSource.some(Boolean)) return () => {};
 
   const scene = new THREE.Scene();
   // A long lens on purpose. At 32 degrees the drawer's front panel rendered half again
@@ -247,8 +238,8 @@ export function initSkillDrawer(host, strip) {
 
   // The tray is cut to the index plus a margin at each end, rather than to a headroom figure
   // that had nothing to do with the folders: the old one left a full GAP of empty tray behind
-  // the last folder and a different amount in front of the first. Dividers sit on the same
-  // GAP pitch as folders, so they count toward this length too.
+  // the last folder and a different amount in front of the first. The empty slot between two
+  // categories sits on the same GAP pitch as a folder, so it counts toward this length too.
   const MARGIN = 0.55;
   const D = GAP * (railSource.length - 1) + MARGIN * 2;
   // A drawer whose back edge comes level with the cabinet face is a drawer that has fallen
@@ -418,28 +409,134 @@ export function initSkillDrawer(host, strip) {
   drawer.add(rail);
 
   const RIM = H / 2; // the cards' bottom edge rests here, so nothing dips below the metal
-  const items = railSource.map((r, i) => {
-    const el = r.li ? buildFolder(r.li) : buildDivider(r.divider);
+  const slotZ = (i) => D / 2 - MARGIN - i * GAP;
+  const items = [];
+  railSource.forEach((li, i) => {
+    if (!li) return; // the gap between two categories
+    const el = buildFolder(li);
     const obj = new CSS3DObject(el);
     // CSS3DObject stamps pointer-events: auto inline on the element, which no stylesheet rule
     // can beat - so the whole transparent 320px box took the pointer, in front of the next
     // few tabs back. Cleared, the CSS decides: only the ::before strip over the tab is a target.
     el.style.pointerEvents = '';
     obj.scale.setScalar(PX);
-    obj.position.set(0, RIM + CH / 2, D / 2 - MARGIN - i * GAP);
+    obj.position.set(0, RIM + CH / 2, slotZ(i));
     rail.add(obj);
     // reveal: the opening stagger's share of the opacity, multiplied in by cull(). op/pe: the
     // last opacity and pointer-events cull() wrote, so it can skip writes that change nothing
-    return { interactive: !!r.li, el, obj, i, z0: obj.position.z, reveal: 1, op: null, pe: null };
+    items.push({ el, obj, i, z0: obj.position.z, reveal: 1, op: null, pe: null });
   });
-  // keyboard Left/Right and select()/close() only ever act on real folders — dividers are
-  // positional-only, so they need their own sequential index within just this list
-  const folders = items.filter((it) => it.interactive);
+  // keyboard Left/Right steps through this list, so the gaps between categories are never a
+  // stop: f.fi is a folder's place in it, f.i its slot in the rail
+  const folders = items;
   folders.forEach((f, fi) => (f.fi = fi));
 
   let active = null;
   let railZ = 0;
-  const maxZ = Math.max(0, (items.length - 1) * GAP - D * 0.34);
+  const maxZ = Math.max(0, (railSource.length - 1) * GAP - D * 0.34);
+
+  // ---- category labels ---------------------------------------------------------------------
+  // Outside the drawer, not filed in it. A divider tab standing in the index covered the logo
+  // and title of the first folder of every category - the one you'd look for - and a narrow
+  // tab off to the right was too small to read. Each category gets its name and a hairline
+  // instead, just outside the left edge of the file: the rule runs along the top-left corners
+  // of its category's tabs and the name sits above-left of its midpoint, away from every tab,
+  // which only ever lean the other way. (Under the right flank was tried first; the left reads
+  // as part of the file's own edge.) The name faces the camera so it reads at any depth.
+  // CSS3D, like the folders, so the rule takes the same colour token as its name; it is never
+  // occluded by the metal either, so cull() clips both by hand, at the cabinet face and at the
+  // drawer's own front.
+  // Anchored on the tabs' corners, not on the drawer's rim at the same depth: a tab stands
+  // TAB_REM above the rim, and at three quarters higher on screen is also further back, so a
+  // rule on the rim sat under the tabs of the folders filed ahead of its own - Audio's ran
+  // from Illustrator to Ableton instead of Ableton to Rekordbox. It used to stand 220px up
+  // as well, out in the empty space over the drawer, where no name belonged to any tab.
+  // Positioned in screen space off that corner, not by a world-unit offset: a world-unit
+  // offset drifts out of line as depth changes, because this camera looks from the side
+  // (AZIMUTH) as well as from above. Fixed pixel offsets from the corner's own projected
+  // position keep the rule running along the tabs at every depth; layoutLabels() (called
+  // from resize(), after the camera is final for that frame) is where that projection happens.
+  const TAB_REM = 3.4; // the tab left above the rim at rest - .folder__sheet's translateY in sections.css
+  const LABEL_PX_LEFT = 10; // screen px left of the tabs' corners
+  const LABEL_PX_UP = 10; // screen px above them
+  const LABEL_LEAD = 0.12; // the rule runs a touch past the category's first and last folder
+  const RULE_PX = 100; // a rule's authored length; cull() scales it to what is showing
+  let tabH = 0; // TAB_REM in world units, set by layoutLabels() from the live root font size
+  const rimWorld = new THREE.Vector3();
+  const rimCam = new THREE.Vector3();
+  const rimFwd = new THREE.Vector3();
+  /** The point `pxLeft`/`pxUp` screen pixels off the top-left corner of a tab filed at depth
+   *  `z`, at the same distance from the camera as that corner - not the same world Z, which
+   *  is what makes this track the corners' own projected line rather than a parallel one that
+   *  drifts from it as the camera's azimuth foreshortens the two differently. */
+  function rimOffset(z, pxLeft, pxUp) {
+    rimWorld.set(-CW / 2, RIM + tabH, z);
+    rimCam.copy(rimWorld).applyMatrix4(camera.matrixWorldInverse);
+    const depth = -rimCam.z;
+    rimWorld.project(camera);
+    rimWorld.x -= (2 * pxLeft) / w;
+    rimWorld.y += (2 * pxUp) / h;
+    rimWorld.unproject(camera).sub(camera.position).normalize();
+    camera.getWorldDirection(rimFwd);
+    return camera.position.clone().addScaledVector(rimWorld, depth / rimWorld.dot(rimFwd));
+  }
+  const X_AXIS = new THREE.Vector3(1, 0, 0);
+  const labels = categories.map((c) => {
+    const el = document.createElement('div');
+    el.className = 'drawer__label';
+    const name = document.createElement('span');
+    name.textContent = c.label;
+    el.append(name);
+    const obj = new CSS3DObject(el);
+    el.style.pointerEvents = '';
+    obj.scale.setScalar(PX);
+    rail.add(obj);
+
+    const ruleEl = document.createElement('div');
+    ruleEl.className = 'drawer__rule';
+    const rule = new CSS3DObject(ruleEl);
+    ruleEl.style.pointerEvents = '';
+    rail.add(rule);
+
+    const front = slotZ(c.first) + LABEL_LEAD; // in world Z, for cull()'s reveal/clip math
+    const back = slotZ(c.last) - LABEL_LEAD;
+    // p0/p1/dir/len: this category's rim-offset endpoints and the segment between them,
+    // filled in by layoutLabels() once the camera is known - front > back in world Z always,
+    // so p0 (at `front`) is the nearer, p1 (at `back`) the further of the two.
+    return {
+      el,
+      obj,
+      ruleEl,
+      rule,
+      front,
+      back,
+      // its own reveal, tweened in openDrawer() - riding the lead folder's own f.reveal made
+      // a category filed toward the back wait for that folder's turn in a 24-item stagger,
+      // arriving over a second after the ones at the front
+      reveal: 1,
+      p0: new THREE.Vector3(),
+      p1: new THREE.Vector3(),
+      dir: new THREE.Quaternion(),
+      len: 1,
+      op: null,
+      rop: null,
+    };
+  });
+  /** Re-solves every label's rim-offset endpoints against the current camera. Only the
+   *  endpoints move here; cull() re-clips and re-draws the visible stretch between them
+   *  every frame, since how much of a category is out of the cabinet changes constantly. */
+  function layoutLabels() {
+    tabH = TAB_REM * parseFloat(getComputedStyle(document.documentElement).fontSize) * PX;
+    for (const l of labels) {
+      l.p0.copy(rimOffset(l.front, LABEL_PX_LEFT, LABEL_PX_UP));
+      l.p1.copy(rimOffset(l.back, LABEL_PX_LEFT, LABEL_PX_UP));
+      l.len = l.p0.distanceTo(l.p1);
+      l.dir.setFromUnitVectors(X_AXIS, l.p1.clone().sub(l.p0).normalize());
+      l.rule.quaternion.copy(l.dir);
+      l.obj.position.copy(l.p0).lerp(l.p1, 0.5); // the name hangs off the rule's midpoint
+      l.obj.quaternion.copy(billboardQuat);
+    }
+  }
 
   // ---- rendering ---------------------------------------------------------------------
   let w = 0;
@@ -515,6 +612,7 @@ export function initSkillDrawer(host, strip) {
   // order GSAP and pump() happened to tick in; it now tweens f.reveal, which is multiplied in
   // here. Writes that change nothing are skipped: every render walks all the folders, and
   // nearly all of them are standing still.
+  const labelTmp = new THREE.Vector3(); // scratch: a label's p1-p0 span, re-used every frame
   function cull() {
     for (const f of items) {
       let op = '';
@@ -536,6 +634,34 @@ export function initSkillDrawer(host, strip) {
       // a class rather than inline pointer-events: the hit target is the folder's ::before
       // strip, which an inline value on the folder itself can't reach
       if (pe !== f.pe) f.el.classList.toggle('is-culled', (f.pe = pe) === 'none');
+    }
+
+    // Category labels: only the stretch that is out in the open shows - in front of the
+    // cabinet face, and not pushed out through the drawer's own front by a drag. Clipped by
+    // how far along the rim-offset segment (not the world-Z span) the limits fall, since p0
+    // and p1 no longer share a world X/Y the way the old Z-only rule did.
+    const backLim = CAB_MOUTH - drawer.position.z - rail.position.z;
+    const frontLim = D / 2 - rail.position.z;
+    const span = labelTmp;
+    for (const l of labels) {
+      const front = Math.min(l.front, frontLim);
+      const back = Math.max(l.back, backLim);
+      l.rule.visible = front > back;
+      if (l.rule.visible) {
+        const t0 = (l.front - front) / (l.front - l.back);
+        const t1 = (l.front - back) / (l.front - l.back);
+        span.copy(l.p1).sub(l.p0);
+        l.rule.scale.set((l.len * (t1 - t0)) / RULE_PX, PX, PX);
+        l.rule.position.copy(l.p0).addScaledVector(span, (t0 + t1) / 2);
+      }
+      const rop = l.reveal.toFixed(3);
+      if (rop !== l.rop) l.ruleEl.style.opacity = l.rop = rop;
+      // the name hangs off the rule's midpoint, so it fades in as that point clears the face
+      const mid = (l.front + l.back) / 2;
+      const shown =
+        mid > frontLim ? 0 : THREE.MathUtils.clamp((mid - backLim) / FADE_OVER, 0, 1) * l.reveal;
+      const op = shown.toFixed(3);
+      if (op !== l.op) l.el.style.opacity = l.op = op;
     }
   }
 
@@ -566,7 +692,7 @@ export function initSkillDrawer(host, strip) {
   // drawer's front, under the section heading. Placed in screen space rather than in the
   // scene, so it lands in the same spot on the page at any framing: a world position tuned
   // at one aspect drifted off the heading, or onto the drawer, at every other.
-  const PICK_W = 0.28; // share of the frame's width the card takes
+  const PICK_W = 0.25; // share of the frame's width the card takes
   const PICK_TOP = 0.03; // gap above it, as a share of the frame's height
   const PICK_PULL = 2; // world units in front of the drawer's face, so it rides over every folder
   const pickPos = new THREE.Vector3();
@@ -576,9 +702,24 @@ export function initSkillDrawer(host, strip) {
     const cardH = Math.min(h * (1 - PICK_TOP * 2), (w * PICK_W * CARD_H) / CARD_W);
     return [(cardH * CARD_W) / CARD_H, cardH];
   }
-  // how far the furniture steps right so the card gets a column of its own, clear of the
-  // drawer's front instead of laid over the folders filed there
-  const pickShift = () => Math.max(0, cardSize()[0] + w * 0.025 - view.left);
+  // How far the furniture steps right so the card gets a column of its own, clear of the
+  // drawer's front instead of laid over the folders filed there - and clear of the category
+  // names, which stand out past that front on the left: sized to the front alone, the longest
+  // name beside the card ran into its corner. The names are measured off the page, less the
+  // slide they were last drawn at, so this reads where they rest at no slide at all.
+  const pickShift = () => {
+    const [cardW, cardH] = cardSize();
+    const clear = cardW + w * 0.025;
+    let shift = clear - view.left;
+    const hb = host.getBoundingClientRect();
+    const top = h * PICK_TOP;
+    for (const l of labels) {
+      const b = l.el.firstChild.getBoundingClientRect();
+      if (!b.width || b.bottom - hb.top < top || b.top - hb.top > top + cardH) continue;
+      shift = Math.max(shift, clear - (b.left - hb.left - view.shift));
+    }
+    return Math.max(0, shift);
+  };
 
   function pickTarget() {
     const [cardW, cardH] = cardSize();
@@ -697,14 +838,20 @@ export function initSkillDrawer(host, strip) {
     buildCabinet(total);
     fit(total);
     billboardQuat.copy(camera.quaternion);
+    layoutLabels();
     measureZAxis();
     renderer.setSize(w, h);
     css.setSize(w, h);
     // the card's spot is in screen space, so it and the room made for it follow the frame
     gsap.killTweensOf(view);
-    view.shift = active ? pickShift() : 0;
-    frameFor(view.shift);
-    if (active) lift(active, 0);
+    view.shift = 0;
+    frameFor(0);
+    if (active) {
+      render(); // pickShift() measures the category names off the page, so draw them at the new size first
+      view.shift = pickShift();
+      frameFor(view.shift);
+      lift(active, 0);
+    }
     render();
   }
 
@@ -819,8 +966,8 @@ export function initSkillDrawer(host, strip) {
         select(f);
       } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
         e.preventDefault();
-        // steps between real folders only — f.fi is this folder's index within that
-        // filtered list, not its position in the full rail, so dividers are never a stop
+        // steps between folders only - f.fi is this folder's place among them, not its slot
+        // in the rail, so the gap between two categories is never a stop
         folders[
           THREE.MathUtils.clamp(f.fi + (e.key === 'ArrowRight' ? 1 : -1), 0, folders.length - 1)
         ].el.focus();
@@ -952,6 +1099,21 @@ export function initSkillDrawer(host, strip) {
         onComplete: render,
       },
     );
+    // Its own short stagger over the 7 categories, not the lead folder's turn in the rail's
+    // 24-item one: riding that made a category filed toward the back wait past a second
+    // before its name appeared, long after its own folders were already visible.
+    gsap.fromTo(
+      labels,
+      { reveal: 0 },
+      {
+        reveal: 1,
+        duration: 0.5,
+        stagger: 0.04,
+        delay: 0.35,
+        ease: 'power2.out',
+        onComplete: render,
+      },
+    );
     pump(2600);
   }
 
@@ -975,6 +1137,7 @@ export function initSkillDrawer(host, strip) {
     gsap.killTweensOf(drawer.position);
     gsap.killTweensOf(view);
     gsap.killTweensOf(items);
+    gsap.killTweensOf(labels);
     items.forEach((f) => {
       gsap.killTweensOf(f.obj.position);
       gsap.killTweensOf(f.obj.scale);

@@ -102,6 +102,19 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
   ones behind it. `cull()` switches it off with `.is-culled`; an open card's whole sheet
   takes the pointer again. Hover lifts the tab 2rem (enough to read logo and title) and
   turns it `HOVER_TURN` toward the camera, mouse only.
+- **Categories are labelled outside the drawer**, not by divider tabs filed in it: a
+  full-width divider covered the logo and title of the first folder of every category, and
+  a narrow one off to the right was too small to read. A category boundary is an empty slot
+  in the rail (`railSource` holds `null` there); each category gets a camera-facing name
+  and a hairline (`.drawer__label`, `.drawer__rule`) running just up-left of its tabs'
+  top-left corners, the name above-left of the rule's midpoint (the one quarter the climbing
+  rule never crosses) - clear of every tab, which all lean the other way. Anchored on the
+  corners (`TAB_REM` above the rim, mirroring `.folder__sheet`'s rest `translateY`), not on
+  the rim itself: at three quarters a tab projects further back than the rim at its own
+  depth, so a rim-anchored rule sat under the folders filed ahead of its category. They are CSS3D like the folders, so `cull()` clips both by hand at the cabinet face
+  and the drawer front, and they ride the opening reveal of their category's first folder.
+  Since they stand out past the drawer's front on the left, `pickShift()` measures them off
+  the page and slides the furniture far enough that none beside the open card touches it.
 - `fit()` solves the camera distance **numerically**, against the corners of the furniture
   (cabinet top included, drawer at full extension), then centres that silhouette with
   `setViewOffset` rather than on the point the camera looks at. Trigonometry that assumed a
