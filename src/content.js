@@ -249,6 +249,13 @@ export const content = {
   skillsHint: {
     title: 'Pick a skill',
     text: 'Click any tool to see what I actually do with it.',
+    // shown beside the shut drawer (src/skillDrawer.js) in the dead space its own canvas
+    // mask fades into on the right - the flat wall's line above talks about a tool, this one
+    // about the drawer itself, since there's a whole extra gesture to invite first.
+    // One line per newline: skillDrawer.js gives each its own <span>, and the two animate
+    // differently - the first is nudged to the right, the second carries the colour sweep - so
+    // breaking this copy differently changes which line does what
+    drawerText: "Pull the last drawer\nSee what's inside.",
   },
   // shown in the Skills section panel (src/main.js) — color = brand color extracted from each icon
   skills: {

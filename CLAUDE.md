@@ -150,10 +150,35 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
 - `main.js` adds `is-live` to `#skill-drawer` only after the module has initialised, and
   every drawer rule is scoped to it. `initSkillsWall()` is a named function precisely so the
   import's `.catch` can hand the section back to the flat wall.
-- The opening reveal uses `gsap.fromTo`, not `from` (on `f.reveal`, 40ms stagger). A `from`
+- **It waits to be pulled.** The drawer used to open itself off an IntersectionObserver, which
+  spent the whole gesture before anyone had looked at the furniture. It now starts shut and runs
+  only on a real pull: a click or drag on the front, or a Tab into a folder (`focusin` on the
+  host — the folders are real DOM and take focus whether the drawer is out or not). While it is
+  shut the section reads like the hero: `.drawer__hint` sets `content.skillsHint.drawerText` at
+  display scale down the left, with `layoutHintArrow()` sweeping to the handle. That sweep is an
+  **exact quarter circle** — it leaves the type straight down and reaches the handle straight
+  across, a 90° arc's own two tangents — which means it is as tall as it is wide, so how high the
+  block sits is not a free choice: `layoutHintArrow()` solves `top` from the arc's width and
+  writes it back in px (`sections.css`'s `top` is only the value for the frame before it runs).
+  The copy is **one `<span>` per line**, split on `drawerText`'s own `\n`, because the two lines
+  animate differently: the first (the instruction) carries `hint-nudge`, a slow shove right that
+  settles back, in flat `--text-dim`; the second (the promise) carries the `hint-shine` colour
+  sweep and doesn't move. Both on both lines was twice the motion for one invitation. The nudge
+  is on the line and not on the block for two reasons — the block's `transform` is its vertical
+  centring, and `layoutHintArrow()` measures the block, which a child's transform leaves
+  untouched.
+  That column needs no help from the camera — `fit()` frames the drawer at *full extension*, so
+  a drawer that is in leaves everything left of ~60% of the box empty. A tweened step-aside off
+  the drawer's own z was built for exactly this and measured `0px` at every size, which is why
+  there isn't one; don't add it back without measuring first.
+- The opening reveal uses `gsap.fromTo`, not `from` (on `f.reveal`, 40ms stagger), and fires
+  once, from `revealIndex()` on the first pull — a drag sets `revealed` without tweening, since
+  a hand pulling the drawer already staggers the folders as they clear the mouth. A `from`
   here left the folders parked on their start values, and an invisible wall of skills is a
   worse failure than no animation; the tween's `onComplete` renders once more for the same
-  reason, in case it finishes after `pump()` has stopped.
+  reason, in case it finishes after `pump()` has stopped. The category names are *not* in it:
+  `fadeLabels(1)` off the run's own `onComplete` brings them in every time, not just the first,
+  and they start at `reveal: 0` because the drawer now starts shut.
 
 - **Selectors must be direct-child scoped.** The card is injected *inside* `.skills-grid`
   and its title is an `<h3>` inside `.skill-group`. Written as descendant selectors,

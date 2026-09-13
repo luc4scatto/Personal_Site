@@ -832,6 +832,119 @@
   -webkit-mask-composite: source-in;
 }
 
+/* The invitation to pull the last drawer, set at display scale: the section opens the way the
+   hero does - a line of type on the left, the object on the right - and only moves when someone
+   pulls it. The column is free without any help from the camera: fit() frames the drawer at
+   full extension, so a drawer that is *in* leaves everything left of about 60% of the box
+   empty. (A tweened step aside off the drawer's own z was built for this and measured 0px at
+   every size tried, which is the whole of why it isn't here.) Centred down that column rather
+   than pinned under the heading: the column runs the full height of the box, and a small block
+   parked at the top left most of it dead. Plain DOM, not CSS3D: it has nothing to do with the
+   scene's perspective. pointer-events: none keeps it from stealing the drag or the handle's own
+   hit test. Visibility rides .is-shut, which skillDrawer.js's render() toggles straight off the
+   drawer's own z - never a separate flag set at every open/close call site, which is exactly
+   the kind of state that drifts from what's on screen.
+   The copy is one line per <span> (skillDrawer.js splits content.js's own newline), because the
+   two lines animate differently: see .drawer__hint span below. */
+#skill-drawer.is-live .drawer__hint {
+  position: absolute;
+  /* Only the value for the frame before layoutHintArrow() runs: the sweep is an exact quarter
+     circle, as tall as it is wide, so the drop from this block down to the handle is fixed by
+     how far across the arc has to reach - skillDrawer.js solves that and writes `top` back in
+     px. High in the box either way: the canvas mask fades it out from 70% down, so a block
+     centred at 50% hangs below everything there is to look at. */
+  top: 20%;
+  left: 4%;
+  /* stops around 52%, clear of the shut front and of the room the arrow sweeps through */
+  width: 48%;
+  max-width: 32rem;
+  margin: 0;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3.6vw, 3rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+/* One line, one animation: the instruction moves, the promise shines. Both running on both
+   lines was twice the motion for one invitation, and the two read as competing for the eye. */
+#skill-drawer.is-live .drawer__hint span {
+  display: block;
+}
+
+/* The line that asks for the gesture is the line that makes it: hint-nudge is a slow shove to
+   the right that settles back past its own rest, the way a drawer does when a hand lets go of
+   it. It rests for most of the cycle - a push that never stops reads as a loading state, not as
+   an invitation - and it sits on the line rather than on the block because the block's own
+   transform is the vertical centring, and because layoutHintArrow() measures the block to solve
+   the arc: a transform on a line moves nothing the parent's box reports, so the sweep can't
+   wander with the push. */
+#skill-drawer.is-live .drawer__hint span:first-child {
+  color: var(--text-dim);
+  animation: hint-nudge 3.6s ease-in-out infinite;
+}
+
+/* and the line that says what the gesture is for carries the colour. hint-shine is homelab's
+   shimmer, reused here and by .skills-hint above: an established "look here" pattern in this
+   codebase, not a new one designed for this spot - slowed, because at this size the 3s sweep
+   reads as a marquee rather than as a highlight. */
+#skill-drawer.is-live .drawer__hint span + span {
+  background: linear-gradient(
+    90deg,
+    var(--text-dim) 0%,
+    var(--text-dim) 40%,
+    var(--accent) 50%,
+    var(--accent-2) 60%,
+    var(--text-dim) 70%,
+    var(--text-dim) 100%
+  );
+  background-size: 300% 100%;
+  background-position: 110% center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hint-shine 4.5s linear infinite;
+}
+
+@keyframes hint-nudge {
+  0%,
+  60%,
+  100% {
+    transform: translateX(0);
+  }
+  76% {
+    transform: translateX(0.55rem);
+  }
+  90% {
+    transform: translateX(-0.1rem);
+  }
+}
+
+/* Full host size, not a small icon beside the text: the path skillDrawer.js's layoutHintArrow()
+   draws spans from wherever the text actually landed toward the handle's own projected
+   position - toward, not onto it: that function stops the curve short on purpose, matching
+   the homelab diagram's own connector arrowhead (hw-arrow in homelabHardware.js) rather than
+   inventing a second arrow language for the same site. currentColor, not the text's own
+   gradient: the text is background-clip text with color: transparent underneath it, which an
+   SVG cannot inherit as a stroke colour. */
+#skill-drawer.is-live .drawer__hint-arrow {
+  position: absolute;
+  inset: 0;
+  color: var(--text-dim);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+#skill-drawer.is-live .drawer__scene.is-shut .drawer__hint,
+#skill-drawer.is-live .drawer__scene.is-shut .drawer__hint-arrow {
+  opacity: 1;
+}
+
 /* the CSS3D layer rides above the metal; it must not swallow the drag, so only the folders
    themselves take pointer events */
 #skill-drawer.is-live .drawer__css {

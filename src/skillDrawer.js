@@ -224,6 +224,60 @@ export function initSkillDrawer(host, strip) {
   css.domElement.className = 'drawer__css';
   host.appendChild(css.domElement);
 
+  // The invitation to pull the last drawer, filed where the flat wall's own hint sits - left,
+  // under the section heading - with one long arrow sweeping across the empty floor of the
+  // scene to land on the handle. Plain DOM, not CSS3D: neither element has anything to do with
+  // the scene's perspective. Both ride render()'s own `is-shut` class, read straight off the
+  // drawer's z each frame rather than tracked as separate state, so they show for exactly as
+  // long as the drawer really is shut - including the very first frame, before anyone has
+  // touched anything.
+  const hintText = document.createElement('p');
+  hintText.className = 'drawer__hint';
+  // A <span> per line of the copy, not one text node with a <br>: each line carries the colour
+  // sweep and the nudge on its own, and the sweeps run half a period apart (sections.css), which
+  // needs two elements to run on. The break is the copy's own, from content.js.
+  for (const line of (content.skillsHint?.drawerText ?? content.skillsHint?.text ?? '').split(
+    '\n',
+  )) {
+    const lineEl = document.createElement('span');
+    lineEl.textContent = line;
+    hintText.appendChild(lineEl);
+  }
+  host.appendChild(hintText);
+
+  // The sweep's own path is solved in resize() - it has to be: its start is wherever CSS
+  // actually laid the text out and its end is the handle's own projected position, and neither
+  // is known until the camera and the page have both settled. A fixed-size element sitting in a
+  // fixed spot the way the tab's small arrow used to (rest of that attempt now gone) can't reach
+  // across a box whose empty floor grows and shrinks with the aspect ratio, so this one spans
+  // the whole host instead and is redrawn, not repositioned.
+  const hintArrowNS = 'http://www.w3.org/2000/svg';
+  const hintArrow = document.createElementNS(hintArrowNS, 'svg');
+  hintArrow.setAttribute('class', 'drawer__hint-arrow');
+  hintArrow.setAttribute('fill', 'none');
+  hintArrow.setAttribute('aria-hidden', 'true');
+  const hintArrowMarker = document.createElementNS(hintArrowNS, 'marker');
+  hintArrowMarker.setAttribute('id', 'drawer-hint-arrowhead');
+  hintArrowMarker.setAttribute('viewBox', '0 0 10 10');
+  hintArrowMarker.setAttribute('refX', '5');
+  hintArrowMarker.setAttribute('refY', '5');
+  hintArrowMarker.setAttribute('markerWidth', '6');
+  hintArrowMarker.setAttribute('markerHeight', '6');
+  hintArrowMarker.setAttribute('orient', 'auto-start-reverse');
+  const hintArrowHead = document.createElementNS(hintArrowNS, 'path');
+  hintArrowHead.setAttribute('d', 'M0 0L10 5L0 10Z');
+  hintArrowHead.setAttribute('fill', 'currentColor');
+  hintArrowMarker.append(hintArrowHead);
+  const hintArrowDefs = document.createElementNS(hintArrowNS, 'defs');
+  hintArrowDefs.append(hintArrowMarker);
+  const hintArrowPath = document.createElementNS(hintArrowNS, 'path');
+  hintArrowPath.setAttribute('stroke', 'currentColor');
+  hintArrowPath.setAttribute('stroke-width', '2');
+  hintArrowPath.setAttribute('stroke-linecap', 'round');
+  hintArrowPath.setAttribute('marker-end', 'url(#drawer-hint-arrowhead)');
+  hintArrow.append(hintArrowDefs, hintArrowPath);
+  host.appendChild(hintArrow);
+
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envRT = pmrem.fromScene(new RoomEnvironment(), 0.04);
   scene.environment = envRT.texture;
@@ -516,10 +570,12 @@ export function initSkillDrawer(host, strip) {
       rule,
       front,
       back,
-      // its own reveal, tweened in openDrawer() - riding the lead folder's own f.reveal made
+      // its own reveal, tweened by fadeLabels() - riding the lead folder's own f.reveal made
       // a category filed toward the back wait for that folder's turn in a 24-item stagger,
-      // arriving over a second after the ones at the front
-      reveal: 1,
+      // arriving over a second after the ones at the front. Starts at 0: the drawer starts
+      // shut and stays that way until it is pulled, and a name only ever stands beside one
+      // that is open and still.
+      reveal: 0,
       p0: new THREE.Vector3(),
       p1: new THREE.Vector3(),
       dir: new THREE.Quaternion(),
@@ -709,8 +765,16 @@ export function initSkillDrawer(host, strip) {
     }
   }
 
+  // Not a separate flag flipped at every open/close call site - a click, a drag, and the
+  // auto-open on scroll each end the drawer shut or open by a different path, and tracking
+  // "shut" by hand at every one of them is exactly the kind of state that drifts from the
+  // thing it describes. Derived from the real z instead, so it can't disagree with what's on
+  // screen; skipped when it hasn't changed, same as every other write in cull().
+  let shutState = null;
   function render() {
     cull();
+    const shutNow = drawer.position.z <= SHUT_Z + 0.001;
+    if (shutNow !== shutState) host.classList.toggle('is-shut', (shutState = shutNow));
     renderer.render(scene, camera);
     css.render(scene, camera);
   }
@@ -793,7 +857,15 @@ export function initSkillDrawer(host, strip) {
   // The frame's own centring, solved by fit(), and how far the furniture has been slid right
   // to make room for a picked card. Kept apart so the slide can be tweened without re-solving
   // the fit; `left` is the furniture's left edge in px once centred.
-  const view = { baseX: 0, baseY: 0, left: 0, shift: 0 };
+  const view = {
+    baseX: 0,
+    baseY: 0,
+    left: 0,
+    handleX: 0,
+    handleY: 0,
+    shutLeft: 0,
+    shift: 0,
+  };
   function frameFor(shift) {
     camera.setViewOffset(w, h, view.baseX - shift, view.baseY, w, h);
     // the canvas mask's right-hand fade rides along, or it dims the cabinet's face instead
@@ -868,6 +940,19 @@ export function initSkillDrawer(host, strip) {
     // two, and measured off the carcass the furniture stepped further aside than it needed to
     corner.set(-FACE_W / 2, FRONT_Y + FRONT_H / 2, D / 2 + 0.22 + OPEN_Z).project(camera);
     view.left = ((corner.x + 1) / 2) * w;
+    // The last drawer's own handle, at rest - where the sweeping hint arrow has to land. Its
+    // world position while shut is the drawer group's own position (SHUT_Z) plus the handle's
+    // local one, since the handle is a child of that group; the arrow only ever shows while the
+    // drawer is shut and still, so this is the only position it will ever need to reach.
+    corner.set(0, FRONT_Y, SHUT_Z + D / 2 + 0.33).project(camera);
+    view.handleX = ((corner.x + 1) / 2) * w;
+    view.handleY = ((1 - corner.y) / 2) * h;
+    // The front's own left edge while shut - not view.left just above, which is the same
+    // corner pulled out to OPEN_Z for the picked card's column and sits well left of where
+    // the closed furniture actually starts. The hint arrow needs the shut silhouette, since
+    // it only ever shows while the drawer is exactly that: shut.
+    corner.set(-FACE_W / 2, FRONT_Y + FRONT_H / 2, SHUT_Z + D / 2 + 0.22).project(camera);
+    view.shutLeft = ((corner.x + 1) / 2) * w;
     return dist;
   }
 
@@ -879,6 +964,54 @@ export function initSkillDrawer(host, strip) {
     return d4 <= d3 * 1.02 ? 4 : d3 <= d2 * 1.35 ? 3 : 2;
   }
 
+  // The sweep is aimed at the handle (view.handleX/Y) but never actually reaches it - "near"
+  // the furniture, not "on top of" it, since a line landing on the drawer itself reads as
+  // pointing at the metal rather than inviting a hand toward it. Stopped a fixed px margin
+  // short of the furniture's own left edge while shut (view.shutLeft, set in fit() just above)
+  // rather than at a fixed fraction of the curve's length: a fraction leaves
+  // the gap shrinking or growing with how far apart the text and the handle happen to land on
+  // a given frame, where a px margin against the furniture's own silhouette stays "near" on
+  // every one of them.
+  const HINT_ARROW_MARGIN = 48;
+  const ARC_START = 0.85; // where along the block's width the sweep leaves it
+  const ARC_K = 0.5523; // the cubic that draws a 90° arc: 4/3 * tan(45°/2)
+  const ARC_TOP_MIN = 8; // the type may not climb out of the top of the box for the geometry
+  /** The sweep's own `d`, and the height the type has to sit at for it, solved fresh each
+   *  resize. It is exactly a quarter circle: it leaves the block straight down and arrives at
+   *  the handle straight across, which are a 90° arc's own two tangents. That only holds while
+   *  the arc is as tall as it is wide, so the drop is not free - the block's `top` is solved
+   *  from it here and written back (CSS keeps a sensible one for the frame before this runs).
+   *  Everything else is read, never assumed: the block's left and width are CSS's, and the end
+   *  is the handle's own projected height (view.handleY) at HINT_ARROW_MARGIN short of the
+   *  furniture's left edge (view.shutLeft) - "near" the metal, never on it, with the tip left
+   *  pointing straight along the last stretch at the handle it stopped short of. */
+  function layoutHintArrow() {
+    hintArrow.setAttribute('width', w);
+    hintArrow.setAttribute('height', h);
+    hintArrow.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    const hostRect = host.getBoundingClientRect();
+    const textRect = hintText.getBoundingClientRect();
+    // Out from under the right of the block, not its middle: the arc is as tall as it is wide,
+    // so every pixel the sweep leaves further left is a pixel the type has to climb, and the
+    // type runs out of box long before the drawer runs out of distance.
+    const sx = textRect.left - hostRect.left + textRect.width * ARC_START;
+    // level with the handle, stopped short of the metal - the tip's last stretch is horizontal,
+    // so it is left aiming straight at the handle across that gap
+    const ex = view.shutLeft - HINT_ARROW_MARGIN;
+    const ey = view.handleY;
+    // The quarter circle's own constraint, solved for where the block sits: its height above
+    // the handle has to equal its distance from the tip. Clamped at the top of the box - the
+    // arc then comes out a little wider than tall, which reads as the same sweep.
+    const top = Math.max(ARC_TOP_MIN, ey - (ex - sx) - 6 - textRect.height / 2);
+    hintText.style.top = `${top}px`;
+    const sy = top + textRect.height / 2 + 6;
+    // The 90° arc as one cubic: down out of the type, across into the handle, with the two
+    // control points on those tangents at the standard 0.5523 of the radius.
+    const c1y = sy + (ey - sy) * ARC_K;
+    const c2x = ex - (ex - sx) * ARC_K;
+    hintArrowPath.setAttribute('d', `M${sx} ${sy} C ${sx} ${c1y}, ${c2x} ${ey}, ${ex} ${ey}`);
+  }
+
   function resize() {
     w = host.clientWidth;
     h = host.clientHeight;
@@ -887,6 +1020,7 @@ export function initSkillDrawer(host, strip) {
     const total = pickDrawerCount();
     buildCabinet(total);
     fit(total);
+    layoutHintArrow();
     billboardQuat.copy(camera.quaternion);
     layoutLabels();
     measureZAxis();
@@ -1177,9 +1311,10 @@ export function initSkillDrawer(host, strip) {
    *  no way back except a drag, and the affordance reads the same either way. The category
    *  names bracket that run: out of the way before it goes in, back once it is all the way
    *  out, so they only ever stand beside a drawer that is open and still. */
-  // Inside the half second a drawer gets. At 1.1s this was the slowest thing on the page, and
-  // with the names' fade in front of it a close took the better part of two seconds.
-  const RUN = 0.5;
+  // One number for every run of the drawer, the entrance included - it is the same piece of
+  // furniture each time, and a toggle that ran faster than the first pull used to make it feel
+  // like a snappier one the moment a visitor touched the handle themselves.
+  const DRAWER_RUN = 1.5;
   function runDrawer() {
     const shut = drawer.position.z < (SHUT_Z + OPEN_Z) / 2;
     const run = () => {
@@ -1190,7 +1325,7 @@ export function initSkillDrawer(host, strip) {
       gsap.killTweensOf(drawer.position);
       gsap.to(drawer.position, {
         z: shut ? OPEN_Z : SHUT_Z,
-        duration: RUN,
+        duration: DRAWER_RUN,
         // coming out is an entrance and wants its speed at the front, where the eye is;
         // going in is the deliberate half, and reads better easing into the cabinet
         ease: shut ? 'power3.out' : 'power2.inOut',
@@ -1198,9 +1333,11 @@ export function initSkillDrawer(host, strip) {
         onComplete: shut ? () => fadeLabels(1) : undefined,
       });
     };
-    if (shut) run();
-    else fadeLabels(0, run);
-    pump((RUN + LABEL_FADE + LABEL_STAGGER * labels.length) * 1000 + 400);
+    if (shut) {
+      revealIndex(); // the index files itself in behind the drawer, the first time it comes out
+      run();
+    } else fadeLabels(0, run);
+    pump((DRAWER_RUN + LABEL_FADE + LABEL_STAGGER * labels.length) * 1000 + 400);
   }
 
   const DRAG_MIN = 5; // px of travel that tells a drag of the face from a click on it
@@ -1225,7 +1362,9 @@ export function initSkillDrawer(host, strip) {
       // full factor to multiply in as each one cleared the cabinet face.
       labelTween?.kill();
       labelTween = null;
-      opened = true;
+      // A hand pulling the drawer is its own stagger - the folders clear the mouth as fast as
+      // it moves them - so the entrance tween is spent rather than fired behind the hand.
+      revealed = true;
       startDrawerZ = drawer.position.z;
       close(); // an open card would ride out over the cabinet while the drawer shuts
     } else {
@@ -1287,24 +1426,26 @@ export function initSkillDrawer(host, strip) {
   };
   window.addEventListener('click', onOutside);
 
-  // ---- open once, when the section arrives -------------------------------------------
-  let opened = false;
+  // ---- it waits to be pulled -----------------------------------------------------------
+  // The section used to open itself the moment it scrolled into view, which spent the whole
+  // gesture before anyone had looked at the furniture. It stays shut instead: the invitation
+  // stands in the column a shut drawer leaves free (.drawer__hint in sections.css), and it runs
+  // only when a hand - or a Tab key - actually pulls it.
   drawer.position.z = SHUT_Z;
-  function openDrawer() {
-    if (opened) return;
-    opened = true;
-    const OPEN_RUN = 1.5;
-    gsap.to(drawer.position, {
-      z: OPEN_Z,
-      duration: OPEN_RUN,
-      ease: 'power3.out',
-      onUpdate: render,
-    });
-    // fromTo, not from: a from() left the folders parked on their start values. It tweens
-    // f.reveal, which cull() multiplies into the opacity it already owns, 40ms apart - 20ms
-    // was under the floor where a stagger reads as one. onComplete renders once more, so a
-    // reveal that finishes after pump() has stopped (a backgrounded tab) can't leave the
-    // index half faded.
+
+  // The index files itself in the first time the drawer comes out, and only then: after that
+  // the folders are simply what is in the drawer, and a second stagger on every reopen read as
+  // the cabinet being restocked. fromTo, not from: a from() left the folders parked on their
+  // start values, and an invisible wall of skills is a worse failure than no animation. It
+  // tweens f.reveal, which cull() multiplies into the opacity it already owns, 40ms apart -
+  // 20ms was under the floor where a stagger reads as one. onComplete renders once more, so a
+  // reveal that finishes after pump() has stopped (a backgrounded tab) can't leave the index
+  // half faded. The names are not here: fadeLabels(1), off the run's own onComplete, brings
+  // them in on a drawer that has stopped, every time rather than just the first.
+  let revealed = false;
+  function revealIndex() {
+    if (revealed) return;
+    revealed = true;
     gsap.fromTo(
       items,
       { reveal: 0 },
@@ -1317,32 +1458,15 @@ export function initSkillDrawer(host, strip) {
         onComplete: render,
       },
     );
-    // The names wait out the whole run and arrive on a drawer that has stopped: they label
-    // what is filed in it, and read as that the moment it is open rather than as more
-    // furniture drifting in. Their own short stagger over the 7 categories, not the lead
-    // folder's turn in the rail's 24-item one, which made a category filed toward the back
-    // wait past a second, long after its own folders were visible. fromTo, not from, and
-    // immediateRender puts them at 0 now, so they stay hidden for the whole run.
-    gsap.fromTo(
-      labels,
-      { reveal: 0 },
-      {
-        reveal: 1,
-        duration: LABEL_FADE,
-        stagger: LABEL_STAGGER,
-        delay: OPEN_RUN,
-        ease: LABEL_EASE, // the same curve both ways, so arriving and leaving feel like one thing
-        onComplete: render,
-      },
-    );
-    pump(2600);
   }
 
-  const io = new IntersectionObserver(
-    (entries) => entries.some((e) => e.isIntersecting) && openDrawer(),
-    { threshold: 0.2 },
-  );
-  io.observe(host);
+  // Tab is a pull too. The folders are real DOM inside the scene, so they take focus whether
+  // the drawer is out or not, and without this a keyboard visitor would be reading a card
+  // filed inside a shut cabinet.
+  const onFocusIn = () => {
+    if (host.classList.contains('is-shut')) runDrawer();
+  };
+  host.addEventListener('focusin', onFocusIn);
 
   const ro = new ResizeObserver(resize);
   ro.observe(host);
@@ -1350,9 +1474,9 @@ export function initSkillDrawer(host, strip) {
 
   // hero3d.js has no teardown at all; this module keeps one.
   return function dispose() {
-    io.disconnect();
     ro.disconnect();
     cancelAnimationFrame(frame);
+    host.removeEventListener('focusin', onFocusIn);
     window.removeEventListener('keydown', onKey);
     window.removeEventListener('click', onOutside);
     gsap.killTweensOf(drawer.position);
