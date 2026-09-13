@@ -731,9 +731,22 @@ export function initSkillDrawer(host, strip) {
         pe = shown < 0.6 ? 'none' : '';
       }
       if (op !== f.op) f.el.style.opacity = f.op = op;
-      // a class rather than inline pointer-events: the hit target is the folder's ::before
-      // strip, which an inline value on the folder itself can't reach
-      if (pe !== f.pe) f.el.classList.toggle('is-culled', (f.pe = pe) === 'none');
+      if (pe !== f.pe) {
+        f.pe = pe;
+        // a class rather than inline pointer-events: the hit target is the folder's ::before
+        // strip, which an inline value on the folder itself can't reach
+        f.el.classList.toggle('is-culled', pe === 'none');
+        // and the folder's own tabIndex, tied to the same threshold: a folder still filed
+        // inside the cabinet is real DOM sitting in the natural Tab order, so without this a
+        // keyboard visitor could Tab through 20-odd "button, collapsed" announcements with
+        // nothing on screen to show for any of them. -1 only drops it from that sequence —
+        // arrow-key browsing (below) calls .focus() directly and reaches it exactly as before.
+        // The lead folder (fi 0) is exempt: it's the drawer's keyboard handle (see the
+        // `focusin` listener, "Tab is a pull too") and stays reachable even while shut, since
+        // landing on it is what triggers the pull - and it is genuinely visible again by the
+        // time focus paints, because runDrawer() starts opening that same frame.
+        f.el.tabIndex = pe === 'none' && f.fi !== 0 ? -1 : 0;
+      }
     }
 
     // Category labels: only the stretch that is out in the open shows - in front of the

@@ -18,7 +18,7 @@ Multi-page Vite build (`vite.config.js`):
 
 - `index.html` — home (hero, about, skills, projects, contact)
 - `vivatech.html` — Vivatech project case study
-- `project-two.html`, `homelab.html` — additional project pages
+- `homelab.html` — additional project page
 
 ## Running locally
 

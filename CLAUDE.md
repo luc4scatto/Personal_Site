@@ -10,7 +10,7 @@ Personal portfolio site for Luca Scattolin (English content), deployed to GitHub
 - Live: https://luc4scatto.github.io/Personal_Site/
 - Every push to `main` auto-deploys via the Pages workflow (source: GitHub Actions, already enabled)
 - **Push policy: never commit/push without Luca's explicit OK** — he reviews on the dev server first
-- Six pages (Vite MPA, inputs in vite.config.js): `index.html` (home), `vivatech.html` (cover, description, video, masonry gallery, LinkedIn links), `homelab.html`, `project-two.html` (a standing coming-soon placeholder, not one named project), `privacy.html` and `404.html`
+- Five pages (Vite MPA, inputs in vite.config.js): `index.html` (home), `vivatech.html` (cover, description, video, masonry gallery, LinkedIn links), `homelab.html`, `privacy.html` and `404.html`. The Projects grid's third card ("More Projects") is a static placeholder with no link — `project-two.html` used to back it and was deleted (2026-09-13) since nothing pointed to it and it held no content; recreate it, re-add the `projectTwo` entry in `vite.config.js`'s `rollupOptions.input`, and re-add the sitemap.xml entry once there's a real project to put there
 
 ## Commands
 
@@ -260,6 +260,16 @@ Sources sometimes arrive as `.fbx` instead of `.glb` (dropped straight into `_or
 where `<script.py>` just does `bpy.ops.import_scene.fbx(filepath=...)` then `bpy.ops.export_scene.gltf(filepath=..., export_format='GLB')` — then run the optimize step above as normal.
 
 Legacy Blender pipeline (previous models, kept for reference): `_originals/3d_files.blend` (183MB, gitignored) exported via `tools/export_glb.py` (per-mesh decimation caps in `FILE_CAPS`, modifiers stripped, placeholder materials, Draco). Run: `/Applications/Blender.app/Contents/MacOS/blender -b --factory-startup -noaudio _originals/3d_files.blend --python tools/export_glb.py`.
+
+## TODO
+
+- **Audio player on the skill cards.** Let a visitor play one of Luca's DJ sets (SoundCloud
+  embed, or a direct player) while browsing the skill cards — Audio category (Ableton Live,
+  Traktor, rekordbox) is the obvious anchor, but check with Luca whether he wants it scoped to
+  just those cards or available site-wide. Needs a decision on embed vs. custom player before
+  touching code: a SoundCloud iframe is near-zero effort but carries their chrome and a network
+  request per load; a native `<audio>` player matches the site's own design language but means
+  hosting the track and building transport controls.
 
 ## Constraints
 
