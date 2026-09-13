@@ -936,12 +936,18 @@
     border-color var(--duration-base) var(--ease-out);
 }
 
-.folder.is-open .folder__close {
+/* .is-landed, not .is-open: skillDrawer.js adds it when the card finishes climbing out of the
+   drawer. The close hangs off the folder's box rather than off the sheet, so tied to .is-open
+   it stood in empty space above a sheet that was still rising - and no transition-delay could
+   hold it there, because CSS3DRenderer re-inserts the element on a pick and a transition never
+   starts on a just-inserted element: the X jumped straight to opaque, delay and all. By the
+   time this class lands the element has been in place for the card's whole run. */
+.folder.is-landed .folder__close {
   opacity: 1;
   transform: scale(1);
   pointer-events: auto;
-  /* the entrance waits for the sheet; a hover's color change does not */
-  transition-delay: 150ms, 150ms, 0s, 0s;
+  /* nothing left to wait for: the card is already there */
+  transition-delay: 0s;
 }
 
 /* the turn lives on the glyph, not the button: the button's own transform is its entrance,
@@ -984,12 +990,21 @@
   outline: none;
 }
 
+/* The ring, never the lift. Left/Right step focus through all 22 folders (skillDrawer.js's
+   own keydown), so a lift here is motion on a key repeat - the one thing that must never
+   animate. The hover peek below keeps it, because a mouse visits one tab at a time. Every
+   tab stands clear of the one filed in front of it, so the ring alone says which is focused. */
 .folder:focus-visible .folder__sheet {
-  transform: translateY(calc(100% - 5.4rem));
   border-color: var(--brand, var(--accent));
   box-shadow: 0 0 0 2px var(--brand, var(--accent));
 }
 
+/* The open state, but not the climb into it. CSS3DRenderer re-inserts a folder's element when
+   the object changes parent on a pick, and a transition does not start on a just-inserted
+   element: measured, the sheet jumped from translateY(266px) to none inside one frame however
+   long a duration was set here. skillDrawer.js's riseSheet() runs the climb on the card's own
+   tween clock instead and clears its inline transform on landing, which is where this rule
+   takes back over. */
 .folder.is-open .folder__sheet,
 .folder.is-open:hover .folder__sheet {
   transform: none;

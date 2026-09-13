@@ -227,7 +227,9 @@ function initSkillsWall() {
     gsap.fromTo(
       card,
       { height: movingRow ? 0 : card.offsetHeight, opacity: movingRow ? 0 : 1 },
-      { height: 'auto', opacity: 1, duration: 0.55, ease: 'power3.out' },
+      // 0.35, not the 0.55 this shipped with: this is the answer to a tap, and it animates
+      // height, which relayouts - the shorter it runs, the less of that there is to drop
+      { height: 'auto', opacity: 1, duration: 0.35, ease: 'power3.out' },
     );
     gsap.fromTo(
       inner,
@@ -235,8 +237,9 @@ function initSkillsWall() {
       {
         y: 0,
         opacity: 1,
-        duration: movingRow ? 0.5 : 0.32,
-        delay: movingRow ? 0.08 : 0,
+        // kept just inside the card's own 0.35 so the two still land together
+        duration: movingRow ? 0.35 : 0.28,
+        delay: movingRow ? 0.06 : 0,
         ease: 'power3.out',
       },
     );

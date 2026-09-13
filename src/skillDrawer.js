@@ -213,6 +213,11 @@ export function initSkillDrawer(host, strip) {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
+  // The metal is decorative and says nothing a reader needs; the folders are not, and they
+  // live in the CSS3D layer beside this canvas. aria-hidden used to sit on the host that
+  // holds both, which hid every skill from assistive tech and made the browser refuse the
+  // attribute outright as soon as a folder took focus. It belongs on the canvas alone.
+  renderer.domElement.setAttribute('aria-hidden', 'true');
   host.appendChild(renderer.domElement);
 
   const css = new CSS3DRenderer();
@@ -457,6 +462,7 @@ export function initSkillDrawer(host, strip) {
   // position keep the rule running along the tabs at every depth; layoutLabels() (called
   // from resize(), after the camera is final for that frame) is where that projection happens.
   const TAB_REM = 3.4; // the tab left above the rim at rest - .folder__sheet's translateY in sections.css
+  const PEEK_REM = 2; // the extra lift under the mouse - .folder:hover .folder__sheet, same file
   const LABEL_PX_LEFT = 10; // screen px left of the tabs' corners
   const LABEL_PX_UP = 10; // screen px above them
   const LABEL_LEAD = 0.12; // the rule runs a touch past the category's first and last folder
@@ -538,6 +544,43 @@ export function initSkillDrawer(host, strip) {
     }
   }
 
+  /** The names belong to an open drawer, not to the drawer itself: they fade in once it has
+   *  finished coming out and fade out before it runs back, so a name is never left standing
+   *  beside a drawer that is shut or still moving. `reveal` is cull()'s own factor, the same
+   *  one the opening stagger tweens - nothing else writes their opacity. */
+  // Soft and unhurried on purpose. These are the one part of the scene that is pure label,
+  // and a quick fade on them read as a flicker rather than as something being set down; the
+  // ease is sine.inOut, which has no hard start and no hard stop at either end. The cost is
+  // paid on the way in, where the drawer stands still until this has finished - about 0.78s
+  // with the stagger's tail, which is what the names going first is worth.
+  const LABEL_FADE = 0.5;
+  const LABEL_STAGGER = 0.04;
+  const LABEL_EASE = 'sine.inOut';
+  // Held so a grab can kill it. gsap.killTweensOf(labels) is not enough: a staggered tween
+  // still runs its onComplete, and this one's is runDrawer()'s "now shut the drawer", so a
+  // hand taken to the drawer mid-fade ran the drawer anyway. kill() drops the callback too.
+  let labelTween = null;
+  function fadeLabels(to, onDone) {
+    labelTween?.kill();
+    labelTween = null;
+    // No categories, no fade - and no callback to wait on either. runDrawer() hangs its whole
+    // close off this onDone, so a tween over an empty array deciding not to fire it would
+    // leave the handle dead.
+    if (!labels.length) return onDone?.();
+    labelTween = gsap.to(labels, {
+      reveal: to,
+      duration: LABEL_FADE,
+      stagger: LABEL_STAGGER,
+      ease: LABEL_EASE,
+      onUpdate: render,
+      onComplete: () => {
+        labelTween = null;
+        render(); // the burst may have stopped already, and a half-faded name would stick
+        onDone?.();
+      },
+    });
+  }
+
   // ---- rendering ---------------------------------------------------------------------
   let w = 0;
   let h = 0;
@@ -566,7 +609,7 @@ export function initSkillDrawer(host, strip) {
   /** Slerps f's own orientation toward `target`. Tweens a per-folder plain object rather than
    *  f.obj.rotation directly — component-wise Euler tweening is exactly the wrong-composition
    *  bug this replaces — so dispose() kills f.rotP, not f.obj.rotation, to reach it. */
-  function rotateTo(f, target, duration, ease) {
+  function rotateTo(f, target, duration, ease, delay = 0) {
     const p = f.rotP ?? (f.rotP = {});
     gsap.killTweensOf(p);
     const start = f.obj.quaternion.clone();
@@ -575,6 +618,7 @@ export function initSkillDrawer(host, strip) {
       t: 1,
       duration,
       ease,
+      delay,
       onUpdate: () => {
         f.obj.quaternion.slerpQuaternions(start, target, p.t);
         render();
@@ -754,7 +798,11 @@ export function initSkillDrawer(host, strip) {
     camera.setViewOffset(w, h, view.baseX - shift, view.baseY, w, h);
     // the canvas mask's right-hand fade rides along, or it dims the cabinet's face instead
     // of the carcass running off behind it
-    host.style.setProperty('--slide', `${shift}px`);
+    // On the canvas, which is the element the mask is on, rather than on the host: a custom
+    // property set on the host invalidates style for everything under it, and everything
+    // under it is the CSS3D layer - 30-odd folder and label elements restyled on every frame
+    // of a slide that runs while the scene is already rendering.
+    renderer.domElement.style.setProperty('--slide', `${shift}px`);
   }
 
   /** Slide the furniture to `shift`. `solve` runs against the frame being slid to, so a card
@@ -771,7 +819,9 @@ export function initSkillDrawer(host, strip) {
     gsap.to(view, {
       shift,
       duration,
-      ease: 'power3.out',
+      // the card's own curve: the pan and the card move together, and two different eases on
+      // one moment read as two things happening rather than one
+      ease: CARD_EASE,
       onUpdate: () => {
         frameFor(view.shift);
         render();
@@ -865,14 +915,138 @@ export function initSkillDrawer(host, strip) {
   }
 
   // ---- picking a folder ----------------------------------------------------------------
+  // The card's own two runs. Coming out is the longer and the more sinuous of the two: it is
+  // the moment the whole section exists for, and at 0.48s on a power3.out the card snapped
+  // out of the rail rather than being drawn out of it. One curve carries position, scale and
+  // rotation, in both directions - three tweens that land together read as one motion only if
+  // they share an ease, which is what the old power3/power4 pairing was hand-matching by eye.
+  const CARD_OUT = 0.78;
+  const CARD_IN = 0.55;
+  const CARD_EASE = 'power2.inOut';
+  // The flex. A waypoint quaternion - out past square, then back - was two slerps sharing one
+  // tween, and at the seam the card turned back at a different rate than it had arrived: that
+  // kink read as two moves rather than as a bend. This overshoots along the arc the card is
+  // already turning through, so it keeps going the way it was going, passes the reading plane
+  // and eases back - one continuous motion, and the only flex available at all, since a folder
+  // is DOM on a CSS3D plane with no geometry to curve. The number is the overshoot's strength:
+  // 1.7 is GSAP's own default (~10% past the target), 3 lands near 8 degrees on this arc.
+  // 'power2.inOut' here turns the flex off without touching anything else.
+  const BEND_EASE = 'back.out(3)';
+  /** The sheet's climb out of the rim, driven here rather than by its own CSS transition.
+   *  CSS3DRenderer re-inserts a folder's element when the object changes parent - which is
+   *  what scene.attach() does on a pick - and a transition never starts on an element the
+   *  browser has just inserted. Measured, the sheet went from translateY(266px) to none
+   *  inside a single frame whatever duration the stylesheet asked for: the content popped
+   *  open and the card then travelled on for another three quarters of a second. That was
+   *  the second of the two steps. On the travel's own tween clock, with the travel's curve,
+   *  it is one motion. */
+  function riseSheet(f, duration, ease) {
+    const sheet = f.el.querySelector('.folder__sheet');
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    gsap.killTweensOf(sheet);
+    sheet.style.transition = 'none'; // the 200ms hover transition would smear every write
+    // CARD_H, never sheet.offsetHeight: CSS3DRenderer has just re-inserted this element, so at
+    // this instant the browser measures it as zero and the climb began 54px above its landing
+    // place instead of 266 below it - the sheet was already unrolled before the card moved.
+    // The sheet is inset:0 inside a card authored at CARD_H, which is what its own CSS
+    // translateY(calc(100% - 3.4rem)) resolves against in the first place.
+    // ...and PEEK_REM off that when the pick came from the mouse, because the folder under it
+    // is already peeking: started from the filed value, the sheet dropped those 2rem in a
+    // single frame before it began to climb, which is the knock you feel on the click itself.
+    const peek = f.el.matches(':hover') ? PEEK_REM : 0;
+    gsap.fromTo(
+      sheet,
+      { y: CARD_H - (TAB_REM + peek) * rem },
+      {
+        y: 0,
+        duration,
+        ease,
+        onComplete: () => {
+          restSheet(f);
+          // The close control only exists once there is a card under it. It hangs off the
+          // folder's box rather than off the sheet, so while the sheet is still climbing it
+          // would sit in the empty space above it - and its own CSS delay could not hold it
+          // back, for the same reason the sheet's transition never ran: the element has just
+          // been re-inserted, and a transition does not start on one the browser has only now
+          // inserted, so it jumped straight to opaque. This class lands hundreds of frames
+          // after that insert, where a transition behaves like any other.
+          f.el.classList.add('is-landed');
+        },
+      },
+    );
+  }
+
+  /** Hands the sheet back to the stylesheet. The rest position, the hover peek and the rim
+   *  mask are all CSS, and an inline transform left behind would beat every one of them. */
+  function restSheet(f) {
+    const sheet = f.el.querySelector('.folder__sheet');
+    gsap.killTweensOf(sheet);
+    gsap.set(sheet, { clearProps: 'transform' });
+    sheet.style.transition = '';
+  }
+
+  // How far a card climbs clear of the file before it comes forward. The folders are parallel
+  // planes a GAP apart and a card sent straight at the reading spot crosses every one filed in
+  // front of it; a CSS3D layer has no per-pixel depth - the browser sorts whole elements - so
+  // a crossing shows as two cards cutting through each other. A tab stands about 0.6 above the
+  // rim, and the painted strip of a filed folder is that tab, so clearing it is what the climb
+  // has to buy. Both runs use it: the way back crosses the same planes in the same way.
+  const CLEAR = 1.6;
+  /** Move f to `target` along one quadratic through `over`, rather than straight there. One
+   *  curve and not a climb tween followed by a travel tween: the seam between two moves is
+   *  exactly what the card's own turn used to show, and this path has none - it leaves the
+   *  file upward and arrives already heading where it is going. The tween runs on a per-folder
+   *  proxy (f.posP), so everything that interrupts a card has to kill that alongside
+   *  f.obj.position, or a dropped run keeps writing coordinates into a card that has moved on.
+   *  Not named `travel`: that is already the drag's own pointer distance, a few hundred lines
+   *  down in this same closure, and the collision is a SyntaxError that takes the whole module
+   *  out - which main.js's .catch then hides by falling back to the flat wall, silently. */
+  function arcTo(f, target, duration, ease, over, onDone) {
+    const p = f.posP ?? (f.posP = {});
+    gsap.killTweensOf(p);
+    const path = new THREE.QuadraticBezierCurve3(f.obj.position.clone(), over, target.clone());
+    p.t = 0;
+    gsap.to(p, {
+      t: 1,
+      duration,
+      ease,
+      onUpdate: () => {
+        path.getPoint(p.t, f.obj.position);
+        render();
+      },
+      onComplete: onDone,
+    });
+  }
+
   /** Carry f to the pick spot and square it up to the camera: a card read at the drawer's
    *  own angle is foreshortened, and the whole reason it comes up is to be read. */
   function lift(f, duration) {
     const { pos, scale } = pickTarget();
-    const ease = 'power3.out';
-    gsap.to(f.obj.position, { x: pos.x, y: pos.y, z: pos.z, duration, ease, onUpdate: render });
+    const ease = CARD_EASE;
+    if (duration) riseSheet(f, duration, ease);
+    // up out of its slot first, then forward to the spot - see CLEAR
+    const over = f.obj.position.clone().setY(f.obj.position.y + CLEAR);
+    arcTo(f, pos, duration, ease, over);
     gsap.to(f.obj.scale, { x: scale, y: scale, z: scale, duration, ease, onUpdate: render });
-    rotateTo(f, billboardQuat, duration * 0.92, ease);
+    // The turn waits out the first fifth of the run, and this is what keeps the card from
+    // cutting through the ones filed in front of it. In the file every folder is a plane
+    // parallel to its neighbours, and parallel planes cannot intersect however much they
+    // overlap on screen; the moment this one starts squaring up to the camera it stops being
+    // parallel, and while it is still among them the browser - which sorts whole elements and
+    // has no per-pixel depth - draws that as the cards slicing each other. Held until the card
+    // is clear of the file, there is nothing left to slice. The climb and the sheet carry the
+    // motion in the meantime, so the run still reads as one move rather than two.
+    // It also still ends with the travel: the flex has to settle on a card that is landing,
+    // not on one already parked.
+    // It starts from wherever hover left the card, never from square: rotateTo captures the
+    // current quaternion, so a folder picked under the mouse carries its HOVER_TURN up with it
+    // and the turn simply continues. Unturning it first was tried and is worse - the card
+    // snapped flat under the cursor before it had moved at all.
+    // The hold is 0.35 of the run, not the 0.18 it was. The ease is inOut, so a fifth of the
+    // time is only ~6% of the travel: the card began squaring up while it was still filed
+    // between its neighbours, which is the slicing this delay exists to prevent. 0.35 is where
+    // the arc has actually bought the height that clears their tabs.
+    rotateTo(f, billboardQuat, duration * 0.65, duration ? BEND_EASE : ease, duration * 0.35);
   }
 
   function select(f) {
@@ -887,48 +1061,45 @@ export function initSkillDrawer(host, strip) {
     // carried the open card along with it. Moving the rail to bring the card forward instead
     // pushed everything in front of it out through the drawer's face.
     gsap.killTweensOf([f.obj.position, f.obj.scale]);
+    if (f.posP) gsap.killTweensOf(f.posP); // the curved run writes through this, not position
     scene.attach(f.obj);
-    slideFrame(pickShift(), () => lift(f, 0.48));
-    pump(1200);
+    // the furniture's pan is tied to the card's own run, or the scene keeps sliding under a
+    // card that has already landed
+    slideFrame(pickShift(), () => lift(f, CARD_OUT), CARD_OUT);
+    pump(1400);
   }
 
   function collapse(f) {
     // aria updates now, the visual close deferred - see below
     f.el.setAttribute('aria-expanded', 'false');
     f.el.querySelector('.folder__close').tabIndex = -1;
+    f.el.classList.remove('is-landed'); // the close goes first, before the card starts back
+    // a climb still running would go on writing inline transforms over the filed rest state
+    restSheet(f);
     // back into the file, so it rides with the index again; a lift still running would
     // otherwise keep writing world coordinates into what is now rail space
     gsap.killTweensOf([f.obj.position, f.obj.scale]);
+    if (f.posP) gsap.killTweensOf(f.posP); // the curved run writes through this, not position
     rail.attach(f.obj);
-    gsap.to(f.obj.position, {
-      x: 0,
-      y: RIM + CH / 2,
-      z: f.z0,
-      duration: 0.35,
-      // A stronger curve than the scale/rotation tweens below, on purpose: position has
-      // the farthest to travel, so power3's tail was still visibly (if barely) creeping
-      // for ~150ms after the card already looked flat and file-sized, reading as two
-      // separate motions instead of one landing. power4 front-loads harder, so by the
-      // point rotation/scale settle, position has too.
-      ease: 'power4.out',
-      onUpdate: render,
-      // .is-open drives the sheet's own CSS slide and the rim mask, which used to drop the moment
-      // this tween started: the mask flipping back on at full CSS size, while the object
-      // was still large mid-flight in world space, read as a jump. Held until the card is
-      // actually back and small again, that same CSS change happens at rail scale, where
-      // it is too small to see.
-      onComplete: () => f.el.classList.remove('is-open'),
-    });
-    rotateTo(f, RESTING_QUAT, 0.35, 'power3.out');
+    // The mirror of the way out: back over the file, then down into its own slot, so the return
+    // crosses no plane the card did not already clear on its way out.
+    // .is-open drives the sheet's own CSS rest position and the rim mask, which used to drop
+    // the moment this tween started: the mask flipping back on at full CSS size, while the
+    // object was still large mid-flight in world space, read as a jump. Held until the card is
+    // actually back and small again, that same CSS change happens at rail scale, where it is
+    // too small to see.
+    const slot = new THREE.Vector3(0, RIM + CH / 2, f.z0);
+    const over = slot.clone().setY(slot.y + CLEAR);
+    arcTo(f, slot, CARD_IN, CARD_EASE, over, () => f.el.classList.remove('is-open'));
+    // Square again before it sinks back between its neighbours, which is the way out's rule
+    // read backwards: a tilted card entering a file of parallel planes is what slices them.
+    rotateTo(f, RESTING_QUAT, CARD_IN * 0.72, CARD_EASE);
     gsap.to(f.obj.scale, {
       x: PX,
       y: PX,
       z: PX,
-      duration: 0.35,
-      // matches position's power4.out above: scale has the biggest relative change of the
-      // three (pick size down to a filed tile), and power3's tail left it visibly still
-      // shrinking after the rotation already read as flat and settled
-      ease: 'power4.out',
+      duration: CARD_IN,
+      ease: CARD_EASE,
       onUpdate: render,
     });
   }
@@ -938,8 +1109,8 @@ export function initSkillDrawer(host, strip) {
     collapse(active);
     active = null;
     host.classList.remove('has-open');
-    slideFrame(0, undefined, 0.35);
-    pump(700);
+    slideFrame(0, undefined, CARD_IN);
+    pump(1000);
   }
 
   for (const f of folders) {
@@ -1003,19 +1174,38 @@ export function initSkillDrawer(host, strip) {
 
   /** A click on the face runs the drawer the rest of the way on its own. It toggles rather
    *  than only shutting: a handle that closes and then does nothing leaves the drawer with
-   *  no way back except a drag, and the affordance reads the same either way. */
+   *  no way back except a drag, and the affordance reads the same either way. The category
+   *  names bracket that run: out of the way before it goes in, back once it is all the way
+   *  out, so they only ever stand beside a drawer that is open and still. */
+  // Inside the half second a drawer gets. At 1.1s this was the slowest thing on the page, and
+  // with the names' fade in front of it a close took the better part of two seconds.
+  const RUN = 0.5;
   function runDrawer() {
     const shut = drawer.position.z < (SHUT_Z + OPEN_Z) / 2;
-    gsap.to(drawer.position, {
-      z: shut ? OPEN_Z : SHUT_Z,
-      duration: 1.1,
-      ease: 'power3.inOut',
-      onUpdate: render,
-    });
-    pump(1400);
+    const run = () => {
+      // GSAP overwrites nothing by default, so two clicks on the handle left two tweens
+      // fighting over the same z, frame by frame. The drag path has always killed them on
+      // the grab; the click path has to as well, and it is what lets a click reverse a run
+      // already under way.
+      gsap.killTweensOf(drawer.position);
+      gsap.to(drawer.position, {
+        z: shut ? OPEN_Z : SHUT_Z,
+        duration: RUN,
+        // coming out is an entrance and wants its speed at the front, where the eye is;
+        // going in is the deliberate half, and reads better easing into the cabinet
+        ease: shut ? 'power3.out' : 'power2.inOut',
+        onUpdate: render,
+        onComplete: shut ? () => fadeLabels(1) : undefined,
+      });
+    };
+    if (shut) run();
+    else fadeLabels(0, run);
+    pump((RUN + LABEL_FADE + LABEL_STAGGER * labels.length) * 1000 + 400);
   }
 
+  const DRAG_MIN = 5; // px of travel that tells a drag of the face from a click on it
   let dragMode = null; // 'drawer' | 'index'
+  let dragHid = false; // whether this drag has already taken the category names down
   let startX = 0;
   let startY = 0;
   let startZ = 0;
@@ -1029,6 +1219,12 @@ export function initSkillDrawer(host, strip) {
     if (grabsDrawer(e)) {
       dragMode = 'drawer';
       gsap.killTweensOf(drawer.position); // a hand on the handle beats the opening tween
+      // and the names' fade with it, callback included. Their `reveal` is left where the
+      // fade got to: snapping it back to 1 here is what made a click on a shut drawer show
+      // every name while the drawer was still coming out, since cull() would then have a
+      // full factor to multiply in as each one cleared the cabinet face.
+      labelTween?.kill();
+      labelTween = null;
       opened = true;
       startDrawerZ = drawer.position.z;
       close(); // an open card would ride out over the cabinet while the drawer shuts
@@ -1052,6 +1248,13 @@ export function initSkillDrawer(host, strip) {
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
     travel = Math.max(travel, Math.hypot(dx, dy));
+    // A drawer with a hand on it is a drawer in motion, and a name only ever stands beside
+    // one that is open and still. They go on the first real movement rather than on the grab,
+    // so a click that never moves is left to runDrawer()'s own fade.
+    if (travel >= DRAG_MIN && !dragHid) {
+      dragHid = true;
+      for (const l of labels) l.reveal = 0;
+    }
     drawer.position.z = THREE.MathUtils.clamp(
       startDrawerZ + (dx * zAxis.x + dy * zAxis.y) / (zAxis.lengthSq() || 1),
       SHUT_Z,
@@ -1060,8 +1263,17 @@ export function initSkillDrawer(host, strip) {
     render();
   });
   const release = () => {
-    // a grab that never went anywhere was a click on the face, not a drag of it
-    if (dragMode === 'drawer' && travel < 5) runDrawer();
+    if (dragMode === 'drawer') {
+      // a grab that never went anywhere was a click on the face, not a drag of it
+      if (travel < DRAG_MIN) runDrawer();
+      // a drag ends wherever the hand left it, so the names come back only if that is all
+      // the way out; short of it they stay down until a run of the drawer brings them in
+      else if (dragHid) {
+        dragHid = false;
+        if (drawer.position.z > OPEN_Z - 0.15) fadeLabels(1);
+        pump();
+      }
+    }
     dragMode = null;
   };
   host.addEventListener('pointerup', release);
@@ -1081,7 +1293,13 @@ export function initSkillDrawer(host, strip) {
   function openDrawer() {
     if (opened) return;
     opened = true;
-    gsap.to(drawer.position, { z: OPEN_Z, duration: 1.5, ease: 'power3.out', onUpdate: render });
+    const OPEN_RUN = 1.5;
+    gsap.to(drawer.position, {
+      z: OPEN_Z,
+      duration: OPEN_RUN,
+      ease: 'power3.out',
+      onUpdate: render,
+    });
     // fromTo, not from: a from() left the folders parked on their start values. It tweens
     // f.reveal, which cull() multiplies into the opacity it already owns, 40ms apart - 20ms
     // was under the floor where a stagger reads as one. onComplete renders once more, so a
@@ -1099,18 +1317,21 @@ export function initSkillDrawer(host, strip) {
         onComplete: render,
       },
     );
-    // Its own short stagger over the 7 categories, not the lead folder's turn in the rail's
-    // 24-item one: riding that made a category filed toward the back wait past a second
-    // before its name appeared, long after its own folders were already visible.
+    // The names wait out the whole run and arrive on a drawer that has stopped: they label
+    // what is filed in it, and read as that the moment it is open rather than as more
+    // furniture drifting in. Their own short stagger over the 7 categories, not the lead
+    // folder's turn in the rail's 24-item one, which made a category filed toward the back
+    // wait past a second, long after its own folders were visible. fromTo, not from, and
+    // immediateRender puts them at 0 now, so they stay hidden for the whole run.
     gsap.fromTo(
       labels,
       { reveal: 0 },
       {
         reveal: 1,
-        duration: 0.5,
-        stagger: 0.04,
-        delay: 0.35,
-        ease: 'power2.out',
+        duration: LABEL_FADE,
+        stagger: LABEL_STAGGER,
+        delay: OPEN_RUN,
+        ease: LABEL_EASE, // the same curve both ways, so arriving and leaving feel like one thing
         onComplete: render,
       },
     );
@@ -1142,6 +1363,8 @@ export function initSkillDrawer(host, strip) {
       gsap.killTweensOf(f.obj.position);
       gsap.killTweensOf(f.obj.scale);
       if (f.rotP) gsap.killTweensOf(f.rotP);
+      if (f.posP) gsap.killTweensOf(f.posP);
+      gsap.killTweensOf(f.el.querySelector('.folder__sheet'));
     });
     scene.traverse((o) => o.geometry?.dispose());
     steel.dispose();

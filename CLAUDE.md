@@ -112,7 +112,10 @@ office drawer seen at three quarters, with the tools filed front-to-back like a 
   corners (`TAB_REM` above the rim, mirroring `.folder__sheet`'s rest `translateY`), not on
   the rim itself: at three quarters a tab projects further back than the rim at its own
   depth, so a rim-anchored rule sat under the folders filed ahead of its category. They are CSS3D like the folders, so `cull()` clips both by hand at the cabinet face
-  and the drawer front, and they ride the opening reveal of their category's first folder.
+  and the drawer front. They fade in only once the drawer has finished opening and fade out
+  before it runs back in (`fadeLabels()`, both ends of `runDrawer()`), so a name never stands
+  beside a drawer that is shut or moving; a hand on the handle kills that fade and shows them
+  all, since `cull()` multiplies `reveal` in and a half-faded name would otherwise stick.
   Since they stand out past the drawer's front on the left, `pickShift()` measures them off
   the page and slides the furniture far enough that none beside the open card touches it.
 - `fit()` solves the camera distance **numerically**, against the corners of the furniture
