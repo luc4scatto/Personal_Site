@@ -953,6 +953,380 @@
   pointer-events: none;
 }
 
+/* the DJ set player — src/setPlayer.js. A record and a waveform, parked in the corner the
+   open drawer leaves free. Two variants off one DOM: filed into the drawer's own box when
+   the metal is live, and a plain block in the flow of the section when it isn't (below
+   701px, reduced motion, WebGL refused). Everything positional is scoped to .is-live, so
+   the fallback inherits only the look. */
+.set-player {
+  /* canvas cannot read a token through var() at paint time, so setPlayer.js reads these two
+     off this element instead - which keeps the colours here, in the stylesheet */
+  --set-played: var(--accent-2);
+  --set-rest: rgba(242, 242, 242, 0.16);
+  --played: 0%;
+}
+
+/* The line that offers the set, above the panel and outside its box: it is an aside spoken
+   to someone already browsing, not a caption belonging to the player's furniture. */
+.set-player__invite {
+  /* The panel is anchored to the bottom of the box, so this gap is what lifts the line: grow
+     it and the invitation rises, the player stays put. Enough air that the two read as an
+     aside and the thing it points at, not as a caption stuck to a box. */
+  margin: 0 0 1.2rem;
+  padding-left: 0.2rem;
+  font-family: var(--font-display);
+  /* it has to fit one line inside a panel that is 42% of the box, so at 701px - the narrowest
+     the drawer ever runs at - the type comes down with the box rather than spilling out of it */
+  font-size: clamp(0.72rem, 1.05vw, 0.88rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--text-dim);
+  /* One line, always: wrapped onto two it stopped reading as an aside and started reading as
+     a paragraph the player had to carry. The copy in content.js is written short for this. */
+  white-space: nowrap;
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+.set-player__panel {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #1e1e1e;
+  border-radius: 0.9rem;
+  /* Near-opaque and deliberately no backdrop-filter: behind this sit a WebGL canvas and a
+     CSS3D layer that both animate through a 1.5s drawer run, and a live blur would re-sample
+     all of it every frame for an effect nobody asked for. */
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+}
+
+/* the fallback variant: a block under the wall, not a corner panel */
+.skills .set-player {
+  max-width: 34rem;
+  margin: 2.5rem auto 0;
+}
+
+.set-player__disc {
+  position: relative;
+  flex: 0 0 auto;
+  width: 3.3rem;
+  height: 3.3rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* The record itself: grooves, a sheen that catches the light the way the steel beside it
+   does, and the label. 1.8s per turn is 33 1/3 rpm, the real number. animation-play-state
+   rather than a JS-driven angle means pausing freezes the record where it stands and
+   resuming carries on from there, for free. */
+.set-player__vinyl {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(255, 255, 255, 0.11),
+      rgba(255, 255, 255, 0) 25%,
+      rgba(255, 255, 255, 0.07) 50%,
+      rgba(255, 255, 255, 0) 75%,
+      rgba(255, 255, 255, 0.11)
+    ),
+    repeating-radial-gradient(circle at 50% 50%, #0e0e0e 0 2px, #171717 2px 3px);
+  animation: vinyl-spin 1.8s linear infinite;
+  animation-play-state: paused;
+}
+
+.set-player.is-playing .set-player__vinyl {
+  animation-play-state: running;
+}
+
+@keyframes vinyl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.set-player__label {
+  position: absolute;
+  inset: 26%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--set-played);
+}
+
+/* the spindle hole: what tells a spinning disc apart from a spinning circle */
+.set-player__label::after {
+  content: '';
+  position: absolute;
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+.set-player__mark {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 12%;
+}
+
+/* The glyph does not spin with the record, and it steps out of the way while one is playing:
+   the label is the thing worth looking at then. Hover or focus brings it back to say what a
+   press would do. */
+.set-player__glyph {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  filter: drop-shadow(0 0 0.4rem rgba(0, 0, 0, 0.9));
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+.set-player.is-playing .set-player__glyph {
+  opacity: 0;
+}
+
+.set-player__disc:hover .set-player__glyph,
+.set-player__disc:focus-visible .set-player__glyph {
+  opacity: 1;
+}
+
+.set-player__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.set-player__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.set-player__note {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  color: #e57373;
+}
+
+/* The waveform is the scrubber - an hour-long set has no chapters, so there is nothing else
+   worth pointing at. touch-action: none because the ancestor sets pan-y, which would hand a
+   horizontal scrub to the page scroller. */
+.set-player__wave {
+  position: relative;
+  margin-top: 0.35rem;
+  height: 2.1rem;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.set-player__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Progress costs one custom property, never a redraw: the played canvas is the same bars in
+   the accent colour, revealed by a clip. */
+.set-player__canvas--played {
+  clip-path: inset(0 calc(100% - var(--played)) 0 0);
+}
+
+.set-player__head {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--played);
+  width: 1px;
+  background: var(--text);
+  opacity: 0.55;
+}
+
+.set-player__foot {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.45rem 0 0;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+}
+
+.set-player__total::before {
+  content: '/ ';
+}
+
+.set-player__next {
+  margin-left: auto;
+  padding: 0.1rem;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.set-player__next:hover {
+  color: var(--set-played);
+}
+
+.set-player__next-glyph {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* the mini transport: two skip steps, a plain play/pause, a volume slider - the ordinary,
+   unambiguous set of controls for anyone who doesn't read the disc as a button. Its own row
+   under .set-player__foot rather than folded into it, so it doesn't compete with the time
+   and the next-set button for the same thin line. */
+.set-player__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+}
+
+.set-player__skip,
+.set-player__mini {
+  padding: 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.set-player__skip:hover,
+.set-player__mini:hover {
+  color: var(--set-played);
+}
+
+.set-player__skip-glyph,
+.set-player__mini-glyph {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* volume last and pushed to the far edge, the same right-alignment .set-player__next uses in
+   the row above it - the two rows read as one column of secondary controls, not two unrelated
+   strips. A native range, not a custom-drawn one: it is a rare enough control here that the
+   platform's own affordance (drag, arrow keys, touch) is worth more than matching the
+   waveform's look. */
+.set-player__volume {
+  margin-left: auto;
+  width: 4.5rem;
+  accent-color: var(--set-played);
+  cursor: pointer;
+}
+
+.set-player__disc:focus-visible,
+.set-player__wave:focus-visible,
+.set-player__next:focus-visible,
+.set-player__skip:focus-visible,
+.set-player__mini:focus-visible,
+.set-player__volume:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .set-player__vinyl {
+    animation: none;
+  }
+}
+
+/* --- the drawer variant ---------------------------------------------------------------
+   It rides the same `is-shut` class render() already writes off the drawer's real z
+   (skillDrawer.js), exactly as .drawer__hint does: no observer, no event, no second flag to
+   drift from the metal. visibility travels with the opacity, or a Tab would land on an
+   invisible Play button while the drawer is shut. The .is-playing exception is the one that
+   matters: shutting the drawer mid-track must not take the Pause button away with it. */
+#skill-drawer.is-live .set-player {
+  position: absolute;
+  /* Measured, not guessed: the canvas mask's right-hand cutoff sits at 62% of the box width,
+     and at a typical box (1440px viewport, ~1026px box) that line falls almost exactly where
+     a 23rem-wide panel at right:2.5% began - a few px of clearance, gone the moment a picked
+     card adds its own shift on top. Smaller and closer to the true right edge is what actually
+     clears it; see the .has-open rule below for the rest of the room a picked card needs. */
+  right: 1.5%;
+  /* rem, not a percentage: the box caps at 76vh, so above ~900px of width its aspect stops
+     holding and a percentage inset drifts. Low in the box on purpose - the canvas mask fades
+     the metal out from 70% down, so this sits on dark rather than on steel. The floor is the
+     box's own -5rem margin into #projects: go lower than about 1rem and the panel starts
+     reaching into the section below it. */
+  bottom: 3.5rem;
+  z-index: 2;
+  /* the percentage cap, not the rem one, is what has to hold the mask-cutoff math at every
+     box size: the box's own width shrinks faster than a fixed rem figure can follow, so a
+     cap loose enough to matter at 1440px overlapped the metal well before 701px */
+  width: min(21rem, 34%);
+  margin: 0;
+  cursor: auto;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.45s var(--ease-out),
+    right 0.48s var(--ease-out),
+    width 0.48s var(--ease-out),
+    visibility 0s linear 0.45s;
+}
+
+/* It arrives late, and leaves at once. The delay is on the way in only: the drawer's own run
+   is the moment worth watching, and a player that slid in on top of it competed with the
+   thing the visitor just pulled. By the time this shows up they are already reading tabs, so
+   it reads as an offer rather than as more furniture. Going the other way - the drawer shut,
+   or the track stopped - there is nothing to wait for. */
+#skill-drawer.is-live .drawer__scene:not(.is-shut) ~ .set-player,
+#skill-drawer.is-live .set-player.is-playing {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.7s var(--ease-out) var(--set-delay, 5s),
+    visibility 0s linear var(--set-delay, 5s);
+}
+
+/* Except when it is already playing: that panel is in use, and making a visitor who shut the
+   drawer wait five seconds to reach Pause would be a punishment for touching the handle. */
+#skill-drawer.is-live .set-player.is-playing {
+  --set-delay: 0s;
+}
+
+/* A picked card slides the whole carcass right (slideFrame()) by a measured, near-constant
+   ~5.3% of the box - the shift comes from the card's own fixed on-screen size, not from which
+   folder or category was picked, confirmed by sampling folders across the rail. At a typical
+   box that alone leaves less clear width to the right of the mask's cutoff than this panel
+   needs even pinned flush to the true right edge, so both `right` and `width` move: pulled
+   in tight and narrowed rather than faded away - a visitor mid-track never loses the panel to
+   a blur they didn't ask for. Both transitions above match slideFrame()'s own 0.48s default,
+   so this reads as one movement with the furniture, not two unrelated ones. */
+#skill-drawer.is-live .drawer__scene.has-open ~ .set-player {
+  right: 0.5%;
+  width: min(17rem, 26%);
+}
+
+/* The invite has nowhere to shrink to - it's one nowrap line sized for the panel at rest, and
+   a card already answers it: the visitor is exploring, they don't need to be invited to. Only
+   the panel needs the room this state clears, so the line steps out of it instead of trying to
+   fit a sentence into a narrower box than it was written for. */
+#skill-drawer.is-live .drawer__scene.has-open ~ .set-player .set-player__invite {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Nor may a folder's own box take it: the box is the whole 320px card, transparent above the
    tab, and left hit-testable it sat in front of the tabs of the next four or five folders
    back, so pointing at a label picked a folder filed ahead of it. The target is a strip over

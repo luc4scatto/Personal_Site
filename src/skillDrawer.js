@@ -1434,8 +1434,11 @@ export function initSkillDrawer(host, strip) {
   const onKey = (e) => e.key === 'Escape' && active && (active.el.focus(), close());
   window.addEventListener('keydown', onKey);
 
+  // The set player (src/setPlayer.js) parks in this box's own corner and is not part of the
+  // index: pressing play there is not "clicking away from the card", and without this
+  // exemption it filed the open folder back in mid-track.
   const onOutside = (e) => {
-    if (active && !e.target.closest('.folder')) close();
+    if (active && !e.target.closest('.folder, .set-player')) close();
   };
   window.addEventListener('click', onOutside);
 

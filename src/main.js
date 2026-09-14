@@ -279,7 +279,20 @@ function initSkillsWall() {
   });
 }
 
-if (!DRAWER_MODE) initSkillsWall();
+// the DJ set player — lazy, and mounted on #skill-drawer in *both* modes. That element is
+// in the markup either way: with the metal live it is the positioned box the player parks
+// in the corner of, and without it a plain wrapper the player falls into the flow of. So
+// there is one mount point, one DOM, and no branch here beyond when to call this.
+const skillDrawerEl = document.querySelector('#skill-drawer');
+const mountSets = () => {
+  if (!skillDrawerEl) return; // every page but the home page
+  import('./setPlayer.js').then((m) => m.initSetPlayer(skillDrawerEl));
+};
+
+if (!DRAWER_MODE) {
+  initSkillsWall();
+  mountSets();
+}
 
 // floating 3D hobby icons — lazy, respects reduced motion
 const heroCanvas = document.querySelector('#hero-canvas');
@@ -296,7 +309,7 @@ if (heroCanvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 // three.js chunk is never fetched and the section falls back to the flat wall
 // below 701px a perspective drawer is unreadable, so the chunk is not even fetched there
 if (DRAWER_MODE) {
-  const skillDrawer = document.querySelector('#skill-drawer');
+  const skillDrawer = skillDrawerEl;
   const scene = skillDrawer.querySelector('.drawer__scene');
   const strip = skillDrawer.querySelector('.drawer__strip');
   import('./skillDrawer.js')
@@ -311,9 +324,15 @@ if (DRAWER_MODE) {
       // moment ago in initAnimations() and is now stale, firing at pixel offsets well past
       // where those sections actually sit. See refreshScrollTriggers() in animations.js.
       refreshScrollTriggers();
+      // after is-live: the player's own CSS is scoped to it, and mounting first would flash
+      // the flow-layout variant for a frame
+      mountSets();
     })
     // the metal failed, so hand the section back to the wall it would have replaced
-    .catch(() => initSkillsWall());
+    .catch(() => {
+      initSkillsWall();
+      mountSets();
+    });
 }
 
 // homelab network diagram (homelab.html only) — real content, always renders;

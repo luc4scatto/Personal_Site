@@ -257,6 +257,66 @@ export const content = {
     // breaking this copy differently changes which line does what
     drawerText: "Pull the last drawer\nSee what's inside.",
   },
+  // DJ sets for the player that rides the open drawer (src/setPlayer.js). A set is a title
+  // and a file - there is no line of blurb under it, because "melodic techno, Jun 2025" told
+  // a visitor nothing they could not hear in five seconds of listening.
+  // The audio itself is NOT hosted by this site: `track` is the public (or private-with-
+  // token) SoundCloud URL, and the player streams it through a hidden SoundCloud iframe it
+  // controls via their Widget API. That split exists for two reasons at once - it costs
+  // this site nothing to serve an hour of audio, and it means the site never distributes a
+  // copyrighted mp3 from its own domain the way self-hosting one would.
+  // `peaks` is a file this repo does hold - tools/peaks.js writes it from Luca's own local
+  // copy of the file, before or after it goes up to SoundCloud - and it is what lets the
+  // waveform be drawn without fetching a byte of audio.
+  // `duration` is committed too: the widget only reports it once ready, and a clock reading
+  // --:-- until then is a broken one.
+  // `label` is optional: the artwork at the centre of the record (Luca's logo, or a per-set
+  // cover). Without it the label carries his initials and no image element is made at all.
+  // An empty list mounts no player at all rather than an empty panel.
+  // The line above the panel. It arrives a few seconds after the drawer does (sections.css
+  // holds that delay), so it reads as an aside offered to someone already browsing rather
+  // than a second thing shouting on arrival.
+  // One line, and it has to stay one: it sits above a panel about 23rem wide.
+  djSetsInvite: 'Fancy one of my sets while you dig?',
+  // `duration: 0` below is honest, not lazy: SoundCloud doesn't expose exact track length
+  // through any unauthenticated endpoint (oEmbed doesn't carry it, and the full REST API
+  // now needs a paid Artist Pro plan just for a client_id). The widget reports the real
+  // number itself once its READY event fires, and the clock swaps to it - usually inside a
+  // second, since the script and iframe are already loaded by the time anyone presses play.
+  // `peaks` files don't exist yet for these four: tools/peaks.js needs Luca's own local copy
+  // of each mp3 to generate them, not just the SoundCloud link. Until then a missing peaks
+  // fetch falls back to a flat rail (loadPeaks() in setPlayer.js) - fully playable and
+  // seekable, just without the real waveform shape.
+  djSets: [
+    {
+      id: 'round-trax-debut',
+      title: 'Round Trax Debut',
+      track: 'https://soundcloud.com/roundtr4x/round-trax-debut',
+      peaks: '/peaks/round-trax-debut.json',
+      duration: 0,
+    },
+    {
+      id: 'round-trax-vibala',
+      title: 'Round Trax: Vibala',
+      track: 'https://soundcloud.com/roundtr4x/round-trax-vibala',
+      peaks: '/peaks/round-trax-vibala.json',
+      duration: 0,
+    },
+    {
+      id: 'round-trax-throwback-house-selecta',
+      title: 'Round Trax: Throwback House Selecta',
+      track: 'https://soundcloud.com/roundtr4x/round-trax-throwback-house-selecta',
+      peaks: '/peaks/round-trax-throwback-house-selecta.json',
+      duration: 0,
+    },
+    {
+      id: 'round-trax-easter-edition',
+      title: 'Round Trax: Easter Edition',
+      track: 'https://soundcloud.com/roundtr4x/round-trax-easter-edition',
+      peaks: '/peaks/round-trax-easter-edition.json',
+      duration: 0,
+    },
+  ],
   // shown in the Skills section panel (src/main.js) — color = brand color extracted from each icon
   skills: {
     blender: {

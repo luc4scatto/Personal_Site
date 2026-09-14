@@ -212,6 +212,80 @@ Pill markup is in `index.html` (`<li data-skill="...">`), copy in `content.skill
 - The **Audio** category (`index.html`, after 2D Softwares) holds **Ableton Live** — icon is the official simple-icons mark (`public/icons/ableton-live.svg`), recolored white like Unreal Engine since Ableton's brand is monochrome black/white.
 - Copy style: use `-`, never an em dash.
 
+## The DJ set player
+
+`src/setPlayer.js` — a record and a waveform, parked in the corner the open drawer leaves
+free. The visible UI is entirely custom - no SoundCloud chrome, no branding - but the audio
+itself streams through a **hidden SoundCloud iframe** the module controls via their Widget
+API, not a file this site serves. Sets are listed in `content.djSets`
+(`{ id, title, track, peaks, duration, label? }`). A set is a title and a file: there is no
+blurb under the name, and the one line of text the panel does carry appears only when the
+audio fails to load.
+
+- **The audio is not hosted by this site and must not be.** `track` is the SoundCloud URL
+  (public, or private with its token) and the site never touches the mp3 - it streams
+  straight from SoundCloud to the visitor. Two reasons at once: an hour of audio costs this
+  site nothing to serve, and a DJ set is by nature a mix of other people's copyrighted
+  tracks, which self-hosting the file would have no licence to distribute. The **Widget API**
+  needs no registration or key (unlike SoundCloud's full REST API, which now sits behind a
+  paid Artist Pro plan) - `loadWidgetScript()` just appends their public
+  `w.soundcloud.com/player/api.js`. With no entry carrying a `track`, the module mounts
+  nothing at all.
+- **The engine is a plain object shaped like `<audio>`.** `currentTime`, `duration`,
+  `paused`, `play()`, `pause()` - everything else in the file (waveform, scrubbing,
+  keyboard, progress) was written against a native `<audio>` element and is unchanged now
+  that the thing underneath is a hidden iframe; only the block that builds this object and
+  wires the widget's events (`READY`/`PLAY`/`PAUSE`/`FINISH`/`ERROR`/`PLAY_PROGRESS`) knows
+  the difference. `engineLoad()` creates the iframe once and reuses it for every later
+  `widget.load()` - SoundCloud's own docs describe `load()` as reloading the iframe's
+  content in place, not replacing the widget object.
+- **The waveform is drawn from committed peaks, never from the audio.** `tools/peaks.js`
+  (node + ffmpeg, run by hand like `tools/export_glb.py`) writes `public/peaks/<id>.json`
+  from Luca's own local copy of the file, before or after it goes up to SoundCloud: 1000 RMS
+  buckets, ~5KB. RMS and not absolute peak — an hour of mastered techno sits within a couple
+  of dB of ceiling almost throughout, and its peak envelope is a solid rectangle. The file
+  holds more buckets than any layout draws and `setPlayer.js` takes the max over a slice per
+  bar, so one file serves both variants, every resize and both pixel ratios. The display
+  curve (`WAVE_CURVE`) lives in the renderer, so it is tunable without regenerating a file.
+  `node tools/peaks.js --self-check` runs the bucketing assertions.
+- **`duration` is committed.** The widget only reports its own duration once `READY` fires;
+  the committed value is what fills the clock before then, and after a track switch until
+  the new `READY` arrives.
+- **Seeking commits on `pointerup`, never on `pointermove`.** The drag paints a ghost
+  playhead locally and only the release calls `widget.seekTo()` - flooding the widget with a
+  seek per drag frame bought nothing visible.
+- **The panel knows the drawer is open the same way the hint does**: the `is-shut` class
+  `render()` writes off the drawer's real z. The player is a *sibling* of `.drawer__scene`,
+  so the reveal is one sibling-combinator rule and there is no observer, no event and no
+  second flag. Sibling and not child for a second reason: `skillDrawer.js`'s `pointerdown`
+  is on `.drawer__scene` and treats anything that isn't a `.folder` as a drag of the index,
+  so a player inside it would slide the rail on every press of Play.
+- **It arrives late on purpose.** The reveal carries a 5s `transition-delay` *inbound only*
+  (`--set-delay` in `sections.css`): the drawer's own run is the moment worth watching, and a
+  player sliding in on top of it competed with the thing the visitor just pulled. Leaving —
+  the drawer shut, the track stopped — has no delay, and neither does a panel that is already
+  playing, or shutting the drawer would put Pause five seconds out of reach.
+- The invitation above the panel is `content.djSetsInvite`, rendered inside the player's own
+  root so one rule fades both and a line can never stand beside a player that isn't there. It
+  is `white-space: nowrap` and its type is a `clamp()` on the viewport, because the panel is
+  42% of a box that narrows: on two lines it stopped reading as an aside. **Keep that copy
+  short** - it has to fit one line at 701px, the narrowest the drawer ever runs at.
+- `.is-playing` (written from the `<audio>`'s own events) beats the shut-drawer rule: closing
+  the drawer mid-track must not take the Pause button away with it. A picked card slides the
+  carcass right into this corner, so `.drawer__scene.has-open` dims the player — unless it
+  is playing, when someone is using it.
+- The `<audio>` is on `document.body`, not in the panel, so nothing that happens to the
+  drawer's DOM can touch it; the site is an MPA, so navigation stops it for free.
+- Order is shuffled once per page load and runs to the end of the list, then stops. No loop,
+  no picker: with 2-4 sets the next button is enough.
+- `skillDrawer.js`'s `onOutside` exempts `.set-player`, or pressing play would file an open
+  folder back in.
+- Progress is one custom property (`--played`) clipping a second canvas — the canvas itself
+  is redrawn only on resize or a change of set, never per frame, because this sits over a
+  WebGL layer that is drawing too.
+- Below 701px (and under reduced motion, and if WebGL fails) the same DOM mounts into the
+  flow of the section instead: everything positional is scoped to `#skill-drawer.is-live`.
+
 ## Hero cloud: drag interaction
 
 Press and drag the canvas to spin the cloud. Three things here are the way they are because
@@ -263,13 +337,20 @@ Legacy Blender pipeline (previous models, kept for reference): `_originals/3d_fi
 
 ## TODO
 
-- **Audio player on the skill cards.** Let a visitor play one of Luca's DJ sets (SoundCloud
-  embed, or a direct player) while browsing the skill cards — Audio category (Ableton Live,
-  Traktor, rekordbox) is the obvious anchor, but check with Luca whether he wants it scoped to
-  just those cards or available site-wide. Needs a decision on embed vs. custom player before
-  touching code: a SoundCloud iframe is near-zero effort but carries their chrome and a network
-  request per load; a native `<audio>` player matches the site's own design language but means
-  hosting the track and building transport controls.
+- **Put the real DJ sets behind the player.** The player and the SoundCloud engine are both
+  built (see "The DJ set player") but untested against a real track — the placeholder entry
+  in `content.djSets` has an empty `track`, which is why the module doesn't mount on the
+  live site. What's left is Luca's: upload each set (or, if he goes that route instead, a
+  handful of individual songs — see "Considered e scartato" in the plan file, which still
+  applies unchanged with SoundCloud as the engine) to SoundCloud, run `tools/peaks.js` on his
+  own local copy of each file, and paste the track URLs into `content.djSets`. Then verify
+  end-to-end in a real browser: does `widget.play()` called inside the disc's click handler
+  actually start audio on the various browsers' autoplay/gesture rules, does a forward seek
+  land where expected, does `ERROR` fire for a track that's been taken down or made private.
+  None of that could be verified here without a live track.
+- **The record's label.** Luca is supplying a logo PNG; drop it in `public/images/` and put
+  its path in a set's `label`. Until then the label carries his initials and no image element
+  is created.
 
 ## Constraints
 
