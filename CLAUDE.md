@@ -269,11 +269,16 @@ audio fails to load.
   root so one rule fades both and a line can never stand beside a player that isn't there. It
   is `white-space: nowrap` and its type is a `clamp()` on the viewport, because the panel is
   42% of a box that narrows: on two lines it stopped reading as an aside. **Keep that copy
-  short** - it has to fit one line at 701px, the narrowest the drawer ever runs at.
-- `.is-playing` (written from the `<audio>`'s own events) beats the shut-drawer rule: closing
-  the drawer mid-track must not take the Pause button away with it. A picked card slides the
-  carcass right into this corner, so `.drawer__scene.has-open` dims the player — unless it
-  is playing, when someone is using it.
+  short** - it has to fit one line at 701px, the narrowest the drawer ever runs at. In drawer
+  mode it is right-aligned, because the line is shorter than the panel and its left edge is
+  where the slid carcass comes closest.
+- **The panel is sized once, against the slid frame.** A picked card slides the carcass right
+  (`slideFrame()`) by a near-constant ~5.3% of the box, pushing the canvas mask's 62% cutoff
+  with it, so `right`/`width` are solved for that state and never change: `.has-open` carries
+  no rule for the player at all. It used to, and a panel that could be mid-track pulled itself
+  in, narrowed, and dropped its invitation under the visitor's hand.
+- `.is-playing` (written from the engine's own events) beats the shut-drawer rule: closing
+  the drawer mid-track must not take the Pause button away with it.
 - The `<audio>` is on `document.body`, not in the panel, so nothing that happens to the
   drawer's DOM can touch it; the site is an MPA, so navigation stops it for free.
 - Order is shuffled once per page load and runs to the end of the list, then stops. No loop,

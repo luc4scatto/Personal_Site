@@ -985,7 +985,6 @@
   /* One line, always: wrapped onto two it stopped reading as an aside and started reading as
      a paragraph the player had to carry. The copy in content.js is written short for this. */
   white-space: nowrap;
-  transition: opacity var(--duration-base) var(--ease-out);
 }
 
 .set-player__panel {
@@ -1257,12 +1256,15 @@
    matters: shutting the drawer mid-track must not take the Pause button away with it. */
 #skill-drawer.is-live .set-player {
   position: absolute;
-  /* Measured, not guessed: the canvas mask's right-hand cutoff sits at 62% of the box width,
-     and at a typical box (1440px viewport, ~1026px box) that line falls almost exactly where
-     a 23rem-wide panel at right:2.5% began - a few px of clearance, gone the moment a picked
-     card adds its own shift on top. Smaller and closer to the true right edge is what actually
-     clears it; see the .has-open rule below for the rest of the room a picked card needs. */
-  right: 1.5%;
+  /* Measured, not guessed, and measured against the *slid* frame rather than the resting one:
+     the canvas mask's right-hand cutoff sits at 62% of the box width, and a picked card slides
+     the whole carcass right (slideFrame()) by a near-constant ~5.3% of the box, pushing that
+     cutoff with it. Solved once for the worse of the two states - at a typical box (1440px
+     viewport, ~1026px) the slid cutoff lands at ~690px and this panel's left edge at ~714px -
+     so the panel is the same size and in the same place whether a card is filed or out. It
+     used to be sized to the resting cutoff and then pulled in and narrowed on .has-open, which
+     meant a panel that could be mid-track resized itself out from under the visitor's hand. */
+  right: 0.8%;
   /* rem, not a percentage: the box caps at 76vh, so above ~900px of width its aspect stops
      holding and a percentage inset drifts. Low in the box on purpose - the canvas mask fades
      the metal out from 70% down, so this sits on dark rather than on steel. The floor is the
@@ -1273,16 +1275,26 @@
   /* the percentage cap, not the rem one, is what has to hold the mask-cutoff math at every
      box size: the box's own width shrinks faster than a fixed rem figure can follow, so a
      cap loose enough to matter at 1440px overlapped the metal well before 701px */
-  width: min(21rem, 34%);
+  width: min(19rem, 30%);
   margin: 0;
   cursor: auto;
   opacity: 0;
   visibility: hidden;
+  /* only the arrival is animated: `right` and `width` no longer change at all, which is the
+     whole point of solving them against the slid frame above */
   transition:
     opacity 0.45s var(--ease-out),
-    right 0.48s var(--ease-out),
-    width 0.48s var(--ease-out),
     visibility 0s linear 0.45s;
+}
+
+/* Centred over the panel, and only inside the drawer: the line is shorter than the panel it
+   sits on, and centring it reads as the panel's own caption rather than leaning toward
+   either edge. Still clear of the carcass a picked card has slid across - the panel itself
+   is sized with margin for that (see .set-player above). The fallback variant is already a
+   centred block under the wall with nothing beside it. */
+#skill-drawer.is-live .set-player__invite {
+  padding: 0 0.2rem;
+  text-align: center;
 }
 
 /* It arrives late, and leaves at once. The delay is on the way in only: the drawer's own run
@@ -1305,31 +1317,9 @@
   --set-delay: 0s;
 }
 
-/* A picked card slides the whole carcass right (slideFrame()) by a measured, near-constant
-   ~5.3% of the box - the shift comes from the card's own fixed on-screen size, not from which
-   folder or category was picked, confirmed by sampling folders across the rail. At a typical
-   box that alone leaves less clear width to the right of the mask's cutoff than this panel
-   needs even pinned flush to the true right edge, so both `right` and `width` move: pulled
-   in tight and narrowed rather than faded away - a visitor mid-track never loses the panel to
-   a blur they didn't ask for. Both transitions above match slideFrame()'s own 0.48s default,
-   so this reads as one movement with the furniture, not two unrelated ones. */
-#skill-drawer.is-live .drawer__scene.has-open ~ .set-player {
-  right: 0.5%;
-  width: min(17rem, 26%);
-}
-
-/* The invite has nowhere to shrink to - it's one nowrap line sized for the panel at rest, and
-   a card already answers it: the visitor is exploring, they don't need to be invited to. Only
-   the panel needs the room this state clears, so the line steps out of it instead of trying to
-   fit a sentence into a narrower box than it was written for. */
-#skill-drawer.is-live .drawer__scene.has-open ~ .set-player .set-player__invite {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Nor may a folder's own box take it: the box is the whole 320px card, transparent above the
-   tab, and left hit-testable it sat in front of the tabs of the next four or five folders
-   back, so pointing at a label picked a folder filed ahead of it. The target is a strip over
+/* A folder's own box may not take the pointer: the box is the whole 320px card, transparent
+   above the tab, and left hit-testable it sat in front of the tabs of the next four or five
+   folders back, so pointing at a label picked a folder filed ahead of it. It is a strip over
    the tab's rest position instead, and it stays put: a hovered folder lifting its tab must
    not grow its target up over the ones behind, or the pointer skips them on the way up. */
 #skill-drawer.is-live .drawer__css .folder::before {
@@ -1620,6 +1610,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-dim);
+  opacity: 0.7;
 }
 
 /* authored 100px long; cull() scales it to the stretch of the category that is showing */
