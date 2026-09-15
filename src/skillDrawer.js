@@ -814,13 +814,53 @@ export function initSkillDrawer(host, strip) {
   // scene, so it lands in the same spot on the page at any framing: a world position tuned
   // at one aspect drifted off the heading, or onto the drawer, at every other.
   const PICK_W = 0.25; // share of the frame's width the card takes
+  // Under this frame width a side column cannot hold a readable card. The card is authored
+  // at CARD_W/CARD_H and drawn through one uniform scale, so its type size *is* that scale:
+  // in a 670px frame (a 744px tablet) a quarter-width card renders its 12px body copy at
+  // 8px. Past the cut-off it overlays the scene at PICK_W_WIDE instead, and the height
+  // clamp below does most of the work from there. Measured off the live frame rather than
+  // a media query, so there is no CSS twin to keep in sync and a rotation re-decides in
+  // resize() for free.
+  const OVERLAY_MAX_W = 980;
+  const PICK_W_WIDE = 0.62;
+  // A pure safety backstop, not a routine constraint - it only fires past a box wider than
+  // any real overlay frame gets (host width * 0.627 stays under CARD_H * 2 up to ~1020px of
+  // host, comfortably past OVERLAY_MAX_W). It shipped at 1.35 first, a real ceiling at every
+  // width past about 690px of host - three quarters of the overlay range, iPad Pro 11" and
+  // 12.9" both included. There the card stopped growing with the box while the height term
+  // below kept climbing, so height/width and MAX_SCALE traded which one bound as the frame
+  // widened, and the card that resulted sat well short of where the dimmed player still was
+  // - the corner it's meant to disappear into, only partly.
+  const MAX_SCALE = 2;
   const PICK_TOP = 0.03; // gap above it, as a share of the frame's height
   const PICK_PULL = 2; // world units in front of the drawer's face, so it rides over every folder
+  const overlaid = () => w <= OVERLAY_MAX_W;
+  // The DJ player parks in the box's right margin while a card is open, blurred but never
+  // hidden (sections.css's .is-overlay ~ .set-player rule) - that's the point of it: it must
+  // stay visible. A card sized to fill the box eventually reaches that margin, and there is
+  // no way to make it bigger without covering the player outright, which is just the
+  // "disappears" behaviour this replaced, wearing a blur. Reserving the player's own
+  // footprint here keeps both fully visible, always - no overlap to paint over, so no
+  // z-index trick either.
+  //
+  // Mirrors sections.css's `width: min(17rem, 40%); right: 0.8%` on that rule - a twin, not
+  // a read of it: skillDrawer.js has no path to a computed style before the card is placed.
+  // 272px (17rem) is `.set-player__panel`'s own measured content width (258px, `width:
+  // fit-content`) plus a small margin, not a guess - an earlier pass reserved 176px, well
+  // under what the panel actually needs, and the transport row's volume slider (a fixed
+  // 4.5rem on its own) overflowed the panel outright. Change one, change both.
+  const PLAYER_RESERVE_PX = () => Math.min(272, w * 0.4) + w * 0.008 + 24;
   const pickPos = new THREE.Vector3();
   const pickRay = new THREE.Vector3();
   const camFwd = new THREE.Vector3();
   function cardSize() {
-    const cardH = Math.min(h * (1 - PICK_TOP * 2), (w * PICK_W * CARD_H) / CARD_W);
+    const share = overlaid() ? PICK_W_WIDE : PICK_W;
+    const availW = overlaid() ? w - PLAYER_RESERVE_PX() : w;
+    const cardH = Math.min(
+      h * (1 - PICK_TOP * 2),
+      (availW * share * CARD_H) / CARD_W,
+      CARD_H * MAX_SCALE,
+    );
     return [(cardH * CARD_W) / CARD_H, cardH];
   }
   // How far the furniture steps right so the card gets a column of its own, clear of the
@@ -829,6 +869,10 @@ export function initSkillDrawer(host, strip) {
   // name beside the card ran into its corner. The names are measured off the page, less the
   // slide they were last drawn at, so this reads where they rest at no slide at all.
   const pickShift = () => {
+    // An overlaid card spans most of the frame, so there is no column beside the drawer to
+    // step aside for - and sliding the furniture out from under it would move the scene for
+    // no reason a visitor can see.
+    if (overlaid()) return 0;
     const [cardW, cardH] = cardSize();
     const clear = cardW + w * 0.025;
     let shift = clear - view.left;
@@ -847,12 +891,18 @@ export function initSkillDrawer(host, strip) {
     const face = pickPos.set(0, 0, D / 2 + OPEN_Z).applyMatrix4(camera.matrixWorldInverse);
     const depth = -face.z - PICK_PULL;
     // left edge on the frame's own left edge, which is the heading's: centre in NDC, cast
-    // through the camera (so the view offset fit() sets is honoured) out to that depth
-    pickRay
-      .set(cardW / w - 1, 1 - (2 * (h * PICK_TOP + cardH / 2)) / h, 0.5)
-      .unproject(camera)
-      .sub(camera.position)
-      .normalize();
+    // through the camera (so the view offset fit() sets is honoured) out to that depth.
+    // Overlaid, it centres within the region left of the player's reserved margin instead of
+    // the full frame - centring in the full frame is what let the card grow into that margin
+    // in the first place. Stays bottom-anchored vertically, mirroring the top margin PICK_TOP
+    // leaves everywhere else: MAX_SCALE caps the card's height on a box that keeps growing
+    // wider, so on a wide-but-short-of-desktop frame the box outgrows the card, and centring
+    // it vertically split that slack top and bottom - the bottom half sat directly over the
+    // player. Bottom-anchored, the same slack collects above the card instead, under the
+    // heading, where there is nothing to show through.
+    if (overlaid()) pickRay.set(-PLAYER_RESERVE_PX() / w, -1 + 2 * PICK_TOP + cardH / h, 0.5);
+    else pickRay.set(cardW / w - 1, 1 - (2 * (h * PICK_TOP + cardH / 2)) / h, 0.5);
+    pickRay.unproject(camera).sub(camera.position).normalize();
     camera.getWorldDirection(camFwd);
     pickPos.copy(camera.position).addScaledVector(pickRay, depth / pickRay.dot(camFwd));
     const pxPerUnit = h / (2 * depth * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
@@ -1029,6 +1079,9 @@ export function initSkillDrawer(host, strip) {
     w = host.clientWidth;
     h = host.clientHeight;
     if (!w || !h) return;
+    // Only ever changes with the frame, so it is written here and not in render() the way
+    // is-shut is - that one tracks a z that moves every frame.
+    host.classList.toggle('is-overlay', overlaid());
     camera.aspect = w / h;
     const total = pickDrawerCount();
     buildCabinet(total);

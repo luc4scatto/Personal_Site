@@ -786,6 +786,15 @@
   cursor: grab;
 }
 
+/* -5rem was tuned against the non-overlay box, which stays 680-900px tall across its own
+   width range. The overlay box is shorter across its whole range (max ~650px, aspect-ratio
+   3/2 against a narrower frame), so the same fixed overlap eats a much bigger share of it -
+   there was only 25px left between the player and #projects before this, not enough room to
+   also pull the player away from the drawer above it without crowding one edge or the other. */
+#skill-drawer.is-live:has(.drawer__scene.is-overlay) {
+  margin-bottom: -3rem;
+}
+
 #skill-drawer.is-live:active {
   cursor: grabbing;
 }
@@ -1317,6 +1326,104 @@
   --set-delay: 0s;
 }
 
+/* Tablet, where skillDrawer.js has put the picked card over the scene instead of in a column
+   beside it (.is-overlay, written off the measured frame in resize()). Two things follow.
+
+   First, the panel above was solved against a *slid* frame, and overlaid there is no slide -
+   pickShift() returns 0 - so the mask's right-hand cutoff stays at its resting 62% and the
+   panel has to clear that instead. The rem cap is what binds at this size: 11rem is 176px
+   against a 670px box, putting the left edge well clear of the ~415px cutoff. The percentage
+   is only there to keep it honest if the box ever grows without the cap moving.
+
+   17rem, not a number chosen to look right: `.set-player__panel` set to `width: fit-content`
+   measures 258px of real content at rest (disc + the transport row - two skips, play/pause,
+   and a volume slider that's a fixed 4.5rem on its own, sections.css:1230) before it will
+   wrap or overflow. 17rem/272px is that plus a small margin, not a guess - a first pass at
+   11rem/176px shipped narrower than the content itself, which is exactly what overflowed the
+   volume slider and folded "/ 60:57" onto two lines the one time this went untested against
+   the panel's own layout. skillDrawer.js's PLAYER_RESERVE_PX mirrors this value for the card
+   to keep clear of - change one, change both. */
+#skill-drawer.is-live .drawer__scene.is-overlay ~ .set-player {
+  /* Lower than the non-overlay 3.5rem - see #skill-drawer.is-live:has(.drawer__scene.is-overlay)
+     above, which buys the room this needs against #projects. Without that change 0.4rem left
+     only 9px of clearance below; with it, room enough to also open real air above, between the
+     invite line and the drawer it sits under. */
+  bottom: 0.4rem;
+  width: min(17rem, 40%);
+}
+
+/* Second, the panel recedes rather than disappears while a card is open: same "focus one
+   thing, blur the rest" grammar the skills wall itself uses when a tile opens
+   (.skills.is-focused li:not(.is-active)). Same exception as everywhere else: a panel
+   mid-track stays sharp and interactive, because taking Pause away to show a skill card
+   would be the worse trade.
+
+   It does not move, and does not need to: skillDrawer.js's PLAYER_RESERVE_PX keeps the card
+   out of this margin at every overlay width, so the two never overlap and there is nothing
+   here for a z-index to referee. Two things were tried and dropped before this: hiding the
+   panel outright undid the point of blurring it in the first place - a card is not a track
+   change, and Pause disappearing mid-listen for either felt like a bug. Growing the card to
+   cover the panel instead just hid it a different way, through a blur instead of a cut - same
+   complaint, new mechanism. Reserving the margin is the one version where both stay visible,
+   all the time, doing their own job. */
+#skill-drawer.is-live .drawer__scene.is-overlay.has-open ~ .set-player:not(.is-playing) {
+  opacity: 0.45;
+  filter: blur(3px);
+  pointer-events: none;
+  transition:
+    opacity 0.35s var(--ease-out),
+    filter 0.35s var(--ease-out);
+}
+
+/* The metal recedes behind an overlaid card. The canvas and not the folders: cull() is the
+   only writer of a folder's opacity and it drops pointer-events below 0.6, so dimming them
+   here would quietly cost the index its hit targets. The card rides in front of them anyway
+   (PICK_PULL).
+
+   The transition sits on the overlay state and not on the dimmed one, or filing the card
+   back would snap the metal to full instead of bringing it back up. */
+#skill-drawer.is-live .drawer__scene.is-overlay canvas {
+  transition:
+    opacity 0.4s var(--ease-out),
+    filter 0.4s var(--ease-out);
+}
+
+/* The category names stand off to the left of the tabs, so an overlaid card cuts them in
+   half - "REAL-", "3D SOF" - which reads as a rendering fault rather than as a name behind a
+   card. They go while one is open. `visibility` and not `opacity` on purpose: cull() writes
+   opacity inline on these every frame and would win, but it never touches visibility. */
+#skill-drawer.is-live .drawer__scene.is-overlay.has-open .drawer__label,
+#skill-drawer.is-live .drawer__scene.is-overlay.has-open .drawer__rule {
+  visibility: hidden;
+}
+
+#skill-drawer.is-live .drawer__scene.is-overlay.has-open canvas {
+  /* Barely a step down, and that is deliberate: the metal is already dark on a black page,
+     and at 0.55 the furniture simply vanished - which loses the reason the drawer is still
+     here on a tablet at all. Enough to seat the card in front, not enough to erase what it
+     was lifted out of.
+
+     The blur is what actually reads as "background" rather than "dimmed foreground" - opacity
+     alone left the drawer looking like the same sharp furniture with the lights turned down,
+     which sat oddly next to the player receding with an actual blur a few rules up. Same
+     3px, so the two things happening at once (a card opening, a panel stepping back) read as
+     one move on one plane, not two different treatments of "not the focus right now". */
+  opacity: 0.82;
+  filter: blur(3px);
+}
+
+/* The other folders blur along with the metal they sit on, so the open card reads as the one
+   sharp thing instead of one sharp layer (canvas) behind another sharp layer (folders) with
+   only the card in between blurred. `filter`, never `opacity`: cull() is the only writer of a
+   folder's opacity and drops pointer-events below 0.6, so touching opacity here would quietly
+   cost the index its hit targets (documented above). `filter` is a property cull() never
+   touches, so this is free to set without fighting it. The open card itself is excluded - it
+   is the thing staying in focus, not one of the things receding. */
+#skill-drawer.is-live .drawer__scene.is-overlay.has-open .drawer__css .folder:not(.is-open) {
+  filter: blur(3px);
+  transition: filter 0.4s var(--ease-out);
+}
+
 /* A folder's own box may not take the pointer: the box is the whole 320px card, transparent
    above the tab, and left hit-testable it sat in front of the tabs of the next four or five
    folders back, so pointing at a label picked a folder filed ahead of it. It is a strip over
@@ -1617,7 +1724,7 @@
 .drawer__rule {
   width: 100px;
   height: 2px;
-  background: color-mix(in srgb, var(--text-dim) 70%, transparent);
+  background: color-mix(in srgb, var(--text) 70%, transparent);
 }
 
 /* projects */
@@ -2551,6 +2658,30 @@ p.project-specs__kicker {
 
 .homelab-hardware.is-stacked .hw-label--icon {
   transform: translate(-50%, -1.15rem);
+}
+
+/* Phone only, and phone only on purpose. The stacked layout also serves tablet portrait,
+   where the diagram gets its full 26rem and the nodes sit far enough apart that the sizes
+   above hold. On a 390px screen the box is the 350px the padding leaves, so the canvas runs
+   at half scale: the two nvme nodes are 75 viewBox units apart, which is 37.5px, and a
+   2.3rem icon is 36.8px - measured, they overlapped by 4px, and the captions either side of
+   them by 14px. Shrinking both buys that back.
+
+   The anchor offset below is re-derived, not copied: it is half the new diameter
+   (1.4rem + 0.32rem either side = 2.04rem, half = 1.02rem). Leave it at 1.15rem and every
+   icon floats off its own connector point. */
+@media (max-width: 700px) {
+  .homelab-hardware.is-stacked .hw-label {
+    max-width: 3.9rem;
+  }
+
+  .homelab-hardware.is-stacked .hw-label svg {
+    padding: 0.32rem;
+  }
+
+  .homelab-hardware.is-stacked .hw-label--icon {
+    transform: translate(-50%, -1.02rem);
+  }
 }
 
 .homelab-hardware.is-stacked .hw-label--room {

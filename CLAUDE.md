@@ -1,365 +1,61 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guida per Claude Code su questo repo.
 
 ## Project
 
-Personal portfolio site for Luca Scattolin (English content), deployed to GitHub Pages. Stack: Vite + vanilla JS/CSS + GSAP + Three.js. No framework — do not introduce React/Vue/etc.
+Portfolio personale di Luca Scattolin (contenuti in inglese), deploy su GitHub Pages. Stack: Vite + vanilla JS/CSS + GSAP + Three.js. Nessun framework - non introdurre React/Vue/ecc.
 
-- Repo: https://github.com/luc4scatto/Personal_Site (public)
+- Repo: https://github.com/luc4scatto/Personal_Site (pubblico)
 - Live: https://luc4scatto.github.io/Personal_Site/
-- Every push to `main` auto-deploys via the Pages workflow (source: GitHub Actions, already enabled)
-- **Push policy: never commit/push without Luca's explicit OK** — he reviews on the dev server first
-- Five pages (Vite MPA, inputs in vite.config.js): `index.html` (home), `vivatech.html` (cover, description, video, masonry gallery, LinkedIn links), `homelab.html`, `privacy.html` and `404.html`. The Projects grid's third card ("More Projects") is a static placeholder with no link — `project-two.html` used to back it and was deleted (2026-09-13) since nothing pointed to it and it held no content; recreate it, re-add the `projectTwo` entry in `vite.config.js`'s `rollupOptions.input`, and re-add the sitemap.xml entry once there's a real project to put there
+- Ogni push su `main` fa auto-deploy (GitHub Actions, Pages workflow)
+- **Push policy: mai commit/push senza OK esplicito di Luca** - verifica sempre sul dev server prima
 
-## Commands
+## Comandi
 
-- `npm run dev` — dev server with HMR
-- `npm run build` — production build to `dist/`
-- `npm run preview` — serve the production build locally (verifies the GitHub Pages base path)
+- `npm run dev` - dev server con HMR, http://localhost:5173/
+- `npm run build` - build di produzione in `dist/`
+- `npm run preview` - serve la build di produzione (verifica il base path di GitHub Pages)
 
-## Architecture
+## Pagine
 
-- `index.html` — home sections (hero with 3D canvas, marquee ribbon, about, skills with brand icons, projects, contact). Marquee = per-word `<span>`s duplicated once for the seamless CSS loop; keep an even word count per half or the color alternation jumps at the seam
-- `src/main.js` — entry point: nav highlighting, GSAP init, card spotlight (`--mx/--my` custom props), and four lazy dynamic imports: hero3d.js (skipped if `prefers-reduced-motion`), skillDrawer.js (gated on `DRAWER_MODE`), homelabDiagram.js and homelabHardware.js. The skills wall lives in `initSkillsWall()`, a named function rather than a bare block so the drawer's import can call it from `.catch` — see "Skills: the tool wall". The `[data-copy]` renderer's `escapeHtml()` escapes `content.js` strings then converts `**word**` to `<strong>` — safe only because that copy is developer-authored, never user input
-- `src/styles/sections.css` — `.about-grid p strong` sets the bold-copy color a step below `--text` (`color-mix(in srgb, var(--text) 50%, var(--text-dim))`) so inline emphasis in the About paragraph reads distinct from section headings, not identical to them
-- `src/animations.js` — GSAP + ScrollTrigger + SplitText animations (hero masked-line reveal, h2 clip reveals, scroll reveals, scroll progress bar, magnetic buttons)
-- `src/hero3d.js` — Three.js floating 3D hobby icons: 19 unique items from Draco GLBs + ~160 small decorative shapes (scale `0.015 + Math.random() ** 1.6 * 0.09` — the power curve skews toward small flecks with only occasional bigger chunks; min spacing 0.1 between shapes and 0.9 from any model home keeps them from ever covering the real objects). No-overlap is guaranteed geometrically (fibonacci-sphere homes, wander < half min home distance) — no physics engine. Materials are replaced at load, cycling three palette colors (lime/white/violet, `COLORS`) per object; within an object, meshes get contrasting lightness shades and every 4th part goes dark metallic for component readability, unless the model has an `isNeutral` override (`recolor()`'s 3rd arg, wired per-model in `addItem`) — `server_console_station` uses one to swap which part reads as structure vs. accent: the front cabinet panels (`server_cabinet` material) go neutral metallic, legs/bolts/lights carry the accent color instead. `side: DoubleSide` (open meshes look holey otherwise). **Interactive**: clicking a model focuses it (raycast via window listeners since the canvas is `pointer-events:none`), scales it up and shows its `DESCRIPTIONS[model]` card (placeholder copy, created in JS, styled `.object-info` in sections.css) while the rest of the scene renders through a real gaussian blur pipeline (layers + render-target ping-pong, `three/addons` blur shaders + `FullScreenQuad`) that's allocated lazily and runs only while focused — idle stays a single render pass. Objects pulse randomly to hint clickability; Esc / × / click-outside close. Drag-to-spin is its own thing — see "Hero cloud: drag interaction" below. Tunables at top of file (SPHERE_RADIUS, WANDER, SIZE_TWEAKS, FOCUS_SCALE, PULSE_AMP, BLUR_STRENGTH, shade offsets)
-- `src/skillDrawer.js` — Three.js + `CSS3DRenderer`: the Skills section as a brushed-steel filing drawer seen at three quarters, with the tool folders filed front-to-back inside it. Procedural geometry and a `RoomEnvironment` PMREM, so **no asset ships** — no GLB, no HDRI. The folders are the page's own `<li data-skill>` elements moved into `CSS3DObject`s, so they stay real DOM. Returns a teardown function; `hero3d.js` has none. Read the whole "Skills: the tool wall" section before touching it: several of the constants there are the result of a dead end
-- `src/styles/base.css` — reset, CSS custom properties (colors, spacing, typography). Change the visual identity here, not in section styles. `--accent` (lime) is the primary; `--accent-2` (violet #a78bfa, same as the 3D scene) is used sparingly: scroll progress gradient, marquee alternation, about-photo gradient, `::selection`, vivatech link arrows
-- `src/styles/sections.css` — per-section layout and styles. Breakpoints are **not** one mobile query — see "Responsive breakpoints" below
-- `public/models/*.glb` — Draco-compressed models; `public/draco/` holds the decoder files (GLTFLoader.setDRACOLoader wired in hero3d.js)
-- `public/icons/`, `public/images/`, `public/video/` — skill brand icons (SVG), Vivatech photos, compressed project video
-- `public/fonts/*.woff2` — self-hosted, no Google Fonts CDN and no `preconnect`. **Space Grotesk** is the display voice (one variable file, 300-700); **Switzer** takes every reading role, because a display grotesque set at 17px across a paragraph fights the reader. `'Switzer Fallback'` is Arial with `size-adjust`/`ascent-override` tuned to Switzer's metrics, so the swap window doesn't reflow. Both faces are declared in `base.css`; change the identity through `--font-display` / `--font-body`, never per-section. Switzer is under the ITF Free Font License (Fontshare) - verify the terms still allow self-hosting before a public deploy
-- `.github/workflows/deploy.yml` — builds and deploys to GitHub Pages on push to main
+Vite MPA, input in `vite.config.js`: `index.html` (home), `vivatech.html`, `homelab.html`, `privacy.html`, `404.html`.
 
-## Responsive breakpoints
+## File chiave
 
-The site used to have a single `700px` query, which left every tablet on the desktop layout. There are now three bands, and **one of them is mirrored in JS** — change one side and you must change the other:
+- `src/main.js` - entry point, nav, GSAP init, import dinamici (hero3d, skillDrawer, homelabDiagram, homelabHardware)
+- `src/animations.js` - animazioni GSAP + ScrollTrigger
+- `src/hero3d.js` - scena Three.js dell'hero
+- `src/skillDrawer.js` - sezione Skills come cassetto 3D (solo desktop, >701px)
+- `src/setPlayer.js` - player DJ set (streaming da SoundCloud, non file ospitati sul sito)
+- `src/content.js` - copy del sito
+- `src/styles/base.css` - reset, custom properties (colori, spacing, typography)
+- `src/styles/sections.css` - layout e stili per sezione
+- `public/models/*.glb` - modelli 3D Draco-compressi
 
-| Query | What it does | JS twin |
-| --- | --- | --- |
-| `max-width: 700px`, or `max-width: 1024px and (orientation: portrait)` | Hero stacks: the 3D canvas leaves absolute positioning and becomes a flow block under the text | `STACKED_HERO` in `hero3d.js` (camera distance) |
-| `max-width: 560px` | Skill card bullets drop from two columns to one | — |
-| `max-width: 700px` | Skill tiles and their marks shrink | — |
+## Vincoli
 
-The skills section used to have three interlocking queries (999 modal / 700 scroll lock / 1000 grid) plus a JS twin for each. It still has **none**. The drawer's `701px` cut-off lives in exactly one place, `DRAWER_MODE` in `main.js`, and it only decides whether the chunk is fetched at load; the drawer itself is a 3D scene that reframes itself at any size, so there is nothing for CSS to mirror. Resist adding a `701px` query to `sections.css` for it — an earlier attempt did, and it needed a matching guard in the module to clear inline styles the stylesheet could not beat.
+- `vite.config.js` ha `base: '/'` (dominio custom in root, non subpath) - il dev server serve tutto su `http://localhost:5173/`, non `/Personal_Site/`
+- Tutte le animazioni devono rispettare `prefers-reduced-motion`
+- Mobile-first; verificare i layout a dimensioni reali (phone 390, tablet 744/820/1024, laptop 1366, desktop 1440) con Chrome DevTools
+- Copy: niente em dash, solo trattino breve `-`
 
-Tablet specifics:
-- **Portrait tablets** (701–1024px): headline is `6.4vw` and `#hero-canvas` is `flex: 1 1 0` — a zero basis, not `auto`, because the `<canvas>` inside is sized by the renderer and an auto basis lets it drive (and keep growing) the band's height. Result: the hero is exactly one screen, no clipped kicker, no sphere off the bottom edge.
-- **Landscape tablets/small laptops** (701–1366px): headline drops to `6.2vw` and the text is capped at `26rem` so it never reaches the sphere.
-- `.hero .btn` is hidden **only** below 700px — tablets have room for it.
+## Gotchas (cose già provate e fallite - non riprovare)
 
-## Skills: the tool wall
-
-The section is a wall of tool tiles grouped by category. Picking one blurs the rest of the
-wall and unfolds its card **in place**, inside the category that owns it — the same "focus
-one thing, let the rest recede" grammar as the 3D hero cloud, in CSS instead of WebGL.
-
-This replaced a `position: fixed` panel and, before that, a sticky second column. Both were
-deleted for the same reason: the card is now a normal grid item, so there is no positioning
-code, no modal and no scroll lock.
-
-**Above 701px the wall is filed into a drawer** (`src/skillDrawer.js`): a long brushed-steel
-office drawer seen at three quarters, with the tools filed front-to-back like a card index.
-
-- **The folders are the page's own `<li data-skill>` elements**, carried into a `CSS3DObject`
-  each via `CSS3DRenderer`. That choice is the load-bearing one: at three quarters every
-  folder sits at a different depth, so a flat DOM strip cannot line up any more, but drawing
-  them as billboards in WebGL would cost the text, the focus ring, the keyboard and the
-  screen reader. CSS3D keeps real DOM inside the scene's perspective.
-- **A folder IS its own detail card.** At rest only the tab shows; picking one unrolls the
-  sheet upward and lifts the card out of the rail (`scene.attach`) into the left column
-  under the section heading, squared up to the camera. Its spot is solved in **screen
-  space** (`pickTarget()`), so it lands under the heading at any framing; a world-space spot
-  tuned at one aspect drifted onto the drawer at every other. The furniture slides right
-  just enough to give the card that column (`slideFrame()`, a tweened `setViewOffset`) and
-  slides back on close; the canvas mask's right-hand fade follows it through `--slide`.
-  There is no separate card and no `#skill-card-slot` in drawer mode.
-- The sheet is always the full card and **slides up** out of the rim (`translateY`, never
-  `height`: animating height relaid the card out every frame, on top of the WebGL pass). At
-  rest it sits pushed down so only the tab shows, and `.folder` has `overflow: hidden`, so
-  nothing a visitor reads ever needs to be drawn behind the metal. That matters: a CSS3D
-  layer cannot be occluded by the WebGL canvas, and this is what makes the two layers
-  co-exist without a second render pass. The rim fade is `.folder`'s `mask-image`, not the
-  sheet's, since the sheet's own bottom edge is out of sight at rest.
-- **`cull()` is the reveal, not just a guard.** A CSS3D layer is always painted over the
-  WebGL canvas, so a folder still inside the cabinet rides on top of the metal instead of
-  being hidden by it. Each folder fades in as it crosses `CAB_MOUTH`, which is why the
-  opening reads as the drawer being pulled out of the cabinet rather than the whole index
-  sliding along above it. `cull()` is also the **only** writer of a folder's opacity: the
-  opening stagger tweens `f.reveal`, a factor `cull()` multiplies in, never `style.opacity`
-  itself - with two writers on one property, which won each frame came down to tick order.
-- **Selection moves the card, never the rail.** Sliding the whole index forward to bring the
-  chosen folder to the front pushed every folder ahead of it out through the drawer's face.
-  `cull()` still hides anything a manual drag pushes past the front lip.
-- **A folder's hit target is a `::before` strip over its tab's rest position**, not its box.
-  The box is the whole 320px card, transparent above the tab, and left hit-testable it sat
-  in front of the next four or five tabs back: pointing at a label picked a folder filed
-  ahead of it. `CSS3DObject` stamps `pointer-events: auto` inline on every element, which is
-  why the box was a target at all: the constructor's inline value is cleared right after, or
-  no stylesheet rule reaches it. The strip doesn't move with the hover lift, so a lifted tab can't swallow the
-  ones behind it. `cull()` switches it off with `.is-culled`; an open card's whole sheet
-  takes the pointer again. Hover lifts the tab 2rem (enough to read logo and title) and
-  turns it `HOVER_TURN` toward the camera, mouse only.
-- **Categories are labelled outside the drawer**, not by divider tabs filed in it: a
-  full-width divider covered the logo and title of the first folder of every category, and
-  a narrow one off to the right was too small to read. A category boundary is an empty slot
-  in the rail (`railSource` holds `null` there); each category gets a camera-facing name
-  and a hairline (`.drawer__label`, `.drawer__rule`) running just up-left of its tabs'
-  top-left corners, the name above-left of the rule's midpoint (the one quarter the climbing
-  rule never crosses) - clear of every tab, which all lean the other way. Anchored on the
-  corners (`TAB_REM` above the rim, mirroring `.folder__sheet`'s rest `translateY`), not on
-  the rim itself: at three quarters a tab projects further back than the rim at its own
-  depth, so a rim-anchored rule sat under the folders filed ahead of its category. They are CSS3D like the folders, so `cull()` clips both by hand at the cabinet face
-  and the drawer front. They fade in only once the drawer has finished opening and fade out
-  before it runs back in (`fadeLabels()`, both ends of `runDrawer()`), so a name never stands
-  beside a drawer that is shut or moving; a hand on the handle kills that fade and shows them
-  all, since `cull()` multiplies `reveal` in and a half-faded name would otherwise stick.
-  Since they stand out past the drawer's front on the left, `pickShift()` measures them off
-  the page and slides the furniture far enough that none beside the open card touches it.
-- `fit()` solves the camera distance **numerically**, against the corners of the furniture
-  (cabinet top included, drawer at full extension), then centres that silhouette with
-  `setViewOffset` rather than on the point the camera looks at. Trigonometry that assumed a
-  front-on camera framed the drawer at about half the width it could use, because at three
-  quarters the projected extent depends on the azimuth as well as the aspect. The picked
-  card is deliberately **not** in those corners: framing its reach too is what used to
-  shrink the furniture to half the frame.
-- **The camera is a long lens (17 degrees) on purpose.** At 32 the drawer's front panel
-  rendered half again larger than the cabinet face eleven units behind it and the two
-  stopped reading as one piece of furniture. Flattening the perspective closes that gap;
-  `fit()` re-solves the distance, so nothing else needs touching. `FACE_W` is the single
-  width the drawer front, the carcass and every closed front share.
-- **The drawer's interior is `MeshBasicMaterial` black**, not dimmed metal. Anything that
-  takes light down there catches the environment and reads as a floor again however far it
-  is darkened.
-- **The cabinet sits behind the drawer's back end, never over it.** A carcass that wrapped
-  the drawer would swallow the folders filed at the back. It is a finite piece of furniture
-  with a top: **3 drawers** by default (the open one included), 4 when the frame has height
-  to spare at no cost in size, 2 only when a third would shrink everything by more than a
-  third (`pickDrawerCount()`). `buildCabinet()` rebuilds rather than scales, because the face
-  is a shape with the mouth cut in it. `.drawer__scene canvas` still carries a `mask-image`:
-  a short fade at the top where the cabinet's top face recedes out of frame, the drawer's
-  underside sinking away at the bottom, and the carcass running off to the right. Masking the
-  canvas rather than fading in the shader is what keeps the CSS3D folders out of it - they
-  are a separate layer with no mask.
-- `GAP` is at its floor. Below roughly 0.4 each full-width tab covers the label of the one
-  behind it, which is what a real index avoids by staggering its tabs sideways.
-- Rendering is **on demand**: `pump()` runs a short rAF burst around each interaction and
-  then stops. `hero3d.js` by contrast runs its loop for the life of the page.
-- `main.js` adds `is-live` to `#skill-drawer` only after the module has initialised, and
-  every drawer rule is scoped to it. `initSkillsWall()` is a named function precisely so the
-  import's `.catch` can hand the section back to the flat wall.
-- **It waits to be pulled.** The drawer used to open itself off an IntersectionObserver, which
-  spent the whole gesture before anyone had looked at the furniture. It now starts shut and runs
-  only on a real pull: a click or drag on the front, or a Tab into a folder (`focusin` on the
-  host — the folders are real DOM and take focus whether the drawer is out or not). While it is
-  shut the section reads like the hero: `.drawer__hint` sets `content.skillsHint.drawerText` at
-  display scale down the left, with `layoutHintArrow()` sweeping to the handle. That sweep is an
-  **exact quarter circle** — it leaves the type straight down and reaches the handle straight
-  across, a 90° arc's own two tangents — which means it is as tall as it is wide, so how high the
-  block sits is not a free choice: `layoutHintArrow()` solves `top` from the arc's width and
-  writes it back in px (`sections.css`'s `top` is only the value for the frame before it runs).
-  The copy is **one `<span>` per line**, split on `drawerText`'s own `\n`, because the two lines
-  animate differently: the first (the instruction) carries `hint-nudge`, a slow shove right that
-  settles back, in flat `--text-dim`; the second (the promise) carries the `hint-shine` colour
-  sweep and doesn't move. Both on both lines was twice the motion for one invitation. The nudge
-  is on the line and not on the block for two reasons — the block's `transform` is its vertical
-  centring, and `layoutHintArrow()` measures the block, which a child's transform leaves
-  untouched.
-  That column needs no help from the camera — `fit()` frames the drawer at *full extension*, so
-  a drawer that is in leaves everything left of ~60% of the box empty. A tweened step-aside off
-  the drawer's own z was built for exactly this and measured `0px` at every size, which is why
-  there isn't one; don't add it back without measuring first.
-- The opening reveal uses `gsap.fromTo`, not `from` (on `f.reveal`, 40ms stagger), and fires
-  once, from `revealIndex()` on the first pull — a drag sets `revealed` without tweening, since
-  a hand pulling the drawer already staggers the folders as they clear the mouth. A `from`
-  here left the folders parked on their start values, and an invisible wall of skills is a
-  worse failure than no animation; the tween's `onComplete` renders once more for the same
-  reason, in case it finishes after `pump()` has stopped. The category names are *not* in it:
-  `fadeLabels(1)` off the run's own `onComplete` brings them in every time, not just the first,
-  and they start at `reveal: 0` because the drawer now starts shut.
-
-- **Selectors must be direct-child scoped.** The card is injected *inside* `.skills-grid`
-  and its title is an `<h3>` inside `.skill-group`. Written as descendant selectors,
-  `.skills-grid li` blurred the card's own bullets as if they were tiles, and
-  `.skill-group h3` gave the card title the category heading's hairline rule. Use
-  `.skills-grid > li` and `.skill-group > h3`.
-- **`--brand`** is the tile's own brand color, set per tile in `main.js` from
-  `content.skills[key].color`. CSS uses it for the tile's wash (`--tile-wash`: 6% at rest,
-  14% on hover, 22% active), the open card's gradient and border, and the bullet dots.
-- The category heading is the section's structural device: display scale, riding a hairline
-  rule that fades out to the right. It replaced six 0.85rem grey captions.
-- `.skill-card__badge` needs its own `[hidden] { display: none }` — `display: inline-block`
-  beats the `hidden` attribute, so unflagged cards rendered an empty pill.
-- The close control is a **drawn SVG**, not `&times;`, and the tiles carry no `+` glyph.
-  Unicode standing in for an icon system is a craft-floor violation.
-- Motion is one authored moment: the height unfold plus the wall going soft. Switching tools
-  inside the same category re-measures the height instead of unfolding again.
-
-Known, out of scope: `.info-card` (the 3D hero object card, `sections.css:10`) still carries
-a `border-left: 3px solid var(--accent)` — the same side-tab tell that was removed from the
-skills card. One line to fix when someone touches that component.
-
-## Skill pills and their panels
-
-Pill markup is in `index.html` (`<li data-skill="...">`), copy in `content.skills` in `src/content.js` — the `data-skill` value is the object key, change one and you must change the other. Above 701px `skillDrawer.js` rewrites those same `<li>` into folders and reads the same entries for the card face, so an entry shape change lands in both the wall and the drawer.
-
-- Entry shape: `{ title, text, color, selfTaught?, bullets? }`. `color` is the brand color pulled from the icon; `selfTaught: true` renders the badge; `bullets` is a list of strings, or `{ label, subs: [...] }` objects for a nested list (only Substance 3D uses the nested form).
-- In the source, every `bullets`/`subs` array is written one entry per line. Keep it that way — Luca reads and edits this list directly.
-- **Agentic Workflow** is one pill covering Hermes Agent, Claude Code, OpenClaw and n8n (they used to be two brand pills). Its icon `public/icons/agentic-workflow.svg` is a hand-written generic node-graph glyph, deliberately brandless so it fits all four bullets. `claude-code.svg` is now unused but kept; `hermes-agent.png` was moved to `public/icons/services/` and recolored white-on-transparent for use as the "Hermes Agent" service icon on `homelab.html` (`src/homelabDiagram.js`'s `ICON_OVERRIDES`).
-- The **Qt Designer** pill is commented out in `index.html` while its `content.skills` entry stays — uncomment to bring it back.
-- The **Audio** category (`index.html`, after 2D Softwares) holds **Ableton Live** — icon is the official simple-icons mark (`public/icons/ableton-live.svg`), recolored white like Unreal Engine since Ableton's brand is monochrome black/white.
-- Copy style: use `-`, never an em dash.
-
-## The DJ set player
-
-`src/setPlayer.js` — a record and a waveform, parked in the corner the open drawer leaves
-free. The visible UI is entirely custom - no SoundCloud chrome, no branding - but the audio
-itself streams through a **hidden SoundCloud iframe** the module controls via their Widget
-API, not a file this site serves. Sets are listed in `content.djSets`
-(`{ id, title, track, peaks, duration, label? }`). A set is a title and a file: there is no
-blurb under the name, and the one line of text the panel does carry appears only when the
-audio fails to load.
-
-- **The audio is not hosted by this site and must not be.** `track` is the SoundCloud URL
-  (public, or private with its token) and the site never touches the mp3 - it streams
-  straight from SoundCloud to the visitor. Two reasons at once: an hour of audio costs this
-  site nothing to serve, and a DJ set is by nature a mix of other people's copyrighted
-  tracks, which self-hosting the file would have no licence to distribute. The **Widget API**
-  needs no registration or key (unlike SoundCloud's full REST API, which now sits behind a
-  paid Artist Pro plan) - `loadWidgetScript()` just appends their public
-  `w.soundcloud.com/player/api.js`. With no entry carrying a `track`, the module mounts
-  nothing at all.
-- **The engine is a plain object shaped like `<audio>`.** `currentTime`, `duration`,
-  `paused`, `play()`, `pause()` - everything else in the file (waveform, scrubbing,
-  keyboard, progress) was written against a native `<audio>` element and is unchanged now
-  that the thing underneath is a hidden iframe; only the block that builds this object and
-  wires the widget's events (`READY`/`PLAY`/`PAUSE`/`FINISH`/`ERROR`/`PLAY_PROGRESS`) knows
-  the difference. `engineLoad()` creates the iframe once and reuses it for every later
-  `widget.load()` - SoundCloud's own docs describe `load()` as reloading the iframe's
-  content in place, not replacing the widget object.
-- **The waveform is drawn from committed peaks, never from the audio.** `tools/peaks.js`
-  (node + ffmpeg, run by hand like `tools/export_glb.py`) writes `public/peaks/<id>.json`
-  from Luca's own local copy of the file, before or after it goes up to SoundCloud: 1000 RMS
-  buckets, ~5KB. RMS and not absolute peak — an hour of mastered techno sits within a couple
-  of dB of ceiling almost throughout, and its peak envelope is a solid rectangle. The file
-  holds more buckets than any layout draws and `setPlayer.js` takes the max over a slice per
-  bar, so one file serves both variants, every resize and both pixel ratios. The display
-  curve (`WAVE_CURVE`) lives in the renderer, so it is tunable without regenerating a file.
-  `node tools/peaks.js --self-check` runs the bucketing assertions.
-- **`duration` is committed.** The widget only reports its own duration once `READY` fires;
-  the committed value is what fills the clock before then, and after a track switch until
-  the new `READY` arrives.
-- **Seeking commits on `pointerup`, never on `pointermove`.** The drag paints a ghost
-  playhead locally and only the release calls `widget.seekTo()` - flooding the widget with a
-  seek per drag frame bought nothing visible.
-- **The panel knows the drawer is open the same way the hint does**: the `is-shut` class
-  `render()` writes off the drawer's real z. The player is a *sibling* of `.drawer__scene`,
-  so the reveal is one sibling-combinator rule and there is no observer, no event and no
-  second flag. Sibling and not child for a second reason: `skillDrawer.js`'s `pointerdown`
-  is on `.drawer__scene` and treats anything that isn't a `.folder` as a drag of the index,
-  so a player inside it would slide the rail on every press of Play.
-- **It arrives late on purpose.** The reveal carries a 5s `transition-delay` *inbound only*
-  (`--set-delay` in `sections.css`): the drawer's own run is the moment worth watching, and a
-  player sliding in on top of it competed with the thing the visitor just pulled. Leaving —
-  the drawer shut, the track stopped — has no delay, and neither does a panel that is already
-  playing, or shutting the drawer would put Pause five seconds out of reach.
-- The invitation above the panel is `content.djSetsInvite`, rendered inside the player's own
-  root so one rule fades both and a line can never stand beside a player that isn't there. It
-  is `white-space: nowrap` and its type is a `clamp()` on the viewport, because the panel is
-  42% of a box that narrows: on two lines it stopped reading as an aside. **Keep that copy
-  short** - it has to fit one line at 701px, the narrowest the drawer ever runs at. In drawer
-  mode it is right-aligned, because the line is shorter than the panel and its left edge is
-  where the slid carcass comes closest.
-- **The panel is sized once, against the slid frame.** A picked card slides the carcass right
-  (`slideFrame()`) by a near-constant ~5.3% of the box, pushing the canvas mask's 62% cutoff
-  with it, so `right`/`width` are solved for that state and never change: `.has-open` carries
-  no rule for the player at all. It used to, and a panel that could be mid-track pulled itself
-  in, narrowed, and dropped its invitation under the visitor's hand.
-- `.is-playing` (written from the engine's own events) beats the shut-drawer rule: closing
-  the drawer mid-track must not take the Pause button away with it.
-- The `<audio>` is on `document.body`, not in the panel, so nothing that happens to the
-  drawer's DOM can touch it; the site is an MPA, so navigation stops it for free.
-- Order is shuffled once per page load and runs to the end of the list, then stops. No loop,
-  no picker: with 2-4 sets the next button is enough.
-- `skillDrawer.js`'s `onOutside` exempts `.set-player`, or pressing play would file an open
-  folder back in.
-- Progress is one custom property (`--played`) clipping a second canvas — the canvas itself
-  is redrawn only on resize or a change of set, never per frame, because this sits over a
-  WebGL layer that is drawing too.
-- Below 701px (and under reduced motion, and if WebGL fails) the same DOM mounts into the
-  flow of the section instead: everything positional is scoped to `#skill-drawer.is-live`.
-
-## Hero cloud: drag interaction
-
-Press and drag the canvas to spin the cloud. Three things here are the way they are because
-the obvious version was tried and failed — don't "simplify" them back:
-
-- **Rotation is a quaternion, premultiplied.** Euler angles put the world Y axis opposite
-  to the screen's once the cloud is flipped past vertical, so dragging sideways rotated the
-  wrong way. Premultiplying by a screen-space axis (`rotateWorld()`) keeps "drag right" =
-  "spin right" in any orientation. Idle spin and mouse parallax are composed *outside* the
-  manual rotation, so they stay screen-relative.
-- **The tilt unwinds at rest** (`settleRoll()`). Composing rotations about two axes breeds
-  rotation about the third, so the horizon drifts — ~12° over a long session, unbounded, and
-  the scene becomes unreadable. Constraining the drag instead would cost a pole where
-  sideways dragging stops working, so the tilt is allowed and then undone (6%/frame, ~1s)
-  only once the cloud is at rest. Weighted by how visible the up axis is, so it fades out
-  near the pole where "upright" is undefined. Note the sign: `atan2(x, y)` measures
-  clockwise, a rotation about +Z goes counter-clockwise — getting this backwards amplifies
-  the tilt instead of removing it.
-- **The smear is fake motion blur**: no velocity buffer, no second geometry pass. It reuses
-  the focus blur pipeline with the per-axis radius driven by how much rotation was applied
-  that frame (`appliedY`/`appliedX` — euler deltas would spike near the poles). Two
-  fullscreen passes, only while moving; idle stays a single pass. Measured cost during a
-  drag at 1024x1366 with 4x CPU throttling: unchanged, 16.67ms/frame.
-
-Feel is tuned by three constants at the top of the file: `DRAG_BLUR` (1.6 — the ceiling is
-~2.5, past which the 9-tap addon shaders show banding instead of a smear), `SPIN_FRICTION`
-(0.96, velocity kept per frame after release — 0.98 ≈ 3s, 0.93 ≈ half a second) and
-`ROLL_FIX` (0.06).
-
-## 3D model pipeline
-
-Current homepage models are external GLB assets. Raw uncompressed sources (~29MB) live in `_originals/new_models_raw/` — gitignored, never commit or move into `public/`. To (re)optimize one into the site:
-
-```
-npx @gltf-transform/cli optimize _originals/new_models_raw/<name>.glb public/models/<name>.glb --compress draco
-```
-
-This welds/simplifies/prunes and Draco-compresses (~29MB raw → ~70KB–180KB per file). Materials get replaced at runtime by hero3d.js, so texture/material loss is irrelevant. If simplification visibly damages a mesh, re-run with `--simplify false`. If the mesh comes apart into one blob with no per-part color variation, re-run with `--join false` too — `optimize`'s default join merges separate meshes sharing a material, and `recolor()` colors per mesh, so joining collapses the whole object to a couple of shades. New model = optimize it into `public/models/` + add its name to GLB_MODELS in hero3d.js.
-
-Sources sometimes arrive as `.fbx` instead of `.glb` (dropped straight into `_originals/`, not `new_models_raw/`). Convert first with headless Blender:
-
-```
-/Applications/Blender.app/Contents/MacOS/blender -b --factory-startup -noaudio --python <script.py> -- <in>.fbx _originals/new_models_raw/<name>.glb
-```
-
-where `<script.py>` just does `bpy.ops.import_scene.fbx(filepath=...)` then `bpy.ops.export_scene.gltf(filepath=..., export_format='GLB')` — then run the optimize step above as normal.
-
-Legacy Blender pipeline (previous models, kept for reference): `_originals/3d_files.blend` (183MB, gitignored) exported via `tools/export_glb.py` (per-mesh decimation caps in `FILE_CAPS`, modifiers stripped, placeholder materials, Draco). Run: `/Applications/Blender.app/Contents/MacOS/blender -b --factory-startup -noaudio _originals/3d_files.blend --python tools/export_glb.py`.
+- **Responsive non è una sola query**: 3 breakpoint (700px stack hero, 560px/700px skill tiles). `STACKED_HERO` in `hero3d.js` mirra a mano il breakpoint 700px/1024px-portrait per la distanza camera - se cambi la query CSS cambia anche lì. `DRAWER_MODE` in `main.js` decide a 701px, una volta sola al load, se caricare il drawer 3D o il wall piatto - resize dopo il load non cambia modalità, serve reload.
+- **Skill drawer** (`src/skillDrawer.js`, solo >701px): i folder sono i veri `<li data-skill>` del DOM portati dentro `CSS3DObject` (serve testo reale/a11y, non billboard WebGL). Hit target è una striscia `::before` sopra il tab, non l'intera card (la card è 320px e sennò intercetta i tab dietro). Selezionare un folder sposta la card, mai la rotaia (spostare la rotaia spingeva gli altri folder fuori dal cassetto). Camera a 17° (tele) per non far sembrare cassetto e mobile due pezzi separati. Interno del cassetto: materiale nero piatto, non metallo scuro (altrimenti cattura l'ambiente e sembra un pavimento). Il cassetto parte chiuso e si apre solo su interazione reale (click/drag/focus) - un IntersectionObserver bruciava il gesto prima che l'utente guardasse.
+- **Card del cassetto su tablet (`is-overlay`)**: la card è autorata 250x320 e renderizzata con una scala 3D uniforme, quindi **la sua dimensione di testo È la sua scala**. A 0.25 di larghezza frame (`PICK_W`) su un box da 670px il corpo testo da 12px rendeva a 8px: illeggibile. Sotto `OVERLAY_MAX_W = 980` px di **box misurato** (non media query: niente gemello CSS da tenere in sync, e una rotazione ridecide da sola in `resize()`) la card passa a `PICK_W_WIDE = 0.62` e il mobile non slitta più (`pickShift()` ritorna 0). Non si centra: resta ancorata in basso e si sposta a sinistra della fascia riservata al player (`PLAYER_RESERVE_PX`, gemella di `sections.css`'s `width: min(17rem, 40%)` sul `.set-player` overlay - cambiane uno, cambia l'altro), così card e player non si sovrappongono mai. Risultato 15.7px a 744, 16.2px a 1024. Dietro si attenua **sia il canvas che le cartelle non aperte**, ma con proprietà diverse: il canvas va a `opacity` (0.82) perché non è un target cliccabile, le cartelle invece solo a `filter: blur()`, mai `opacity`, perché `cull()` scrive `opacity` inline ogni frame sulle cartelle e toglie i `pointer-events` sotto 0.6 - abbassarla da CSS costerebbe all'indice i suoi bersagli di click. Le etichette di categoria si nascondono con `visibility` e non `opacity` per lo stesso motivo.
+- **DJ player** (`src/setPlayer.js`): audio mai ospitato sul sito, streamma da un iframe SoundCloud nascosto via Widget API (no API key richiesta, a differenza della REST API a pagamento). L'oggetto "engine" ha la stessa forma di `<audio>` (currentTime/duration/play/pause) cosi il resto del codice (waveform, scrub, keyboard) non sa che sotto c'è un iframe. Waveform disegnata da peak committati (`tools/peaks.js`, RMS non picco assoluto - un mix masterizzato ha un picco quasi piatto), mai dall'audio live. Seek si conferma solo su `pointerup`, mai su `pointermove` (altrimenti flood di seek). Il pannello arriva con 5s di ritardo solo in entrata (il drawer che si apre è il momento da guardare, non deve competere).
+- **Hero cloud drag** (`src/hero3d.js`): rotazione via quaternioni premoltiplicati, non euler (euler inverte l'asse Y oltre un certo tilt). Il tilt residuo si smorza da fermo (`settleRoll`), non si vincola durante il drag (vincolarlo crea un polo dove il drag laterale smette di funzionare). Lo sfocato di movimento è finto: riusa la pipeline di blur del focus, nessun buffer di velocità.
+- **Pipeline modelli 3D**: `npx @gltf-transform/cli optimize <src>.glb public/models/<name>.glb --compress draco` (raw ~29MB → ~70-180KB). Se il mesh si spappola in un blob senza variazione di colore per parte, riaggiungi `--join false` (il join di default fonde le mesh che condividono materiale). FBX si converte prima con Blender headless (vedi script in `_originals/`).
+- `.info-card` (card oggetto 3D hero, `sections.css`) ha ancora un `border-left` residuo mai rimosso - un giorno da allineare allo stile della skill card.
 
 ## TODO
 
-- **Put the real DJ sets behind the player.** The player and the SoundCloud engine are both
-  built (see "The DJ set player") but untested against a real track — the placeholder entry
-  in `content.djSets` has an empty `track`, which is why the module doesn't mount on the
-  live site. What's left is Luca's: upload each set (or, if he goes that route instead, a
-  handful of individual songs — see "Considered e scartato" in the plan file, which still
-  applies unchanged with SoundCloud as the engine) to SoundCloud, run `tools/peaks.js` on his
-  own local copy of each file, and paste the track URLs into `content.djSets`. Then verify
-  end-to-end in a real browser: does `widget.play()` called inside the disc's click handler
-  actually start audio on the various browsers' autoplay/gesture rules, does a forward seek
-  land where expected, does `ERROR` fire for a track that's been taken down or made private.
-  None of that could be verified here without a live track.
-- **The record's label.** Luca is supplying a logo PNG; drop it in `public/images/` and put
-  its path in a set's `label`. Until then the label carries his initials and no image element
-  is created.
+- **DJ set reali**: player e engine SoundCloud pronti ma mai testati con un set vero (`content.djSets` ha `track` vuoto, quindi il modulo non monta in produzione). Serve: caricare i set su SoundCloud, girare `tools/peaks.js` sui file locali, incollare gli URL in `content.djSets`, poi verificare in browser reale autoplay/gesture, seek, evento `ERROR`.
+- **Logo del disco**: Luca deve fornire un PNG, va in `public/images/` e referenziato nel campo `label` di un set.
+- **Distanza player/cassetto su tablet (`is-overlay`)**: a riposo (nessuna card aperta) l'invito `.set-player__invite` e il pannello player sembrano troppo vicini al cassetto - provato a stringere il mask-image del canvas (`#skill-drawer.is-live .drawer__scene.is-overlay canvas`) per far sfumare il metallo prima, funzionava ma è stato annullato su richiesta di Luca prima del commit. Da riprendere: il vero problema è che `.set-player`'s width è cresciuto da 11rem a 17rem (per non far uscire lo slider volume) senza mai spostare la posizione (`right: 0.8%`), quindi il pannello ora parte al ~70% del box overlay, dentro alla zona dove il fade del canvas (62%→100%) è appena iniziato, non finito.
 
-## Constraints
+## In lavorazione
 
-- `vite.config.js` sets `base: '/'` — the site is served from the custom domain root (lucascattolin.com), not a repo-name subpath. The dev server therefore serves the site at `http://localhost:5173/`, not `/Personal_Site/`; hitting the wrong path still renders the page (HTML fallback) but every model 404s
-- All animations must respect `prefers-reduced-motion`
-- Mobile-first responsive; heavy animations are simplified or disabled on small viewports. Verify layout changes at real device sizes (iPad mini 744, iPad Air 820, iPad Pro 1024 portrait, 1180/1366 landscape, phone 390, desktop 1440) — Chrome DevTools emulation, since the browser window can't be made taller than the screen
-- Site copy is real (Thélios/Vivatech content) except the two placeholder project cards ("Project Two/Three") awaiting Luca's details
+Sezione Skills (`src/skillDrawer.js`, `sections.css`), tablet/`is-overlay`: risolti leggibilità card, player che spariva, overflow interno player, nero pieno in fondo alla card, blur di cassetto+cartelle quando una card è aperta. Aperto: la distanza player/cassetto a riposo (vedi TODO sopra).
