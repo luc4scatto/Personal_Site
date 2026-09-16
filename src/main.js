@@ -175,11 +175,15 @@ function initSkillsWall() {
   // and the tile strip behind it goes inert (blocked, not just dimmed) until it closes.
   let modalEl = null;
   let stripEl = null;
+  let sideGroup = null;
   if (IS_PHONE_SKILLS_LAYOUT) {
     modalEl = document.createElement('div');
     modalEl.className = 'skills-modal';
     document.body.append(modalEl);
     stripEl = document.querySelector('.drawer__strip');
+    // EXPERIMENT - the first category opens its detail beside the stack instead of over
+    // it. Delete this (and the matching CSS, search "EXPERIMENT") to revert.
+    sideGroup = document.querySelector('.skill-group');
     inner.querySelector('.skill-card__title').id = 'skill-card-title';
     card.setAttribute('role', 'dialog');
     card.setAttribute('aria-modal', 'true');
@@ -239,16 +243,25 @@ function initSkillsWall() {
       li.classList.add('is-active');
       gsap.killTweensOf(card);
       modalEl.append(card);
-      stripEl?.setAttribute('inert', '');
-      stripEl?.classList.add('is-dimmed');
-      document.body.style.overflow = 'hidden';
+      // EXPERIMENT - beside the stack, not over it: nothing is covered, so nothing gets
+      // blocked either. The page keeps scrolling and the other cards stay tappable.
+      const side =
+        !!sideGroup &&
+        li.closest('.skill-group') === sideGroup &&
+        window.matchMedia('(min-width: 600px)').matches;
+      modalEl.classList.toggle('skills-modal--side', side);
+      if (!side) {
+        stripEl?.setAttribute('inert', '');
+        stripEl?.classList.add('is-dimmed');
+        document.body.style.overflow = 'hidden';
+      }
       // rAF so the just-inserted node still picks up the CSS transition instead of
       // starting already in its end state - the focus() call rides the same rAF because
       // setting [inert] on the strip triggers the browser's own async focus fixup, which
       // otherwise lands after a synchronous focus() here and silently reverts it to <body>
       requestAnimationFrame(() => {
         modalEl.classList.add('is-open');
-        card.querySelector('.skill-card__close').focus();
+        if (!side) card.querySelector('.skill-card__close').focus();
       });
       return;
     }

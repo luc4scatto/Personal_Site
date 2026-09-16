@@ -3079,6 +3079,41 @@ p.project-specs__kicker {
     line-height: 1.5rem;
   }
 
+  /* EXPERIMENT - first category only (see main.js). The stack itself is untouched: same
+     tabs, same overlap, same peek, same scroll. It just stops short of the right edge, and
+     the room that frees up is where the detail opens. Delete this block to revert.
+
+     Only from 600px up: the panel is 40% of the frame, and under that it lands around
+     140px, which is two words a line and a title sitting on its own close button. A real
+     phone keeps the full-screen card - main.js gates the JS on the same width. */
+  @media (min-width: 600px) {
+  .skill-group:first-of-type .skills-grid > li {
+    width: 52%;
+  }
+
+  /* beside the stack instead of over it: no scrim, no blur, nothing covered - so the
+     container has to let clicks fall through to the cards it is sitting on top of */
+  .skills-modal.skills-modal--side {
+    background: none;
+    backdrop-filter: none;
+    pointer-events: none;
+    place-items: center end;
+    padding: 1rem;
+  }
+
+  /* .skills-modal too, so this beats the full-screen rule's own width further down */
+  .skills-modal.skills-modal--side .skill-card {
+    width: 42%;
+    max-height: 78vh;
+    pointer-events: auto;
+  }
+
+  /* 2 columns of bullets in a panel this narrow leaves 3 words a line */
+  .skills-modal--side .skill-card__bullets {
+    columns: 1;
+  }
+  }
+
   /* the tapped card's detail, centered over a blocked background - see openCard()/
      closeCard()'s IS_PHONE_SKILLS_LAYOUT branch in main.js */
   .skills-modal {
