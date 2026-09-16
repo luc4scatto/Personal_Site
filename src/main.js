@@ -149,6 +149,12 @@ const DRAWER_MODE =
   !window.matchMedia('(prefers-reduced-motion: reduce)').matches &&
   window.matchMedia('(min-width: 701px)').matches;
 
+// Same decided-once-at-load contract as DRAWER_MODE (see CLAUDE.md: a resize after load does
+// not change mode, a reload does). Phone gets its own centered-modal card behavior inside
+// initSkillsWall() below; reduced-motion desktop and a failed drawer import still fall back to
+// the plain full-width wall untouched.
+const IS_PHONE_SKILLS_LAYOUT = window.matchMedia('(max-width: 700px)').matches;
+
 function initSkillsWall() {
   if (!skillsSection || !skillTiles.length) return;
   // the invitation, in the same place the hero puts its own "click on an object" line
@@ -165,6 +171,21 @@ function initSkillsWall() {
 
   const isReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Phone: the card opens into a fixed, centered modal instead of unfolding in the grid flow,
+  // and the tile strip behind it goes inert (blocked, not just dimmed) until it closes.
+  let modalEl = null;
+  let stripEl = null;
+  if (IS_PHONE_SKILLS_LAYOUT) {
+    modalEl = document.createElement('div');
+    modalEl.className = 'skills-modal';
+    document.body.append(modalEl);
+    stripEl = document.querySelector('.drawer__strip');
+    inner.querySelector('.skill-card__title').id = 'skill-card-title';
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    card.setAttribute('aria-labelledby', 'skill-card-title');
+  }
+
   const applyContent = (li) => {
     const d = SKILL_DESCRIPTIONS[li.dataset.skill];
     if (!applySkillContent(inner, d)) return false;
@@ -180,6 +201,20 @@ function initSkillsWall() {
     activeEl = null;
     skillsSection.classList.remove('is-focused');
     card.closest('.skill-group')?.classList.remove('has-open-card');
+
+    if (IS_PHONE_SKILLS_LAYOUT) {
+      modalEl.classList.remove('is-open');
+      stripEl?.removeAttribute('inert');
+      stripEl?.classList.remove('is-dimmed');
+      document.body.style.overflow = '';
+      if (instant || isReduced()) {
+        card.remove();
+        return;
+      }
+      modalEl.addEventListener('transitionend', () => card.remove(), { once: true });
+      return;
+    }
+
     gsap.killTweensOf(card);
     if (instant || isReduced()) {
       card.remove();
@@ -197,6 +232,27 @@ function initSkillsWall() {
   };
 
   const openCard = (li) => {
+    if (IS_PHONE_SKILLS_LAYOUT) {
+      if (!applyContent(li)) return;
+      activeEl?.classList.remove('is-active');
+      activeEl = li;
+      li.classList.add('is-active');
+      gsap.killTweensOf(card);
+      modalEl.append(card);
+      stripEl?.setAttribute('inert', '');
+      stripEl?.classList.add('is-dimmed');
+      document.body.style.overflow = 'hidden';
+      // rAF so the just-inserted node still picks up the CSS transition instead of
+      // starting already in its end state - the focus() call rides the same rAF because
+      // setting [inert] on the strip triggers the browser's own async focus fixup, which
+      // otherwise lands after a synchronous focus() here and silently reverts it to <body>
+      requestAnimationFrame(() => {
+        modalEl.classList.add('is-open');
+        card.querySelector('.skill-card__close').focus();
+      });
+      return;
+    }
+
     const grid = li.closest('.skills-grid');
     if (!applyContent(li) || !grid) return;
     // In drawer mode the folders sit in one horizontal row, so there is no row for the card
@@ -263,13 +319,17 @@ function initSkillsWall() {
   });
 
   card.querySelector('.skill-card__close').addEventListener('click', () => {
-    activeEl?.focus(); // send focus back to the tile that opened the card
+    // captured before closeCard() clears activeEl - on phone the tile is still inert
+    // until closeCard() runs, so focus() must come after, not before
+    const target = activeEl;
     closeCard();
+    target?.focus();
   });
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && activeEl) {
-      activeEl.focus();
+      const target = activeEl;
       closeCard();
+      target.focus();
     }
   });
   // clicking away from the wall closes it; the card and the tiles handle their own clicks
@@ -291,7 +351,8 @@ const mountSets = () => {
 
 if (!DRAWER_MODE) {
   initSkillsWall();
-  mountSets();
+  // no DJ player on the phone modal layout - see IS_PHONE_SKILLS_LAYOUT above
+  if (!IS_PHONE_SKILLS_LAYOUT) mountSets();
 }
 
 // floating 3D hobby icons — lazy, respects reduced motion
@@ -331,7 +392,7 @@ if (DRAWER_MODE) {
     // the metal failed, so hand the section back to the wall it would have replaced
     .catch(() => {
       initSkillsWall();
-      mountSets();
+      if (!IS_PHONE_SKILLS_LAYOUT) mountSets();
     });
 }
 
