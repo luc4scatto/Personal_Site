@@ -534,7 +534,8 @@
   }
 
   /* the invitation still reads — it's information, not decoration — just without the shine */
-  .skills-hint {
+  .skills-hint,
+  .skills-invite__line {
     animation: none;
     background: none;
     color: var(--text-dim);
@@ -565,7 +566,8 @@
      way), it just snaps instead of tweening - and closeCard()'s isReduced() branch skips
      waiting on transitionend entirely, since with transition:none it would never fire */
   .skills-modal,
-  .skills-modal .skill-card {
+  .skills-modal .skill-card,
+  .skills-invite {
     transition: none;
   }
 }
@@ -3235,6 +3237,15 @@ p.project-specs__kicker {
     pointer-events: none;
   }
 
+  /* the invitation and the card it eventually gets replaced by share one cell - without
+     this, the invite (present the whole time, just faded out once a card opens) would
+     still claim its own row in the implicit grid, and the card's own centering would be
+     measured against that taller two-row box instead of sitting on it as an overlay */
+  .skills-modal .skill-card,
+  .skills-invite {
+    grid-area: 1 / 1;
+  }
+
   .skills-modal .skill-card {
     /* a share of the same content width the drawer is a share of - the modal is fixed to
        the viewport, so the gutters have to come back out by hand */
@@ -3253,6 +3264,69 @@ p.project-specs__kicker {
   .skills-modal.is-open .skill-card {
     opacity: 1;
     transform: none;
+  }
+
+  /* The section's only invitation on phone now - main.js stops building .skills-hint here,
+     since that one sits above the stack and has long scrolled away by the time a reader is
+     this far down a 22-tool list. Carries the exact shine .skills-hint used to (same
+     weight/tracking, same gradient sweep, same hint-shine keyframes - all defined once,
+     above, and shared rather than re-declared), just at a size the narrow column can
+     actually hold. Visible only while the strip is in view (.is-visible, toggled by an
+     IntersectionObserver in main.js - nothing here can see the strip's own position) and
+     never while a card is open, whether or not the strip itself is still in view. */
+  .skills-invite {
+    /* width, not max-width: the two-line split (main.js) made the box shrink-to-fit its
+       widest child instead of the whole paragraph's wrapped-line width, so its rendered
+       width no longer reliably matched the card's own - and with .skills-modal's
+       place-items: center end right-aligning each item in its grid cell, two different
+       widths meant two different right gutters. Same formula as .skill-card's own width
+       just below, so the two can never drift apart again. */
+    width: calc((100vw - 2 * var(--pad-x)) * 0.44);
+    margin: 0;
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+
+  .skills-invite.is-visible {
+    opacity: 1;
+  }
+
+  /* Two rows (main.js splits the text in two, word-count-even), each its own element with
+     its own hint-shine timeline - a shared background on one two-line element would put
+     the same slice of the gradient on both lines at once, since it's one background image
+     spanning the whole box. animation-delay on the second is half the loop's own period
+     (3s / 2), the largest offset a repeating cycle can hold before it just starts
+     lapping - anything past that starts closing the gap back up rather than widening it. */
+  .skills-invite__line {
+    display: block;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+    background: linear-gradient(
+      90deg,
+      var(--text-dim) 0%,
+      var(--text-dim) 40%,
+      var(--accent) 50%,
+      var(--accent-2) 60%,
+      var(--text-dim) 70%,
+      var(--text-dim) 100%
+    );
+    background-size: 300% 100%;
+    background-position: 110% center;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: hint-shine 3s linear infinite;
+  }
+
+  .skills-invite__line + .skills-invite__line {
+    animation-delay: 1.5s;
+  }
+
+  .skills-modal.is-open .skills-invite {
+    opacity: 0;
   }
 
   /* the detail card is authored for a full-width row, so every step of it has to come

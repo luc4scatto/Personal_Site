@@ -9,7 +9,6 @@ public/audio
 .agents/skills/
 .claude/skills/
 .claude/settings.local.json
-.impeccable/config.local.json
-.impeccable/hook.cache.json
 skills-lock.json
-.impeccable/review/
+.impeccable/
+plans/001-drawer-card-open-close-timing.md

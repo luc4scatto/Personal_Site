@@ -157,12 +157,19 @@ const IS_PHONE_SKILLS_LAYOUT = window.matchMedia('(max-width: 700px)').matches;
 
 function initSkillsWall() {
   if (!skillsSection || !skillTiles.length) return;
-  // the invitation, in the same place the hero puts its own "click on an object" line
-  const hint = document.createElement('p');
-  hint.className = 'skills-hint';
-  hint.textContent =
-    content.skillsHint?.text ?? 'Click any tool to see what I actually do with it.';
-  skillsSection.querySelector('h2')?.after(hint);
+  // The invitation, in the same place the hero puts its own "click on an object" line -
+  // except on phone, where it's replaced by .skills-invite (below): that one sits beside
+  // the stack itself and stays in view the whole way down, instead of scrolling away
+  // above a 22-tool list the way this one would. Reduced-motion desktop and a failed
+  // drawer import still use the plain grid with no side panel to carry it instead, so they
+  // keep this one.
+  if (!IS_PHONE_SKILLS_LAYOUT) {
+    const hint = document.createElement('p');
+    hint.className = 'skills-hint';
+    hint.textContent =
+      content.skillsHint?.text ?? 'Click any tool to see what I actually do with it.';
+    skillsSection.querySelector('h2')?.after(hint);
+  }
 
   const card = document.createElement('div');
   card.className = 'skill-card';
@@ -176,6 +183,7 @@ function initSkillsWall() {
   // inert, no scroll lock: the page keeps scrolling and every tab stays tappable.
   let modalEl = null;
   let stripEl = null;
+  let invite = null;
   if (IS_PHONE_SKILLS_LAYOUT) {
     modalEl = document.createElement('div');
     modalEl.className = 'skills-modal';
@@ -186,6 +194,34 @@ function initSkillsWall() {
     inner.querySelector('.skill-card__title').id = 'skill-card-title';
     card.setAttribute('role', 'dialog');
     card.setAttribute('aria-labelledby', 'skill-card-title');
+
+    // The same invitation the section's own heading already carries, repeated into the
+    // empty half of the frame the stack doesn't use - the only thing living there until a
+    // tap fills it with an actual card. Lives in the fixed .skills-modal, sharing the
+    // card's own grid cell (place-items: center end already centres it on the viewport,
+    // not on the stack's own - much taller - height, so it stays put on screen as the
+    // stack scrolls under it, instead of only ever showing up around the drawer's
+    // midpoint). Visibility is wired up below, alongside the card's own placement logic -
+    // it needs the exact same "does this fit beside the stack" test the card uses.
+    invite = document.createElement('p');
+    invite.className = 'skills-invite';
+    // Two explicit rows, not the natural wrap: the shine is one background image per
+    // element, so text that wraps within a single element shows the same slice of the
+    // gradient on every line at once - same colour, same instant, no stagger possible.
+    // Split into two <span>, each its own element with its own hint-shine timeline
+    // (offset in CSS via animation-delay), so the second visibly trails the first instead
+    // of moving in lockstep with it.
+    const text = content.skillsHint?.text ?? 'Click any tool to see what I actually do with it.';
+    const words = text.split(' ');
+    const mid = Math.ceil(words.length / 2);
+    const line1 = document.createElement('span');
+    line1.className = 'skills-invite__line';
+    line1.textContent = words.slice(0, mid).join(' ');
+    const line2 = document.createElement('span');
+    line2.className = 'skills-invite__line';
+    line2.textContent = words.slice(mid).join(' ');
+    invite.append(line1, line2);
+    modalEl.append(invite);
   }
 
   const applyContent = (li) => {
@@ -197,22 +233,23 @@ function initSkillsWall() {
 
   let activeEl = null;
 
-  // where the panel lands: fixed, centred on the frame, as tall as its card needs
-  const panelBand = () => {
-    const h = card.offsetHeight; // layout box: unaffected by the entry transform
+  // where a fixed, centred-on-the-frame element lands, as tall as it needs - shared by the
+  // open card and, further down, the idle invitation that shows in its place
+  const bandFor = (el) => {
+    const h = el.offsetHeight; // layout box: unaffected by any entry transform
     const top = (window.innerHeight - h) / 2;
     return { top, bottom: top + h };
   };
 
-  // The panel may only live alongside the stack itself. Past the bottom it hangs over
-  // Projects; past the top it drifts up beside the section's own title and hint, with no
-  // tab next to it at all. The stack, not the section around it: the section's padding
-  // reaches well past the last tab, which is exactly the slack that let it overlap.
-  const panelFitsBesideStack = () => {
+  // Either one may only live alongside the stack itself. Past the bottom it hangs over
+  // Projects; past the top it drifts up beside the section's own title, with no tab next
+  // to it at all. The stack, not the section around it: the section's padding reaches
+  // well past the last tab, which is exactly the slack that let it overlap.
+  const fitsBesideStack = (el) => {
     if (!stripEl) return true;
     const strip = stripEl.getBoundingClientRect();
-    const panel = panelBand();
-    return panel.top >= strip.top && panel.bottom <= strip.bottom;
+    const band = bandFor(el);
+    return band.top >= strip.top && band.bottom <= strip.bottom;
   };
 
   // Opening a tab near either end of the stack centres the panel past that end - tap the
@@ -225,7 +262,7 @@ function initSkillsWall() {
   const scrollPanelBesideStack = () => {
     if (!stripEl) return;
     const strip = stripEl.getBoundingClientRect();
-    const panel = panelBand();
+    const panel = bandFor(card);
 
     // a positive scroll moves the page down, which moves the strip up the frame
     let delta = 0;
@@ -378,15 +415,22 @@ function initSkillsWall() {
   // stack - the same test that placed it, so the two can never disagree. Only ever closes:
   // opening still needs a real tap (see CLAUDE.md - a scroll-driven open burns the gesture
   // before the reader has looked at anything).
+  //
+  // The idle invitation rides the same listener and the same test: an IntersectionObserver
+  // (the earlier approach) only asks whether the strip has any pixel at all in the
+  // viewport, which stayed true long after the invite's own centred band - a fixed height
+  // in the middle of the screen - had already scrolled past the strip's actual edge and
+  // onto Projects or the section's own title.
   if (IS_PHONE_SKILLS_LAYOUT) {
-    window.addEventListener(
-      'scroll',
-      () => {
-        if (!activeEl || performance.now() < scrollSettleUntil) return;
-        if (!panelFitsBesideStack()) closeCard();
-      },
-      { passive: true },
-    );
+    const syncPlacement = () => {
+      if (activeEl) {
+        if (performance.now() >= scrollSettleUntil && !fitsBesideStack(card)) closeCard();
+      } else if (invite) {
+        invite.classList.toggle('is-visible', fitsBesideStack(invite));
+      }
+    };
+    window.addEventListener('scroll', syncPlacement, { passive: true });
+    syncPlacement();
   }
 
   // clicking away from the wall closes it; the card and the tiles handle their own clicks
