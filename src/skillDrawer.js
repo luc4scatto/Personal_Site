@@ -787,7 +787,10 @@ export function initSkillDrawer(host, strip) {
   function render() {
     cull();
     const shutNow = drawer.position.z <= SHUT_Z + 0.001;
-    if (shutNow !== shutState) host.classList.toggle('is-shut', (shutState = shutNow));
+    if (shutNow !== shutState) {
+      host.classList.toggle('is-shut', (shutState = shutNow));
+      if (shutNow) host.classList.remove('has-opened');
+    }
     renderer.render(scene, camera);
     css.render(scene, camera);
   }
@@ -1257,6 +1260,11 @@ export function initSkillDrawer(host, strip) {
     f.el.setAttribute('aria-expanded', 'true');
     f.el.querySelector('.folder__close').tabIndex = 0;
     host.classList.add('has-open');
+    // Sticks past this close, unlike has-open: it marks "the drawer's own 5s arrival fade
+    // already played", so a later card close can restore the player at once instead of
+    // replaying that delay. Cleared only when the drawer goes fully shut (render(), below),
+    // so the next real opening gets the slow fade-in again.
+    host.classList.add('has-opened');
     // Out of the file and into the scene itself: left on the rail, a drag through the index
     // carried the open card along with it. Moving the rail to bring the card forward instead
     // pushed everything in front of it out through the drawer's face.

@@ -1375,6 +1375,20 @@
     filter 0.35s var(--ease-out);
 }
 
+/* Closing the card drops .has-open, but the scene is still ".is-overlay" and ":not(.is-shut)",
+   so without this the panel falls back to the "arrives late" show-transition above (sections.css:1314)
+   and its 5s delay - built for the drawer opening, not for a card closing - so the panel sat
+   dim for seconds after the card was already gone. Same fast timing as the dim-in, just undone.
+   Gated on .has-opened (skillDrawer.js's select(), set the first time a card opens and cleared
+   only when the drawer goes fully shut) so this never wins on the drawer's own first reveal -
+   that one still needs the 5s delay above, only a later card-close should skip it. */
+#skill-drawer.is-live .drawer__scene.is-overlay.has-opened:not(.has-open) ~ .set-player:not(.is-playing) {
+  transition:
+    opacity 0.35s var(--ease-out),
+    filter 0.35s var(--ease-out),
+    visibility 0s linear;
+}
+
 /* The metal recedes behind an overlaid card. The canvas and not the folders: cull() is the
    only writer of a folder's opacity and it drops pointer-events below 0.6, so dimming them
    here would quietly cost the index its hit targets. The card rides in front of them anyway
