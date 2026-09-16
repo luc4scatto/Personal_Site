@@ -3001,29 +3001,152 @@ p.project-specs__kicker {
 
      Everything is scaled to ~0.78 of the desktop folder so the stack only needs half the
      frame: the other half is where the detail opens, beside it instead of over it. */
+  /* The drawer itself, flattened. The scene's steel is 0x9aa0a8 at metalness 0.96, brushed
+     with horizontal strokes and lit from one key light, so: a cool grey body raked across
+     its width, horizontal striations over the top, and a bright rim where the light catches
+     the near edge against a dark one where it falls away.
+
+     Inside is pure black, never dark metal - the 3D version takes no light in there at all
+     on purpose, because anything lit down there catches the environment and starts reading
+     as a floor the cards are standing on rather than a void they are filed in. */
+  .drawer__strip {
+    position: relative;
+    /* clearance above and below the metal itself, not just the section's own --space around
+       it: the side panel's placement is clamped to the strip's own top/bottom edge (see
+       scrollPanelBesideStack() in main.js), so with none of this the drawer's rounded
+       corner could end up flush against the viewport's own top edge with an open card
+       right behind it, or the strip's foot could land close enough to "Projects" for the
+       two to read as one run */
+    margin: 2.5rem 0 3.5rem;
+    width: 50%;
+    padding: 7px;
+    border-radius: 0.55rem;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.05) 0 1px,
+        rgba(0, 0, 0, 0.06) 1px 2px,
+        transparent 2px 4px
+      ),
+      linear-gradient(105deg, #c3c9d1 0%, #949aa2 14%, #6b7178 46%, #8d939b 72%, #565c64 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+      0 14px 34px -16px rgba(0, 0, 0, 0.9);
+  }
+
+  /* the void the cards are filed in - painted behind them, since every tab is positioned
+     and this is not */
+  .drawer__strip::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border-radius: 0.3rem;
+    background: #000;
+    box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.95);
+  }
+
   .skills-grid {
     display: flex;
     flex-direction: column;
     gap: 0;
+    /* the peek is a transform, so it never grows the box it moves within - when the *last*
+       card of a group is the one hovered/active, the sibling peek has nothing after it to
+       push down except empty space, and without this that empty space doesn't exist: the
+       shifted card paints straight through the metal's own bottom edge. Exactly --peek, so
+       the group's resting height only grows by as much as the worst case ever needs. */
+    padding-bottom: var(--peek, 1.55rem);
   }
 
-  /* the categories are the drawer's own dividers on desktop; here the heading and its rule
-     span the full width, so they would run under the detail panel - and the stack reads as
-     one filed run without them */
+  /* the same clearance rekordbox got at the drawer's own foot, mirrored at its head: the
+     first tile of the first group otherwise sits flush against the 7px bezel with nothing
+     but that to separate it from the metal, while every other tile at rest has at least
+     the peek's worth of room above it (its own overlap into the tile before it). Only the
+     first group, not every group's own first tile - the gap between categories is a
+     separate, deliberately much smaller thing (see .skill-group + .skill-group below). */
+  .skill-group:first-of-type .skills-grid {
+    padding-top: var(--peek, 1.55rem);
+  }
+
+  /* The category, turned to run along the drawer's own long side - a label down the flank
+     rather than a banner across the top, which at this width would have spanned the full
+     frame and run under the detail panel. Same parts as the desktop heading: the name, then
+     a hairline that runs out to the end of the group. */
+  .skill-group {
+    display: flex;
+    align-items: stretch;
+    gap: 0.3rem;
+    /* single source of truth: read by the peek transform below, and by .skills-grid's own
+       padding-bottom, which needs to know the exact same number to stay in sync with it */
+    --peek: 1.55rem;
+  }
+
   .skill-group > h3 {
-    display: none;
+    display: flex;
+    /* reversed to undo the rotate below: without it the 180 turn puts the name at the foot
+       of the group with the rule running up out of it, back to front from the desktop */
+    flex-direction: row-reverse;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.45rem;
+    width: 18px;
+    margin: 0;
+    /* rotated as well as vertical, so it reads bottom-to-top the way a spine does */
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* Two flex:1 hairlines instead of the desktop's one: a single trailing line (flex:1)
+     just pins the name to whichever end it starts from, same as before - centring the name
+     needs an equal-and-opposite line on the other side too, so the pair grows in lockstep
+     and the name sits in the middle of the group's height regardless of how tall it is. */
+  .skill-group > h3::before,
+  .skill-group > h3::after {
+    content: '';
+    flex: 1;
+    width: 1px;
+    background: #2f2f2f;
+  }
+
+  /* faded at the far end from the name on each side, mirroring the desktop rule's own
+     fade-to-transparent - center-out on both, not the single direction one line allowed */
+  .skill-group > h3::before {
+    background: linear-gradient(0deg, #2f2f2f, transparent);
+  }
+
+  .skill-group > h3::after {
+    background: linear-gradient(180deg, #2f2f2f, transparent);
+  }
+
+  /* the desktop gap (clamp(2.5rem,4vw,3.5rem), 40px here) reads right between two
+     full-width headed bands - between two half-width filed groups, each already carrying
+     its own side label the full run of the category, it read as more black than break.
+     Small enough that the label's own hairlines (which fade out well short of this gap)
+     still read as the thing doing the separating, not the gap itself. */
+  .skill-group + .skill-group {
+    margin-top: 0.85rem;
+  }
+
+  .skill-group > .skills-grid {
+    flex: 1;
+    min-width: 0;
   }
 
   .skills-grid > li {
-    /* 2.65rem of tab plus the 1.55rem the peek reveals: any taller and the last card of a
-       group, with nothing filed in front of it, sits there as a blank face */
-    --peek: 1.55rem;
-    width: 44%;
+    /* 2.65rem of tab plus the 1.55rem --peek reveals (declared on .skill-group above, not
+       here - the metal's own padding-bottom needs it too): any taller and the last card of
+       a group, with nothing filed in front of it, sits there as a blank face */
     height: 4.2rem;
     flex-direction: row;
     align-items: flex-start;
     gap: 0.45rem;
-    padding: 0.55rem 0.6rem;
+    padding: 0.5rem 0.6rem;
     background:
       linear-gradient(
         180deg,
@@ -3083,10 +3206,12 @@ p.project-specs__kicker {
   }
 
   .skill-label {
-    font-size: 0.65rem;
-    /* matched to the icon box, so tab text and mark read as one centred row while both
-       still sit at the top of the card */
-    line-height: 1.25rem;
+    font-size: 0.6rem;
+    /* two of these still clear the 2.65rem of tab on show, so the long names wrap instead
+       of forcing the whole stack wider than the frame can afford - measured against
+       "Adobe Substance 3D", the only one that needs the second line at 390px */
+    line-height: 0.95rem;
+    margin-top: 2px;
   }
 
   /* The tapped card's detail, beside the stack rather than over it - pinned to the right
@@ -3104,12 +3229,16 @@ p.project-specs__kicker {
        nothing to leave standing; what comes and goes is the card inside it. */
     display: grid;
     place-items: center end;
-    padding: 0.75rem;
+    /* the same gutter the page itself keeps, so the gap left of the drawer and the gap
+       right of the panel are the one value and cannot drift apart */
+    padding: 0.75rem var(--pad-x);
     pointer-events: none;
   }
 
   .skills-modal .skill-card {
-    width: 48%;
+    /* a share of the same content width the drawer is a share of - the modal is fixed to
+       the viewport, so the gutters have to come back out by hand */
+    width: calc((100vw - 2 * var(--pad-x)) * 0.44);
     max-height: 80vh;
     overflow-y: auto;
     margin: 0;
@@ -3131,7 +3260,7 @@ p.project-specs__kicker {
   .skills-modal .skill-card__inner {
     padding: 0.9rem 0.8rem;
     /* clear of the close button, which shrinks with everything else below */
-    padding-right: 2.6rem;
+    padding-right: 2.2rem;
     border-radius: 0.7rem;
   }
 
