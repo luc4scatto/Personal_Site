@@ -3225,7 +3225,11 @@ p.project-specs__kicker {
      IS_PHONE_SKILLS_LAYOUT branch in main.js. */
   .skills-modal {
     position: fixed;
-    inset: 0;
+    /* top cleared past the fixed nav (measured ~65px/4.0625rem) - place-items: center
+       otherwise centers on the full viewport height and a tall card (long bullet lists,
+       e.g. Substance 3D) lands its top edge under the nav, which this z-index then draws
+       over */
+    inset: 4.25rem 0 0 0;
     z-index: 60; /* above .info-card's 50, comfortably above .nav's 10 */
     /* always laid out, never display:none - toggling display kills the card's own fade
        before it starts, and with it the transitionend that takes the card back out of the
@@ -3252,7 +3256,10 @@ p.project-specs__kicker {
     /* a share of the same content width the drawer is a share of - the modal is fixed to
        the viewport, so the gutters have to come back out by hand */
     width: calc((100vw - 2 * var(--pad-x)) * 0.44);
-    max-height: 80vh;
+    /* caps to what .skills-modal's own reserved band (inset top 4.25rem, 0.75rem padding
+       top+bottom) can actually hold, so centering never has to push the top edge back up
+       under the nav to fit a tall card */
+    max-height: calc(100vh - 4.25rem - 1.5rem);
     overflow-y: auto;
     margin: 0;
     pointer-events: auto;
