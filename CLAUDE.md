@@ -1,149 +1,61 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guida per Claude Code su questo repo.
 
 ## Project
 
-Personal portfolio site for Luca Scattolin (English content), deployed to GitHub Pages. Stack: Vite + vanilla JS/CSS + GSAP + Three.js. No framework — do not introduce React/Vue/etc.
+Portfolio personale di Luca Scattolin (contenuti in inglese), deploy su GitHub Pages. Stack: Vite + vanilla JS/CSS + GSAP + Three.js. Nessun framework - non introdurre React/Vue/ecc.
 
-- Repo: https://github.com/luc4scatto/Personal_Site (public)
+- Repo: https://github.com/luc4scatto/Personal_Site (pubblico)
 - Live: https://luc4scatto.github.io/Personal_Site/
-- Every push to `main` auto-deploys via the Pages workflow (source: GitHub Actions, already enabled)
-- **Push policy: never commit/push without Luca's explicit OK** — he reviews on the dev server first
-- Two pages (Vite MPA, inputs in vite.config.js): `index.html` (home) and `vivatech.html` (Vivatech project page: cover, description, video, masonry gallery, LinkedIn links)
+- Ogni push su `main` fa auto-deploy (GitHub Actions, Pages workflow)
+- **Push policy: mai commit/push senza OK esplicito di Luca** - verifica sempre sul dev server prima
 
-## Commands
+## Comandi
 
-- `npm run dev` — dev server with HMR
-- `npm run build` — production build to `dist/`
-- `npm run preview` — serve the production build locally (verifies the GitHub Pages base path)
+- `npm run dev` - dev server con HMR, http://localhost:5173/
+- `npm run build` - build di produzione in `dist/`
+- `npm run preview` - serve la build di produzione (verifica il base path di GitHub Pages)
 
-## Architecture
+## Pagine
 
-- `index.html` — home sections (hero with 3D canvas, marquee ribbon, about, skills with brand icons, projects, contact). Marquee = per-word `<span>`s duplicated once for the seamless CSS loop; keep an even word count per half or the color alternation jumps at the seam
-- `src/main.js` — entry point: nav highlighting, GSAP init, card spotlight (`--mx/--my` custom props), lazy dynamic import of hero3d.js (skipped if `prefers-reduced-motion`). The `[data-copy]` renderer's `escapeHtml()` escapes `content.js` strings then converts `**word**` to `<strong>` — safe only because that copy is developer-authored, never user input
-- `src/styles/sections.css` — `.about-grid p strong` sets the bold-copy color a step below `--text` (`color-mix(in srgb, var(--text) 50%, var(--text-dim))`) so inline emphasis in the About paragraph reads distinct from section headings, not identical to them
-- `src/animations.js` — GSAP + ScrollTrigger + SplitText animations (hero masked-line reveal, h2 clip reveals, scroll reveals, scroll progress bar, magnetic buttons)
-- `src/hero3d.js` — Three.js floating 3D hobby icons: 19 unique items from Draco GLBs + ~160 small decorative shapes (scale `0.015 + Math.random() ** 1.6 * 0.09` — the power curve skews toward small flecks with only occasional bigger chunks; min spacing 0.1 between shapes and 0.9 from any model home keeps them from ever covering the real objects). No-overlap is guaranteed geometrically (fibonacci-sphere homes, wander < half min home distance) — no physics engine. Materials are replaced at load, cycling three palette colors (lime/white/violet, `COLORS`) per object; within an object, meshes get contrasting lightness shades and every 4th part goes dark metallic for component readability, unless the model has an `isNeutral` override (`recolor()`'s 3rd arg, wired per-model in `addItem`) — `server_console_station` uses one to swap which part reads as structure vs. accent: the front cabinet panels (`server_cabinet` material) go neutral metallic, legs/bolts/lights carry the accent color instead. `side: DoubleSide` (open meshes look holey otherwise). **Interactive**: clicking a model focuses it (raycast via window listeners since the canvas is `pointer-events:none`), scales it up and shows its `DESCRIPTIONS[model]` card (placeholder copy, created in JS, styled `.object-info` in sections.css) while the rest of the scene renders through a real gaussian blur pipeline (layers + render-target ping-pong, `three/addons` blur shaders + `FullScreenQuad`) that's allocated lazily and runs only while focused — idle stays a single render pass. Objects pulse randomly to hint clickability; Esc / × / click-outside close. Drag-to-spin is its own thing — see "Hero cloud: drag interaction" below. Tunables at top of file (SPHERE_RADIUS, WANDER, SIZE_TWEAKS, FOCUS_SCALE, PULSE_AMP, BLUR_STRENGTH, shade offsets)
-- `src/styles/base.css` — reset, CSS custom properties (colors, spacing, typography). Change the visual identity here, not in section styles. `--accent` (lime) is the primary; `--accent-2` (violet #a78bfa, same as the 3D scene) is used sparingly: scroll progress gradient, marquee alternation, about-photo gradient, `::selection`, vivatech link arrows
-- `src/styles/sections.css` — per-section layout and styles. Breakpoints are **not** one mobile query — see "Responsive breakpoints" below
-- `public/models/*.glb` — Draco-compressed models; `public/draco/` holds the decoder files (GLTFLoader.setDRACOLoader wired in hero3d.js)
-- `public/icons/`, `public/images/`, `public/video/` — skill brand icons (SVG), Vivatech photos, compressed project video
-- `public/fonts/*.woff2` — self-hosted, no Google Fonts CDN and no `preconnect`. **Space Grotesk** is the display voice (one variable file, 300-700); **Switzer** takes every reading role, because a display grotesque set at 17px across a paragraph fights the reader. `'Switzer Fallback'` is Arial with `size-adjust`/`ascent-override` tuned to Switzer's metrics, so the swap window doesn't reflow. Both faces are declared in `base.css`; change the identity through `--font-display` / `--font-body`, never per-section. Switzer is under the ITF Free Font License (Fontshare) - verify the terms still allow self-hosting before a public deploy
-- `.github/workflows/deploy.yml` — builds and deploys to GitHub Pages on push to main
+Vite MPA, input in `vite.config.js`: `index.html` (home), `vivatech.html`, `homelab.html`, `privacy.html`, `404.html`.
 
-## Responsive breakpoints
+## File chiave
 
-The site used to have a single `700px` query, which left every tablet on the desktop layout. There are now three bands, and **one of them is mirrored in JS** — change one side and you must change the other:
+- `src/main.js` - entry point, nav, GSAP init, import dinamici (hero3d, skillDrawer, homelabDiagram, homelabHardware)
+- `src/animations.js` - animazioni GSAP + ScrollTrigger
+- `src/hero3d.js` - scena Three.js dell'hero
+- `src/skillDrawer.js` - sezione Skills come cassetto 3D (solo desktop, >701px)
+- `src/setPlayer.js` - player DJ set (streaming da SoundCloud, non file ospitati sul sito)
+- `src/content.js` - copy del sito
+- `src/styles/base.css` - reset, custom properties (colori, spacing, typography)
+- `src/styles/sections.css` - layout e stili per sezione
+- `public/models/*.glb` - modelli 3D Draco-compressi
 
-| Query | What it does | JS twin |
-| --- | --- | --- |
-| `max-width: 700px`, or `max-width: 1024px and (orientation: portrait)` | Hero stacks: the 3D canvas leaves absolute positioning and becomes a flow block under the text | `STACKED_HERO` in `hero3d.js` (camera distance) |
-| `max-width: 560px` | Skill card bullets drop from two columns to one | — |
-| `max-width: 700px` | Skill tiles and their marks shrink | — |
+## Vincoli
 
-The skills section used to have three interlocking queries (999 modal / 700 scroll lock / 1000 grid) plus a JS twin for each. It has **none** now: the detail card is a normal grid item that unfolds in place, so the same markup works at every width. The two queries above are cosmetic, with no JS counterpart.
+- `vite.config.js` ha `base: '/'` (dominio custom in root, non subpath) - il dev server serve tutto su `http://localhost:5173/`, non `/Personal_Site/`
+- Tutte le animazioni devono rispettare `prefers-reduced-motion`
+- Mobile-first; verificare i layout a dimensioni reali (phone 390, tablet 744/820/1024, laptop 1366, desktop 1440) con Chrome DevTools
+- Copy: niente em dash, solo trattino breve `-`
 
-Tablet specifics:
-- **Portrait tablets** (701–1024px): headline is `6.4vw` and `#hero-canvas` is `flex: 1 1 0` — a zero basis, not `auto`, because the `<canvas>` inside is sized by the renderer and an auto basis lets it drive (and keep growing) the band's height. Result: the hero is exactly one screen, no clipped kicker, no sphere off the bottom edge.
-- **Landscape tablets/small laptops** (701–1366px): headline drops to `6.2vw` and the text is capped at `26rem` so it never reaches the sphere.
-- `.hero .btn` is hidden **only** below 700px — tablets have room for it.
+## Gotchas (cose già provate e fallite - non riprovare)
 
-## Skills: the tool wall
+- **Responsive non è una sola query**: 3 breakpoint (700px stack hero, 560px/700px skill tiles). `STACKED_HERO` in `hero3d.js` mirra a mano il breakpoint 700px/1024px-portrait per la distanza camera - se cambi la query CSS cambia anche lì. `DRAWER_MODE` in `main.js` decide a 701px, una volta sola al load, se caricare il drawer 3D o il wall piatto - resize dopo il load non cambia modalità, serve reload.
+- **Skill drawer** (`src/skillDrawer.js`, solo >701px): i folder sono i veri `<li data-skill>` del DOM portati dentro `CSS3DObject` (serve testo reale/a11y, non billboard WebGL). Hit target è una striscia `::before` sopra il tab, non l'intera card (la card è 320px e sennò intercetta i tab dietro). Selezionare un folder sposta la card, mai la rotaia (spostare la rotaia spingeva gli altri folder fuori dal cassetto). Camera a 17° (tele) per non far sembrare cassetto e mobile due pezzi separati. Interno del cassetto: materiale nero piatto, non metallo scuro (altrimenti cattura l'ambiente e sembra un pavimento). Il cassetto parte chiuso e si apre solo su interazione reale (click/drag/focus) - un IntersectionObserver bruciava il gesto prima che l'utente guardasse.
+- **Card del cassetto su tablet (`is-overlay`)**: la card è autorata 250x320 e renderizzata con una scala 3D uniforme, quindi **la sua dimensione di testo È la sua scala**. A 0.25 di larghezza frame (`PICK_W`) su un box da 670px il corpo testo da 12px rendeva a 8px: illeggibile. Sotto `OVERLAY_MAX_W = 980` px di **box misurato** (non media query: niente gemello CSS da tenere in sync, e una rotazione ridecide da sola in `resize()`) la card passa a `PICK_W_WIDE = 0.62` e il mobile non slitta più (`pickShift()` ritorna 0). Non si centra: resta ancorata in basso e si sposta a sinistra della fascia riservata al player (`PLAYER_RESERVE_PX`, gemella di `sections.css`'s `width: min(17rem, 40%)` sul `.set-player` overlay - cambiane uno, cambia l'altro), così card e player non si sovrappongono mai. Risultato 15.7px a 744, 16.2px a 1024. Dietro si attenua **sia il canvas che le cartelle non aperte**, ma con proprietà diverse: il canvas va a `opacity` (0.82) perché non è un target cliccabile, le cartelle invece solo a `filter: blur()`, mai `opacity`, perché `cull()` scrive `opacity` inline ogni frame sulle cartelle e toglie i `pointer-events` sotto 0.6 - abbassarla da CSS costerebbe all'indice i suoi bersagli di click. Le etichette di categoria si nascondono con `visibility` e non `opacity` per lo stesso motivo.
+- **DJ player** (`src/setPlayer.js`): audio mai ospitato sul sito, streamma da un iframe SoundCloud nascosto via Widget API (no API key richiesta, a differenza della REST API a pagamento). L'oggetto "engine" ha la stessa forma di `<audio>` (currentTime/duration/play/pause) cosi il resto del codice (waveform, scrub, keyboard) non sa che sotto c'è un iframe. Waveform disegnata da peak committati (`tools/peaks.js`, RMS non picco assoluto - un mix masterizzato ha un picco quasi piatto), mai dall'audio live. Seek si conferma solo su `pointerup`, mai su `pointermove` (altrimenti flood di seek). Il pannello arriva con 5s di ritardo solo in entrata (il drawer che si apre è il momento da guardare, non deve competere).
+- **Hero cloud drag** (`src/hero3d.js`): rotazione via quaternioni premoltiplicati, non euler (euler inverte l'asse Y oltre un certo tilt). Il tilt residuo si smorza da fermo (`settleRoll`), non si vincola durante il drag (vincolarlo crea un polo dove il drag laterale smette di funzionare). Lo sfocato di movimento è finto: riusa la pipeline di blur del focus, nessun buffer di velocità.
+- **Pipeline modelli 3D**: `npx @gltf-transform/cli optimize <src>.glb public/models/<name>.glb --compress draco` (raw ~29MB → ~70-180KB). Se il mesh si spappola in un blob senza variazione di colore per parte, riaggiungi `--join false` (il join di default fonde le mesh che condividono materiale). FBX si converte prima con Blender headless (vedi script in `_originals/`).
+- `.info-card` (card oggetto 3D hero, `sections.css`) ha ancora un `border-left` residuo mai rimosso - un giorno da allineare allo stile della skill card.
 
-The section is a wall of tool tiles grouped by category. Picking one blurs the rest of the
-wall and unfolds its card **in place**, inside the category that owns it — the same "focus
-one thing, let the rest recede" grammar as the 3D hero cloud, in CSS instead of WebGL.
+## TODO
 
-This replaced a `position: fixed` panel and, before that, a sticky second column. Both were
-deleted for the same reason: the card is now a normal grid item, so there is no positioning
-code, no modal, no scroll lock, and **no breakpoint twin between JS and CSS at all**. The
-section behaves the same from 390px to 1440px.
+- **DJ set reali**: player e engine SoundCloud pronti ma mai testati con un set vero (`content.djSets` ha `track` vuoto, quindi il modulo non monta in produzione). Serve: caricare i set su SoundCloud, girare `tools/peaks.js` sui file locali, incollare gli URL in `content.djSets`, poi verificare in browser reale autoplay/gesture, seek, evento `ERROR`.
+- **Logo del disco**: Luca deve fornire un PNG, va in `public/images/` e referenziato nel campo `label` di un set.
+- **Distanza player/cassetto su tablet (`is-overlay`)**: a riposo (nessuna card aperta) l'invito `.set-player__invite` e il pannello player sembrano troppo vicini al cassetto - provato a stringere il mask-image del canvas (`#skill-drawer.is-live .drawer__scene.is-overlay canvas`) per far sfumare il metallo prima, funzionava ma è stato annullato su richiesta di Luca prima del commit. Da riprendere: il vero problema è che `.set-player`'s width è cresciuto da 11rem a 17rem (per non far uscire lo slider volume) senza mai spostare la posizione (`right: 0.8%`), quindi il pannello ora parte al ~70% del box overlay, dentro alla zona dove il fade del canvas (62%→100%) è appena iniziato, non finito.
 
-- **Selectors must be direct-child scoped.** The card is injected *inside* `.skills-grid`
-  and its title is an `<h3>` inside `.skill-group`. Written as descendant selectors,
-  `.skills-grid li` blurred the card's own bullets as if they were tiles, and
-  `.skill-group h3` gave the card title the category heading's hairline rule. Use
-  `.skills-grid > li` and `.skill-group > h3`.
-- **`--brand`** is the tile's own brand color, set per tile in `main.js` from
-  `content.skills[key].color`. CSS uses it for the tile's wash (`--tile-wash`: 6% at rest,
-  14% on hover, 22% active), the open card's gradient and border, and the bullet dots.
-- The category heading is the section's structural device: display scale, riding a hairline
-  rule that fades out to the right. It replaced six 0.85rem grey captions.
-- `.skill-card__badge` needs its own `[hidden] { display: none }` — `display: inline-block`
-  beats the `hidden` attribute, so unflagged cards rendered an empty pill.
-- The close control is a **drawn SVG**, not `&times;`, and the tiles carry no `+` glyph.
-  Unicode standing in for an icon system is a craft-floor violation.
-- Motion is one authored moment: the height unfold plus the wall going soft. Switching tools
-  inside the same category re-measures the height instead of unfolding again.
+## In lavorazione
 
-Known, out of scope: `.info-card` (the 3D hero object card, `sections.css:10`) still carries
-a `border-left: 3px solid var(--accent)` — the same side-tab tell that was removed from the
-skills card. One line to fix when someone touches that component.
-
-## Skill pills and their panels
-
-Pill markup is in `index.html` (`<li data-skill="...">`), copy in `content.skills` in `src/content.js` — the `data-skill` value is the object key, change one and you must change the other.
-
-- Entry shape: `{ title, text, color, selfTaught?, bullets? }`. `color` is the brand color pulled from the icon; `selfTaught: true` renders the badge; `bullets` is a list of strings, or `{ label, subs: [...] }` objects for a nested list (only Substance 3D uses the nested form).
-- In the source, every `bullets`/`subs` array is written one entry per line. Keep it that way — Luca reads and edits this list directly.
-- **Agentic Workflow** is one pill covering Hermes Agent, Claude Code, OpenClaw and n8n (they used to be two brand pills). Its icon `public/icons/agentic-workflow.svg` is a hand-written generic node-graph glyph, deliberately brandless so it fits all four bullets. `claude-code.svg` is now unused but kept; `hermes-agent.png` was moved to `public/icons/services/` and recolored white-on-transparent for use as the "Hermes Agent" service icon on `homelab.html` (`src/homelabDiagram.js`'s `ICON_OVERRIDES`).
-- The **Qt Designer** pill is commented out in `index.html` while its `content.skills` entry stays — uncomment to bring it back.
-- The **Audio** category (`index.html`, after 2D Softwares) holds **Ableton Live** — icon is the official simple-icons mark (`public/icons/ableton-live.svg`), recolored white like Unreal Engine since Ableton's brand is monochrome black/white.
-- Copy style: use `-`, never an em dash.
-
-## Hero cloud: drag interaction
-
-Press and drag the canvas to spin the cloud. Three things here are the way they are because
-the obvious version was tried and failed — don't "simplify" them back:
-
-- **Rotation is a quaternion, premultiplied.** Euler angles put the world Y axis opposite
-  to the screen's once the cloud is flipped past vertical, so dragging sideways rotated the
-  wrong way. Premultiplying by a screen-space axis (`rotateWorld()`) keeps "drag right" =
-  "spin right" in any orientation. Idle spin and mouse parallax are composed *outside* the
-  manual rotation, so they stay screen-relative.
-- **The tilt unwinds at rest** (`settleRoll()`). Composing rotations about two axes breeds
-  rotation about the third, so the horizon drifts — ~12° over a long session, unbounded, and
-  the scene becomes unreadable. Constraining the drag instead would cost a pole where
-  sideways dragging stops working, so the tilt is allowed and then undone (6%/frame, ~1s)
-  only once the cloud is at rest. Weighted by how visible the up axis is, so it fades out
-  near the pole where "upright" is undefined. Note the sign: `atan2(x, y)` measures
-  clockwise, a rotation about +Z goes counter-clockwise — getting this backwards amplifies
-  the tilt instead of removing it.
-- **The smear is fake motion blur**: no velocity buffer, no second geometry pass. It reuses
-  the focus blur pipeline with the per-axis radius driven by how much rotation was applied
-  that frame (`appliedY`/`appliedX` — euler deltas would spike near the poles). Two
-  fullscreen passes, only while moving; idle stays a single pass. Measured cost during a
-  drag at 1024x1366 with 4x CPU throttling: unchanged, 16.67ms/frame.
-
-Feel is tuned by three constants at the top of the file: `DRAG_BLUR` (1.6 — the ceiling is
-~2.5, past which the 9-tap addon shaders show banding instead of a smear), `SPIN_FRICTION`
-(0.96, velocity kept per frame after release — 0.98 ≈ 3s, 0.93 ≈ half a second) and
-`ROLL_FIX` (0.06).
-
-## 3D model pipeline
-
-Current homepage models are external GLB assets. Raw uncompressed sources (~29MB) live in `_originals/new_models_raw/` — gitignored, never commit or move into `public/`. To (re)optimize one into the site:
-
-```
-npx @gltf-transform/cli optimize _originals/new_models_raw/<name>.glb public/models/<name>.glb --compress draco
-```
-
-This welds/simplifies/prunes and Draco-compresses (~29MB raw → ~70KB–180KB per file). Materials get replaced at runtime by hero3d.js, so texture/material loss is irrelevant. If simplification visibly damages a mesh, re-run with `--simplify false`. If the mesh comes apart into one blob with no per-part color variation, re-run with `--join false` too — `optimize`'s default join merges separate meshes sharing a material, and `recolor()` colors per mesh, so joining collapses the whole object to a couple of shades. New model = optimize it into `public/models/` + add its name to GLB_MODELS in hero3d.js.
-
-Sources sometimes arrive as `.fbx` instead of `.glb` (dropped straight into `_originals/`, not `new_models_raw/`). Convert first with headless Blender:
-
-```
-/Applications/Blender.app/Contents/MacOS/blender -b --factory-startup -noaudio --python <script.py> -- <in>.fbx _originals/new_models_raw/<name>.glb
-```
-
-where `<script.py>` just does `bpy.ops.import_scene.fbx(filepath=...)` then `bpy.ops.export_scene.gltf(filepath=..., export_format='GLB')` — then run the optimize step above as normal.
-
-Legacy Blender pipeline (previous models, kept for reference): `_originals/3d_files.blend` (183MB, gitignored) exported via `tools/export_glb.py` (per-mesh decimation caps in `FILE_CAPS`, modifiers stripped, placeholder materials, Draco). Run: `/Applications/Blender.app/Contents/MacOS/blender -b --factory-startup -noaudio _originals/3d_files.blend --python tools/export_glb.py`.
-
-## Constraints
-
-- `vite.config.js` sets `base: '/'` — the site is served from the custom domain root (lucascattolin.com), not a repo-name subpath. The dev server therefore serves the site at `http://localhost:5173/`, not `/Personal_Site/`; hitting the wrong path still renders the page (HTML fallback) but every model 404s
-- All animations must respect `prefers-reduced-motion`
-- Mobile-first responsive; heavy animations are simplified or disabled on small viewports. Verify layout changes at real device sizes (iPad mini 744, iPad Air 820, iPad Pro 1024 portrait, 1180/1366 landscape, phone 390, desktop 1440) — Chrome DevTools emulation, since the browser window can't be made taller than the screen
-- Site copy is real (Thélios/Vivatech content) except the two placeholder project cards ("Project Two/Three") awaiting Luca's details
+Sezione Skills (`src/skillDrawer.js`, `sections.css`), tablet/`is-overlay`: risolti leggibilità card, player che spariva, overflow interno player, nero pieno in fondo alla card, blur di cassetto+cartelle quando una card è aperta. Aperto: la distanza player/cassetto a riposo (vedi TODO sopra).

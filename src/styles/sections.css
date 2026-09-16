@@ -14,8 +14,8 @@
   opacity: 0;
   transform: translateY(8px) scale(0.98);
   transition:
-    opacity 0.25s,
-    transform 0.25s;
+    opacity var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
 }
 
 .info-card.is-open {
@@ -46,7 +46,7 @@
   font-size: 1.3rem;
   line-height: 1;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color var(--duration-base) var(--ease-out);
 }
 
 .info-card__close:hover {
@@ -195,9 +195,9 @@
   color: var(--text-dim);
   cursor: pointer;
   transition:
-    color 0.2s,
-    border-color 0.2s,
-    transform 0.2s;
+    color var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
 }
 
 .skill-card__close:hover,
@@ -534,7 +534,8 @@
   }
 
   /* the invitation still reads — it's information, not decoration — just without the shine */
-  .skills-hint {
+  .skills-hint,
+  .skills-invite__line {
     animation: none;
     background: none;
     color: var(--text-dim);
@@ -551,6 +552,23 @@
   .hw-line--ftth-pulse {
     animation: none;
     opacity: 0;
+  }
+
+  /* movement drops, the color/border feedback that carries the actual state stays */
+  .skills-grid > li:hover,
+  .skills-grid li:focus-visible,
+  .skills-grid > li.is-active,
+  .card:hover {
+    transform: none;
+  }
+
+  /* phone modal: the open/close state change still happens (JS toggles the classes either
+     way), it just snaps instead of tweening - and closeCard()'s isReduced() branch skips
+     waiting on transitionend entirely, since with transition:none it would never fire */
+  .skills-modal,
+  .skills-modal .skill-card,
+  .skills-invite {
+    transition: none;
   }
 }
 
@@ -647,18 +665,33 @@
   border-radius: 0.9rem;
   cursor: pointer;
   transition:
-    border-color 0.25s,
-    transform 0.25s,
-    background 0.35s,
-    opacity 0.35s,
-    filter 0.35s;
+    border-color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    background var(--duration-slow) var(--ease-out),
+    opacity var(--duration-slow) var(--ease-out),
+    filter var(--duration-slow) var(--ease-out);
 }
 
 .skills-grid > li:hover,
 .skills-grid > li:focus-visible {
   --tile-wash: 14%;
   border-color: color-mix(in srgb, var(--brand, var(--accent)) 45%, #1e1e1e);
+}
+
+/* the lift is a hover flourish, not feedback the tap needs — gated so a touch tap doesn't
+   fire it and then have nothing to hover it back off with */
+.skills-grid li:focus-visible {
   transform: translateY(-3px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .skills-grid > li:hover {
+    transform: translateY(-3px);
+  }
+}
+
+.skills-grid > li:active {
+  transform: scale(0.98);
 }
 
 .skills-grid li:focus-visible {
@@ -676,12 +709,17 @@
   width: 34px;
   height: 34px;
   object-fit: contain;
-  transition: transform 0.25s;
+  transition: transform var(--duration-base) var(--ease-out);
 }
 
-.skills-grid > li:hover .skill-icon,
 .skills-grid > li.is-active .skill-icon {
   transform: scale(1.08);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .skills-grid > li:hover .skill-icon {
+    transform: scale(1.08);
+  }
 }
 
 .skill-label {
@@ -733,6 +771,986 @@
   opacity: 0;
 }
 
+/* skill drawer — the tool wall, filed. src/skillDrawer.js draws a brushed-steel drawer in
+   WebGL and files the folders into it at three quarters, front to back. The folders are the
+   page's own <li data-skill> elements carried into CSS3DObjects, so they keep real text,
+   real focus and real semantics inside the scene's perspective.
+
+   Everything is gated on #skill-drawer.is-live, which main.js adds only once the module has
+   initialised. Reduced motion, no WebGL and a failed import therefore all fall back to the
+   flat wall above with no overrides at all. */
+#skill-card-slot {
+  display: grid;
+}
+
+#skill-drawer.is-live {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  max-height: 76vh;
+  /* negative on purpose: the canvas mask (below) already fades the last ~30% of this box's
+     own height toward black for the "sinks away" effect, so the box reads as empty well
+     before its true bottom edge. Left at a normal positive margin, that dead tail stacked
+     with .skills' own padding-bottom *and* #projects' padding-top read as one big gap. */
+  margin-bottom: -5rem;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+/* -5rem was tuned against the non-overlay box, which stays 680-900px tall across its own
+   width range. The overlay box is shorter across its whole range (max ~650px, aspect-ratio
+   3/2 against a narrower frame), so the same fixed overlap eats a much bigger share of it -
+   there was only 25px left between the player and #projects before this, not enough room to
+   also pull the player away from the drawer above it without crowding one edge or the other. */
+#skill-drawer.is-live:has(.drawer__scene.is-overlay) {
+  margin-bottom: -3rem;
+}
+
+#skill-drawer.is-live:active {
+  cursor: grabbing;
+}
+
+#skill-drawer.is-live .drawer__scene {
+  position: absolute;
+  inset: 0;
+}
+
+/* The metal dissolves into the page on three sides: the cabinet keeps going up out of frame
+   instead of stopping on a cut edge, the drawer's underside sinks away so the folders are
+   standing in something rather than floating, and the carcass runs off into the dark at the
+   back rather than ending on the right edge of the canvas — deep enough to swallow the whole
+   drawer it reaches that edge exactly, and a long lens leaves its far end barely converged,
+   so a hard cut there read as broken perspective. Masking the canvas rather than fading in
+   the shader keeps the CSS3D folders untouched — they are a separate layer. */
+#skill-drawer.is-live .drawer__scene canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.5) 5%,
+      #000 13%,
+      #000 70%,
+      rgba(0, 0, 0, 0.45) 88%,
+      transparent 100%
+    ),
+    linear-gradient(to right, #000 calc(62% + var(--slide, 0px)), transparent 100%);
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.5) 5%,
+      #000 13%,
+      #000 70%,
+      rgba(0, 0, 0, 0.45) 88%,
+      transparent 100%
+    ),
+    linear-gradient(to right, #000 calc(62% + var(--slide, 0px)), transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+
+/* The invitation to pull the last drawer, set at display scale: the section opens the way the
+   hero does - a line of type on the left, the object on the right - and only moves when someone
+   pulls it. The column is free without any help from the camera: fit() frames the drawer at
+   full extension, so a drawer that is *in* leaves everything left of about 60% of the box
+   empty. (A tweened step aside off the drawer's own z was built for this and measured 0px at
+   every size tried, which is the whole of why it isn't here.) Centred down that column rather
+   than pinned under the heading: the column runs the full height of the box, and a small block
+   parked at the top left most of it dead. Plain DOM, not CSS3D: it has nothing to do with the
+   scene's perspective. pointer-events: none keeps it from stealing the drag or the handle's own
+   hit test. Visibility rides .is-shut, which skillDrawer.js's render() toggles straight off the
+   drawer's own z - never a separate flag set at every open/close call site, which is exactly
+   the kind of state that drifts from what's on screen.
+   The copy is one line per <span> (skillDrawer.js splits content.js's own newline), because the
+   two lines animate differently: see .drawer__hint span below. */
+#skill-drawer.is-live .drawer__hint {
+  position: absolute;
+  /* Only the value for the frame before layoutHintArrow() runs: the sweep is an exact quarter
+     circle, as tall as it is wide, so the drop from this block down to the handle is fixed by
+     how far across the arc has to reach - skillDrawer.js solves that and writes `top` back in
+     px. High in the box either way: the canvas mask fades it out from 70% down, so a block
+     centred at 50% hangs below everything there is to look at. */
+  top: 20%;
+  left: 4%;
+  /* stops around 52%, clear of the shut front and of the room the arrow sweeps through */
+  width: 48%;
+  max-width: 32rem;
+  margin: 0;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3.6vw, 3rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+/* One line, one animation: the instruction moves, the promise shines. Both running on both
+   lines was twice the motion for one invitation, and the two read as competing for the eye. */
+#skill-drawer.is-live .drawer__hint span {
+  display: block;
+}
+
+/* The line that asks for the gesture is the line that makes it: hint-nudge is a slow shove to
+   the right that settles back past its own rest, the way a drawer does when a hand lets go of
+   it. It rests for most of the cycle - a push that never stops reads as a loading state, not as
+   an invitation - and it sits on the line rather than on the block because the block's own
+   transform is the vertical centring, and because layoutHintArrow() measures the block to solve
+   the arc: a transform on a line moves nothing the parent's box reports, so the sweep can't
+   wander with the push. */
+#skill-drawer.is-live .drawer__hint span:first-child {
+  color: var(--text-dim);
+  animation: hint-nudge 3.6s ease-in-out infinite;
+}
+
+/* and the line that says what the gesture is for carries the colour. hint-shine is homelab's
+   shimmer, reused here and by .skills-hint above: an established "look here" pattern in this
+   codebase, not a new one designed for this spot - slowed, because at this size the 3s sweep
+   reads as a marquee rather than as a highlight. */
+#skill-drawer.is-live .drawer__hint span + span {
+  background: linear-gradient(
+    90deg,
+    var(--text-dim) 0%,
+    var(--text-dim) 40%,
+    var(--accent) 50%,
+    var(--accent-2) 60%,
+    var(--text-dim) 70%,
+    var(--text-dim) 100%
+  );
+  background-size: 300% 100%;
+  background-position: 110% center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hint-shine 4.5s linear infinite;
+}
+
+@keyframes hint-nudge {
+  0%,
+  60%,
+  100% {
+    transform: translateX(0);
+  }
+  76% {
+    transform: translateX(0.55rem);
+  }
+  90% {
+    transform: translateX(-0.1rem);
+  }
+}
+
+/* Full host size, not a small icon beside the text: the path skillDrawer.js's layoutHintArrow()
+   draws spans from wherever the text actually landed toward the handle's own projected
+   position - toward, not onto it: that function stops the curve short on purpose, matching
+   the homelab diagram's own connector arrowhead (hw-arrow in homelabHardware.js) rather than
+   inventing a second arrow language for the same site. currentColor, not the text's own
+   gradient: the text is background-clip text with color: transparent underneath it, which an
+   SVG cannot inherit as a stroke colour. */
+#skill-drawer.is-live .drawer__hint-arrow {
+  position: absolute;
+  inset: 0;
+  color: var(--text-dim);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+#skill-drawer.is-live .drawer__scene.is-shut .drawer__hint,
+#skill-drawer.is-live .drawer__scene.is-shut .drawer__hint-arrow {
+  opacity: 1;
+}
+
+/* the CSS3D layer rides above the metal; it must not swallow the drag, so only the folders
+   themselves take pointer events */
+#skill-drawer.is-live .drawer__css {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* the DJ set player — src/setPlayer.js. A record and a waveform, parked in the corner the
+   open drawer leaves free. Two variants off one DOM: filed into the drawer's own box when
+   the metal is live, and a plain block in the flow of the section when it isn't (below
+   701px, reduced motion, WebGL refused). Everything positional is scoped to .is-live, so
+   the fallback inherits only the look. */
+.set-player {
+  /* canvas cannot read a token through var() at paint time, so setPlayer.js reads these two
+     off this element instead - which keeps the colours here, in the stylesheet */
+  --set-played: var(--accent-2);
+  --set-rest: rgba(242, 242, 242, 0.16);
+  --played: 0%;
+}
+
+/* The line that offers the set, above the panel and outside its box: it is an aside spoken
+   to someone already browsing, not a caption belonging to the player's furniture. */
+.set-player__invite {
+  /* The panel is anchored to the bottom of the box, so this gap is what lifts the line: grow
+     it and the invitation rises, the player stays put. Enough air that the two read as an
+     aside and the thing it points at, not as a caption stuck to a box. */
+  margin: 0 0 1.2rem;
+  padding-left: 0.2rem;
+  font-family: var(--font-display);
+  /* it has to fit one line inside a panel that is 42% of the box, so at 701px - the narrowest
+     the drawer ever runs at - the type comes down with the box rather than spilling out of it */
+  font-size: clamp(0.72rem, 1.05vw, 0.88rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--text-dim);
+  /* One line, always: wrapped onto two it stopped reading as an aside and started reading as
+     a paragraph the player had to carry. The copy in content.js is written short for this. */
+  white-space: nowrap;
+}
+
+.set-player__panel {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #1e1e1e;
+  border-radius: 0.9rem;
+  /* Near-opaque and deliberately no backdrop-filter: behind this sit a WebGL canvas and a
+     CSS3D layer that both animate through a 1.5s drawer run, and a live blur would re-sample
+     all of it every frame for an effect nobody asked for. */
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+}
+
+/* the fallback variant: a block under the wall, not a corner panel */
+.skills .set-player {
+  max-width: 34rem;
+  margin: 2.5rem auto 0;
+}
+
+.set-player__disc {
+  position: relative;
+  flex: 0 0 auto;
+  width: 3.3rem;
+  height: 3.3rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* The record itself: grooves, a sheen that catches the light the way the steel beside it
+   does, and the label. 1.8s per turn is 33 1/3 rpm, the real number. animation-play-state
+   rather than a JS-driven angle means pausing freezes the record where it stands and
+   resuming carries on from there, for free. */
+.set-player__vinyl {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(255, 255, 255, 0.11),
+      rgba(255, 255, 255, 0) 25%,
+      rgba(255, 255, 255, 0.07) 50%,
+      rgba(255, 255, 255, 0) 75%,
+      rgba(255, 255, 255, 0.11)
+    ),
+    repeating-radial-gradient(circle at 50% 50%, #0e0e0e 0 2px, #171717 2px 3px);
+  animation: vinyl-spin 1.8s linear infinite;
+  animation-play-state: paused;
+}
+
+.set-player.is-playing .set-player__vinyl {
+  animation-play-state: running;
+}
+
+@keyframes vinyl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.set-player__label {
+  position: absolute;
+  inset: 26%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--set-played);
+}
+
+/* the spindle hole: what tells a spinning disc apart from a spinning circle */
+.set-player__label::after {
+  content: '';
+  position: absolute;
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+.set-player__mark {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 12%;
+}
+
+/* The glyph does not spin with the record, and it steps out of the way while one is playing:
+   the label is the thing worth looking at then. Hover or focus brings it back to say what a
+   press would do. */
+.set-player__glyph {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1.4rem;
+  height: 1.4rem;
+  filter: drop-shadow(0 0 0.4rem rgba(0, 0, 0, 0.9));
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+.set-player.is-playing .set-player__glyph {
+  opacity: 0;
+}
+
+.set-player__disc:hover .set-player__glyph,
+.set-player__disc:focus-visible .set-player__glyph {
+  opacity: 1;
+}
+
+.set-player__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.set-player__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.set-player__note {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  color: #e57373;
+}
+
+/* The waveform is the scrubber - an hour-long set has no chapters, so there is nothing else
+   worth pointing at. touch-action: none because the ancestor sets pan-y, which would hand a
+   horizontal scrub to the page scroller. */
+.set-player__wave {
+  position: relative;
+  margin-top: 0.35rem;
+  height: 2.1rem;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.set-player__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Progress costs one custom property, never a redraw: the played canvas is the same bars in
+   the accent colour, revealed by a clip. */
+.set-player__canvas--played {
+  clip-path: inset(0 calc(100% - var(--played)) 0 0);
+}
+
+.set-player__head {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--played);
+  width: 1px;
+  background: var(--text);
+  opacity: 0.55;
+}
+
+.set-player__foot {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.45rem 0 0;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+}
+
+.set-player__total::before {
+  content: '/ ';
+}
+
+.set-player__next {
+  margin-left: auto;
+  padding: 0.1rem;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.set-player__next:hover {
+  color: var(--set-played);
+}
+
+.set-player__next-glyph {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* the mini transport: two skip steps, a plain play/pause, a volume slider - the ordinary,
+   unambiguous set of controls for anyone who doesn't read the disc as a button. Its own row
+   under .set-player__foot rather than folded into it, so it doesn't compete with the time
+   and the next-set button for the same thin line. */
+.set-player__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+}
+
+.set-player__skip,
+.set-player__mini {
+  padding: 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.set-player__skip:hover,
+.set-player__mini:hover {
+  color: var(--set-played);
+}
+
+.set-player__skip-glyph,
+.set-player__mini-glyph {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+}
+
+/* volume last and pushed to the far edge, the same right-alignment .set-player__next uses in
+   the row above it - the two rows read as one column of secondary controls, not two unrelated
+   strips. A native range, not a custom-drawn one: it is a rare enough control here that the
+   platform's own affordance (drag, arrow keys, touch) is worth more than matching the
+   waveform's look. */
+.set-player__volume {
+  margin-left: auto;
+  width: 4.5rem;
+  accent-color: var(--set-played);
+  cursor: pointer;
+}
+
+.set-player__disc:focus-visible,
+.set-player__wave:focus-visible,
+.set-player__next:focus-visible,
+.set-player__skip:focus-visible,
+.set-player__mini:focus-visible,
+.set-player__volume:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .set-player__vinyl {
+    animation: none;
+  }
+}
+
+/* --- the drawer variant ---------------------------------------------------------------
+   It rides the same `is-shut` class render() already writes off the drawer's real z
+   (skillDrawer.js), exactly as .drawer__hint does: no observer, no event, no second flag to
+   drift from the metal. visibility travels with the opacity, or a Tab would land on an
+   invisible Play button while the drawer is shut. The .is-playing exception is the one that
+   matters: shutting the drawer mid-track must not take the Pause button away with it. */
+#skill-drawer.is-live .set-player {
+  position: absolute;
+  /* Measured, not guessed, and measured against the *slid* frame rather than the resting one:
+     the canvas mask's right-hand cutoff sits at 62% of the box width, and a picked card slides
+     the whole carcass right (slideFrame()) by a near-constant ~5.3% of the box, pushing that
+     cutoff with it. Solved once for the worse of the two states - at a typical box (1440px
+     viewport, ~1026px) the slid cutoff lands at ~690px and this panel's left edge at ~714px -
+     so the panel is the same size and in the same place whether a card is filed or out. It
+     used to be sized to the resting cutoff and then pulled in and narrowed on .has-open, which
+     meant a panel that could be mid-track resized itself out from under the visitor's hand. */
+  right: 0.8%;
+  /* rem, not a percentage: the box caps at 76vh, so above ~900px of width its aspect stops
+     holding and a percentage inset drifts. Low in the box on purpose - the canvas mask fades
+     the metal out from 70% down, so this sits on dark rather than on steel. The floor is the
+     box's own -5rem margin into #projects: go lower than about 1rem and the panel starts
+     reaching into the section below it. */
+  bottom: 3.5rem;
+  z-index: 2;
+  /* the percentage cap, not the rem one, is what has to hold the mask-cutoff math at every
+     box size: the box's own width shrinks faster than a fixed rem figure can follow, so a
+     cap loose enough to matter at 1440px overlapped the metal well before 701px */
+  width: min(19rem, 30%);
+  margin: 0;
+  cursor: auto;
+  opacity: 0;
+  visibility: hidden;
+  /* only the arrival is animated: `right` and `width` no longer change at all, which is the
+     whole point of solving them against the slid frame above */
+  transition:
+    opacity 0.45s var(--ease-out),
+    visibility 0s linear 0.45s;
+}
+
+/* Centred over the panel, and only inside the drawer: the line is shorter than the panel it
+   sits on, and centring it reads as the panel's own caption rather than leaning toward
+   either edge. Still clear of the carcass a picked card has slid across - the panel itself
+   is sized with margin for that (see .set-player above). The fallback variant is already a
+   centred block under the wall with nothing beside it. */
+#skill-drawer.is-live .set-player__invite {
+  padding: 0 0.2rem;
+  text-align: center;
+}
+
+/* It arrives late, and leaves at once. The delay is on the way in only: the drawer's own run
+   is the moment worth watching, and a player that slid in on top of it competed with the
+   thing the visitor just pulled. By the time this shows up they are already reading tabs, so
+   it reads as an offer rather than as more furniture. Going the other way - the drawer shut,
+   or the track stopped - there is nothing to wait for. */
+#skill-drawer.is-live .drawer__scene:not(.is-shut) ~ .set-player,
+#skill-drawer.is-live .set-player.is-playing {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.7s var(--ease-out) var(--set-delay, 5s),
+    visibility 0s linear var(--set-delay, 5s);
+}
+
+/* Except when it is already playing: that panel is in use, and making a visitor who shut the
+   drawer wait five seconds to reach Pause would be a punishment for touching the handle. */
+#skill-drawer.is-live .set-player.is-playing {
+  --set-delay: 0s;
+}
+
+/* Tablet, where skillDrawer.js has put the picked card over the scene instead of in a column
+   beside it (.is-overlay, written off the measured frame in resize()). Two things follow.
+
+   First, the panel above was solved against a *slid* frame, and overlaid there is no slide -
+   pickShift() returns 0 - so the mask's right-hand cutoff stays at its resting 62% and the
+   panel has to clear that instead. The rem cap is what binds at this size: 11rem is 176px
+   against a 670px box, putting the left edge well clear of the ~415px cutoff. The percentage
+   is only there to keep it honest if the box ever grows without the cap moving.
+
+   17rem, not a number chosen to look right: `.set-player__panel` set to `width: fit-content`
+   measures 258px of real content at rest (disc + the transport row - two skips, play/pause,
+   and a volume slider that's a fixed 4.5rem on its own, sections.css:1230) before it will
+   wrap or overflow. 17rem/272px is that plus a small margin, not a guess - a first pass at
+   11rem/176px shipped narrower than the content itself, which is exactly what overflowed the
+   volume slider and folded "/ 60:57" onto two lines the one time this went untested against
+   the panel's own layout. skillDrawer.js's PLAYER_RESERVE_PX mirrors this value for the card
+   to keep clear of - change one, change both. */
+#skill-drawer.is-live .drawer__scene.is-overlay ~ .set-player {
+  /* Lower than the non-overlay 3.5rem - see #skill-drawer.is-live:has(.drawer__scene.is-overlay)
+     above, which buys the room this needs against #projects. Without that change 0.4rem left
+     only 9px of clearance below; with it, room enough to also open real air above, between the
+     invite line and the drawer it sits under. */
+  bottom: 0.4rem;
+  width: min(17rem, 40%);
+}
+
+/* Second, the panel recedes rather than disappears while a card is open: same "focus one
+   thing, blur the rest" grammar the skills wall itself uses when a tile opens
+   (.skills.is-focused li:not(.is-active)). Same exception as everywhere else: a panel
+   mid-track stays sharp and interactive, because taking Pause away to show a skill card
+   would be the worse trade.
+
+   It does not move, and does not need to: skillDrawer.js's PLAYER_RESERVE_PX keeps the card
+   out of this margin at every overlay width, so the two never overlap and there is nothing
+   here for a z-index to referee. Two things were tried and dropped before this: hiding the
+   panel outright undid the point of blurring it in the first place - a card is not a track
+   change, and Pause disappearing mid-listen for either felt like a bug. Growing the card to
+   cover the panel instead just hid it a different way, through a blur instead of a cut - same
+   complaint, new mechanism. Reserving the margin is the one version where both stay visible,
+   all the time, doing their own job. */
+#skill-drawer.is-live .drawer__scene.is-overlay.has-open ~ .set-player:not(.is-playing) {
+  opacity: 0.45;
+  filter: blur(3px);
+  pointer-events: none;
+  transition:
+    opacity 0.35s var(--ease-out),
+    filter 0.35s var(--ease-out);
+}
+
+/* Closing the card drops .has-open, but the scene is still ".is-overlay" and ":not(.is-shut)",
+   so without this the panel falls back to the "arrives late" show-transition above (sections.css:1314)
+   and its 5s delay - built for the drawer opening, not for a card closing - so the panel sat
+   dim for seconds after the card was already gone. Same fast timing as the dim-in, just undone.
+   Gated on .has-opened (skillDrawer.js's select(), set the first time a card opens and cleared
+   only when the drawer goes fully shut) so this never wins on the drawer's own first reveal -
+   that one still needs the 5s delay above, only a later card-close should skip it. */
+#skill-drawer.is-live .drawer__scene.is-overlay.has-opened:not(.has-open) ~ .set-player:not(.is-playing) {
+  transition:
+    opacity 0.35s var(--ease-out),
+    filter 0.35s var(--ease-out),
+    visibility 0s linear;
+}
+
+/* The metal recedes behind an overlaid card. The canvas and not the folders: cull() is the
+   only writer of a folder's opacity and it drops pointer-events below 0.6, so dimming them
+   here would quietly cost the index its hit targets. The card rides in front of them anyway
+   (PICK_PULL).
+
+   The transition sits on the overlay state and not on the dimmed one, or filing the card
+   back would snap the metal to full instead of bringing it back up. */
+#skill-drawer.is-live .drawer__scene.is-overlay canvas {
+  transition:
+    opacity 0.4s var(--ease-out),
+    filter 0.4s var(--ease-out);
+}
+
+/* The category names stand off to the left of the tabs, so an overlaid card cuts them in
+   half - "REAL-", "3D SOF" - which reads as a rendering fault rather than as a name behind a
+   card. They go while one is open. `visibility` and not `opacity` on purpose: cull() writes
+   opacity inline on these every frame and would win, but it never touches visibility. */
+#skill-drawer.is-live .drawer__scene.is-overlay.has-open .drawer__label,
+#skill-drawer.is-live .drawer__scene.is-overlay.has-open .drawer__rule {
+  visibility: hidden;
+}
+
+#skill-drawer.is-live .drawer__scene.is-overlay.has-open canvas {
+  /* Barely a step down, and that is deliberate: the metal is already dark on a black page,
+     and at 0.55 the furniture simply vanished - which loses the reason the drawer is still
+     here on a tablet at all. Enough to seat the card in front, not enough to erase what it
+     was lifted out of.
+
+     The blur is what actually reads as "background" rather than "dimmed foreground" - opacity
+     alone left the drawer looking like the same sharp furniture with the lights turned down,
+     which sat oddly next to the player receding with an actual blur a few rules up. Same
+     3px, so the two things happening at once (a card opening, a panel stepping back) read as
+     one move on one plane, not two different treatments of "not the focus right now". */
+  opacity: 0.82;
+  filter: blur(3px);
+}
+
+/* The other folders blur along with the metal they sit on, so the open card reads as the one
+   sharp thing instead of one sharp layer (canvas) behind another sharp layer (folders) with
+   only the card in between blurred. `filter`, never `opacity`: cull() is the only writer of a
+   folder's opacity and drops pointer-events below 0.6, so touching opacity here would quietly
+   cost the index its hit targets (documented above). `filter` is a property cull() never
+   touches, so this is free to set without fighting it. The open card itself is excluded - it
+   is the thing staying in focus, not one of the things receding. */
+#skill-drawer.is-live .drawer__scene.is-overlay.has-open .drawer__css .folder:not(.is-open) {
+  filter: blur(3px);
+  transition: filter 0.4s var(--ease-out);
+}
+
+/* A folder's own box may not take the pointer: the box is the whole 320px card, transparent
+   above the tab, and left hit-testable it sat in front of the tabs of the next four or five
+   folders back, so pointing at a label picked a folder filed ahead of it. It is a strip over
+   the tab's rest position instead, and it stays put: a hovered folder lifting its tab must
+   not grow its target up over the ones behind, or the pointer skips them on the way up. */
+#skill-drawer.is-live .drawer__css .folder::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 3.4rem;
+  pointer-events: auto;
+}
+
+/* still inside the cabinet, or pushed out through the drawer's face - cull() sets this */
+#skill-drawer.is-live .drawer__css .folder.is-culled::before {
+  pointer-events: none;
+}
+
+/* open, the whole card is the target again */
+#skill-drawer.is-live .drawer__css .folder.is-open .folder__sheet {
+  pointer-events: auto;
+}
+
+/* the source list is empty once its items have moved into the scene */
+#skill-drawer.is-live .drawer__strip {
+  display: none;
+}
+
+/* ---- a folder ---- */
+
+/* The box is always the full card, and so is the sheet inside it. At rest the sheet sits
+   pushed down into the box with only its tab above the rim, and opening slides it up out of
+   the drawer: a transform, where it used to grow its height and relayout every frame. The
+   box clips whatever is still below the rim, so nothing has to be drawn behind the metal. */
+.folder {
+  position: relative;
+  width: 250px;
+  height: 320px;
+  overflow: hidden;
+  cursor: pointer;
+  list-style: none;
+}
+
+/* the fade at the rim: the sheet's own bottom edge is out of sight now, so the fade moved up
+   to the box, which is where the rim actually is */
+.folder {
+  mask-image: linear-gradient(to top, transparent 0, #000 0.45rem);
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 0.45rem);
+}
+
+.folder__sheet {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #0b0b0b;
+  border: 1px solid color-mix(in srgb, var(--brand, var(--accent)) 32%, #232323);
+  border-top: 2px solid var(--brand, var(--accent));
+  border-radius: 0.35rem 0.35rem 0.2rem 0.2rem;
+  box-shadow: 0 12px 26px -14px rgba(0, 0, 0, 0.9);
+  /* translate percentages are the sheet's own height, so this leaves exactly the tab above
+     the rim whatever size the card is authored at */
+  transform: translateY(calc(100% - 3.4rem));
+  /* 200ms, not the 450ms this shipped with: this is a hover preview on a grid of tiles,
+     hit far more than once per visit, and 450ms is 1.5x the budget for that frequency */
+  transition:
+    transform 200ms var(--ease-out),
+    border-color var(--duration-base) var(--ease-out);
+}
+
+/* the open card's own control - hidden at rest and on the hover peek, since there is
+   nothing to close yet; fades and scales in once .is-open lands, same drawn-X language as
+   .skill-card__close in the flat wall, sized down for this card's smaller footprint */
+.folder__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  background: #0b0b0b;
+  border: 1px solid #262626;
+  border-radius: 50%;
+  color: var(--text-dim);
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.94);
+  pointer-events: none;
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out);
+}
+
+/* .is-landed, not .is-open: skillDrawer.js adds it when the card finishes climbing out of the
+   drawer. The close hangs off the folder's box rather than off the sheet, so tied to .is-open
+   it stood in empty space above a sheet that was still rising - and no transition-delay could
+   hold it there, because CSS3DRenderer re-inserts the element on a pick and a transition never
+   starts on a just-inserted element: the X jumped straight to opaque, delay and all. By the
+   time this class lands the element has been in place for the card's whole run. */
+.folder.is-landed .folder__close {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+  /* nothing left to wait for: the card is already there */
+  transition-delay: 0s;
+}
+
+/* the turn lives on the glyph, not the button: the button's own transform is its entrance,
+   and sharing it made every hover wait out the entrance delay */
+.folder__close svg {
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.folder__close:focus-visible {
+  color: var(--text);
+  border-color: var(--brand, var(--accent));
+}
+
+.folder__close:focus-visible svg {
+  transform: rotate(90deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .folder__close:hover {
+    color: var(--text);
+    border-color: var(--brand, var(--accent));
+  }
+
+  .folder__close:hover svg {
+    transform: rotate(90deg);
+  }
+}
+
+/* gated like every other hover in this file: a tap on touch fires a false hover, which
+   peeked the sheet ahead of the click that actually opens it. 2rem of lift, not the 1rem it
+   had: each tab only shows a sliver above the one filed in front of it, and 1rem left the
+   logo and title half hidden - the peek is there to read which folder you're on. */
+@media (hover: hover) and (pointer: fine) {
+  .folder:hover .folder__sheet {
+    transform: translateY(calc(100% - 5.4rem));
+  }
+}
+
+.folder:focus-visible {
+  outline: none;
+}
+
+/* The ring, never the lift. Left/Right step focus through all 22 folders (skillDrawer.js's
+   own keydown), so a lift here is motion on a key repeat - the one thing that must never
+   animate. The hover peek below keeps it, because a mouse visits one tab at a time. Every
+   tab stands clear of the one filed in front of it, so the ring alone says which is focused. */
+.folder:focus-visible .folder__sheet {
+  border-color: var(--brand, var(--accent));
+  box-shadow: 0 0 0 2px var(--brand, var(--accent));
+}
+
+/* The open state, but not the climb into it. CSS3DRenderer re-inserts a folder's element when
+   the object changes parent on a pick, and a transition does not start on a just-inserted
+   element: measured, the sheet jumped from translateY(266px) to none inside one frame however
+   long a duration was set here. skillDrawer.js's riseSheet() runs the climb on the card's own
+   tween clock instead and clears its inline transform on landing, which is where this rule
+   takes back over. */
+.folder.is-open .folder__sheet,
+.folder.is-open:hover .folder__sheet {
+  transform: none;
+}
+
+/* The rim fade is for a folder coming out of the drawer - a hover peek, or the sheet sliding
+   up past the rim - so it never shows a hard cut. A fully open card isn't coming out of
+   anything: it's the one thing meant to be read in full, and the same fade read as an
+   unexplained fog along its bottom. Later than the rule that sets it, which it ties on
+   specificity with. */
+.folder.is-open {
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+.folder__tab {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 0.85rem;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--brand, var(--accent)) 26%, transparent),
+    transparent
+  );
+}
+
+.folder__tab .skill-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.folder__tab .skill-label {
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.folder__body {
+  padding: 0 0.85rem 0.9rem;
+}
+
+.folder__badge {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  border: 1px solid color-mix(in srgb, var(--accent-2) 45%, transparent);
+  border-radius: 999px;
+}
+
+.folder__text {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
+.folder__bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.folder__bullets > li {
+  position: relative;
+  padding-left: 0.85rem;
+  margin-bottom: 0.28rem;
+}
+
+.folder__bullets > li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--brand, var(--accent));
+}
+
+.folder__bullets ul {
+  list-style: none;
+  padding: 0.25rem 0 0.15rem 0.15rem;
+  margin: 0;
+  color: var(--text-dim);
+}
+
+.folder__bullets ul li::before {
+  background: color-mix(in srgb, var(--brand, var(--accent)) 55%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folder__sheet,
+  .folder__close {
+    transition-duration: 0.01ms;
+    transition-delay: 0s;
+  }
+}
+
+/* A category's name and rule, just outside the drawer's left rim (skillDrawer.js, "category
+   labels"). The name is a zero-size anchor at the rule's midpoint with the text set above
+   and to the left of it: the rule climbs from lower left to upper right, so that is the one
+   quarter round the midpoint it never crosses. Same voice as the flat wall's category
+   headings, at the size of a label. */
+.drawer__label {
+  width: 0;
+  height: 0;
+}
+
+.drawer__label span {
+  position: absolute;
+  right: 0.3rem;
+  bottom: 0.3rem;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+/* authored 100px long; cull() scales it to the stretch of the category that is showing */
+.drawer__rule {
+  width: 100px;
+  height: 2px;
+  background: color-mix(in srgb, var(--text) 70%, transparent);
+}
+
 /* projects */
 .projects-grid {
   display: grid;
@@ -749,8 +1767,8 @@
   flex-direction: column;
   gap: 0.75rem;
   transition:
-    border-color 0.2s,
-    transform 0.2s;
+    border-color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
   position: relative;
   overflow: hidden;
 }
@@ -776,7 +1794,16 @@
 
 .card:hover {
   border-color: var(--accent);
-  transform: translateY(-4px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-4px);
+  }
+}
+
+.card:active {
+  transform: scale(0.99);
 }
 
 .card-thumb {
@@ -1657,6 +2684,30 @@ p.project-specs__kicker {
   transform: translate(-50%, -1.15rem);
 }
 
+/* Phone only, and phone only on purpose. The stacked layout also serves tablet portrait,
+   where the diagram gets its full 26rem and the nodes sit far enough apart that the sizes
+   above hold. On a 390px screen the box is the 350px the padding leaves, so the canvas runs
+   at half scale: the two nvme nodes are 75 viewBox units apart, which is 37.5px, and a
+   2.3rem icon is 36.8px - measured, they overlapped by 4px, and the captions either side of
+   them by 14px. Shrinking both buys that back.
+
+   The anchor offset below is re-derived, not copied: it is half the new diameter
+   (1.4rem + 0.32rem either side = 2.04rem, half = 1.02rem). Leave it at 1.15rem and every
+   icon floats off its own connector point. */
+@media (max-width: 700px) {
+  .homelab-hardware.is-stacked .hw-label {
+    max-width: 3.9rem;
+  }
+
+  .homelab-hardware.is-stacked .hw-label svg {
+    padding: 0.32rem;
+  }
+
+  .homelab-hardware.is-stacked .hw-label--icon {
+    transform: translate(-50%, -1.02rem);
+  }
+}
+
 .homelab-hardware.is-stacked .hw-label--room {
   font-size: 0.68rem;
   padding: 0.22rem 0.55rem;
@@ -1944,25 +2995,394 @@ p.project-specs__kicker {
     gap: 1rem;
   }
 
-  /* two tiles per row on a phone: the mark stays readable and the name stays visible —
-     the wall is the point, and an icon-only grid throws away half of it */
+  /* The drawer, stood on its end and pushed into the left half: one column of cards filed
+     over each other, each showing only its tab, with the icon and title in the same place
+     as the desktop .folder__tab (top-left, one row). The card carries .folder__sheet's own
+     skin: #0b0b0b, brand top border, brand wash over the tab, and the rim mask that makes
+     it read as continuing under the card filed in front of it.
+
+     Everything is scaled to ~0.78 of the desktop folder so the stack only needs half the
+     frame: the other half is where the detail opens, beside it instead of over it. */
+  /* The drawer itself, flattened. The scene's steel is 0x9aa0a8 at metalness 0.96, brushed
+     with horizontal strokes and lit from one key light, so: a cool grey body raked across
+     its width, horizontal striations over the top, and a bright rim where the light catches
+     the near edge against a dark one where it falls away.
+
+     Inside is pure black, never dark metal - the 3D version takes no light in there at all
+     on purpose, because anything lit down there catches the environment and starts reading
+     as a floor the cards are standing on rather than a void they are filed in. */
+  .drawer__strip {
+    position: relative;
+    /* clearance above and below the metal itself, not just the section's own --space around
+       it: the side panel's placement is clamped to the strip's own top/bottom edge (see
+       scrollPanelBesideStack() in main.js), so with none of this the drawer's rounded
+       corner could end up flush against the viewport's own top edge with an open card
+       right behind it, or the strip's foot could land close enough to "Projects" for the
+       two to read as one run */
+    margin: 2.5rem 0 3.5rem;
+    width: 50%;
+    padding: 7px;
+    border-radius: 0.55rem;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.05) 0 1px,
+        rgba(0, 0, 0, 0.06) 1px 2px,
+        transparent 2px 4px
+      ),
+      linear-gradient(105deg, #c3c9d1 0%, #949aa2 14%, #6b7178 46%, #8d939b 72%, #565c64 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.55),
+      0 14px 34px -16px rgba(0, 0, 0, 0.9);
+  }
+
+  /* the void the cards are filed in - painted behind them, since every tab is positioned
+     and this is not */
+  .drawer__strip::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border-radius: 0.3rem;
+    background: #000;
+    box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.95);
+  }
+
   .skills-grid {
-    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-    gap: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    /* the peek is a transform, so it never grows the box it moves within - when the *last*
+       card of a group is the one hovered/active, the sibling peek has nothing after it to
+       push down except empty space, and without this that empty space doesn't exist: the
+       shifted card paints straight through the metal's own bottom edge. Exactly --peek, so
+       the group's resting height only grows by as much as the worst case ever needs. */
+    padding-bottom: var(--peek, 1.55rem);
+  }
+
+  /* the same clearance rekordbox got at the drawer's own foot, mirrored at its head: the
+     first tile of the first group otherwise sits flush against the 7px bezel with nothing
+     but that to separate it from the metal, while every other tile at rest has at least
+     the peek's worth of room above it (its own overlap into the tile before it). Only the
+     first group, not every group's own first tile - the gap between categories is a
+     separate, deliberately much smaller thing (see .skill-group + .skill-group below). */
+  .skill-group:first-of-type .skills-grid {
+    padding-top: var(--peek, 1.55rem);
+  }
+
+  /* The category, turned to run along the drawer's own long side - a label down the flank
+     rather than a banner across the top, which at this width would have spanned the full
+     frame and run under the detail panel. Same parts as the desktop heading: the name, then
+     a hairline that runs out to the end of the group. */
+  .skill-group {
+    display: flex;
+    align-items: stretch;
+    gap: 0.3rem;
+    /* single source of truth: read by the peek transform below, and by .skills-grid's own
+       padding-bottom, which needs to know the exact same number to stay in sync with it */
+    --peek: 1.55rem;
+  }
+
+  .skill-group > h3 {
+    display: flex;
+    /* reversed to undo the rotate below: without it the 180 turn puts the name at the foot
+       of the group with the rule running up out of it, back to front from the desktop */
+    flex-direction: row-reverse;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.45rem;
+    width: 18px;
+    margin: 0;
+    /* rotated as well as vertical, so it reads bottom-to-top the way a spine does */
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* Two flex:1 hairlines instead of the desktop's one: a single trailing line (flex:1)
+     just pins the name to whichever end it starts from, same as before - centring the name
+     needs an equal-and-opposite line on the other side too, so the pair grows in lockstep
+     and the name sits in the middle of the group's height regardless of how tall it is. */
+  .skill-group > h3::before,
+  .skill-group > h3::after {
+    content: '';
+    flex: 1;
+    width: 1px;
+    background: #2f2f2f;
+  }
+
+  /* faded at the far end from the name on each side, mirroring the desktop rule's own
+     fade-to-transparent - center-out on both, not the single direction one line allowed */
+  .skill-group > h3::before {
+    background: linear-gradient(0deg, #2f2f2f, transparent);
+  }
+
+  .skill-group > h3::after {
+    background: linear-gradient(180deg, #2f2f2f, transparent);
+  }
+
+  /* the desktop gap (clamp(2.5rem,4vw,3.5rem), 40px here) reads right between two
+     full-width headed bands - between two half-width filed groups, each already carrying
+     its own side label the full run of the category, it read as more black than break.
+     Small enough that the label's own hairlines (which fade out well short of this gap)
+     still read as the thing doing the separating, not the gap itself. */
+  .skill-group + .skill-group {
+    margin-top: 0.85rem;
+  }
+
+  .skill-group > .skills-grid {
+    flex: 1;
+    min-width: 0;
   }
 
   .skills-grid > li {
-    padding: 0.9rem 0.9rem 0.85rem;
-    gap: 0.7rem;
+    /* 2.65rem of tab plus the 1.55rem --peek reveals (declared on .skill-group above, not
+       here - the metal's own padding-bottom needs it too): any taller and the last card of
+       a group, with nothing filed in front of it, sits there as a blank face */
+    height: 4.2rem;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.45rem;
+    padding: 0.5rem 0.6rem;
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--brand, var(--accent)) 26%, transparent),
+        transparent 2.65rem
+      ),
+      #0b0b0b;
+    border: 1px solid color-mix(in srgb, var(--brand, var(--accent)) 32%, #232323);
+    border-top: 2px solid var(--brand, var(--accent));
+    border-radius: 0.35rem 0.35rem 0.2rem 0.2rem;
+    box-shadow: 0 12px 26px -14px rgba(0, 0, 0, 0.9);
+    mask-image: linear-gradient(to top, transparent 0, #000 0.45rem);
+    -webkit-mask-image: linear-gradient(to top, transparent 0, #000 0.45rem);
+    /* same 200ms the drawer peeks its sheet in */
+    transition: transform 200ms var(--ease-out);
+  }
+
+  /* 1.55rem of each card filed under the next one: 2.65rem of tab stays out */
+  .skills-grid > li + li {
+    margin-top: -1.55rem;
+  }
+
+  /* The peek, turned vertical. The drawer slides the pointed-at sheet up out of the rim;
+     here the cards filed *after* it slide down instead, so the same 3.4rem -> 5.4rem
+     reveal happens without ever creeping over the tab above it. */
+  .skills-grid > li:active ~ li,
+  .skills-grid > li:focus-visible ~ li,
+  .skills-grid > li.is-active ~ li {
+    transform: translateY(var(--peek, 2rem));
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .skills-grid > li:hover ~ li {
+      transform: translateY(var(--peek, 2rem));
+    }
+  }
+
+  /* the reveal stays - it is the only thing that says which card is being pointed at -
+     it just stops sliding there */
+  @media (prefers-reduced-motion: reduce) {
+    .skills-grid > li {
+      transition: none;
+    }
+  }
+
+  /* the base tile's press-scale and focus-lift both move the card inside its own stack,
+     which reads as a wobble when everything around it is filed edge to edge */
+  .skills-grid > li:active,
+  .skills-grid li:focus-visible,
+  .skills-grid > li.is-active {
+    transform: none;
   }
 
   .skill-icon {
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
   }
 
   .skill-label {
-    font-size: 0.875rem;
+    font-size: 0.6rem;
+    /* two of these still clear the 2.65rem of tab on show, so the long names wrap instead
+       of forcing the whole stack wider than the frame can afford - measured against
+       "Adobe Substance 3D", the only one that needs the second line at 390px */
+    line-height: 0.95rem;
+    margin-top: 2px;
+  }
+
+  /* The tapped card's detail, beside the stack rather than over it - pinned to the right
+     half and centred on the frame, so it never covers the tabs you are picking from. It
+     sits in the free half, so there is no scrim and nothing is blocked: clicks fall
+     straight through the empty area to the stack underneath. See openCard()/closeCard()'s
+     IS_PHONE_SKILLS_LAYOUT branch in main.js. */
+  .skills-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 60; /* above .info-card's 50, comfortably above .nav's 10 */
+    /* always laid out, never display:none - toggling display kills the card's own fade
+       before it starts, and with it the transitionend that takes the card back out of the
+       DOM. The container is empty and pointer-events:none while closed, so it costs
+       nothing to leave standing; what comes and goes is the card inside it. */
+    display: grid;
+    place-items: center end;
+    /* the same gutter the page itself keeps, so the gap left of the drawer and the gap
+       right of the panel are the one value and cannot drift apart */
+    padding: 0.75rem var(--pad-x);
+    pointer-events: none;
+  }
+
+  /* the invitation and the card it eventually gets replaced by share one cell - without
+     this, the invite (present the whole time, just faded out once a card opens) would
+     still claim its own row in the implicit grid, and the card's own centering would be
+     measured against that taller two-row box instead of sitting on it as an overlay */
+  .skills-modal .skill-card,
+  .skills-invite {
+    grid-area: 1 / 1;
+  }
+
+  .skills-modal .skill-card {
+    /* a share of the same content width the drawer is a share of - the modal is fixed to
+       the viewport, so the gutters have to come back out by hand */
+    width: calc((100vw - 2 * var(--pad-x)) * 0.44);
+    max-height: 80vh;
+    overflow-y: auto;
+    margin: 0;
+    pointer-events: auto;
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      transform var(--duration-base) var(--ease-out);
+  }
+
+  .skills-modal.is-open .skill-card {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The section's only invitation on phone now - main.js stops building .skills-hint here,
+     since that one sits above the stack and has long scrolled away by the time a reader is
+     this far down a 22-tool list. Carries the exact shine .skills-hint used to (same
+     weight/tracking, same gradient sweep, same hint-shine keyframes - all defined once,
+     above, and shared rather than re-declared), just at a size the narrow column can
+     actually hold. Visible only while the strip is in view (.is-visible, toggled by an
+     IntersectionObserver in main.js - nothing here can see the strip's own position) and
+     never while a card is open, whether or not the strip itself is still in view. */
+  .skills-invite {
+    /* width, not max-width: the two-line split (main.js) made the box shrink-to-fit its
+       widest child instead of the whole paragraph's wrapped-line width, so its rendered
+       width no longer reliably matched the card's own - and with .skills-modal's
+       place-items: center end right-aligning each item in its grid cell, two different
+       widths meant two different right gutters. Same formula as .skill-card's own width
+       just below, so the two can never drift apart again. */
+    width: calc((100vw - 2 * var(--pad-x)) * 0.44);
+    margin: 0;
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+
+  .skills-invite.is-visible {
+    opacity: 1;
+  }
+
+  /* Two rows (main.js splits the text in two, word-count-even), each its own element with
+     its own hint-shine timeline - a shared background on one two-line element would put
+     the same slice of the gradient on both lines at once, since it's one background image
+     spanning the whole box. animation-delay on the second is half the loop's own period
+     (3s / 2), the largest offset a repeating cycle can hold before it just starts
+     lapping - anything past that starts closing the gap back up rather than widening it. */
+  .skills-invite__line {
+    display: block;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+    background: linear-gradient(
+      90deg,
+      var(--text-dim) 0%,
+      var(--text-dim) 40%,
+      var(--accent) 50%,
+      var(--accent-2) 60%,
+      var(--text-dim) 70%,
+      var(--text-dim) 100%
+    );
+    background-size: 300% 100%;
+    background-position: 110% center;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: hint-shine 3s linear infinite;
+  }
+
+  .skills-invite__line + .skills-invite__line {
+    animation-delay: 1.5s;
+  }
+
+  .skills-modal.is-open .skills-invite {
+    opacity: 0;
+  }
+
+  /* the detail card is authored for a full-width row, so every step of it has to come
+     down to fit a panel this narrow */
+  .skills-modal .skill-card__inner {
+    padding: 0.9rem 0.8rem;
+    /* clear of the close button, which shrinks with everything else below */
+    padding-right: 2.2rem;
+    border-radius: 0.7rem;
+  }
+
+  /* 2.25rem of button against a 175px panel put the X on top of a long title
+     ("TouchDesigner" has nowhere to wrap) */
+  .skills-modal .skill-card__close {
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .skills-modal .skill-card__title {
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .skills-modal .skill-card__badge {
+    margin-top: 0.5rem;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.6rem;
+  }
+
+  .skills-modal .skill-card__text {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+
+  /* 2 columns of bullets in a panel this narrow leaves 3 words a line */
+  .skills-modal .skill-card__bullets {
+    columns: 1;
+    margin-top: 0.8rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+
+  /* At the flow width's own available room the title wraps to two lines more often than the
+     desktop panel it was centred against, so the disc read as floating low against the title
+     alone instead of sitting level with it. Top-aligning keeps it level with the title's own
+     first line regardless of how many the title wraps to. */
+  .set-player__panel {
+    align-items: flex-start;
+  }
+
+  .set-player__disc {
+    margin-top: 0.1rem;
   }
 
   /* the tree keeps its shape on a phone, it just stops sitting side by side:

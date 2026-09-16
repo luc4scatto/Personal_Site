@@ -114,7 +114,7 @@ const CONNECTIONS = [
 
   { from: 'switch-server', to: 'minipc', type: 'lan', arrow: 'end' },
   { from: 'switch-server', to: 'jetkvm', type: 'lan', arrow: 'end' },
-  { from: 'switch-server', to: 'modem', type: 'lan', arrow: 'end' },
+  { from: 'modem', to: 'switch-server', type: 'lan', arrow: 'end' },
   { from: 'switch-studio', to: 'computer', type: 'lan', arrow: 'end' },
   { from: 'switch-studio', to: 'laptop', type: 'lan', arrow: 'end' },
 

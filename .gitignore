@@ -2,9 +2,13 @@ node_modules
 dist
 .DS_Store
 _originals
+# DJ set audio: an hour-long set is ~55MB and the whole of public/ is 12MB. The real files
+# live on external storage and content.js holds their URLs; this folder is only ever the
+# short dev asset tools/peaks.js is tested against.
+public/audio
 .agents/skills/
 .claude/skills/
 .claude/settings.local.json
-.impeccable/config.local.json
-.impeccable/hook.cache.json
 skills-lock.json
+.impeccable/
+plans/001-drawer-card-open-close-timing.md

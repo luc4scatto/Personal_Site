@@ -4,6 +4,19 @@ import { content } from './content.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// The skill drawer's chunk loads async and, once live, hides the flat `.drawer__strip`
+// grid in favour of a much shorter `aspect-ratio` box (src/styles/sections.css). Every
+// ScrollTrigger below it — the h2 clip reveals and [data-reveal] cards on Projects/Contact
+// included — was measured against the taller flat-grid layout that was on the page when
+// initAnimations() ran, moments before that swap. GSAP never re-measures on its own for a
+// class-driven height change (only on window resize or its own load-event refresh, and the
+// drawer's chunk often isn't done by then), so those triggers keep firing at their old,
+// too-far-down pixel offsets — the section behind them scrolls past empty until the stale
+// threshold is finally crossed. main.js calls this the moment `.is-live` lands.
+export function refreshScrollTriggers() {
+  ScrollTrigger.refresh();
+}
+
 export function initAnimations() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -20,7 +33,7 @@ export function initAnimations() {
         yPercent: 0,
         duration: 1.1,
         ease: 'power4.out',
-        stagger: 0.12,
+        stagger: 0.08,
         delay: 0.15,
         onComplete: startWordLoop,
       });
@@ -35,7 +48,7 @@ export function initAnimations() {
     opacity: 0,
     duration: 1,
     ease: 'power3.out',
-    stagger: 0.12,
+    stagger: 0.08,
     delay: 0.45,
   });
 
@@ -78,6 +91,9 @@ export function initAnimations() {
     const xTo = gsap.quickTo(btn, 'x', { duration: 0.4, ease: 'power3' });
     const yTo = gsap.quickTo(btn, 'y', { duration: 0.4, ease: 'power3' });
     btn.addEventListener('pointermove', (e) => {
+      // mouse only: on touch this fires during a tap that slides even slightly, and the
+      // button crawls out from under the finger that is pressing it
+      if (e.pointerType !== 'mouse') return;
       const r = btn.getBoundingClientRect();
       xTo((e.clientX - r.left - r.width / 2) * 0.3);
       yTo((e.clientY - r.top - r.height / 2) * 0.3);
@@ -112,10 +128,26 @@ function initWordCycler(el) {
   el.textContent = '';
   el.style.display = 'inline-block';
   el.style.position = 'relative';
-  el.style.width = `${widths[0]}px`;
+  // Cut to the longest word once, then never touched again. Tweening the slot's width relaid
+  // the whole headline out every frame, half a second in every 1.8, for the life of the page:
+  // the only perpetual non-GPU animation on the site. What moves now is the trailing period,
+  // on a transform, so the word still reads as tight against it.
+  const maxWidth = Math.max(...widths);
+  el.style.width = `${maxWidth}px`;
   el.style.height = `${height}px`;
   el.style.overflow = 'hidden';
   el.style.verticalAlign = 'bottom';
+
+  // The "." lives as a bare text node right after the accent span, and a text node cannot
+  // carry a transform, so it gets an element of its own.
+  const period = document.createElement('span');
+  period.style.display = 'inline-block';
+  const tail = el.nextSibling;
+  if (tail?.nodeType === Node.TEXT_NODE && tail.textContent.trim()) {
+    period.textContent = tail.textContent.trim();
+    tail.replaceWith(period);
+    gsap.set(period, { x: widths[0] - maxWidth });
+  }
 
   const makeWord = (text) => {
     const span = document.createElement('span');
@@ -144,12 +176,14 @@ function initWordCycler(el) {
       yPercent: 100,
       opacity: 0,
       duration: DURATION,
-      ease: 'power3.inOut',
+      // the pair moves as one, so the word leaving takes the same ease-out as the one
+      // arriving; power3.inOut held it back through the first half of its own exit
+      ease: 'power3.out',
       onComplete: () => outgoing.remove(),
     });
     gsap.to(incoming, { yPercent: 0, opacity: 1, duration: DURATION, ease: 'power3.out' });
-    // resize the slot to the new word so the period stays tight and slides smoothly
-    gsap.to(el, { width: widths[index], duration: DURATION, ease: 'power3.inOut' });
+    // the period slides over to hug the new word - a transform, so no layout runs for it
+    gsap.to(period, { x: widths[index] - maxWidth, duration: DURATION, ease: 'power3.out' });
     current = incoming;
     gsap.delayedCall(HOLD, next);
   };

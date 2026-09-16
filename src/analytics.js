@@ -27,9 +27,12 @@ export function initAnalytics() {
 
   const banner = document.createElement('div');
   banner.className = 'cookie-banner';
+  // link text is the destination, not "Learn more": out of context that phrase reads the same
+  // on any page, which is exactly what Lighthouse's SEO link-text audit flags - the aria-label
+  // it replaced said the same thing twice for no reason once the visible text says it once
   banner.innerHTML =
     "<p>This site uses Google Analytics to see how it's used. No data is sold or shared. " +
-    '<a href="privacy.html" aria-label="Learn more in the privacy policy">Learn more</a></p>' +
+    '<a href="privacy.html">Read the privacy policy</a></p>' +
     '<div class="cookie-banner__actions">' +
     '<button type="button" class="cookie-banner__decline">Decline</button>' +
     '<button type="button" class="btn cookie-banner__accept">Accept</button>' +
