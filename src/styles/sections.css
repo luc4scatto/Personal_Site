@@ -1392,7 +1392,9 @@
    Gated on .has-opened (skillDrawer.js's select(), set the first time a card opens and cleared
    only when the drawer goes fully shut) so this never wins on the drawer's own first reveal -
    that one still needs the 5s delay above, only a later card-close should skip it. */
-#skill-drawer.is-live .drawer__scene.is-overlay.has-opened:not(.has-open) ~ .set-player:not(.is-playing) {
+#skill-drawer.is-live
+  .drawer__scene.is-overlay.has-opened:not(.has-open)
+  ~ .set-player:not(.is-playing) {
   transition:
     opacity 0.35s var(--ease-out),
     filter 0.35s var(--ease-out),
