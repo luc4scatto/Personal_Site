@@ -171,22 +171,20 @@ function initSkillsWall() {
 
   const isReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Phone: the card opens into a fixed, centered modal instead of unfolding in the grid flow,
-  // and the tile strip behind it goes inert (blocked, not just dimmed) until it closes.
+  // Phone: the stack takes the left half and the card opens fixed in the right half,
+  // beside it. Nothing is covered, so this is a non-modal dialog - no aria-modal, no
+  // inert, no scroll lock: the page keeps scrolling and every tab stays tappable.
   let modalEl = null;
   let stripEl = null;
-  let sideGroup = null;
   if (IS_PHONE_SKILLS_LAYOUT) {
     modalEl = document.createElement('div');
     modalEl.className = 'skills-modal';
     document.body.append(modalEl);
+    // the tab stack itself, which ends with the last tab - the section around it carries
+    // padding the panel has no business sitting beside
     stripEl = document.querySelector('.drawer__strip');
-    // EXPERIMENT - the first category opens its detail beside the stack instead of over
-    // it. Delete this (and the matching CSS, search "EXPERIMENT") to revert.
-    sideGroup = document.querySelector('.skill-group');
     inner.querySelector('.skill-card__title').id = 'skill-card-title';
     card.setAttribute('role', 'dialog');
-    card.setAttribute('aria-modal', 'true');
     card.setAttribute('aria-labelledby', 'skill-card-title');
   }
 
@@ -199,6 +197,49 @@ function initSkillsWall() {
 
   let activeEl = null;
 
+  // where the panel lands: fixed, centred on the frame, as tall as its card needs
+  const panelBand = () => {
+    const h = card.offsetHeight; // layout box: unaffected by the entry transform
+    const top = (window.innerHeight - h) / 2;
+    return { top, bottom: top + h };
+  };
+
+  // The panel may only live alongside the stack itself. Past the bottom it hangs over
+  // Projects; past the top it drifts up beside the section's own title and hint, with no
+  // tab next to it at all. The stack, not the section around it: the section's padding
+  // reaches well past the last tab, which is exactly the slack that let it overlap.
+  const panelFitsBesideStack = () => {
+    if (!stripEl) return true;
+    const strip = stripEl.getBoundingClientRect();
+    const panel = panelBand();
+    return panel.top >= strip.top && panel.bottom <= strip.bottom;
+  };
+
+  // Opening a tab near either end of the stack centres the panel past that end - tap the
+  // last tab with Projects already filling the screen and the card opens on top of
+  // Projects. This walks the page the minimum distance that puts the panel back alongside
+  // actual tabs, landing it a few px inside so that rounding alone cannot trip the close
+  // test above on the very next scroll event.
+  const STACK_PAD = 8;
+  let scrollSettleUntil = 0;
+  const scrollPanelBesideStack = () => {
+    if (!stripEl) return;
+    const strip = stripEl.getBoundingClientRect();
+    const panel = panelBand();
+
+    // a positive scroll moves the page down, which moves the strip up the frame
+    let delta = 0;
+    if (panel.bottom > strip.bottom - STACK_PAD) delta = strip.bottom - STACK_PAD - panel.bottom;
+    else if (panel.top < strip.top + STACK_PAD) delta = strip.top + STACK_PAD - panel.top;
+    if (!delta) return;
+
+    // the scroll below fires scroll events of its own, and mid-flight the panel is briefly
+    // outside the section - without this the close-on-scroll watcher would shut the card
+    // we are in the middle of placing
+    scrollSettleUntil = performance.now() + (isReduced() ? 0 : 800);
+    window.scrollBy({ top: delta, behavior: isReduced() ? 'auto' : 'smooth' });
+  };
+
   const closeCard = (instant) => {
     if (!activeEl) return;
     activeEl.classList.remove('is-active');
@@ -208,9 +249,6 @@ function initSkillsWall() {
 
     if (IS_PHONE_SKILLS_LAYOUT) {
       modalEl.classList.remove('is-open');
-      stripEl?.removeAttribute('inert');
-      stripEl?.classList.remove('is-dimmed');
-      document.body.style.overflow = '';
       if (instant || isReduced()) {
         card.remove();
         return;
@@ -243,25 +281,16 @@ function initSkillsWall() {
       li.classList.add('is-active');
       gsap.killTweensOf(card);
       modalEl.append(card);
-      // EXPERIMENT - beside the stack, not over it: nothing is covered, so nothing gets
-      // blocked either. The page keeps scrolling and the other cards stay tappable.
-      const side =
-        !!sideGroup &&
-        li.closest('.skill-group') === sideGroup &&
-        window.matchMedia('(min-width: 600px)').matches;
-      modalEl.classList.toggle('skills-modal--side', side);
-      if (!side) {
-        stripEl?.setAttribute('inert', '');
-        stripEl?.classList.add('is-dimmed');
-        document.body.style.overflow = 'hidden';
-      }
       // rAF so the just-inserted node still picks up the CSS transition instead of
-      // starting already in its end state - the focus() call rides the same rAF because
-      // setting [inert] on the strip triggers the browser's own async focus fixup, which
-      // otherwise lands after a synchronous focus() here and silently reverts it to <body>
+      // starting already in its end state. Focus stays on the tab that was tapped: the
+      // panel covers nothing, so pulling focus across the frame would only cost the
+      // reader their place in the stack.
+      // Guarded: a close landing inside the same frame (Escape on a keyboard, a scripted
+      // open/close) would otherwise be undone by this callback re-opening the panel.
       requestAnimationFrame(() => {
+        if (activeEl !== li) return;
         modalEl.classList.add('is-open');
-        if (!side) card.querySelector('.skill-card__close').focus();
+        scrollPanelBesideStack();
       });
       return;
     }
@@ -332,8 +361,7 @@ function initSkillsWall() {
   });
 
   card.querySelector('.skill-card__close').addEventListener('click', () => {
-    // captured before closeCard() clears activeEl - on phone the tile is still inert
-    // until closeCard() runs, so focus() must come after, not before
+    // captured before closeCard() clears activeEl
     const target = activeEl;
     closeCard();
     target?.focus();
@@ -345,6 +373,22 @@ function initSkillsWall() {
       target.focus();
     }
   });
+  // The panel is fixed, so scrolling slides the stack out from under it and it ends up
+  // hanging over a neighbouring section. It closes the moment it stops fitting beside the
+  // stack - the same test that placed it, so the two can never disagree. Only ever closes:
+  // opening still needs a real tap (see CLAUDE.md - a scroll-driven open burns the gesture
+  // before the reader has looked at anything).
+  if (IS_PHONE_SKILLS_LAYOUT) {
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!activeEl || performance.now() < scrollSettleUntil) return;
+        if (!panelFitsBesideStack()) closeCard();
+      },
+      { passive: true },
+    );
+  }
+
   // clicking away from the wall closes it; the card and the tiles handle their own clicks
   window.addEventListener('click', (e) => {
     if (!activeEl || card.contains(e.target) || e.target.closest('.skills-grid li')) return;

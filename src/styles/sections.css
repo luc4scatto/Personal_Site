@@ -565,8 +565,7 @@
      way), it just snaps instead of tweening - and closeCard()'s isReduced() branch skips
      waiting on transitionend entirely, since with transition:none it would never fire */
   .skills-modal,
-  .skills-modal .skill-card,
-  .drawer__strip.is-dimmed {
+  .skills-modal .skill-card {
     transition: none;
   }
 }
@@ -2994,31 +2993,42 @@ p.project-specs__kicker {
     gap: 1rem;
   }
 
-  /* The drawer, stood on its end: one column of cards filed over each other, each showing
-     only its tab - the same 3.4rem of sheet the desktop folders show above the drawer rim,
-     with the icon and title in the same place (.folder__tab: top-left, one row, 24px mark,
-     0.8125rem display face). The card carries .folder__sheet's own skin: #0b0b0b, brand top
-     border, brand wash over the tab, and the rim mask that makes it read as continuing
-     under the card filed in front of it. */
+  /* The drawer, stood on its end and pushed into the left half: one column of cards filed
+     over each other, each showing only its tab, with the icon and title in the same place
+     as the desktop .folder__tab (top-left, one row). The card carries .folder__sheet's own
+     skin: #0b0b0b, brand top border, brand wash over the tab, and the rim mask that makes
+     it read as continuing under the card filed in front of it.
+
+     Everything is scaled to ~0.78 of the desktop folder so the stack only needs half the
+     frame: the other half is where the detail opens, beside it instead of over it. */
   .skills-grid {
     display: flex;
     flex-direction: column;
     gap: 0;
   }
 
+  /* the categories are the drawer's own dividers on desktop; here the heading and its rule
+     span the full width, so they would run under the detail panel - and the stack reads as
+     one filed run without them */
+  .skill-group > h3 {
+    display: none;
+  }
+
   .skills-grid > li {
-    /* 3.4rem of tab plus the 2rem the peek reveals: any taller and the last card of a
+    /* 2.65rem of tab plus the 1.55rem the peek reveals: any taller and the last card of a
        group, with nothing filed in front of it, sits there as a blank face */
-    height: 5.4rem;
+    --peek: 1.55rem;
+    width: 44%;
+    height: 4.2rem;
     flex-direction: row;
     align-items: flex-start;
-    gap: 0.6rem;
-    padding: 0.75rem 0.85rem;
+    gap: 0.45rem;
+    padding: 0.55rem 0.6rem;
     background:
       linear-gradient(
         180deg,
         color-mix(in srgb, var(--brand, var(--accent)) 26%, transparent),
-        transparent 3.4rem
+        transparent 2.65rem
       ),
       #0b0b0b;
     border: 1px solid color-mix(in srgb, var(--brand, var(--accent)) 32%, #232323);
@@ -3031,9 +3041,9 @@ p.project-specs__kicker {
     transition: transform 200ms var(--ease-out);
   }
 
-  /* 2rem of each card filed under the next one: 3.4rem of tab stays out */
+  /* 1.55rem of each card filed under the next one: 2.65rem of tab stays out */
   .skills-grid > li + li {
-    margin-top: -2rem;
+    margin-top: -1.55rem;
   }
 
   /* The peek, turned vertical. The drawer slides the pointed-at sheet up out of the rim;
@@ -3042,12 +3052,12 @@ p.project-specs__kicker {
   .skills-grid > li:active ~ li,
   .skills-grid > li:focus-visible ~ li,
   .skills-grid > li.is-active ~ li {
-    transform: translateY(2rem);
+    transform: translateY(var(--peek, 2rem));
   }
 
   @media (hover: hover) and (pointer: fine) {
     .skills-grid > li:hover ~ li {
-      transform: translateY(2rem);
+      transform: translateY(var(--peek, 2rem));
     }
   }
 
@@ -3068,74 +3078,42 @@ p.project-specs__kicker {
   }
 
   .skill-icon {
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 
   .skill-label {
-    font-size: 0.8125rem;
+    font-size: 0.65rem;
     /* matched to the icon box, so tab text and mark read as one centred row while both
        still sit at the top of the card */
-    line-height: 1.5rem;
+    line-height: 1.25rem;
   }
 
-  /* EXPERIMENT - first category only (see main.js). The stack itself is untouched: same
-     tabs, same overlap, same peek, same scroll. It just stops short of the right edge, and
-     the room that frees up is where the detail opens. Delete this block to revert.
-
-     Only from 600px up: the panel is 40% of the frame, and under that it lands around
-     140px, which is two words a line and a title sitting on its own close button. A real
-     phone keeps the full-screen card - main.js gates the JS on the same width. */
-  @media (min-width: 600px) {
-  .skill-group:first-of-type .skills-grid > li {
-    width: 52%;
-  }
-
-  /* beside the stack instead of over it: no scrim, no blur, nothing covered - so the
-     container has to let clicks fall through to the cards it is sitting on top of */
-  .skills-modal.skills-modal--side {
-    background: none;
-    backdrop-filter: none;
-    pointer-events: none;
-    place-items: center end;
-    padding: 1rem;
-  }
-
-  /* .skills-modal too, so this beats the full-screen rule's own width further down */
-  .skills-modal.skills-modal--side .skill-card {
-    width: 42%;
-    max-height: 78vh;
-    pointer-events: auto;
-  }
-
-  /* 2 columns of bullets in a panel this narrow leaves 3 words a line */
-  .skills-modal--side .skill-card__bullets {
-    columns: 1;
-  }
-  }
-
-  /* the tapped card's detail, centered over a blocked background - see openCard()/
-     closeCard()'s IS_PHONE_SKILLS_LAYOUT branch in main.js */
+  /* The tapped card's detail, beside the stack rather than over it - pinned to the right
+     half and centred on the frame, so it never covers the tabs you are picking from. It
+     sits in the free half, so there is no scrim and nothing is blocked: clicks fall
+     straight through the empty area to the stack underneath. See openCard()/closeCard()'s
+     IS_PHONE_SKILLS_LAYOUT branch in main.js. */
   .skills-modal {
     position: fixed;
     inset: 0;
     z-index: 60; /* above .info-card's 50, comfortably above .nav's 10 */
-    display: none;
-    place-items: center;
-    padding: 1.25rem;
-    background: color-mix(in srgb, var(--bg) 82%, transparent);
-    backdrop-filter: blur(6px);
-  }
-
-  .skills-modal.is-open {
+    /* always laid out, never display:none - toggling display kills the card's own fade
+       before it starts, and with it the transitionend that takes the card back out of the
+       DOM. The container is empty and pointer-events:none while closed, so it costs
+       nothing to leave standing; what comes and goes is the card inside it. */
     display: grid;
+    place-items: center end;
+    padding: 0.75rem;
+    pointer-events: none;
   }
 
   .skills-modal .skill-card {
-    width: min(30rem, 100%);
-    max-height: 86vh;
+    width: 48%;
+    max-height: 80vh;
     overflow-y: auto;
     margin: 0;
+    pointer-events: auto;
     opacity: 0;
     transform: scale(0.94) translateY(8px);
     transition:
@@ -3148,14 +3126,48 @@ p.project-specs__kicker {
     transform: none;
   }
 
-  /* blocked, not just dimmed - JS also sets [inert] on this element while the modal is
-     open, so filter/opacity here are only the matching visual state */
-  .drawer__strip.is-dimmed {
-    filter: blur(2px);
-    opacity: 0.4;
-    transition:
-      opacity var(--duration-base) var(--ease-out),
-      filter var(--duration-base) var(--ease-out);
+  /* the detail card is authored for a full-width row, so every step of it has to come
+     down to fit a panel this narrow */
+  .skills-modal .skill-card__inner {
+    padding: 0.9rem 0.8rem;
+    /* clear of the close button, which shrinks with everything else below */
+    padding-right: 2.6rem;
+    border-radius: 0.7rem;
+  }
+
+  /* 2.25rem of button against a 175px panel put the X on top of a long title
+     ("TouchDesigner" has nowhere to wrap) */
+  .skills-modal .skill-card__close {
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .skills-modal .skill-card__title {
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  .skills-modal .skill-card__badge {
+    margin-top: 0.5rem;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.6rem;
+  }
+
+  .skills-modal .skill-card__text {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+
+  /* 2 columns of bullets in a panel this narrow leaves 3 words a line */
+  .skills-modal .skill-card__bullets {
+    columns: 1;
+    margin-top: 0.8rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
   }
 
   /* At the flow width's own available room the title wraps to two lines more often than the
