@@ -1445,9 +1445,24 @@
    cost the index its hit targets (documented above). `filter` is a property cull() never
    touches, so this is free to set without fighting it. The open card itself is excluded - it
    is the thing staying in focus, not one of the things receding. */
-#skill-drawer.is-live .drawer__scene.is-overlay.has-open .drawer__css .folder:not(.is-open) {
+/* The blur goes on the sheet, never on .folder itself: .folder is the node CSS3DRenderer
+   writes its matrix3d to, and a filter on a transformed node inside a preserve-3d subtree
+   makes Firefox flatten that subtree into its own raster layer, then composite it at the
+   wrong scale - an oversized, brand-coloured ghost of the folder around the open card
+   (Chrome and Safari composite it in place, which is why it only showed in Firefox). The
+   sheet is a plain child with no 3D transform of its own, so this stays an ordinary 2D
+   filter everywhere. Its own transform/border-color transitions are repeated here: this
+   rule wins on specificity, and a bare `transition: filter` would drop them. */
+#skill-drawer.is-live
+  .drawer__scene.is-overlay.has-open
+  .drawer__css
+  .folder:not(.is-open)
+  .folder__sheet {
   filter: blur(3px);
-  transition: filter 0.4s var(--ease-out);
+  transition:
+    transform 200ms var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    filter 0.4s var(--ease-out);
 }
 
 /* A folder's own box may not take the pointer: the box is the whole 320px card, transparent
@@ -1491,6 +1506,9 @@
   overflow: hidden;
   cursor: pointer;
   list-style: none;
+  /* set here rather than alongside the open card's border below, so taking that border does
+     not resize the box mid-animation */
+  box-sizing: border-box;
 }
 
 /* the fade at the rim: the sheet's own bottom edge is out of sight now, so the fade moved up
@@ -1628,6 +1646,27 @@
 .folder.is-open {
   mask-image: none;
   -webkit-mask-image: none;
+}
+
+/* The open card's frame is painted by .folder, not by the sheet inside it. Firefox rasterises
+   the sheet's subtree at the folder's own (tiny) CSS3D scale and then magnifies it, so a 1px
+   border came out as a fat brand-coloured band around the card - measured on the real thing, a
+   2px outline on .folder drew correctly while the same 2px on a nested child drew ~4x too
+   thick. Chrome and Safari paint both at final scale, which is why only Firefox showed it.
+   .folder carries the matrix3d itself, so its own border is never in that mis-scaled raster.
+   Only while open: at rest the sheet is translated down inside the box, and a border on the
+   box would frame the empty space it left behind. The sheet drops its border entirely rather
+   than just its colour, so the width lands on .folder instead of being counted twice and the
+   content box inside stays exactly what it was (248x317). */
+.folder.is-open {
+  border: 1px solid color-mix(in srgb, var(--brand, var(--accent)) 32%, #232323);
+  border-top: 2px solid var(--brand, var(--accent));
+  border-radius: 0.35rem 0.35rem 0.2rem 0.2rem;
+}
+
+.folder.is-open .folder__sheet,
+.folder.is-open:focus-visible .folder__sheet {
+  border: 0;
 }
 
 .folder__tab {
