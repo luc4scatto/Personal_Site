@@ -1453,16 +1453,25 @@
    sheet is a plain child with no 3D transform of its own, so this stays an ordinary 2D
    filter everywhere. Its own transform/border-color transitions are repeated here: this
    rule wins on specificity, and a bare `transition: filter` would drop them. */
-#skill-drawer.is-live
-  .drawer__scene.is-overlay.has-open
-  .drawer__css
-  .folder:not(.is-open)
-  .folder__sheet {
-  filter: blur(3px);
-  transition:
-    transform 200ms var(--ease-out),
-    border-color var(--duration-base) var(--ease-out),
-    filter 0.4s var(--ease-out);
+/* Fine pointers only, which in practice means: not on a tablet. This is one blur per filed
+   folder - twenty-one offscreen raster passes, re-composited in 3D on every frame the drawer
+   pumps - and on iPad Chrome (WebKit, sharing a GPU budget with two WebGL contexts) it both
+   dropped the framerate across the whole section and appeared to collapse WebKit's 3D sorting
+   of the folders, which then interpenetrated the open card. Same media condition the hover
+   rules use below, for the same reason: what the device can do, not how wide it is. The
+   canvas keeps its own single blur above, so the card still reads as the one sharp thing. */
+@media (hover: hover) and (pointer: fine) {
+  #skill-drawer.is-live
+    .drawer__scene.is-overlay.has-open
+    .drawer__css
+    .folder:not(.is-open)
+    .folder__sheet {
+    filter: blur(3px);
+    transition:
+      transform 200ms var(--ease-out),
+      border-color var(--duration-base) var(--ease-out),
+      filter 0.4s var(--ease-out);
+  }
 }
 
 /* A folder's own box may not take the pointer: the box is the whole 320px card, transparent

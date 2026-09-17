@@ -207,7 +207,12 @@ export function initSkillDrawer(host, strip) {
   const camera = new THREE.PerspectiveCamera(17, 1, 0.1, 400);
 
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // Same cap as hero3d.js, for the same reason and not by coincidence: on a tablet the two
+  // contexts share one GPU budget, and this one composites a 22-element CSS3D subtree on top
+  // of its own canvas. Touch, not width - an iPad Pro 11" in landscape is 1194px, desktop by
+  // any media query. Read once, like the pixel ratio it feeds.
+  const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, coarsePointer ? 1.5 : 2));
   // this renderer is its own island: hero3d.js sets neither of these and corrects sRGB by
   // hand in its blur shader, so configuring them here changes nothing over there
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -836,7 +841,19 @@ export function initSkillDrawer(host, strip) {
   // - the corner it's meant to disappear into, only partly.
   const MAX_SCALE = 2;
   const PICK_TOP = 0.03; // gap above it, as a share of the frame's height
-  const PICK_PULL = 2; // world units in front of the drawer's face, so it rides over every folder
+  // World units in front of the drawer's face, so the card rides over every folder. Free to
+  // raise: pickTarget() derives pxPerUnit from this same depth and compensates in the scale,
+  // so the card is the same size on screen at any value - this only buys separation in Z.
+  //
+  // 2 was enough while the card sat in its own column. Overlaid it does not get one
+  // (pickShift() returns 0 there, deliberately), so it lands directly over the folders filed
+  // at the front of the mouth, which stand out past the drawer's face on the left - and 2
+  // units ahead of the face *centre* is not 2 ahead of those. Chrome resolved that overlap in
+  // the card's favour; WebKit on iPad painted the frontmost folder (Blender, slot 0) over the
+  // open card, at every card, because a CSS3D layer has no per-pixel depth and the browser is
+  // free to order two near-coplanar elements either way. 8 clears the whole front of the file
+  // with room to spare, so there is no near-coplanar case left to order.
+  const pickPull = () => (overlaid() ? 8 : 2);
   const overlaid = () => w <= OVERLAY_MAX_W;
   // The DJ player parks in the box's right margin while a card is open, blurred but never
   // hidden (sections.css's .is-overlay ~ .set-player rule) - that's the point of it: it must
@@ -892,7 +909,7 @@ export function initSkillDrawer(host, strip) {
   function pickTarget() {
     const [cardW, cardH] = cardSize();
     const face = pickPos.set(0, 0, D / 2 + OPEN_Z).applyMatrix4(camera.matrixWorldInverse);
-    const depth = -face.z - PICK_PULL;
+    const depth = -face.z - pickPull();
     // left edge on the frame's own left edge, which is the heading's: centre in NDC, cast
     // through the camera (so the view offset fit() sets is honoured) out to that depth.
     // Overlaid, it centres within the region left of the player's reserved margin instead of
