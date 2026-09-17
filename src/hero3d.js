@@ -39,6 +39,11 @@ const DESCRIPTIONS = content.hero3dObjects;
 // beside it — must match the media query on #hero-canvas in sections.css
 const STACKED_HERO = '(max-width: 700px), (max-width: 1024px) and (orientation: portrait)';
 
+// Touch, not width: an iPad Pro 11" in landscape is 1194px wide, desktop by any media query,
+// and still a tablet GPU sharing one budget with the drawer's second WebGL context. Read once
+// - a device does not grow a mouse mid-session, and the renderer's pixel ratio is set once too.
+const COARSE_POINTER = window.matchMedia('(pointer: coarse)').matches;
+
 const ITEM_SIZE = 0.95;
 // per-model size tweaks on top of ITEM_SIZE — hero pieces up, tiny parts down
 const SIZE_TWEAKS = {
@@ -148,7 +153,12 @@ export function initHero3D(container) {
   camera.position.z = 9.5;
 
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // dpr 2 plus MSAA, twice over (this scene and the skill drawer's own context), does not fit
+  // a tablet's budget: on an iPad Pro 11" that is a ~2388x1200 drawing buffer here, two blur
+  // render targets on top of it, and another canvas down in Skills. 1.5 drops 44% of the
+  // pixels and reads the same at arm's length. Antialias stays on - the models have hard
+  // edges and the stair-stepping would show more than the resolution does.
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, COARSE_POINTER ? 1.5 : 2));
   container.appendChild(renderer.domElement);
 
   const ambient = new THREE.AmbientLight(0xffffff, 0.8);
@@ -302,6 +312,9 @@ export function initHero3D(container) {
   const ndc = new THREE.Vector2();
   const tmpV = new THREE.Vector3();
   let focusedItem = null;
+  // assigned at the bottom of init, once the renderer's loop exists; declared here because
+  // focus()/unfocus() below call it and they are defined long before it
+  let syncLoop = () => {};
   let hoveredItem = null;
   let returnFocusTo = null; // the .hero-objects button that opened the card via keyboard, if any
   // measured live in positionCard() rather than hardcoded — the fixed header's height
@@ -330,6 +343,7 @@ export function initHero3D(container) {
     document.querySelector('.hero-hint')?.classList.add('is-hidden');
     if (focusedItem) focusedItem.wrapper.traverse((o) => o.layers.set(0));
     focusedItem = item;
+    syncLoop(); // the card is position: fixed and only repositioned from the loop
     item.wrapper.traverse((o) => o.layers.set(1));
     ensureBlur();
     const d = DESCRIPTIONS[item.model] || DESCRIPTIONS._default;
@@ -350,6 +364,7 @@ export function initHero3D(container) {
     focusedItem.wrapper.traverse((o) => o.layers.set(0));
     focusedItem = null;
     camera.layers.set(0);
+    syncLoop();
     info.el.classList.remove('is-open');
     if (returnFocusTo) {
       returnFocusTo.focus();
@@ -656,7 +671,17 @@ export function initHero3D(container) {
   const baseEuler = new THREE.Euler();
   let blurH = 0; // current smear radius per axis, eased toward the rotation speed
   let blurV = 0;
-  renderer.setAnimationLoop((time) => {
+  let swallowGap = false; // set by sync() below when the loop restarts
+  const loop = (time) => {
+    // Timer accumulates the raw gap between the frame it stopped on and the one it starts
+    // again on, and every object's wander and pulse is a function of elapsed time - so coming
+    // back to the hero after a while would snap the whole cloud to a different pose. Absorb
+    // that one gap at timescale 0: the timer takes the new timestamp as its reference without
+    // moving elapsed, and the next frame's delta is an ordinary one.
+    if (swallowGap) {
+      swallowGap = false;
+      timer.setTimescale(0).update(time).setTimescale(1);
+    }
     timer.update(time);
     const t = timer.getElapsed();
     items.forEach((it) => {
@@ -745,5 +770,31 @@ export function initHero3D(container) {
     } else {
       renderer.render(scene, camera);
     }
-  });
+  };
+
+  // Render while the hero is on screen, not for the life of the page. This scene is animated
+  // continuously by design (idle spin, wander, pulses), so unlike the drawer's on-demand
+  // pump() it cannot be driven by interaction - but there is no reason to keep drawing 19
+  // models at full framerate while the reader is down in Skills with a second WebGL context
+  // and a CSS3D subtree competing for the same GPU. Two signals, one switch: off screen or
+  // backgrounded tab means off. rAF throttles a hidden tab on its own, but the visibility
+  // handler also covers an iOS tab switch, where a throttled loop still holds its buffers.
+  // A focused object keeps it running wherever the page is: its card is position: fixed and
+  // positionCard() is the only thing that places it, so parking the loop under an open card
+  // would pin the card wherever it happened to be. focus()/unfocus() call this too.
+  let onScreen = true;
+  let running = false;
+  syncLoop = () => {
+    const run = (onScreen || !!focusedItem) && !document.hidden;
+    if (run === running) return;
+    running = run;
+    if (run) swallowGap = true;
+    renderer.setAnimationLoop(run ? loop : null);
+  };
+  new IntersectionObserver(([entry]) => {
+    onScreen = entry.isIntersecting;
+    syncLoop();
+  }).observe(container);
+  document.addEventListener('visibilitychange', () => syncLoop());
+  syncLoop();
 }

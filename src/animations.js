@@ -35,7 +35,14 @@ export function initAnimations() {
         ease: 'power4.out',
         stagger: 0.08,
         delay: 0.15,
-        onComplete: startWordLoop,
+        onComplete: () => {
+          // Same cure as the h2 reveal below: GSAP leaves its transform inline, which leaves
+          // the compositing layer behind it. On iOS, under the memory pressure of two WebGL
+          // contexts, that layer gets rasterized at reduced scale and re-upscaled - the first
+          // hero line came out a blurred ghost while the second, shorter one stayed sharp.
+          gsap.set(heroLines, { clearProps: 'transform' });
+          startWordLoop();
+        },
       });
     };
     // wait for the display font so the slot width is measured correctly
