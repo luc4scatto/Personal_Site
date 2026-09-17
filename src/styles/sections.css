@@ -1654,18 +1654,20 @@
    2px outline on .folder drew correctly while the same 2px on a nested child drew ~4x too
    thick. Chrome and Safari paint both at final scale, which is why only Firefox showed it.
    .folder carries the matrix3d itself, so its own border is never in that mis-scaled raster.
-   Only while open: at rest the sheet is translated down inside the box, and a border on the
-   box would frame the empty space it left behind. The sheet drops its border entirely rather
-   than just its colour, so the width lands on .folder instead of being counted twice and the
-   content box inside stays exactly what it was (248x317). */
-.folder.is-open {
+   Gated on .is-landed, not .is-open: .is-open arrives on the click, while the sheet is still
+   climbing out of the drawer, and the box would frame the empty space the sheet has not
+   reached yet - a card rising half empty. By .is-landed the sheet is flush with the box, so
+   the swap is seamless. The sheet drops its border entirely rather than just its colour, so
+   the width lands on .folder instead of being counted twice and the content box inside stays
+   exactly what it was (248x317). */
+.folder.is-landed {
   border: 1px solid color-mix(in srgb, var(--brand, var(--accent)) 32%, #232323);
   border-top: 2px solid var(--brand, var(--accent));
   border-radius: 0.35rem 0.35rem 0.2rem 0.2rem;
 }
 
-.folder.is-open .folder__sheet,
-.folder.is-open:focus-visible .folder__sheet {
+.folder.is-landed .folder__sheet,
+.folder.is-landed:focus-visible .folder__sheet {
   border: 0;
 }
 
