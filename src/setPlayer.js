@@ -87,6 +87,11 @@ const WIDGET_CHROME = {
   download: false,
 };
 const ENGINE_ID = 'set-player-engine';
+// How long to wait for a PLAY event after asking for one before admitting it isn't coming.
+// Long enough to cover a slow first buffer, short enough that a blocked start doesn't read as
+// a hang. iOS can refuse playback for a reload it doesn't consider user-initiated, and that
+// refusal is silent: no ERROR, no PLAY, nothing to react to but the absence.
+const PLAY_WAIT = 3000;
 
 let widgetScriptPromise = null;
 function loadWidgetScript() {
@@ -229,25 +234,57 @@ export function initSetPlayer(mount) {
       widget?.setVolume(curVolume);
     },
     play() {
-      if (widget) widget.play();
+      if (widget) askPlay();
       else pendingPlay = true;
       return Promise.resolve();
     },
     pause() {
       pendingPlay = false;
+      clearTimeout(playWatchdog);
       widget?.pause();
     },
   };
 
+  // Every request for playback goes through here, so there is one place that knows a PLAY is
+  // owed and one timer watching for it. Without this a refused start leaves the transport
+  // showing Pause over a bar that never moves - the player looks broken when it is only
+  // waiting for a tap it never asked for.
+  let playWatchdog = 0;
+  function askPlay() {
+    widget.play();
+    clearTimeout(playWatchdog);
+    playWatchdog = setTimeout(() => {
+      if (!curPaused) return; // it started after all
+      onPause(); // repaint the real state: the glyphs may still say Pause from the last set
+      noteEl.textContent = 'Tap play to start this set.';
+      noteEl.hidden = false;
+    }, PLAY_WAIT);
+  }
+
   /** Creates the iframe and widget on the first call; every later call reuses them via
    *  widget.load(), which SoundCloud's own docs describe as reloading the iframe's content
-   *  in place - the JS widget object and its bound listeners stay valid. `auto_play` is
-   *  passed as a widget option rather than calling play() after the fact, which is what
-   *  lets a track-to-track advance stay inside SoundCloud's own load/ready sequencing
-   *  instead of us guessing when it's safe to call play(). */
+   *  in place - the JS widget object and its bound listeners stay valid. `auto_play` is passed
+   *  as a widget option so a track-to-track advance can stay inside SoundCloud's own load/ready
+   *  sequencing, but it is not trusted on its own: see the reuse branch. */
   function engineLoad(trackUrl, play) {
     if (widget) {
+      // auto_play alone is not enough, and the tablet is where that shows: load() replaces
+      // the iframe's document, and the new one has no user activation of its own, so iOS
+      // ignores auto_play outright. Nothing then calls play(), no PLAY event arrives, onPlay
+      // never runs, and the rAF loop below - which only ever restarts from onPlay - stays
+      // dead: a frozen progress bar over silence. So arm pendingPlay the same way the
+      // first-load branch does and let onReady ask for playback explicitly.
+      pendingPlay = play;
       widget.load(trackUrl, { auto_play: play, callback: onReady, ...WIDGET_CHROME });
+      // And ask again right here, inside the click that caused this. iOS grants playback to
+      // the widget's iframe off the parent's gesture - that is why pressing play works at all
+      // through a hidden cross-origin frame - but only while the gesture is still being
+      // processed. onReady lands in a later task, long after it has expired, which is why the
+      // next set loaded silently on iPad and played on desktop. This call is still inside it.
+      // Safe to send before the load has landed: play is only ever true here when the previous
+      // set was already playing, so the worst case is a redundant play on a track that is
+      // already playing. pendingPlay stays armed as the fallback for whoever gets there first.
+      if (play) askPlay();
       return;
     }
     const params = new URLSearchParams({
@@ -388,6 +425,13 @@ export function initSetPlayer(mount) {
   async function load(set, { play = false } = {}) {
     current = set;
     curDuration = NaN;
+    // A new set starts at zero and nobody is dragging it. curTime is otherwise only ever
+    // written by the widget's own progress messages, so without this the first frame after a
+    // switch repaints the *previous* set's position; and scrubbing, if a drag lost its
+    // pointerup (capture stolen, panel hidden mid-drag), stays true forever and gags both the
+    // rAF loop and its PLAY_PROGRESS fallback.
+    curTime = 0;
+    scrubbing = false;
     el.classList.remove('is-error');
     titleEl.textContent = set.title;
     noteEl.hidden = true;
@@ -440,6 +484,8 @@ export function initSetPlayer(mount) {
   // own events - there is no DOM element here to addEventListener on.
   const onPlay = () => {
     curPaused = false;
+    clearTimeout(playWatchdog);
+    if (!el.classList.contains('is-error')) noteEl.hidden = true;
     el.classList.add('is-playing');
     disc.setAttribute('aria-label', `Pause ${current.title}`);
     miniBtn.setAttribute('aria-label', 'Pause');
@@ -469,6 +515,10 @@ export function initSetPlayer(mount) {
     if (!frame && !scrubbing) showProgress(curTime);
   };
   const onError = () => {
+    // a real failure outranks the watchdog's guess, and otherwise its timer would land three
+    // seconds later and replace this message with the milder one
+    clearTimeout(playWatchdog);
+    pendingPlay = false;
     el.classList.add('is-error');
     noteEl.textContent = "Couldn't load this set - check your connection.";
     noteEl.hidden = false;
@@ -479,12 +529,16 @@ export function initSetPlayer(mount) {
     widget.setVolume(curVolume); // a fresh player per track swap, so re-apply every time
     if (pendingPlay) {
       pendingPlay = false;
-      widget.play();
+      askPlay();
     }
     widget.getDuration((ms) => {
       curDuration = ms / 1000;
       totalEl.textContent = clock(duration());
       announce(audio.currentTime);
+      // The widget can report PLAY before it reports a duration, and until it has one
+      // showProgress() paints a ratio of zero - so the loop could be running against a bar
+      // pinned at 0%, or not running at all if PLAY landed while frame was still 0.
+      if (!curPaused && !frame) frame = requestAnimationFrame(tick);
     });
   };
 
@@ -535,6 +589,7 @@ export function initSetPlayer(mount) {
   return function dispose() {
     ro.disconnect();
     cancelAnimationFrame(frame);
+    clearTimeout(playWatchdog);
     widget?.pause();
     iframeEl?.remove();
     el.remove();
