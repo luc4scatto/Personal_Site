@@ -63,6 +63,11 @@ export function initAnimations() {
         duration: 0.9,
         ease: 'power3.out',
         scrollTrigger: { trigger: el, start: 'top 85%' },
+        // Firefox keeps the transform/clip-path compositing layer from the tween's start
+        // state painted behind the finished text - a blurred ghost of the heading, offset
+        // by the -30px it started at. Chrome drops that layer on its own; Firefox needs
+        // the inline props gone before it will.
+        onComplete: () => gsap.set(el, { clearProps: 'clipPath,transform' }),
       },
     );
   });
