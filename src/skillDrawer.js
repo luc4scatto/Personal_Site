@@ -1182,6 +1182,7 @@ export function initSkillDrawer(host, strip) {
   // 1.7 is GSAP's own default (~10% past the target), 3 lands near 8 degrees on this arc.
   // 'power2.inOut' here turns the flex off without touching anything else.
   const BEND_EASE = 'back.out(3)';
+  const SHEET_LEAD = 0.45; // the share of the card's run the sheet takes to unroll (see lift())
   /** The sheet's climb out of the rim, driven here rather than by its own CSS transition.
    *  CSS3DRenderer re-inserts a folder's element when the object changes parent - which is
    *  what scene.attach() does on a pick - and a transition never starts on an element the
@@ -1211,17 +1212,7 @@ export function initSkillDrawer(host, strip) {
         y: 0,
         duration,
         ease,
-        onComplete: () => {
-          restSheet(f);
-          // The close control only exists once there is a card under it. It hangs off the
-          // folder's box rather than off the sheet, so while the sheet is still climbing it
-          // would sit in the empty space above it - and its own CSS delay could not hold it
-          // back, for the same reason the sheet's transition never ran: the element has just
-          // been re-inserted, and a transition does not start on one the browser has only now
-          // inserted, so it jumped straight to opaque. This class lands hundreds of frames
-          // after that insert, where a transition behaves like any other.
-          f.el.classList.add('is-landed');
-        },
+        onComplete: () => restSheet(f),
       },
     );
   }
@@ -1273,10 +1264,22 @@ export function initSkillDrawer(host, strip) {
   function lift(f, duration) {
     const { pos, scale } = pickTarget();
     const ease = CARD_EASE;
-    if (duration) riseSheet(f, duration, ease);
+    // The sheet is out of the file by the time the card is out of it, not by the time it lands.
+    // Sharing the travel's clock and curve, 64% of it was still below the folder's clipping box
+    // at 43% of the run: the card flew as a slice cut off by a hard edge that only closed on
+    // landing - a mask catching up with the card. Front-loaded, it unrolls during the climb,
+    // where being drawn out of a slot is what it looks like anyway, and flies whole.
+    if (duration) riseSheet(f, duration * SHEET_LEAD, 'power2.out');
     // up out of its slot first, then forward to the spot - see CLEAR
     const over = f.obj.position.clone().setY(f.obj.position.y + CLEAR);
-    arcTo(f, pos, duration, ease, over);
+    // The close control only exists once there is a card under it, and only on a card that
+    // has stopped: it hangs off the folder's box, and its own CSS delay could not hold it back,
+    // for the same reason the sheet's transition never ran - the element has just been
+    // re-inserted, and a transition does not start on one the browser has only now inserted,
+    // so it jumped straight to opaque. This class lands at the end of the run, hundreds of
+    // frames after that insert, where a transition behaves like any other. Off the travel, not
+    // off the sheet, since the sheet now finishes first (SHEET_LEAD).
+    arcTo(f, pos, duration, ease, over, () => f.el.classList.add('is-landed'));
     gsap.to(f.obj.scale, { x: scale, y: scale, z: scale, duration, ease, onUpdate: render });
     // The turn waits out the first fifth of the run, and this is what keeps the card from
     // cutting through the ones filed in front of it. In the file every folder is a plane
