@@ -283,6 +283,34 @@ export function initSkillDrawer(host, strip) {
   hintArrow.append(hintArrowDefs, hintArrowPath);
   host.appendChild(hintArrow);
 
+  // The index's touch handle. A finger on a folder is a tap on it - pointerdown lets the
+  // folders take their own clicks - so on a tablet there was no way to walk through the tabs
+  // the way a mouse does by hovering them. This rail runs along the drawer's near side and
+  // does the hover's job: the folder beside the finger turns and peeks, and stays up when it
+  // lets go, to be opened with a tap on its tab. Touch only, decided once at load like
+  // DRAWER_MODE; aria-hidden because it only doubles the folders, which keep their own focus
+  // and keys. Screen space, not a CSS3DObject: laid on the slanted side wall it would be a
+  // foreshortened sliver, too thin to hit.
+  const scrub = coarsePointer ? document.createElement('div') : null;
+  const scrubThumb = scrub && document.createElement('span');
+  let scrubKey = ''; // last transform written, so a still drawer costs no style writes
+  let scrubLen = 0; // the drawn rail's length, px
+  let scrubS0 = 0; // where the drawn rail starts and ends along the wall, 0-1 (see placeScrub)
+  let scrubS1 = 1;
+  let scrubAvoid = null; // the set player's box in host px, or null until it is mounted
+  let scrubAvoidStale = true;
+  let peeked = null; // the folder the rail has lifted
+  const scrubA = new THREE.Vector2(); // near end of the rail, host px
+  const scrubB = new THREE.Vector2(); // far end
+  const scrubP = new THREE.Vector3(); // scratch
+  if (scrub) {
+    scrub.className = 'drawer__scrub';
+    scrub.setAttribute('aria-hidden', 'true');
+    scrubThumb.className = 'drawer__scrub-thumb';
+    scrub.appendChild(scrubThumb);
+    host.appendChild(scrub);
+  }
+
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envRT = pmrem.fromScene(new RoomEnvironment(), 0.04);
   scene.environment = envRT.texture;
@@ -796,6 +824,7 @@ export function initSkillDrawer(host, strip) {
       host.classList.toggle('is-shut', (shutState = shutNow));
       if (shutNow) host.classList.remove('has-opened');
     }
+    if (scrub && !shutNow) placeScrub();
     renderer.render(scene, camera);
     css.render(scene, camera);
   }
@@ -1096,6 +1125,7 @@ export function initSkillDrawer(host, strip) {
   }
 
   function resize() {
+    scrubAvoidStale = true;
     w = host.clientWidth;
     h = host.clientHeight;
     if (!w || !h) return;
@@ -1173,7 +1203,7 @@ export function initSkillDrawer(host, strip) {
     // ...and PEEK_REM off that when the pick came from the mouse, because the folder under it
     // is already peeking: started from the filed value, the sheet dropped those 2rem in a
     // single frame before it began to climb, which is the knock you feel on the click itself.
-    const peek = f.el.matches(':hover') ? PEEK_REM : 0;
+    const peek = f.el.matches(':hover') || f.el.classList.contains('is-peek') ? PEEK_REM : 0;
     gsap.fromTo(
       sheet,
       { y: CARD_H - (TAB_REM + peek) * rem },
@@ -1272,6 +1302,10 @@ export function initSkillDrawer(host, strip) {
   function select(f) {
     if (active === f) return close();
     if (active) collapse(active);
+    // A peeked folder keeps its .is-peek until it is filed back (collapse): riseSheet() reads
+    // it to start the climb from the peek rather than dropping 2rem first. Any other peek goes.
+    if (peeked === f) peeked = null;
+    else unpeek();
     active = f;
     f.el.classList.add('is-open');
     f.el.setAttribute('aria-expanded', 'true');
@@ -1295,6 +1329,7 @@ export function initSkillDrawer(host, strip) {
   }
 
   function collapse(f) {
+    f.el.classList.remove('is-peek');
     // aria updates now, the visual close deferred - see below
     f.el.setAttribute('aria-expanded', 'false');
     f.el.querySelector('.folder__close').tabIndex = -1;
@@ -1371,6 +1406,150 @@ export function initSkillDrawer(host, strip) {
     });
   }
 
+  // ---- the touch rail (see `scrub` above) ------------------------------------------------
+  /** Host px of a point halfway up the near side wall's outer face at world depth `z`. */
+  function wallPoint(z, out) {
+    scrubP.set(W / 2, 0, 0);
+    drawer.localToWorld(scrubP);
+    scrubP.z = z;
+    scrubP.project(camera);
+    return out.set(((scrubP.x + 1) / 2) * w, ((1 - scrubP.y) / 2) * h);
+  }
+  const SCRUB_INSET = 0.08; // the rail's margin at each end of the wall, as a share of its length
+  const SCRUB_BACK = 0.06; // how far past the middle the rail is pushed, as a share of the wall
+  const SCRUB_CLEAR_PX = 8; // air kept between the rail's end and the set player
+  // The set player sits in the box's lower right, and on a tablet held upright the wall's
+  // line runs straight through it. Read once per resize, not per frame: the player never
+  // moves inside the box on its own. Hidden or not, it keeps the same box.
+  function avoidRect() {
+    if (!scrubAvoidStale) return scrubAvoid;
+    const p = host.parentElement?.querySelector('.set-player');
+    if (!p) return null; // mounted a moment after the drawer; asked again next frame
+    const r = p.getBoundingClientRect();
+    const hr = host.getBoundingClientRect();
+    const m = SCRUB_CLEAR_PX + 22; // plus half the hit strip's height
+    scrubAvoid = {
+      l: r.left - hr.left - m,
+      t: r.top - hr.top - m,
+      r: r.right - hr.left + m,
+      b: r.bottom - hr.top + m,
+    };
+    scrubAvoidStale = false;
+    return scrubAvoid;
+  }
+  // When the player is in the way the rail is drawn
+  // shorter and the finger's travel along it is stretched back over the whole wall, the way a
+  // scrollbar's track stands for the whole page: cut short instead, every folder past the cut
+  // would have had nothing left to reach it with.
+  // Laid halfway up the wall's outer face and measured in the drawer's space, so it is part of the
+  // furniture: the near end rides the drawer's front, and the far end stops at the cabinet's
+  // mouth, where the wall goes in - the rail comes out, and grows, as the drawer does.
+  function placeScrub() {
+    wallPoint(drawer.position.z + D / 2, scrubA);
+    wallPoint(Math.max(drawer.position.z - D / 2, CAB_MOUTH), scrubB);
+    const dx = scrubB.x - scrubA.x;
+    const dy = scrubB.y - scrubA.y;
+    const len = Math.hypot(dx, dy) || 1;
+    let free = 1; // how far along the wall the rail can run before it meets the player
+    const box = avoidRect();
+    if (box) {
+      for (let k = 0; k <= 1; k += 0.01) {
+        const x = scrubA.x + dx * k;
+        const y = scrubA.y + dy * k;
+        if (x > box.l && x < box.r && y > box.t && y < box.b) {
+          free = Math.max(0.25, k); // never a stub too short to scrub with
+          break;
+        }
+      }
+    }
+    // Centred on the wall, with the same margin at both ends, as long as the player leaves room
+    // for a centred rail worth having; where it doesn't (a tablet held upright) it starts at the
+    // front and runs up to the player instead.
+    const centred = Math.min(1 - 2 * SCRUB_INSET, 2 * free - 1);
+    if (centred >= 0.25) {
+      // Pushed back past the true middle: perspective makes the near margin read wider than
+      // the far one, so an even split looks front-heavy. Never past what the player leaves.
+      scrubS1 = Math.min(free, (1 + centred) / 2 + SCRUB_BACK);
+      scrubS0 = scrubS1 - centred;
+    } else {
+      scrubS0 = 0;
+      scrubS1 = free;
+    }
+    const x0 = scrubA.x + dx * scrubS0;
+    const y0 = scrubA.y + dy * scrubS0;
+    const key = `translate(${x0.toFixed(1)}px,${y0.toFixed(1)}px) rotate(${Math.atan2(dy, dx).toFixed(4)}rad)`;
+    const drawn = len * (scrubS1 - scrubS0);
+    if (key === scrubKey && drawn === scrubLen) return;
+    scrubKey = key;
+    scrubLen = drawn;
+    scrub.style.width = `${drawn.toFixed(1)}px`;
+    scrub.style.transform = key;
+  }
+  // 0 at the near end, 1 at the far one: where `x`,`y` falls along the rail
+  const alongScrub = (x, y) => {
+    const dx = scrubB.x - scrubA.x;
+    const dy = scrubB.y - scrubA.y;
+    return ((x - scrubA.x) * dx + (y - scrubA.y) * dy) / (dx * dx + dy * dy || 1);
+  };
+  const scrubTmp = new THREE.Vector2();
+  function peek(f) {
+    if (f === peeked) return;
+    unpeek();
+    if (!f || f === active) return;
+    peeked = f;
+    f.el.classList.add('is-peek');
+    rotateTo(f, HOVER_QUAT, 0.2, 'power3.out');
+  }
+  function unpeek() {
+    if (!peeked) return;
+    peeked.el.classList.remove('is-peek');
+    if (peeked !== active) rotateTo(peeked, RESTING_QUAT, 0.2, 'power3.out');
+    peeked = null;
+  }
+  // Nearest folder to the finger, measured in the rail's own screen terms rather than by
+  // splitting it into equal parts: perspective packs the far tabs closer together, so an even
+  // split would drift off the folder actually beside the finger.
+  function scrubAt(e) {
+    const r = host.getBoundingClientRect();
+    // the finger's place on the drawn rail, stretched over the whole wall
+    const t = THREE.MathUtils.clamp(
+      (alongScrub(e.clientX - r.left, e.clientY - r.top) - scrubS0) / (scrubS1 - scrubS0),
+      0,
+      1,
+    );
+    let best = null;
+    let bestD = Infinity;
+    let bestT = t;
+    for (const f of folders) {
+      if (f === active || f.pe === 'none') continue; // still in the cabinet, or out of the file
+      const p = wallPoint(drawer.position.z + rail.position.z + f.z0, scrubTmp);
+      const ft = alongScrub(p.x, p.y);
+      const d = Math.abs(ft - t);
+      if (d < bestD) ((best = f), (bestD = d), (bestT = ft));
+    }
+    peek(best);
+    scrubThumb.style.transform = `translateX(${(THREE.MathUtils.clamp(bestT, 0, 1) * scrubLen).toFixed(1)}px)`;
+  }
+  if (scrub) {
+    let scrubbing = false;
+    scrub.addEventListener('pointerdown', (e) => {
+      e.stopPropagation(); // the host's own pointerdown would start a drawer or index drag
+      scrubbing = true;
+      try {
+        scrub.setPointerCapture(e.pointerId);
+      } catch {
+        // same as the host's grab: the moves still arrive without capture
+      }
+      scrubAt(e);
+    });
+    scrub.addEventListener('pointermove', (e) => scrubbing && scrubAt(e));
+    // the peek stays where the finger left it - lifting it was the point, and the tap that
+    // opens it is on the tab itself
+    const end = () => (scrubbing = false);
+    scrub.addEventListener('pointerup', end);
+    scrub.addEventListener('pointercancel', end);
+  }
+
   // ---- dragging ----------------------------------------------------------------------
   // Two drags share the canvas. Grab the drawer's face or its handle and the whole drawer
   // runs in and out; grab anywhere else and you walk your fingers through the index.
@@ -1407,6 +1586,7 @@ export function initSkillDrawer(host, strip) {
   // like a snappier one the moment a visitor touched the handle themselves.
   const DRAWER_RUN = 1.5;
   function runDrawer() {
+    unpeek();
     const shut = drawer.position.z < (SHUT_Z + OPEN_Z) / 2;
     const run = () => {
       // GSAP overwrites nothing by default, so two clicks on the handle left two tweens
@@ -1458,6 +1638,7 @@ export function initSkillDrawer(host, strip) {
       revealed = true;
       startDrawerZ = drawer.position.z;
       close(); // an open card would ride out over the cabinet while the drawer shuts
+      unpeek();
     } else {
       dragMode = 'index';
       startZ = railZ;

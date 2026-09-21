@@ -964,6 +964,76 @@
   opacity: 1;
 }
 
+/* The touch rail along the drawer's near side (skillDrawer.js, `scrub`; only created on a
+   coarse pointer). skillDrawer.js writes its width and a translate+rotate from the side
+   wall's projected edge, so the box is laid out from its own top-left and turned about its
+   left end. 44px tall is the hit target; the line drawn in it is 3px. Hidden while the drawer
+   is shut and while a card is open, since an overlaid card covers what it would point at. */
+#skill-drawer.is-live .drawer__scrub {
+  position: absolute;
+  top: -22px;
+  left: 0;
+  z-index: 3;
+  height: 44px;
+  transform-origin: 0 50%;
+  touch-action: none;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.35s var(--ease-out),
+    visibility 0s linear 0.35s;
+}
+
+#skill-drawer.is-live .drawer__scrub::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 999px;
+  /* a slot cut in the steel, not a line drawn on it: dark inside, a lit lip along its lower
+     edge. A light line alone vanished against the wall it now sits on. */
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow:
+    inset 0 1px 1px rgba(0, 0, 0, 0.8),
+    0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+#skill-drawer.is-live .drawer__scrub-thumb {
+  position: absolute;
+  top: 50%;
+  left: -6px;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: 50%;
+  /* polished, where the drawer is brushed: brighter than the steel around it, with a hard
+     highlight up-left (the same side the scene is lit from) and a dark ring to cut it out of
+     the metal it slides over */
+  background: radial-gradient(
+    circle at 35% 30%,
+    #ffffff 0,
+    #e3e6ea 22%,
+    #9ba1a9 58%,
+    #5b6068 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.75),
+    0 2px 4px rgba(0, 0, 0, 0.6);
+  transition: transform 0.12s var(--ease-out);
+}
+
+#skill-drawer.is-live .drawer__scene:not(.is-shut):not(.has-open) .drawer__scrub {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.35s var(--ease-out),
+    visibility 0s linear;
+}
+
 /* the CSS3D layer rides above the metal; it must not swallow the drag, so only the folders
    themselves take pointer events */
 #skill-drawer.is-live .drawer__css {
@@ -1621,6 +1691,12 @@
   .folder:hover .folder__sheet {
     transform: translateY(calc(100% - 5.4rem));
   }
+}
+
+/* The same peek, lifted by the touch rail (.drawer__scrub) instead of a mouse. Twin of the
+   hover rule above and of PEEK_REM in skillDrawer.js - change one, change all three. */
+.folder.is-peek .folder__sheet {
+  transform: translateY(calc(100% - 5.4rem));
 }
 
 .folder:focus-visible {
