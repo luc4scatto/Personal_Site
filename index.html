@@ -34,6 +34,17 @@
         ]
       }
     </script>
+    <!-- The drawer's flat skills wall is real HTML (the phone, reduced-motion and failed-import
+         fallback), and main.js is a module: it runs after first paint, so on a drawer-capable
+         screen the wall flashed for a frame before the 3D drawer took over. Decided here, before
+         paint, with the same test as DRAWER_MODE in src/main.js - change one, change both. -->
+    <script>
+      if (
+        matchMedia('(min-width: 701px)').matches &&
+        !matchMedia('(prefers-reduced-motion: reduce)').matches
+      )
+        document.documentElement.classList.add('drawer-pending');
+    </script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>

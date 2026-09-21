@@ -492,6 +492,7 @@ if (DRAWER_MODE) {
     })
     // the metal failed, so hand the section back to the wall it would have replaced
     .catch(() => {
+      document.documentElement.classList.remove('drawer-pending'); // see index.html's <head>
       initSkillsWall();
       if (!IS_PHONE_SKILLS_LAYOUT) mountSets();
     });

@@ -1572,6 +1572,14 @@
   display: none;
 }
 
+/* ...and never shown on the way there: .drawer-pending is set in index.html's <head>, before
+   first paint, on the screens that will get the drawer. visibility, not display, so the section
+   keeps the height it had until .is-live swaps the layout. main.js drops the class if the
+   drawer fails to load, handing the wall back. */
+.drawer-pending #skill-drawer:not(.is-live) .drawer__strip {
+  visibility: hidden;
+}
+
 /* ---- a folder ---- */
 
 /* The box is always the full card, and so is the sheet inside it. At rest the sheet sits
