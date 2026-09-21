@@ -202,8 +202,9 @@ export function initSetPlayer(mount) {
   // progress) needed no changes when the real element underneath became a hidden iframe.
   // curDuration starts NaN, not 0, so duration()'s Number.isFinite() fallback below still
   // works before the widget has reported anything - the same state a fresh <audio> is in.
+  // `widget` is always the engine the transport is driving (cur.widget); see the engine pair
+  // below for why there are two.
   let widget = null;
-  let iframeEl = null;
   let curTime = 0;
   let curDuration = NaN;
   let curPaused = true;
@@ -245,12 +246,36 @@ export function initSetPlayer(mount) {
     },
   };
 
+  // A touch device refuses any play that isn't answered inside the tap, and the widget can't
+  // answer the first one in time: its first play() has to fetch the stream URL before it can
+  // call play() on its own media element, and by the time that comes back (~250ms) iOS no
+  // longer counts it as part of the gesture - one PLAY, one PAUSE, silence. A second press
+  // worked because the stream was resolved by then. So on touch every engine spends that
+  // first, doomed play itself, muted, as soon as it is READY, and the visitor's press is the
+  // one that finds the stream ready. Desktop never had the problem and skips it.
+  const WARM = matchMedia('(pointer: coarse)').matches;
+  function startWarm(eng) {
+    eng.warmed = true;
+    eng.warming = true;
+    eng.widget.setVolume(0);
+    eng.widget.play();
+    eng.warmTimer = setTimeout(() => endWarm(eng), 4000); // iOS may answer with nothing at all
+  }
+  function endWarm(eng) {
+    if (!eng.warming) return;
+    eng.warming = false;
+    clearTimeout(eng.warmTimer);
+    eng.widget.seekTo(0);
+    if (eng === cur) eng.widget.setVolume(curVolume);
+  }
+
   // Every request for playback goes through here, so there is one place that knows a PLAY is
   // owed and one timer watching for it. Without this a refused start leaves the transport
   // showing Pause over a bar that never moves - the player looks broken when it is only
   // waiting for a tap it never asked for.
   let playWatchdog = 0;
   function askPlay() {
+    endWarm(cur);
     widget.play();
     clearTimeout(playWatchdog);
     playWatchdog = setTimeout(() => {
@@ -261,55 +286,82 @@ export function initSetPlayer(mount) {
     }, PLAY_WAIT);
   }
 
-  /** Creates the iframe and widget on the first call; every later call reuses them via
-   *  widget.load(), which SoundCloud's own docs describe as reloading the iframe's content
-   *  in place - the JS widget object and its bound listeners stay valid. `auto_play` is passed
-   *  as a widget option so a track-to-track advance can stay inside SoundCloud's own load/ready
-   *  sequencing, but it is not trusted on its own: see the reuse branch. */
-  function engineLoad(trackUrl, play) {
-    if (widget) {
-      // auto_play alone is not enough, and the tablet is where that shows: load() replaces
-      // the iframe's document, and the new one has no user activation of its own, so iOS
-      // ignores auto_play outright. Nothing then calls play(), no PLAY event arrives, onPlay
-      // never runs, and the rAF loop below - which only ever restarts from onPlay - stays
-      // dead: a frozen progress bar over silence. So arm pendingPlay the same way the
-      // first-load branch does and let onReady ask for playback explicitly.
-      pendingPlay = play;
-      widget.load(trackUrl, { auto_play: play, callback: onReady, ...WIDGET_CHROME });
-      // And ask again right here, inside the click that caused this. iOS grants playback to
-      // the widget's iframe off the parent's gesture - that is why pressing play works at all
-      // through a hidden cross-origin frame - but only while the gesture is still being
-      // processed. onReady lands in a later task, long after it has expired, which is why the
-      // next set loaded silently on iPad and played on desktop. This call is still inside it.
-      // Safe to send before the load has landed: play is only ever true here when the previous
-      // set was already playing, so the worst case is a redundant play on a track that is
-      // already playing. pendingPlay stays armed as the fallback for whoever gets there first.
-      if (play) askPlay();
-      return;
-    }
+  // One engine per set, all made and warmed up front. Changing set with widget.load() replaces
+  // the iframe's document, and the new one has the same cold stream as the very first play plus
+  // no user activation of its own: on iPad the next set started and stopped on its own. A second
+  // engine reloaded and warmed behind the playing one failed differently but just as surely:
+  // iOS lets a page play one media element at a time, so the spare's muted warm-up play paused
+  // the set being listened to. So nothing is ever loaded or warmed once audio is running - every
+  // set has its own iframe from page load, warmed while nothing plays yet, and "next" is only a
+  // swap inside the click: play the new engine, pause the old one. An auto-advance at the end of
+  // a set has no tap behind it, so on iOS it can still stop there: the watchdog then asks for one.
+  let cur = null;
+  const engines = new Map(); // track url -> engine
+  let engineSeq = 0;
+  function makeEngine(trackUrl) {
+    const eng = {
+      url: trackUrl,
+      widget: null,
+      ready: false,
+      warmed: false,
+      warming: false,
+      failed: false,
+    };
     const params = new URLSearchParams({
       url: trackUrl,
-      auto_play: 'false', // the very first load is never a play; the button always is
+      auto_play: 'false', // loading is never a play; the button always is
       ...Object.fromEntries(Object.entries(WIDGET_CHROME).map(([k, v]) => [k, String(v)])),
     });
-    iframeEl = document.createElement('iframe');
-    iframeEl.id = ENGINE_ID;
-    iframeEl.hidden = true;
-    iframeEl.setAttribute('allow', 'autoplay');
-    iframeEl.src = `https://w.soundcloud.com/player/?${params}`;
-    document.body.appendChild(iframeEl);
-    if (play) pendingPlay = true;
+    const id = `${ENGINE_ID}-${engineSeq++}`;
+    eng.iframe = document.createElement('iframe');
+    eng.iframe.id = id;
+    eng.iframe.hidden = true;
+    eng.iframe.setAttribute('allow', 'autoplay');
+    eng.iframe.src = `https://w.soundcloud.com/player/?${params}`;
+    document.body.appendChild(eng.iframe);
     loadWidgetScript().then(() => {
-      widget = window.SC.Widget(ENGINE_ID);
-      widget.bind(window.SC.Widget.Events.READY, onReady);
-      widget.bind(window.SC.Widget.Events.PLAY, onPlay);
-      widget.bind(window.SC.Widget.Events.PAUSE, onPause);
-      widget.bind(window.SC.Widget.Events.FINISH, onEnded);
-      widget.bind(window.SC.Widget.Events.ERROR, onError);
-      widget.bind(window.SC.Widget.Events.PLAY_PROGRESS, onProgress);
+      const w = window.SC.Widget(id);
+      const E = window.SC.Widget.Events;
+      eng.widget = w;
+      if (eng === cur) widget = w;
+      // every event is routed by engine: only `cur` ever reaches the transport, and a warm-up
+      // is answered here without the transport ever seeing it
+      w.bind(E.READY, () => engineReady(eng));
+      w.bind(E.PLAY, () => (eng.warming ? w.pause() : eng === cur && onPlay()));
+      w.bind(E.PAUSE, () => (eng.warming ? endWarm(eng) : eng === cur && onPause()));
+      w.bind(E.FINISH, () => eng === cur && onEnded());
+      w.bind(E.ERROR, () => {
+        eng.failed = true;
+        if (eng === cur) onError();
+      });
+      w.bind(E.PLAY_PROGRESS, (e) => eng === cur && !eng.warming && onProgress(e));
     });
+    return eng;
   }
 
+  function engineReady(eng) {
+    eng.ready = true;
+    if (eng === cur) return onReady();
+    eng.widget.setVolume(0); // a waiting engine is never heard until it is the current one
+    if (WARM && !eng.warmed) startWarm(eng);
+  }
+
+  function engineLoad(trackUrl, play) {
+    if (!engines.size) for (const s of order) engines.set(s.track, makeEngine(s.track));
+    const old = cur;
+    cur = engines.get(trackUrl);
+    widget = cur.widget; // null until the widget script lands; makeEngine fills it in then
+    pendingPlay = play;
+    // synchronous, so askPlay() still runs inside the click that asked for it; otherwise
+    // pendingPlay waits for this engine's own READY
+    if (cur.ready) onReady();
+    if (old && old !== cur) {
+      old.widget?.pause();
+      // the old engine's own PAUSE no longer reaches the transport, so a switch that isn't a
+      // play (the crate running out, back to the top) repaints the stop itself
+      if (!play && !curPaused) onPause();
+    }
+  }
   let peaks = null; // the current set's 1000 values, or null while loading
   const peakCache = new Map();
 
@@ -480,8 +532,8 @@ export function initSetPlayer(mount) {
     audio.volume = Number(volumeInput.value) / 100;
   });
 
-  // These are bound once, inside engineLoad's first-run branch, straight to the widget's
-  // own events - there is no DOM element here to addEventListener on.
+  // Bound per engine in makeEngine(), which only lets the current one through - there is no
+  // DOM element here to addEventListener on.
   const onPlay = () => {
     curPaused = false;
     clearTimeout(playWatchdog);
@@ -526,11 +578,12 @@ export function initSetPlayer(mount) {
   // Fired from engineLoad's READY bind - once for the very first track, and again (per the
   // widget's own docs) each time load() swaps in a new one.
   const onReady = () => {
-    widget.setVolume(curVolume); // a fresh player per track swap, so re-apply every time
     if (pendingPlay) {
       pendingPlay = false;
-      askPlay();
-    }
+      askPlay(); // first, so it is the first message a click sends
+    } else if (WARM && !cur.warmed && curPaused) startWarm(cur);
+    // a waiting engine sits at 0, so the level is re-applied every time one becomes current
+    if (!cur.warming) widget.setVolume(curVolume);
     widget.getDuration((ms) => {
       curDuration = ms / 1000;
       totalEl.textContent = clock(duration());
@@ -591,7 +644,7 @@ export function initSetPlayer(mount) {
     cancelAnimationFrame(frame);
     clearTimeout(playWatchdog);
     widget?.pause();
-    iframeEl?.remove();
+    for (const e of engines.values()) e.iframe.remove();
     el.remove();
   };
 }
