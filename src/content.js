@@ -42,9 +42,10 @@ export const content = {
       description:
         'Real-time interactive installation built with TouchDesigner and Unreal Engine, showcased at Vivatech in Paris.',
     },
-    two: {
-      title: 'More Projects',
-      description: 'New projects are in the works - check back soon.',
+    pipeline: {
+      title: 'Pipeline Projects',
+      description:
+        'Five in-house tools for Maya, Unreal Engine, Omniverse and PowerPoint, each built to remove one slow, manual step from the 3D workflow.',
     },
     three: {
       title: 'Personal project: Homelab',
@@ -157,6 +158,138 @@ export const content = {
       'Hermes Agent':
         'Self-hosted AI agent from Nous Research, reachable over Telegram and Discord instead of a web UI. Builds its own skills from experience and keeps memory across sessions, rather than starting blank every chat.',
     },
+  },
+  // Internal tools built at Thélios. This page is public and so is the repo:
+  // no internal tool names, brands, systems, vendors, paths or real product
+  // codes - only what each tool does, in general terms. The mockups in
+  // pipeline-projects.html follow the same rule (redrawn, fake data).
+  pipelineProjects: {
+    kicker: 'Built at Thélios',
+    meta: 'Thélios · 3D R&D · Python, Maya, Unreal Engine, Omniverse, USD, Qt',
+    intro1:
+      'In the **3D R&D team** at Thélios, a lot of the slow work was not modeling or rendering, it was everything around it: cleaning and naming meshes by hand, rebuilding the same variants for every colorway, renaming hundreds of renders, assembling presentation decks slide by slide.',
+    intro2:
+      'None of these tools were planned as a system. Each one started from a specific problem the team kept hitting, and grew until that problem went away. They run inside **Maya**, **Unreal Engine** and **NVIDIA Omniverse**, or as standalone **Python** desktop apps.',
+    disclaimer:
+      'Built in-house. Tool names, data and interfaces shown here are generalized and redrawn - no proprietary code, data or assets.',
+    indexHint: 'Five tools, five problems. Pick one.',
+    backCta: '← Back to projects',
+    // Rendered by src/pipelineProjects.js into the index tiles and each
+    // chapter's text column. `id` matches the chapter's id in the page.
+    tools: [
+      {
+        id: 'omniverse',
+        name: 'Look-dev panel for Omniverse',
+        stack: 'NVIDIA Omniverse · USD · OpenPBR MaterialX · Python',
+        icon: 'nvidia-omniverse.svg',
+        // pills under the title: the tools each one is built with (icon optional)
+        highlights: [
+          { icon: 'usd.svg', label: 'USD' },
+          { icon: 'materialx.svg', label: 'OpenPBR · MaterialX' },
+          { icon: 'python.svg', label: 'Python' },
+          { label: 'Omniverse Kit' },
+        ],
+        problem:
+          'Setting up a look-dev scene meant importing models one by one, hunting materials across a shared library, and rendering previews by hand before anything could be reviewed.',
+        bullets: [
+          'Brings hand-picked prototypes or single models into the scene straight from product data, each one composed into the stage as **USD**',
+          'Searches, creates, updates and copies **OpenPBR** materials authored in **MaterialX**, with thumbnail renders on sample shapes',
+          'Batch-renders the selected SKUs with RTX, with fixed presets for color work or full manual control',
+          'Steps through every model and colorway in the scene to check each look before it goes out',
+        ],
+        idea: 'The whole kit is built around two open standards: **USD** for everything in the scene, from templates to models, and **OpenPBR in MaterialX** for every material, so a look is described once and reads the same in any tool and renderer that speaks them. Materials also stay **portable**: every create or update rewrites texture and master-material links as relative paths, so a folder can move anywhere in the library without breaking a scene.',
+      },
+      {
+        id: 'maya',
+        name: 'Maya prep toolkit',
+        stack: 'Autodesk Maya · Python · Qt',
+        icon: 'autodesk-maya.svg',
+        highlights: [
+          { icon: 'autodesk-maya.svg', label: 'Maya' },
+          { icon: 'python.svg', label: 'Python' },
+          { icon: 'qt-designer.svg', label: 'PySide6' },
+          { label: 'SQL' },
+          { label: 'JSON' },
+        ],
+        problem:
+          'Every artist cleaned, unwrapped and named meshes a little differently, so models arrived downstream inconsistent and had to be fixed again before rendering.',
+        bullets: [
+          'One dockable panel for mesh cleanup: combine, separate, group, freeze, pivot, mirror with automatic left/right naming',
+          'UV presets tuned for lenses and acetate parts, plus a dedicated lightmap UV set',
+          'Diagnostic materials (checker, arrow pattern, RGB) to check UV direction and part separation at a glance',
+          'Exports to Unreal as one FBX per part, after checking every mesh is ready for it',
+          'A second tab looks the model up in product data: its SKUs, and which material goes on which component',
+          'Exports that as JSON, one file per SKU or a whole release at once, ready for the render tools downstream',
+        ],
+        idea: "Naming comes from **product data**, not memory: the panel loads the model's component list and builds a tree, and picking a node renames the selected mesh to the standard convention, suffixes included. Every tool after it can trust the names.",
+      },
+      {
+        id: 'unreal',
+        name: 'Render automation for Unreal',
+        stack: 'Unreal Engine · Python · Editor Utility Widgets',
+        icon: 'unreal-engine.svg',
+        highlights: [
+          { icon: 'unreal-engine.svg', label: 'Unreal Engine' },
+          { icon: 'python.svg', label: 'Python' },
+          { label: 'Editor Utility Widgets' },
+          { label: 'Movie Render Graph' },
+          { label: 'pandas' },
+        ],
+        problem:
+          'Each model ships in many colorways, and every colorway needed its own variant for the beauty, HDR, mirror and shadow passes, set up by hand, then every rendered frame renamed by hand.',
+        bullets: [
+          'Imports new models from the shared folders, skipping anything already in the project',
+          'Builds one Blueprint per model, with lighting channels, LOD settings and an ID material per part',
+          'Creates Level Variant Sets for every pass from a data table, one variant per colorway',
+          'Copies camera and light keyframes across sequences, then drives Movie Render Graph',
+        ],
+        idea: 'Everything is **incremental**: the scripts compare what is already in the project with the data table and only add the difference, so a new colorway is one click, not a rebuild. When the render queue finishes, a hook renames every EXR from frame numbers to Model_Colorway.Camera.',
+      },
+      {
+        id: 'catalogue',
+        name: 'Catalogue deck generator',
+        stack: 'Python · PyQt6 · python-pptx',
+        icon: 'python.svg',
+        highlights: [
+          { icon: 'python.svg', label: 'Python' },
+          { icon: 'qt-designer.svg', label: 'PyQt6' },
+          { label: 'python-pptx' },
+          { label: 'REST APIs' },
+          { label: 'Nuitka' },
+        ],
+        problem:
+          'Seasonal catalogues were assembled by hand in PowerPoint, copying product data from one system, images from another and marketing copy from a third.',
+        bullets: [
+          'Pick a release and a brand, get a finished deck',
+          'Merges product data, PIM attributes and DAM images for every SKU',
+          'Places a hero image and up to seven variant groups per slide, merging identical variants into one card',
+          'Gives variant families their own slides and flags prescription-ready models',
+        ],
+        idea: 'The layout is a small **engine**, not a fixed template: positions are computed from how many variant groups land on each slide, product images are auto-cropped, and one list of slide jobs decides both how many slides exist and what goes on each.',
+      },
+      {
+        id: 'review',
+        name: 'Review deck builder',
+        stack: 'Python · PyQt5 · PowerPoint automation',
+        icon: 'qt-designer.svg',
+        highlights: [
+          { icon: 'python.svg', label: 'Python' },
+          { icon: 'qt-designer.svg', label: 'PyQt5' },
+          { label: 'python-pptx' },
+          { label: 'PowerPoint COM' },
+          { label: 'PyInstaller' },
+        ],
+        problem:
+          'Evaluation decks meant one slide per style, each with renders, worn shots, codes and technical specs typed in by hand.',
+        bullets: [
+          'Finds every style for a release, category and brand, and gives each one a slide',
+          'Places renders and worn shots in layouts tuned for one to six images',
+          'Fills sizes, materials and specs straight from product data',
+          'A second tab splits any finished deck into 4K PNGs, named after the model on each slide',
+        ],
+        idea: 'python-pptx cannot duplicate slides faithfully, so the builder drives **PowerPoint itself** to clone the template, then hands the file back to python-pptx to fill every placeholder.',
+      },
+    ],
   },
   privacy: {
     kicker: 'Privacy',

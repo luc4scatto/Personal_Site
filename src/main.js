@@ -505,6 +505,15 @@ if (homelabDiagram) {
   import('./homelabDiagram.js').then((m) => m.initHomelabDiagram(homelabDiagram));
 }
 
+// pipeline projects page - copy lands after the reveals are measured, so the
+// page grows under ScrollTrigger: refresh once it is in
+if (document.querySelector('#pp-index')) {
+  import('./pipelineProjects.js').then((m) => {
+    m.initPipelineProjects();
+    refreshScrollTriggers();
+  });
+}
+
 // homelab hardware diagram (homelab.html only) — same reasoning as above
 const homelabHardware = document.querySelector('#homelab-hardware');
 if (homelabHardware) {

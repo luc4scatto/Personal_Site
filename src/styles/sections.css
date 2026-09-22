@@ -1956,22 +1956,6 @@
 
 /* stand-in for a real cover, same idiom as homelab's old cover placeholder -
    dashed box + a hand-drawn icon, swapped for a real thumb once there's a project */
-.card-thumb--soon {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border: 1px dashed color-mix(in srgb, var(--text-dim) 40%, transparent);
-  background: color-mix(in srgb, var(--text) 4%, var(--bg));
-  color: var(--text-dim);
-  font-size: 0.85rem;
-}
-
-.card-thumb--soon svg {
-  width: 28px;
-  height: 28px;
-}
 
 .card p {
   color: var(--text-dim);
@@ -2318,7 +2302,8 @@ p.project-specs__kicker {
 /* the rows are buttons but nothing about a tree says "tap me", and on touch
    there is no hover to discover it with — so the invitation is written down,
    and a slow shine sweeps across it so it reads as alive, not a caption */
-.homelab-services-section .section-hint {
+.homelab-services-section .section-hint,
+.pp-hint {
   margin-bottom: 2.5rem;
   font-size: clamp(1.1rem, 2vw, 1.35rem);
   font-weight: 500;
@@ -2350,7 +2335,8 @@ p.project-specs__kicker {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .homelab-services-section .section-hint {
+  .homelab-services-section .section-hint,
+  .pp-hint {
     animation: none;
     background: none;
     color: var(--text-dim);
@@ -3583,5 +3569,1054 @@ p.project-specs__kicker {
 
   .hd-branches {
     margin-left: calc(var(--hd-hub-size) / 2);
+  }
+}
+
+/* ============ Pipeline Projects (pipeline-projects.html) ============
+   Five unrelated in-house tools, each told as problem / what it does / the
+   interesting part, next to a redrawn UI. The mockups are the site's own
+   drawing of each tool: same sections and buttons as the real thing, fake
+   data, no screenshot, logo or template from the original. They are
+   decoration (aria-hidden) except the Omniverse one, whose sections are real
+   <details> and whose View stepper is real buttons. */
+
+.pp-page #tools,
+.pp-page .pp-tool {
+  padding-bottom: calc(var(--space) * 0.4);
+}
+
+.pp-disclaimer {
+  font-size: 0.95rem !important;
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+}
+
+.pp-index {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 1rem;
+}
+
+.pp-index__tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  height: 100%;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  transition:
+    border-color var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
+}
+
+.pp-index__tile:hover,
+.pp-index__tile:focus-visible {
+  border-color: var(--accent);
+}
+
+.pp-index__tile:active {
+  transform: scale(0.98);
+}
+
+.pp-index__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.15;
+}
+
+.pp-index__problem {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pp-tool {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: start;
+}
+
+.pp-tool__stack {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-display);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.pp-tool__text h2 {
+  font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+  margin-bottom: 1.5rem;
+}
+
+.pp-tool__label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 1.5rem 0 0.5rem;
+}
+
+.pp-tool__problem,
+.pp-tool__idea,
+.pp-tool__bullets {
+  color: var(--text-dim);
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.pp-tool__text strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.pp-tool__bullets {
+  padding-left: 1.1rem;
+}
+
+.pp-tool__bullets li + li {
+  margin-top: 0.4rem;
+}
+
+.pp-tool__bullets li::marker {
+  color: var(--accent);
+}
+
+/* sticky on wide screens: the text column is the longer one, the mockup
+   stays beside whatever paragraph is being read */
+@media (min-width: 1025px) {
+  .pp-tool__ui {
+    position: sticky;
+    top: 6rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  /* minmax(0, ...) not 1fr: a bare 1fr track never shrinks below its
+     content's min width, and the mockups' nowrap log lines widened the page */
+  .pp-tool {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- mockup kit ---- */
+.pp-win {
+  --ui-bg: #111;
+  --ui-panel: #171717;
+  --ui-btn: #222;
+  --ui-line: rgba(255, 255, 255, 0.08);
+  --ui-text: #cfcfcf;
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  overflow: hidden;
+  color: var(--ui-text);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  line-height: 1.2;
+  box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.9);
+}
+
+
+.pp-win__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.9rem;
+}
+
+.pp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  background: var(--ui-btn);
+  border: 1px solid transparent;
+  color: var(--ui-text);
+  font: inherit;
+  white-space: nowrap;
+}
+
+button.pp-btn {
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+button.pp-btn:hover,
+button.pp-btn:focus-visible {
+  border-color: var(--accent);
+}
+
+button.pp-btn:active {
+  transform: scale(0.97);
+}
+
+.pp-btn--primary {
+  background: var(--accent);
+  color: #0a0a0a;
+  font-weight: 500;
+}
+
+.pp-btn--ghost {
+  background: none;
+  border-color: var(--ui-line);
+  color: var(--accent-2);
+}
+
+.pp-btn--big {
+  padding: 0.8rem;
+  font-size: 0.9rem;
+}
+
+.pp-btn svg {
+  width: 1.8rem;
+  height: auto;
+  color: currentColor;
+}
+
+.pp-btn--icon svg {
+  width: 2.2rem;
+}
+
+.pp-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.pp-row--wrap {
+  flex-wrap: wrap;
+}
+
+.pp-grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.pp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.pp-field > span:first-child,
+.pp-label {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+}
+
+.pp-label {
+  width: 4.5rem;
+  flex-shrink: 0;
+}
+
+.pp-input {
+  display: block;
+  padding: 0.5rem 0.6rem;
+  border-radius: 6px;
+  background: #0b0b0b;
+  border: 1px solid var(--ui-line);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 2.6rem;
+}
+
+.pp-input--select {
+  padding-right: 1.4rem;
+  background:
+    linear-gradient(45deg, transparent 50%, var(--text-dim) 50%) calc(100% - 0.75rem) 50% / 0.3rem 0.3rem no-repeat,
+    linear-gradient(-45deg, transparent 50%, var(--text-dim) 50%) calc(100% - 0.45rem) 50% / 0.3rem 0.3rem no-repeat,
+    #0b0b0b;
+}
+
+.pp-input--search::before {
+  content: '⌕ ';
+  color: var(--text-dim);
+}
+
+.pp-input--path {
+  color: var(--text-dim);
+  font-family: ui-monospace, monospace;
+  font-size: 0.72rem;
+}
+
+.pp-tabs {
+  display: flex;
+  gap: 0.2rem;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.pp-tabs > span {
+  padding: 0.45rem 0.7rem;
+  color: var(--text-dim);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.pp-tabs > .is-on {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+.pp-tabs--fill > span {
+  flex: 1;
+  text-align: center;
+}
+
+.pp-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem;
+  background: var(--ui-panel);
+  border-radius: 10px;
+  min-width: 0;
+}
+
+.pp-group__title {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.15rem;
+}
+
+.pp-grid2,
+.pp-grid4 {
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pp-grid4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.pp-table {
+  list-style: none;
+  padding: 0.3rem 0.6rem;
+  background: #0b0b0b;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+}
+
+.pp-table li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+}
+
+.pp-table li + li {
+  border-top: 1px solid var(--ui-line);
+}
+
+.pp-table--cols li {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  justify-items: center;
+}
+
+.pp-table--cols li > :first-child {
+  justify-self: start;
+}
+
+.pp-table__head {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pp-code {
+  color: var(--sec, var(--accent));
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+}
+
+.pp-check,
+.pp-chk::before {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.pp-check.is-on,
+.pp-chk.is-on::before {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.pp-chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 0.6rem;
+}
+
+.pp-chk::before {
+  content: '';
+}
+
+.pp-ok {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+/* ---- Omniverse panel ---- */
+.pp-omni {
+  max-width: 30rem;
+  margin-inline: auto;
+}
+
+.pp-omni__reload {
+  width: 100%;
+}
+
+.pp-omni__sec {
+  border: 1px solid var(--ui-line);
+  border-left: 3px solid var(--sec);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--sec) 6%, var(--ui-panel));
+}
+
+.pp-omni__sec > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.pp-omni__sec > summary::-webkit-details-marker {
+  display: none;
+}
+
+.pp-omni__sec > summary::before {
+  content: '';
+  width: 0.4rem;
+  height: 0.4rem;
+  border-right: 1.5px solid var(--sec);
+  border-bottom: 1.5px solid var(--sec);
+  transform: rotate(-45deg);
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.pp-omni__sec[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.pp-omni__sec > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.pp-omni__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 0.8rem 0.8rem;
+}
+
+.pp-omni__thumbs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pp-ball {
+  width: 3rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #d9a066, #7a4a22 55%, #2a170a);
+}
+
+.pp-ball--flat {
+  border-radius: 6px;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(40, 20, 5, 0.8) 0 12%, transparent 13%),
+    radial-gradient(circle at 70% 60%, rgba(40, 20, 5, 0.7) 0 10%, transparent 11%),
+    #b07840;
+}
+
+.pp-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0 0.2rem;
+}
+
+.pp-view__glasses {
+  width: 9rem;
+  color: var(--text);
+}
+
+.pp-view__glasses path {
+  transition: fill var(--duration-slow) var(--ease-out);
+}
+
+.pp-view__name {
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+}
+
+.pp-view__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.pp-view__dots {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.pp-view__dots i {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.pp-view__dots i.is-on {
+  background: var(--sec);
+}
+
+/* ---- Maya toolkit ---- */
+.pp-maya__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.pp-maya__grid .pp-btn {
+  justify-content: flex-start;
+  padding: 0.4rem 0.6rem;
+}
+
+.pp-swatch {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  background: var(--c, #fff);
+  flex-shrink: 0;
+}
+
+.pp-swatch--checker {
+  border-radius: 2px;
+  background: repeating-conic-gradient(#ddd 0 25%, #333 0 50%) 0 0 / 0.4rem 0.4rem;
+}
+
+.pp-swatch--arrow {
+  border-radius: 2px;
+  background: repeating-linear-gradient(45deg, #ddd 0 2px, #333 2px 4px);
+}
+
+.pp-tree,
+.pp-tree ul {
+  list-style: none;
+  padding: 0;
+}
+
+.pp-tree ul {
+  padding-left: 0.9rem;
+  margin: 0.15rem 0 0.3rem;
+  border-left: 1px solid var(--ui-line);
+}
+
+.pp-tree li {
+  padding: 0.15rem 0.3rem;
+}
+
+.pp-tree > li {
+  color: var(--text);
+}
+
+.pp-tree ul li {
+  color: var(--text-dim);
+}
+
+.pp-tree .is-picked {
+  color: #0a0a0a;
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+/* ---- Unreal widget ---- */
+.pp-seg {
+  display: flex;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.pp-seg > span {
+  flex: 1;
+  text-align: center;
+  padding: 0.45rem 0.2rem;
+  color: var(--text-dim);
+}
+
+.pp-seg > span + span {
+  border-left: 1px solid var(--ui-line);
+}
+
+.pp-seg > .is-on {
+  background: var(--accent-2);
+  color: #0a0a0a;
+}
+
+.pp-log {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  padding: 0.6rem;
+  border-radius: 8px;
+  background: #0b0b0b;
+  border: 1px solid var(--ui-line);
+  overflow-x: auto;
+}
+
+.pp-log p {
+  white-space: nowrap;
+}
+
+.pp-log p + p {
+  margin-top: 0.3rem;
+}
+
+.pp-log b {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.pp-log i {
+  color: var(--accent-2);
+  font-style: normal;
+}
+
+.pp-log--term {
+  color: color-mix(in srgb, var(--accent) 75%, var(--text-dim));
+}
+
+.pp-cursor {
+  animation: pp-blink 1s steps(1) infinite;
+}
+
+@keyframes pp-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---- catalogue slide ---- */
+.pp-slide {
+  aspect-ratio: 16 / 9;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 4%;
+  padding: 4%;
+  border-radius: 6px;
+  background: #ece8e1;
+  color: #1a1a1a;
+}
+
+.pp-slide svg {
+  width: 100%;
+  height: auto;
+  color: #1a1a1a;
+}
+
+.pp-slide__hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4%;
+  min-width: 0;
+}
+
+.pp-slide__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(0.7rem, 1.6vw, 1rem);
+}
+
+.pp-slide__sub {
+  font-size: 0.6rem;
+  color: #666;
+}
+
+.pp-slide__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6%;
+  align-content: center;
+}
+
+.pp-slide__grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.pp-bar {
+  display: block;
+  height: 0.25rem;
+  border-radius: 2px;
+  background: #bdb7ad;
+}
+
+.pp-bar--short {
+  width: 60%;
+}
+
+.pp-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 0.55rem;
+  font-weight: 700;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  background: #1a1a1a;
+  color: #ece8e1;
+}
+
+.pp-caption {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .pp-grid4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pp-row .pp-label {
+    width: 3.6rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-cursor {
+    animation: none;
+  }
+
+  .pp-omni__sec > summary::before,
+  .pp-view__glasses path,
+  .pp-index__tile {
+    transition: none;
+  }
+}
+
+/* the component tree gets the full width under the three button columns,
+   tree on the left, suffixes + rename beside it: stacked it left a tall
+   empty well next to it */
+.pp-maya__tree {
+  grid-column: 1 / -1;
+}
+
+.pp-maya__split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.8rem;
+  align-items: end;
+}
+
+.pp-maya__rename {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* phone: the Maya dock is a picture of breadth, not a manual - four
+   buttons per group say the same thing at a third of the scroll */
+@media (max-width: 560px) {
+  .pp-maya__grid > .pp-group:not(.pp-maya__tree) > .pp-btn:nth-of-type(n + 5) {
+    display: none;
+  }
+}
+
+/* ---- live mockups: every control answers the pointer (see initMockup in
+   src/pipelineProjects.js). Hover = accent edge, press = a small squash,
+   a [data-run] button fills left to right while "busy" then turns accent. */
+.pp-win .pp-btn,
+.pp-win .pp-tabs > span,
+.pp-win .pp-seg > span,
+.pp-win .pp-check,
+.pp-win .pp-chk,
+.pp-win .pp-tree ul li,
+.pp-win .pp-table li:not(.pp-table__head) {
+  cursor: pointer;
+  user-select: none;
+}
+
+.pp-win .pp-btn {
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.pp-win .pp-tabs > span,
+.pp-win .pp-seg > span,
+.pp-win .pp-tree ul li,
+.pp-win .pp-table li {
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pp-win .pp-btn:hover {
+    border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+    background-color: #2a2a2a;
+  }
+
+  .pp-win .pp-btn--primary:hover {
+    background-color: color-mix(in srgb, var(--accent) 85%, #fff);
+  }
+
+  .pp-win .pp-btn--ghost:hover {
+    background-color: color-mix(in srgb, var(--accent-2) 12%, transparent);
+    border-color: var(--accent-2);
+  }
+
+  .pp-win .pp-tabs > span:not(.is-on):hover,
+  .pp-win .pp-seg > span:not(.is-on):hover {
+    color: var(--text);
+  }
+
+  .pp-win .pp-seg > span:not(.is-on):hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .pp-win .pp-tree ul li:not(.is-picked):hover,
+  .pp-win .pp-table li:not(.pp-table__head):not(.is-picked):hover {
+    color: var(--text);
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .pp-win .pp-check:hover,
+  .pp-win .pp-chk:hover::before {
+    border-color: var(--accent);
+  }
+
+  .pp-omni__sec > summary:hover {
+    background-color: color-mix(in srgb, var(--sec) 10%, transparent);
+    border-radius: 10px;
+  }
+}
+
+.pp-win .pp-btn:active {
+  transform: scale(0.96);
+}
+
+.pp-win .pp-btn.is-hit {
+  animation: pp-hit var(--duration-slow) var(--ease-out);
+}
+
+@keyframes pp-hit {
+  from {
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+}
+
+.pp-win .pp-btn.is-running {
+  color: var(--text);
+}
+
+.pp-win .pp-btn.is-running::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: pp-run 900ms linear forwards;
+}
+
+@keyframes pp-run {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.pp-win .pp-btn.is-done {
+  background: color-mix(in srgb, var(--accent) 18%, var(--ui-btn));
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pp-win .pp-btn--primary.is-running,
+.pp-win .pp-btn--primary.is-done {
+  background: #1f2410;
+  color: var(--accent);
+}
+
+.pp-win .pp-btn.is-done::before {
+  content: '✓';
+  font-weight: 600;
+}
+
+.pp-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.pp-panel[hidden] {
+  display: none;
+}
+
+.pp-win .pp-table li.is-picked,
+.pp-tree .is-picked {
+  color: #0a0a0a;
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+.pp-win .pp-table li.is-picked .pp-code {
+  color: #0a0a0a;
+}
+
+.pp-table li {
+  padding-inline: 0.3rem;
+}
+
+.pp-table--c3 li {
+  display: grid;
+  grid-template-columns: 1.6fr 0.8fr 1fr;
+  gap: 0.4rem;
+}
+
+.pp-table--kv li > :last-child {
+  color: var(--text-dim);
+}
+
+.pp-chip {
+  margin-left: auto;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--sec, var(--accent)) 55%, transparent);
+  color: var(--sec, var(--accent));
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+}
+
+.pp-omni__mtlx {
+  align-self: center;
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.pp-omni__mtlx i {
+  font-style: normal;
+  color: var(--sec);
+}
+
+.pp-tabs--small > span {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.72rem;
+}
+
+.pp-maya__preview {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  overflow-wrap: anywhere;
+}
+
+.pp-maya__preview b {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.pp-maya__info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.5rem;
+}
+
+.pp-tool__highlights {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: -0.5rem 0 0.5rem;
+}
+
+.pp-tool__highlights li:has(img) {
+  padding-left: 0.55rem;
+}
+
+.pp-tool__highlights li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-win .pp-btn,
+  .pp-win .pp-tabs > span,
+  .pp-win .pp-seg > span,
+  .pp-win .pp-tree ul li,
+  .pp-win .pp-table li {
+    transition: none;
+  }
+
+  .pp-win .pp-btn:active {
+    transform: none;
+  }
+
+  .pp-win .pp-btn.is-hit,
+  .pp-win .pp-btn.is-running::after {
+    animation: none;
   }
 }
