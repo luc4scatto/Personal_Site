@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pipeline Projects · Luca Scattolin</title>
+    <meta name="description" content="In-house tools for Maya, Unreal Engine, Omniverse and PowerPoint, built for the 3D R&amp;D team at Thélios." />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="canonical" href="https://lucascattolin.com/pipeline-projects.html" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Luca Scattolin" />
+    <meta property="og:url" content="https://lucascattolin.com/pipeline-projects.html" />
+    <meta property="og:title" content="Pipeline Projects · Luca Scattolin" />
+    <meta property="og:description" content="In-house tools for Maya, Unreal Engine, Omniverse and PowerPoint, built for the 3D R&amp;D team at Thélios." />
+    <meta property="og:image" content="https://lucascattolin.com/images/pipeline-projects-cover.webp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Pipeline Projects · Luca Scattolin" />
+    <meta name="twitter:description" content="In-house tools for Maya, Unreal Engine, Omniverse and PowerPoint, built for the 3D R&amp;D team at Thélios." />
+    <meta name="twitter:image" content="https://lucascattolin.com/images/pipeline-projects-cover.webp" />
+  </head>
+  <body class="homelab-page pp-page">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="nav">
+      <a class="nav-logo" href="index.html">LS</a>
+      <nav>
+        <a href="index.html#projects">← Back</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+      <div class="scroll-progress" aria-hidden="true"></div>
+    </header>
+
+    <!-- one glasses outline, reused by every mockup that needs a "product":
+         a drawing, never a render of a real frame -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol id="pp-glasses" viewBox="0 0 120 44">
+        <path d="M4 12h112" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        <path d="M8 12c0 16 6 26 22 26s22-10 22-24c0-2-1-2-2-2H10c-1 0-2 0-2 0z" fill="var(--lens, transparent)" stroke="currentColor" stroke-width="3" stroke-linejoin="round" />
+        <path d="M68 12c0 14 6 26 22 26s22-10 22-26c0 0-1 0-2 0H70c-1 0-2 0-2 0z" fill="var(--lens, transparent)" stroke="currentColor" stroke-width="3" stroke-linejoin="round" />
+        <path d="M52 16c3-4 13-4 16 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+      </symbol>
+    </svg>
+
+    <main id="main-content">
+      <section id="project" class="page-hero">
+        <p class="hero-kicker" data-stagger data-copy="pipelineProjects.kicker">Built at Thélios</p>
+        <h1 data-stagger><span class="accent">Pipeline Projects</span></h1>
+        <p class="project-meta" data-stagger data-copy="pipelineProjects.meta">Thélios · 3D R&amp;D</p>
+      </section>
+
+      <section id="description" class="project-description">
+        <div class="project-description-text">
+          <p data-reveal data-copy="pipelineProjects.intro1"></p>
+          <p data-reveal data-copy="pipelineProjects.intro2"></p>
+          <p class="pp-disclaimer" data-reveal data-copy="pipelineProjects.disclaimer"></p>
+        </div>
+      </section>
+
+      <section id="tools" class="pp-index-section">
+        <p class="section-hint pp-hint" data-reveal data-copy="pipelineProjects.indexHint">Five tools, five problems. Pick one.</p>
+        <ul class="pp-index" id="pp-index" data-reveal></ul>
+      </section>
+
+      <!-- ============ Omniverse look-dev panel ============ -->
+      <section id="omniverse" class="pp-tool">
+        <div class="pp-tool__text" data-tool="omniverse" data-reveal></div>
+        <div class="pp-tool__ui" data-reveal>
+          <div class="pp-win pp-omni" role="group" aria-label="Redrawn look-dev panel, sections open and close">
+            <div class="pp-win__body">
+              <span class="pp-btn pp-btn--ghost pp-omni__reload" data-run="Reloading…" data-done="Modules reloaded">Reload modules</span>
+
+              <details class="pp-omni__sec" style="--sec: #8b7bff">
+                <summary>Template <span class="pp-chip">USD</span></summary>
+                <div class="pp-omni__content">
+                  <div class="pp-tabs"><span class="is-on">Color specialist</span><span>Review render</span></div>
+                  <div class="pp-row">
+                    <span class="pp-input pp-input--select pp-grow">Sample shape: Torus</span>
+                    <span class="pp-btn">Show</span>
+                  </div>
+                  <span class="pp-btn" data-run="Composing stage…" data-done="Template referenced">Import template</span>
+                </div>
+              </details>
+
+              <details class="pp-omni__sec" style="--sec: #ff9a4d">
+                <summary>Prototype import <span class="pp-chip">USD</span></summary>
+                <div class="pp-omni__content">
+                  <div class="pp-row">
+                    <label class="pp-field"><span>Release</span><span class="pp-input">01</span></label>
+                    <label class="pp-field"><span>Brand</span><span class="pp-input pp-input--select">Brand A</span></label>
+                    <span class="pp-btn">Select</span>
+                  </div>
+                  <ul class="pp-table">
+                    <li><span class="pp-code">PROTO_0101</span><span class="pp-check is-on"></span></li>
+                    <li><span class="pp-code">PROTO_0102</span><span class="pp-check"></span></li>
+                    <li><span class="pp-code">PROTO_0103</span><span class="pp-check is-on"></span></li>
+                  </ul>
+                  <div class="pp-grid2"><span class="pp-btn" data-run="Referencing…" data-done="Added to stage">Import selected</span><span class="pp-btn" data-run="Referencing…" data-done="Added to stage">Import all</span></div>
+                </div>
+              </details>
+
+              <details class="pp-omni__sec" style="--sec: #ff5d7a" open>
+                <summary>Materials <span class="pp-chip">OpenPBR · MaterialX</span></summary>
+                <div class="pp-omni__content">
+                  <span class="pp-input pp-input--search">acetate hav</span>
+                  <div class="pp-row">
+                    <span class="pp-input pp-input--select pp-grow">Acetate</span>
+                    <span class="pp-input pp-input--select pp-grow">Havana</span>
+                    <span class="pp-input pp-input--select pp-grow">Gloss</span>
+                  </div>
+                  <div class="pp-grid2"><span class="pp-btn" data-run="Searching…" data-done="3 matches">Search</span><span class="pp-btn" data-run="Loading .mtlx…" data-done="Bound to prim">Load</span></div>
+                  <div class="pp-omni__thumbs" aria-hidden="true"><span class="pp-ball"></span><span class="pp-ball pp-ball--flat"></span><span class="pp-omni__mtlx">ACE_HAV_GLOSS<br /><i>open_pbr_surface</i></span></div>
+                  <span class="pp-btn" data-run="Rendering thumbs…" data-done="2 thumbs saved">Render thumbnails</span>
+                </div>
+              </details>
+
+              <details class="pp-omni__sec" style="--sec: #2fd0d8">
+                <summary>Render</summary>
+                <div class="pp-omni__content">
+                  <ul class="pp-table pp-table--cols">
+                    <li class="pp-table__head"><span>Name</span><span>Ok</span><span>SKU</span><span>Render</span></li>
+                    <li><span class="pp-code">MODEL_A01</span><span class="pp-ok"></span><span>1</span><span class="pp-check is-on"></span></li>
+                    <li><span class="pp-code">MODEL_A01</span><span class="pp-ok"></span><span>2</span><span class="pp-check is-on"></span></li>
+                    <li><span class="pp-code">MODEL_A02</span><span class="pp-ok"></span><span>1</span><span class="pp-check"></span></li>
+                  </ul>
+                  <div class="pp-seg"><span class="is-on">Color specialist</span><span>Render dept</span></div>
+                  <div class="pp-row">
+                    <span class="pp-label">Resolution</span><span class="pp-input pp-input--select pp-grow">1920 x 1920</span>
+                  </div>
+                  <div class="pp-row">
+                    <span class="pp-label">Frames</span><span class="pp-input">1</span><span class="pp-input">8</span>
+                  </div>
+                  <span class="pp-btn pp-btn--primary" data-run="Path tracing…" data-done="Renders saved">Render selected</span>
+                </div>
+              </details>
+
+              <details class="pp-omni__sec" style="--sec: #b27bff" open>
+                <summary>View</summary>
+                <div class="pp-omni__content">
+                  <div class="pp-view" id="pp-view">
+                    <svg class="pp-view__glasses" viewBox="0 0 120 44" aria-hidden="true"><use href="#pp-glasses" /></svg>
+                    <p class="pp-view__name" aria-live="polite">MODEL_A01 · Colorway 01</p>
+                    <div class="pp-view__nav">
+                      <button type="button" class="pp-btn" data-step="-1" aria-label="Previous colorway">‹ Prev</button>
+                      <span class="pp-view__dots" aria-hidden="true"></span>
+                      <button type="button" class="pp-btn" data-step="1" aria-label="Next colorway">Next ›</button>
+                    </div>
+                  </div>
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Maya prep toolkit ============ -->
+      <section id="maya" class="pp-tool">
+        <div class="pp-tool__text" data-tool="maya" data-reveal></div>
+        <div class="pp-tool__ui" data-reveal aria-hidden="true">
+          <div class="pp-win pp-maya">
+            <div class="pp-win__body">
+              <div class="pp-row"><span class="pp-input pp-grow">MODEL_A01</span><span class="pp-btn pp-btn--icon" data-run="…" data-done="Name read"><svg viewBox="0 0 120 44"><use href="#pp-glasses" /></svg></span></div>
+              <div class="pp-tabs"><span class="is-on" data-tab="mesh">Mesh / Rename</span><span data-tab="info">Product info / JSON</span></div>
+
+              <div class="pp-panel" data-panel="mesh">
+                <div class="pp-maya__grid">
+                  <div class="pp-group">
+                    <p class="pp-group__title">Meshes</p>
+                    <span class="pp-btn">Combine</span><span class="pp-btn">Separate</span><span class="pp-btn">Group</span><span class="pp-btn">Frame group</span>
+                    <span class="pp-btn">Delete history</span><span class="pp-btn">Freeze</span><span class="pp-btn">Center pivot</span><span class="pp-btn">Mirror</span>
+                  </div>
+                  <div class="pp-group">
+                    <p class="pp-group__title">UV</p>
+                    <span class="pp-btn">UV editor</span><span class="pp-btn">Lens UV</span><span class="pp-btn">Acetate X</span><span class="pp-btn">Acetate Z</span>
+                    <span class="pp-btn">Auto UV</span><span class="pp-btn">Grid layout</span><span class="pp-btn">Orient shells</span><span class="pp-btn">Lightmap set</span>
+                  </div>
+                  <div class="pp-group">
+                    <p class="pp-group__title">Materials</p>
+                    <span class="pp-btn"><i class="pp-swatch pp-swatch--checker"></i>Checker</span><span class="pp-btn"><i class="pp-swatch pp-swatch--arrow"></i>Arrows</span>
+                    <span class="pp-btn"><i class="pp-swatch" style="--c: #e5484d"></i>Red</span><span class="pp-btn"><i class="pp-swatch" style="--c: #46a758"></i>Green</span>
+                    <span class="pp-btn"><i class="pp-swatch" style="--c: #3e63dd"></i>Blue</span><span class="pp-btn">Clean nodes</span>
+                  </div>
+                  <div class="pp-group pp-maya__tree">
+                    <p class="pp-group__title">Components</p>
+                    <div class="pp-tabs pp-tabs--small"><span class="is-on">Product list</span><span>Render list</span></div>
+                    <div class="pp-maya__split">
+                      <ul class="pp-tree">
+                        <li>Frontal<ul><li>Acetate</li><li class="is-picked">End piece metal</li><li>Finishing</li></ul></li>
+                        <li>Lens<ul><li>Lenses</li></ul></li>
+                        <li>Temples<ul><li>Metal</li></ul></li>
+                        <li>Tip<ul><li>Acetate</li></ul></li>
+                      </ul>
+                      <div class="pp-maya__rename">
+                        <div class="pp-row pp-row--wrap">
+                          <span class="pp-chk is-on">L</span><span class="pp-chk">R</span><span class="pp-chk">Int</span><span class="pp-chk is-on">Ext</span>
+                        </div>
+                        <p class="pp-maya__preview">→ <b data-rename-preview>Frontal_EndPieceMetal_L_Ext</b></p>
+                        <span class="pp-btn pp-btn--primary" data-run="Renaming…" data-done="Mesh renamed">Rename mesh</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <span class="pp-btn" data-run="Checking lightmap UVs…" data-done="7 FBX exported">Export FBX to Unreal</span>
+              </div>
+
+              <div class="pp-panel" data-panel="info" hidden>
+                <div class="pp-row"><span class="pp-input pp-grow">MODEL_A01</span><span class="pp-btn" data-run="Querying…" data-done="3 SKUs found">Get product info</span></div>
+                <div class="pp-maya__info">
+                  <div class="pp-group">
+                    <p class="pp-group__title">SKUs</p>
+                    <ul class="pp-table pp-table--c3">
+                      <li class="pp-table__head"><span>SKU</span><span>Release</span><span>Colorway</span></li>
+                      <li class="is-picked"><span class="pp-code">MODEL_A01_01</span><span>01</span><span>Black</span></li>
+                      <li><span class="pp-code">MODEL_A01_02</span><span>01</span><span>Havana</span></li>
+                      <li><span class="pp-code">MODEL_A01_03</span><span>01</span><span>Crystal</span></li>
+                    </ul>
+                  </div>
+                  <div class="pp-group">
+                    <p class="pp-group__title">Components → materials</p>
+                    <ul class="pp-table pp-table--kv">
+                      <li><span>Frontal</span><span>Acetate / Black</span></li>
+                      <li><span>Temples</span><span>Metal / Gold</span></li>
+                      <li><span>End piece</span><span>Metal / Gold</span></li>
+                      <li><span>Lenses</span><span>Grey gradient</span></li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="pp-grid2"><span class="pp-btn" data-run="Writing…" data-done="1 JSON saved">Export JSON (SKU)</span><span class="pp-btn" data-run="Writing…" data-done="48 JSON saved">Export JSON (release)</span></div>
+                <div class="pp-log">
+                  <p>MODEL_A01_01.json</p>
+                  <p>{ "Frontal": <i>"Acetate / Black"</i>, "Temples": <i>"Metal / Gold"</i>, … }</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Unreal render automation ============ -->
+      <section id="unreal" class="pp-tool">
+        <div class="pp-tool__text" data-tool="unreal" data-reveal></div>
+        <div class="pp-tool__ui" data-reveal aria-hidden="true">
+          <div class="pp-win pp-unreal">
+            <div class="pp-win__body">
+              <div class="pp-tabs pp-tabs--fill"><span class="is-on" data-tab="create">Create</span><span data-tab="cams">Levels / Cams</span></div>
+
+              <div class="pp-panel" data-panel="create">
+                <div class="pp-row">
+                  <span class="pp-input pp-grow pp-input--path">models/release_01/</span><span class="pp-btn" data-run="Importing…" data-done="4 new, 12 skipped">Import</span>
+                </div>
+                <span class="pp-btn pp-btn--big" data-run="Building…" data-done="16 Blueprints ready"><svg viewBox="0 0 120 44"><use href="#pp-glasses" /></svg>Build Blueprints</span>
+                <div class="pp-group">
+                  <p class="pp-group__title">Variants</p>
+                  <div class="pp-grid4"><span class="pp-btn" data-run="…" data-done="+2 added">Beauty</span><span class="pp-btn" data-run="…" data-done="+2 added">HDR</span><span class="pp-btn" data-run="…" data-done="+2 added">IDs</span><span class="pp-btn" data-run="…" data-done="+2 added">Mirror</span></div>
+                </div>
+                <div class="pp-group">
+                  <p class="pp-group__title">Level</p>
+                  <div class="pp-seg"><span class="is-on">Beauty</span><span>HDR</span><span>IDs</span><span>Mirror</span><span>Shadow</span></div>
+                </div>
+              </div>
+
+              <div class="pp-panel" data-panel="cams" hidden>
+                <div class="pp-group">
+                  <p class="pp-group__title">Keyframes</p>
+                  <div class="pp-grid2">
+                    <span class="pp-btn" data-run="Copying…" data-done="Cam01 → Cam02-08">Beauty cams</span><span class="pp-btn" data-run="Copying…" data-done="Cam01 → Cam02-08">HDR cams</span>
+                    <span class="pp-btn" data-run="Copying…" data-done="Specular synced">Specular keys</span><span class="pp-btn" data-run="Copying…" data-done="Applied per SKU">Same model keys</span>
+                  </div>
+                </div>
+                <div class="pp-group">
+                  <p class="pp-group__title">Movie Render Graph</p>
+                  <div class="pp-row"><span class="pp-label">Output</span><span class="pp-input pp-grow pp-input--path">renders/release_01/</span></div>
+                  <div class="pp-row"><span class="pp-label">Frames</span><span class="pp-input">1</span><span class="pp-input">16</span></div>
+                  <span class="pp-btn pp-btn--primary" data-run="Rendering…" data-done="EXRs renamed">Set and render</span>
+                </div>
+              </div>
+
+              <div class="pp-log">
+                <p><b>+2</b> variants added · 14 unchanged</p>
+                <p>Cam03.0004.exr <i>→</i> MODEL_A01_Colorway04.Cam03.exr</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Catalogue deck generator ============ -->
+      <section id="catalogue" class="pp-tool">
+        <div class="pp-tool__text" data-tool="catalogue" data-reveal></div>
+        <div class="pp-tool__ui" data-reveal aria-hidden="true">
+          <div class="pp-win pp-deck">
+            <div class="pp-win__body">
+              <div class="pp-row">
+                <label class="pp-field"><span>Release</span><span class="pp-input">01</span></label>
+                <label class="pp-field pp-grow"><span>Brand</span><span class="pp-input pp-input--select">Brand A</span></label>
+                <span class="pp-btn pp-btn--primary" data-run="Building…" data-done="32 slides">Create deck</span>
+              </div>
+              <div class="pp-slide">
+                <div class="pp-slide__hero">
+                  <p class="pp-slide__title">MODEL_A01</p>
+                  <p class="pp-slide__sub">Release 01</p>
+                  <svg viewBox="0 0 120 44" style="--lens: rgba(120, 90, 60, 0.35)"><use href="#pp-glasses" /></svg>
+                  <span class="pp-bar"></span><span class="pp-bar pp-bar--short"></span>
+                  <span class="pp-badge">RX</span>
+                </div>
+                <div class="pp-slide__grid">
+                  <div><svg viewBox="0 0 120 44" style="--lens: rgba(40, 40, 40, 0.6)"><use href="#pp-glasses" /></svg><span class="pp-bar"></span></div>
+                  <div><svg viewBox="0 0 120 44" style="--lens: rgba(140, 100, 60, 0.45)"><use href="#pp-glasses" /></svg><span class="pp-bar"></span></div>
+                  <div><svg viewBox="0 0 120 44" style="--lens: rgba(60, 110, 150, 0.45)"><use href="#pp-glasses" /></svg><span class="pp-bar"></span></div>
+                  <div><svg viewBox="0 0 120 44" style="--lens: rgba(90, 130, 80, 0.45)"><use href="#pp-glasses" /></svg><span class="pp-bar"></span></div>
+                  <div><svg viewBox="0 0 120 44" style="--lens: rgba(170, 80, 90, 0.4)"><use href="#pp-glasses" /></svg><span class="pp-bar"></span></div>
+                  <div><svg viewBox="0 0 120 44" style="--lens: rgba(200, 170, 90, 0.4)"><use href="#pp-glasses" /></svg><span class="pp-bar"></span></div>
+                </div>
+              </div>
+              <p class="pp-caption">Product data + PIM + DAM → 1 hero, 6 variant groups</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ Review deck builder ============ -->
+      <section id="review" class="pp-tool">
+        <div class="pp-tool__text" data-tool="review" data-reveal></div>
+        <div class="pp-tool__ui" data-reveal aria-hidden="true">
+          <div class="pp-win pp-review">
+            <div class="pp-win__body">
+              <div class="pp-tabs"><span class="is-on" data-tab="creator">Creator</span><span data-tab="splitter">Splitter</span></div>
+
+              <div class="pp-panel" data-panel="creator">
+                <div class="pp-row">
+                  <span class="pp-input">01</span>
+                  <span class="pp-input pp-input--select pp-grow">Sun · Man</span>
+                  <span class="pp-input pp-input--select pp-grow">Brand A</span>
+                </div>
+                <div class="pp-row"><span class="pp-label">Renders</span><span class="pp-input pp-grow pp-input--path">renders/</span><span class="pp-btn">Select</span></div>
+                <div class="pp-row"><span class="pp-label">Worn shots</span><span class="pp-input pp-grow pp-input--path">worn/</span><span class="pp-btn">Select</span></div>
+                <div class="pp-row"><span class="pp-label">Export</span><span class="pp-input pp-grow pp-input--path">decks/</span><span class="pp-btn">Select</span></div>
+                <span class="pp-btn pp-btn--primary pp-btn--big" data-run="Cloning slides…" data-done="24 slides filled">Create PowerPoint</span>
+              </div>
+
+              <div class="pp-panel" data-panel="splitter" hidden>
+                <div class="pp-row"><span class="pp-label">Deck</span><span class="pp-input pp-grow pp-input--path">decks/review_01.pptm</span><span class="pp-btn">Select</span></div>
+                <div class="pp-row"><span class="pp-label">Output</span><span class="pp-input pp-grow pp-input--path">png/</span><span class="pp-btn">Select</span></div>
+                <div class="pp-row"><span class="pp-chk is-on">Name files after the model on each slide</span></div>
+                <span class="pp-btn pp-btn--primary pp-btn--big" data-run="Exporting 3840 x 2160…" data-done="24 PNGs saved">Split to PNG</span>
+              </div>
+
+              <div class="pp-log pp-log--term">
+                <p>----- Slides to create: 24 -----</p>
+                <p>('MODEL_A01', '01', '02', '05')</p>
+                <p>('MODEL_A02', '01', '03')</p>
+                <p>('MODEL_A03', '02', '04', '06')</p>
+                <p class="pp-cursor">…</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="back" class="project-back">
+        <a class="btn" href="index.html#projects" data-reveal data-copy="pipelineProjects.backCta">← Back to projects</a>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p data-copy="footer.copyright">© 2026 Luca Scattolin</p>
+      <a href="index.html#contact">Contact</a>
+      <a href="privacy.html">Privacy</a>
+    </footer>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

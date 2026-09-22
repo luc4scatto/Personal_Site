@@ -6,5 +6,6 @@
 
 - [Home](https://lucascattolin.com/): Profile, skills and project overview.
 - [Vivatech](https://lucascattolin.com/vivatech.html): Real-time interactive installation built with TouchDesigner and Unreal Engine, showcased at Vivatech in Paris.
+- [Pipeline Projects](https://lucascattolin.com/pipeline-projects.html): In-house tools built for the 3D R&D team at Thélios - Maya prep toolkit, Unreal render automation, Omniverse look-dev panel and PowerPoint deck generators. Redrawn interfaces, no proprietary data.
 - [Homelab](https://lucascattolin.com/homelab.html): Personal self-hosted homelab project - hardware wiring diagram and service map.
 - [Privacy](https://lucascattolin.com/privacy.html): Privacy notice.
