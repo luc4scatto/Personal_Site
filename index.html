@@ -204,29 +204,35 @@
       </section>
 
       <section id="contact" class="contact">
-        <h2 data-reveal>Let's talk</h2>
-        <p data-reveal data-copy="contact.tagline">Got a project in mind or just want to say hi?</p>
+        <div class="contact-intro">
+          <h2 data-reveal>Let's talk</h2>
+          <p data-reveal data-copy="contact.tagline">Got a project in mind or just want to say hi?</p>
+          <ul class="contact-links" data-reveal>
+            <li><a href="cv/Luca-Scattolin-CV.pdf" download>Download CV <span aria-hidden="true">↓</span></a></li>
+            <li><a href="https://github.com/luc4scatto" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span></a></li>
+            <li><a href="https://www.linkedin.com/in/lucascattolin" target="_blank" rel="noopener">LinkedIn <span aria-hidden="true">↗</span></a></li>
+          </ul>
+        </div>
         <form class="contact-form" id="contact-form" data-reveal>
-          <div class="contact-field">
-            <label for="contact-name">Name</label>
-            <input type="text" id="contact-name" name="name" autocomplete="name" required />
-          </div>
-          <div class="contact-field">
-            <label for="contact-from">Your email</label>
-            <input type="email" id="contact-from" name="email" autocomplete="email" required />
+          <div class="contact-row">
+            <div class="contact-field">
+              <label for="contact-name">Name</label>
+              <input type="text" id="contact-name" name="name" autocomplete="name" required />
+            </div>
+            <div class="contact-field">
+              <label for="contact-from">Your email</label>
+              <input type="email" id="contact-from" name="email" autocomplete="email" required />
+            </div>
           </div>
           <div class="contact-field">
             <label for="contact-message">Message</label>
-            <textarea id="contact-message" name="message" rows="4" required></textarea>
+            <textarea id="contact-message" name="message" rows="5" required></textarea>
           </div>
-          <button class="btn" type="submit">Send message</button>
-          <p class="contact-status" aria-live="polite"></p>
+          <div class="contact-actions">
+            <button class="btn" type="submit">Send message</button>
+            <p class="contact-status" aria-live="polite"></p>
+          </div>
         </form>
-        <div class="contact-links" data-reveal>
-          <a href="cv/Luca-Scattolin-CV.pdf" download>Download CV</a>
-          <a href="https://github.com/luc4scatto" target="_blank" rel="noopener">GitHub</a>
-          <a href="https://www.linkedin.com/in/lucascattolin" target="_blank" rel="noopener">LinkedIn</a>
-        </div>
       </section>
     </main>
 

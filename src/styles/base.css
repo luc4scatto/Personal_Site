@@ -82,7 +82,16 @@ html {
 }
 
 body {
-  background: var(--bg);
+  /* Film grain, so the page reads as a material and not as an empty black. It is part of the
+     body's own background, tiled and scrolling with the page, on purpose: a fixed full-screen
+     overlay with a blend mode would force a re-composite over both WebGL canvases every frame,
+     and the iPad GPU budget is already spent (see CLAUDE.md). Painted once per tile, then free.
+     Low frequency for a coarse tooth, and alpha keyed off the noise itself (0.14 x value - 0.068)
+     so only the peaks show: rough speckle without lifting the black.
+     It sits under the content, so photos and the 3D scenes stay clean. */
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.14 0 0 0 -0.068'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    var(--bg);
   color: var(--text);
   font-family: var(--font-body);
   line-height: 1.65;
