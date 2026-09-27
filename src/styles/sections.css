@@ -1986,40 +1986,14 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  transition:
-    border-color var(--duration-base) var(--ease-out),
-    transform var(--duration-fast) var(--ease-out);
+  /* no transform here: the pointer tilt is GSAP's (animations.js), a CSS transition
+     would lag every quickTo update */
+  transition: border-color var(--duration-base) var(--ease-out);
   position: relative;
-  overflow: hidden;
-}
-
-/* spotlight following the pointer (--mx/--my set in main.js) */
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    280px circle at var(--mx, 50%) var(--my, 50%),
-    color-mix(in srgb, var(--accent) 10%, transparent),
-    transparent 70%
-  );
-  opacity: 0;
-  transition: opacity 0.3s;
-  pointer-events: none;
-}
-
-.card:hover::before {
-  opacity: 1;
 }
 
 .card:hover {
   border-color: var(--accent);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .card:hover {
-    transform: translateY(-4px);
-  }
 }
 
 .card:active {
@@ -2065,7 +2039,7 @@
    unambiguous destination, so the overlay covers the card; the placeholder cards carry
    two links (GitHub / Live) and keep their separate hit areas. Nothing is added to the
    a11y tree: the link is still the only control, so keyboard and screen readers are
-   unchanged, and .card is already position: relative for the spotlight. */
+   unchanged, and .card is already position: relative. */
 .card-links a:only-child::after {
   content: '';
   position: absolute;

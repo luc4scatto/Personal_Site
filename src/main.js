@@ -123,15 +123,6 @@ if (gallery && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   });
 }
 
-// card spotlight: radial glow following the pointer
-document.querySelectorAll('.card').forEach((card) => {
-  card.addEventListener('pointermove', (e) => {
-    const r = card.getBoundingClientRect();
-    card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-    card.style.setProperty('--my', `${e.clientY - r.top}px`);
-  });
-});
-
 // skills wall: every tool is a tile carrying its own brand mark and color. Picking one
 // blurs the rest of the wall and unfolds its card in place, inside the category it belongs
 // to — the same "focus one thing, let the rest recede" grammar as the 3D hero cloud.

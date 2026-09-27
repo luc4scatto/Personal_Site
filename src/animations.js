@@ -115,6 +115,24 @@ export function initAnimations() {
       yTo(0);
     });
   });
+
+  // project cards tilt toward the pointer. Rotation, not x/y: the [data-reveal] tween
+  // above owns the card's y
+  document.querySelectorAll('.card').forEach((card) => {
+    gsap.set(card, { transformPerspective: 800 });
+    const rxTo = gsap.quickTo(card, 'rotationX', { duration: 0.5, ease: 'power3' });
+    const ryTo = gsap.quickTo(card, 'rotationY', { duration: 0.5, ease: 'power3' });
+    card.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return; // same reason as the magnetic buttons
+      const r = card.getBoundingClientRect();
+      ryTo(((e.clientX - r.left) / r.width - 0.5) * 12);
+      rxTo(-((e.clientY - r.top) / r.height - 0.5) * 12);
+    });
+    card.addEventListener('pointerleave', () => {
+      rxTo(0);
+      ryTo(0);
+    });
+  });
 }
 
 // builds the accent-word slot and returns a start() that begins the looping cascade

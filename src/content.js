@@ -45,7 +45,7 @@ export const content = {
     pipeline: {
       title: 'Pipeline Projects',
       description:
-        'Five in-house tools for Maya, Unreal Engine, Omniverse and PowerPoint, each built to remove one slow, manual step from the 3D workflow.',
+        'Five in-house tools for Maya, Unreal Engine, Omniverse and PowerPoint, from USD and MaterialX look-dev to renders and decks, each built to remove one slow, manual step from the 3D workflow.',
     },
     three: {
       title: 'Personal project: Homelab',
@@ -169,7 +169,7 @@ export const content = {
     intro1:
       'In the **3D R&D team** at Thélios, a lot of the slow work was not modeling or rendering, it was everything around it: cleaning and naming meshes by hand, rebuilding the same variants for every colorway, renaming hundreds of renders, assembling presentation decks slide by slide.',
     intro2:
-      'None of these tools were planned as a system. Each one started from a specific problem the team kept hitting, and grew until that problem went away. They run inside **Maya**, **Unreal Engine** and **NVIDIA Omniverse**, or as standalone **Python** desktop apps.',
+      'None of these tools were planned as a system. Each one started from a specific problem the team kept hitting, and grew until that problem went away. They run inside **Maya**, **Unreal Engine** and **NVIDIA Omniverse**, or as standalone **Python** desktop apps. The look-dev side is built on open standards: **USD** for everything in the scene and **OpenPBR in MaterialX** for every material.',
     disclaimer:
       'Built in-house. Tool names, data and interfaces shown here are generalized and redrawn - no proprietary code, data or assets.',
     indexHint: 'Five tools, five problems. Pick one.',
