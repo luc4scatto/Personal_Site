@@ -6,7 +6,7 @@
  * A mat is geometry and nothing else - a fine and a coarse grid, rulers on the edges, a
  * protractor fan, 30/45/60 guides, circle templates, no printed brand - so it is generated from numbers
  * rather than drawn by hand, and tweaking a spacing means editing a constant and re-running.
- * White strokes at low alpha: the page's own palette, not the green of a real mat.
+ * Strokes in the secondary accent (INK) at low alpha: the page palette, not the green of a real mat.
  * The CSS (sections.css, #about::before / #projects::before) crops a different region of it
  * into each section and fades the edges, so the whole sheet is never seen at once.
  *
@@ -17,6 +17,10 @@ import { writeFileSync } from 'node:fs';
 
 const W = 1600;
 const H = 1100;
+// stroke colour: twin of --accent-2 in base.css (an SVG background cannot read CSS vars) -
+// change one, change the other, and re-run. Opacities below are ~2.8x what white needed:
+// the blue is ~3.5x darker than white, so the same alpha all but vanished on the black page
+const INK = '#5c8dff';
 const M = 40; // margin between the sheet edge and the grid, where the rulers sit
 const CELL = 20; // one "cm"
 const X0 = M,
@@ -93,11 +97,11 @@ for (let R = 1500; R <= 2000; R += 100) circle(1050, Math.round(1900 + R * 0.35)
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
 <defs><clipPath id="c"><rect x="${X0}" y="${Y0}" width="${X1 - X0}" height="${Y1 - Y0}"/></clipPath></defs>
 <style>
-line,circle,path{fill:none;stroke:#fff}
-.g{stroke-opacity:.022}.G{stroke-opacity:.05}.d{stroke-opacity:.035}.t{stroke-opacity:.11}
-.sheet{fill:none;stroke:#fff;stroke-opacity:.07}
-text{font-family:Helvetica,Arial,sans-serif;fill:#fff}
-.n{font-size:10px;fill-opacity:.18}
+line,circle,path{fill:none;stroke:${INK}}
+.g{stroke-opacity:.065}.G{stroke-opacity:.14}.d{stroke-opacity:.1}.t{stroke-opacity:.3}
+.sheet{fill:none;stroke:${INK};stroke-opacity:.19}
+text{font-family:Helvetica,Arial,sans-serif;fill:${INK}}
+.n{font-size:10px;fill-opacity:.5}
 </style>
 <rect x=".5" y=".5" width="${W - 1}" height="${H - 1}" rx="18" class="sheet"/>
 <g clip-path="url(#c)">

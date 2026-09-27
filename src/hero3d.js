@@ -6,9 +6,11 @@ import { HorizontalBlurShader } from 'three/addons/shaders/HorizontalBlurShader.
 import { VerticalBlurShader } from 'three/addons/shaders/VerticalBlurShader.js';
 import { content } from './content.js';
 
-const ACCENT = 0xccff00;
+// the scene wears the page's accent pair, so a palette change in CSS reaches the 3D too
+const rootStyle = getComputedStyle(document.documentElement);
+const ACCENT = rootStyle.getPropertyValue('--accent').trim() || 0xff6a13;
 const WHITE = 0xf2f2f2;
-const VIOLET = 0xa78bfa; // third palette color — complementary to the lime accent
+const VIOLET = rootStyle.getPropertyValue('--accent-2').trim() || 0x5c8dff; // third palette color
 const COLORS = [ACCENT, WHITE, VIOLET];
 const GLB_MODELS = [
   'mixing_board_01',

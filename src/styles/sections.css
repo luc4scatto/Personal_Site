@@ -513,20 +513,21 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: transparent;
-  /* neon: a near-white core on the stroke (a lit tube burns paler than its glow), then
-     two wide, faint halos in the tube's colour. The fill is transparent but a text-shadow still
+  /* neon: the stroke in the full accent (a white-mixed "tube core" washed it out next to the
+     rest of the page's accents), then two wide, faint halos in the same colour. The fill is
+     transparent but a text-shadow still
      paints the whole glyph, so a tight or strong halo fills the letters in and the tube is lost:
      keep them wide and low. text-shadow is rasterized once into the
      scrolling layer, so the glow costs nothing per frame - unlike a filter: drop-shadow() on
      a ~7000px animated track, which is exactly the layer the iPad GPU budget already evicts */
   --neon: var(--accent);
-  -webkit-text-stroke: 1.2px color-mix(in srgb, var(--neon) 65%, #fff);
+  -webkit-text-stroke: 1.2px var(--neon);
   text-shadow:
     0 0 10px color-mix(in srgb, var(--neon) 28%, transparent),
     0 0 26px color-mix(in srgb, var(--neon) 18%, transparent);
 }
 
-/* words alternate lime/violet; 8 words per loop half keeps the seam invisible */
+/* words alternate accent/accent-2; 8 words per loop half keeps the seam invisible */
 .marquee-track span:nth-child(even) {
   --neon: var(--accent-2);
 }
@@ -4627,7 +4628,7 @@ button.pp-btn:active {
 
 .pp-win .pp-btn--primary.is-running,
 .pp-win .pp-btn--primary.is-done {
-  background: #1f2410;
+  background: #2a1508;
   color: var(--accent);
 }
 

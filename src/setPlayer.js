@@ -406,7 +406,7 @@ export function initSetPlayer(mount) {
   function drawWave() {
     const cs = getComputedStyle(el);
     paint(restCanvas, cs.getPropertyValue('--set-rest').trim() || '#3a3a3a', peaks);
-    paint(playedCanvas, cs.getPropertyValue('--set-played').trim() || '#a78bfa', peaks);
+    paint(playedCanvas, cs.getPropertyValue('--set-played').trim() || '#5c8dff', peaks);
   }
 
   async function loadPeaks(set) {

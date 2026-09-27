@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100">
 <defs><clipPath id="c"><rect x="40" y="40" width="1520" height="1020"/></clipPath></defs>
 <style>
-line,circle,path{fill:none;stroke:#fff}
-.g{stroke-opacity:.022}.G{stroke-opacity:.05}.d{stroke-opacity:.035}.t{stroke-opacity:.11}
-.sheet{fill:none;stroke:#fff;stroke-opacity:.07}
-text{font-family:Helvetica,Arial,sans-serif;fill:#fff}
-.n{font-size:10px;fill-opacity:.18}
+line,circle,path{fill:none;stroke:#5c8dff}
+.g{stroke-opacity:.065}.G{stroke-opacity:.14}.d{stroke-opacity:.1}.t{stroke-opacity:.3}
+.sheet{fill:none;stroke:#5c8dff;stroke-opacity:.19}
+text{font-family:Helvetica,Arial,sans-serif;fill:#5c8dff}
+.n{font-size:10px;fill-opacity:.5}
 </style>
 <rect x=".5" y=".5" width="1599" height="1099" rx="18" class="sheet"/>
 <g clip-path="url(#c)">
