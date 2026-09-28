@@ -38,7 +38,14 @@ function buildIndex(list, tools) {
     a.append(
       icon(tool.icon, 28),
       el('span', 'pp-index__name', rich(tool.name)),
-      el('span', 'pp-index__problem', rich(tool.problem)),
+      el('span', 'pp-index__label', 'Problem'),
+      el('span', 'pp-index__problem', rich(tool.teaser)),
+      // arrow down: the chapter is further down this page, not another page
+      el(
+        'span',
+        'pp-index__go',
+        '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 2.5v11M3.5 9 8 13.5 12.5 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      ),
     );
     const li = el('li');
     li.append(a);
@@ -201,8 +208,24 @@ function initMockup(win) {
   });
 }
 
+// the page's cover next to the intro: inert copies of the real mockups, so the
+// drawing lives in one place and the cover can never drift from the chapters
+function buildCollage(host) {
+  ['.pp-omni', '.pp-maya', '.pp-unreal'].forEach((sel) => {
+    const win = document.querySelector(`.pp-tool__ui ${sel}`)?.cloneNode(true);
+    if (!win) return;
+    win.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
+    win.removeAttribute('role');
+    win.removeAttribute('aria-label');
+    win.inert = true;
+    host.append(win);
+  });
+}
+
 export function initPipelineProjects() {
   document.querySelectorAll('.pp-win').forEach(initMockup);
+  const collage = document.querySelector('.pp-collage');
+  if (collage) buildCollage(collage);
   const { tools } = content.pipelineProjects;
   const index = document.querySelector('#pp-index');
   if (index) buildIndex(index, tools);

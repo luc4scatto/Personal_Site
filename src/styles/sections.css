@@ -2225,6 +2225,13 @@
   padding-bottom: calc(var(--space) * 0.4);
 }
 
+/* no cover photo between title and intro on these pages, so the intro is the
+   title's lede, not a new section: drop its leading dose and let kicker, title
+   and intro read as one group. The hero's trimmed trailing edge is the gap. */
+.homelab-page #description {
+  padding-top: 0;
+}
+
 .page-hero h1 {
   font-size: clamp(2.5rem, 7vw, 5rem);
 }
@@ -3733,6 +3740,59 @@ p.project-specs__kicker {
   padding-left: 1rem;
 }
 
+/* cover beside the intro: three of the chapter mockups, scaled down and
+   loosely stacked. Wide screens only - below 1025px the intro is already
+   full width and the first real mockup sits a scroll away. */
+.pp-collage {
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  .pp-page #description {
+    display: grid;
+    grid-template-columns: minmax(0, 40rem) minmax(0, 1fr);
+    gap: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .pp-collage {
+    display: block;
+    position: relative;
+    min-height: 28rem;
+  }
+
+  .pp-collage > .pp-win {
+    position: absolute;
+    width: 24rem;
+    max-width: none;
+    max-height: 25rem;
+    margin: 0;
+    transform-origin: top left;
+    transform: rotate(var(--r)) scale(0.62);
+    /* the windows are taller than their slot: fade the cut instead of a hard edge */
+    mask-image: linear-gradient(to bottom, #000 72%, transparent);
+  }
+
+  .pp-collage > .pp-win:nth-child(1) {
+    --r: 2deg;
+    top: 0;
+    right: 0;
+    transform-origin: top right;
+  }
+
+  .pp-collage > .pp-win:nth-child(2) {
+    --r: -3deg;
+    top: 30%;
+    left: 0;
+  }
+
+  .pp-collage > .pp-win:nth-child(3) {
+    --r: 1.5deg;
+    top: 58%;
+    right: 8%;
+    transform-origin: top right;
+  }
+}
+
 .pp-index {
   list-style: none;
   padding: 0;
@@ -3741,14 +3801,26 @@ p.project-specs__kicker {
   gap: 1rem;
 }
 
+/* each card is a subgrid over five shared rows (icon, name, label, problem,
+   link), so a two-line name pushes every card's label down with it and the
+   five read as one table, not five boxes that happen to sit side by side */
+.pp-index > li {
+  display: grid;
+  grid-row: span 5;
+  grid-template-rows: subgrid;
+}
+
 .pp-index__tile {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  height: 100%;
+  display: grid;
+  grid-row: span 5;
+  grid-template-rows: subgrid;
+  row-gap: 0.6rem;
+  justify-items: start;
   padding: 1.25rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1rem;
+  /* flat, no grain: the body's film grain stops at the card edge */
+  background: var(--bg);
   transition:
     border-color var(--duration-base) var(--ease-out),
     transform var(--duration-base) var(--ease-out);
@@ -3770,13 +3842,58 @@ p.project-specs__kicker {
   line-height: 1.15;
 }
 
+.pp-index__label {
+  margin-top: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
 .pp-index__problem {
+  margin-top: -0.35rem;
   font-size: 0.9rem;
   color: var(--text-dim);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+}
+
+/* says the card is a way in: a small round arrow, filled on hover */
+.pp-index__go {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin-top: 0.4rem;
+  justify-self: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  color: var(--accent);
+  transition:
+    background-color var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out);
+}
+
+.pp-index__go svg {
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.pp-index__tile:hover .pp-index__go,
+.pp-index__tile:focus-visible .pp-index__go {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+
+.pp-index__tile:hover .pp-index__go svg,
+.pp-index__tile:focus-visible .pp-index__go svg {
+  transform: translateY(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-index__go svg {
+    transition: none;
+  }
 }
 
 .pp-tool {

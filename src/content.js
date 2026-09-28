@@ -63,7 +63,6 @@ export const content = {
   },
   vivatech: {
     kicker: 'Project',
-    meta: 'Thélios · LVMH Dream Gallery · Vivatech Paris 2026 · TouchDesigner + Unreal Engine',
     description1:
       "At Vivatech 2026 - the tenth edition of Europe's biggest tech event - LVMH brought ten of its Maisons to the Dream Gallery pavilion in Paris, showing how technology amplifies craftsmanship across the whole value chain.",
     description2:
@@ -80,7 +79,6 @@ export const content = {
   },
   homelab: {
     kicker: 'Personal Project',
-    meta: 'Self-hosted · Ongoing',
     description1:
       'It started with something simple: a shared folder my Windows machine and my Mac could both reach, instead of shuffling files between them by hand with an external hard drive, inconvenient enough over time, that I went looking for a better way. That one NAS folder opened a door into **self-hosted software**, and I never really came back out.',
     description2:
@@ -165,14 +163,13 @@ export const content = {
   // pipeline-projects.html follow the same rule (redrawn, fake data).
   pipelineProjects: {
     kicker: 'Built at Thélios',
-    meta: 'Thélios · 3D R&D · Python, Maya, Unreal Engine, Omniverse, USD, Qt',
     intro1:
-      'In the **3D R&D team** at Thélios, a lot of the slow work was not modeling or rendering, it was everything around it: cleaning and naming meshes by hand, rebuilding the same variants for every colorway, renaming hundreds of renders, assembling presentation decks slide by slide.',
+      'In the **3D R&D team** at Thélios, a lot of the slow work was not modeling or rendering, it was everything around it: cleaning and naming meshes by hand, building the variants for every colorway, renaming hundreds of renders, assembling presentation decks slide by slide.',
     intro2:
-      'None of these tools were planned as a system. Each one started from a specific problem the team kept hitting, and grew until that problem went away. They run inside **Maya**, **Unreal Engine** and **NVIDIA Omniverse**, or as standalone **Python** desktop apps. The look-dev side is built on open standards: **USD** for everything in the scene and **OpenPBR in MaterialX** for every material.',
+      'None of these tools were planned as a system. Each one started from a specific problem the team kept hitting, and grew until those problems went away. They were built to make the most of what **Maya**, **Unreal Engine** and **NVIDIA Omniverse** can do, or as standalone **Python** desktop apps. The look-dev side is built on open standards: **USD** for everything in the scene and **OpenPBR in MaterialX** for every material.',
     disclaimer:
       'Built in-house. Tool names, data and interfaces shown here are generalized and redrawn - no proprietary code, data or assets.',
-    indexHint: 'Five tools, five problems. Pick one.',
+    indexHint: 'Five tools, each built to fix one problem. Pick one to see it.',
     backCta: '← Back to projects',
     // Rendered by src/pipelineProjects.js into the index tiles and each
     // chapter's text column. `id` matches the chapter's id in the page.
@@ -187,17 +184,19 @@ export const content = {
           { icon: 'usd.svg', label: 'USD' },
           { icon: 'materialx.svg', label: 'OpenPBR · MaterialX' },
           { icon: 'python.svg', label: 'Python' },
-          { label: 'Omniverse Kit' },
+          { icon: 'omniverse.svg', label: 'Omniverse Kit' },
         ],
+        // one line for the index card, under its Problem label; the full problem is in the chapter
+        teaser: 'Look-dev scenes built by hand, one model and one material at a time.',
         problem:
-          'Setting up a look-dev scene meant importing models one by one, hunting materials across a shared library, and rendering previews by hand before anything could be reviewed.',
+          'Setting up a look-dev scene meant importing models one by one, hunting materials across a shared library, cross-checking product data between separate databases to get it right, and rendering every model and colorway by hand, one at a time, before anything could go to review.',
         bullets: [
           'Brings hand-picked prototypes or single models into the scene straight from product data, each one composed into the stage as **USD**',
           'Searches, creates, updates and copies **OpenPBR** materials authored in **MaterialX**, with thumbnail renders on sample shapes',
-          'Batch-renders the selected SKUs with RTX, with fixed presets for color work or full manual control',
+          'Batch-renders the selected SKUs with **Omniverse RTX**, the ray-traced renderer that runs on NVIDIA GPUs',
           'Steps through every model and colorway in the scene to check each look before it goes out',
         ],
-        idea: 'The whole kit is built around two open standards: **USD** for everything in the scene, from templates to models, and **OpenPBR in MaterialX** for every material, so a look is described once and reads the same in any tool and renderer that speaks them. Materials also stay **portable**: every create or update rewrites texture and master-material links as relative paths, so a folder can move anywhere in the library without breaking a scene.',
+        idea: 'The whole kit is built around two open standards: **USD** for everything in the scene, from templates to models, and **OpenPBR in MaterialX** for every material, so a material is written once in a standard format that any USD or MaterialX-compatible tool can open, with no conversion. Materials are also **portable**: whenever one is created or updated, its links to textures and to its master material are saved as relative paths, so a material folder can be moved anywhere in the library and every scene that uses it keeps working.',
       },
       {
         id: 'maya',
@@ -211,6 +210,8 @@ export const content = {
           { label: 'SQL' },
           { label: 'JSON' },
         ],
+        // one line for the index card, under its Problem label; the full problem is in the chapter
+        teaser: 'Every artist prepped meshes their own way, so nothing matched downstream.',
         problem:
           'Every artist cleaned, unwrapped and named meshes a little differently, so models arrived downstream inconsistent and had to be fixed again before rendering.',
         bullets: [
@@ -235,6 +236,8 @@ export const content = {
           { label: 'Movie Render Graph' },
           { label: 'pandas' },
         ],
+        // one line for the index card, under its Problem label; the full problem is in the chapter
+        teaser: 'Every colorway set up and rendered by hand, pass by pass.',
         problem:
           'Each model ships in many colorways, and every colorway needed its own variant for the beauty, HDR, mirror and shadow passes, set up by hand, then every rendered frame renamed by hand.',
         bullets: [
@@ -257,6 +260,8 @@ export const content = {
           { label: 'REST APIs' },
           { label: 'Nuitka' },
         ],
+        // one line for the index card, under its Problem label; the full problem is in the chapter
+        teaser: 'Seasonal catalogues pasted together in PowerPoint from three systems.',
         problem:
           'Seasonal catalogues were assembled by hand in PowerPoint, copying product data from one system, images from another and marketing copy from a third.',
         bullets: [
@@ -279,6 +284,8 @@ export const content = {
           { label: 'PowerPoint COM' },
           { label: 'PyInstaller' },
         ],
+        // one line for the index card, under its Problem label; the full problem is in the chapter
+        teaser: 'Evaluation decks typed up slide by slide, one style at a time.',
         problem:
           'Evaluation decks meant one slide per style, each with renders, worn shots, codes and technical specs typed in by hand.',
         bullets: [
