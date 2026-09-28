@@ -177,7 +177,6 @@ export const content = {
       {
         id: 'omniverse',
         name: 'Look-dev panel for Omniverse',
-        stack: 'NVIDIA Omniverse · USD · OpenPBR MaterialX · Python',
         icon: 'nvidia-omniverse.svg',
         // pills under the title: the tools each one is built with (icon optional)
         highlights: [
@@ -201,7 +200,6 @@ export const content = {
       {
         id: 'maya',
         name: 'Maya prep toolkit',
-        stack: 'Autodesk Maya · Python · Qt',
         icon: 'autodesk-maya.svg',
         highlights: [
           { icon: 'autodesk-maya.svg', label: 'Maya' },
@@ -227,14 +225,12 @@ export const content = {
       {
         id: 'unreal',
         name: 'Render automation for Unreal',
-        stack: 'Unreal Engine · Python · Editor Utility Widgets',
         icon: 'unreal-engine.svg',
         highlights: [
           { icon: 'unreal-engine.svg', label: 'Unreal Engine' },
           { icon: 'python.svg', label: 'Python' },
           { label: 'Editor Utility Widgets' },
           { label: 'Movie Render Graph' },
-          { label: 'pandas' },
         ],
         // one line for the index card, under its Problem label; the full problem is in the chapter
         teaser: 'Every colorway set up and rendered by hand, pass by pass.',
@@ -251,14 +247,12 @@ export const content = {
       {
         id: 'catalogue',
         name: 'Catalogue deck generator',
-        stack: 'Python · PyQt6 · python-pptx',
         icon: 'python.svg',
         highlights: [
           { icon: 'python.svg', label: 'Python' },
           { icon: 'qt-designer.svg', label: 'PyQt6' },
-          { label: 'python-pptx' },
+          { icon: 'powerpoint.svg', label: 'PowerPoint' },
           { label: 'REST APIs' },
-          { label: 'Nuitka' },
         ],
         // one line for the index card, under its Problem label; the full problem is in the chapter
         teaser: 'Seasonal catalogues pasted together in PowerPoint from three systems.',
@@ -267,7 +261,7 @@ export const content = {
         bullets: [
           'Pick a release and a brand, get a finished deck',
           'Merges product data, PIM attributes and DAM images for every SKU',
-          'Places a hero image and up to seven variant groups per slide, merging identical variants into one card',
+          'Places a hero image and up to seven variant groups per slide',
           'Gives variant families their own slides and flags prescription-ready models',
         ],
         idea: 'The layout is a small **engine**, not a fixed template: positions are computed from how many variant groups land on each slide, product images are auto-cropped, and one list of slide jobs decides both how many slides exist and what goes on each.',
@@ -275,14 +269,11 @@ export const content = {
       {
         id: 'review',
         name: 'Review deck builder',
-        stack: 'Python · PyQt5 · PowerPoint automation',
         icon: 'qt-designer.svg',
         highlights: [
           { icon: 'python.svg', label: 'Python' },
           { icon: 'qt-designer.svg', label: 'PyQt5' },
-          { label: 'python-pptx' },
-          { label: 'PowerPoint COM' },
-          { label: 'PyInstaller' },
+          { icon: 'powerpoint.svg', label: 'PowerPoint' },
         ],
         // one line for the index card, under its Problem label; the full problem is in the chapter
         teaser: 'Evaluation decks typed up slide by slide, one style at a time.',

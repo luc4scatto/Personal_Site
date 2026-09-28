@@ -3903,16 +3903,6 @@ p.project-specs__kicker {
   align-items: start;
 }
 
-.pp-tool__stack {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-display);
-  color: var(--text-dim);
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-
 .pp-tool__text h2 {
   font-size: clamp(1.8rem, 3.6vw, 2.6rem);
   margin-bottom: 1.5rem;
@@ -4055,6 +4045,12 @@ button.pp-btn:active {
   align-items: center;
   gap: 0.5rem;
   min-width: 0;
+}
+
+/* a row of labeled fields: sit buttons on the inputs' baseline, not centered
+   against field + label */
+.pp-row:has(> .pp-field) {
+  align-items: flex-end;
 }
 
 .pp-row--wrap {
@@ -4841,7 +4837,9 @@ button.pp-btn:active {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin: -0.5rem 0 0.5rem;
+  /* the pills are the chapter's subtitle now: tight to the h2, a clear
+     break before the body */
+  margin: -0.5rem 0 2.25rem; /* collapses with the label's 1.5rem top, so it must beat it */
 }
 
 .pp-tool__highlights li:has(img) {

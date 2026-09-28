@@ -54,9 +54,6 @@ function buildIndex(list, tools) {
 }
 
 function buildChapter(host, tool) {
-  const kicker = el('p', 'pp-tool__stack');
-  kicker.append(icon(tool.icon, 20), document.createTextNode(tool.stack));
-
   const bullets = el('ul', 'pp-tool__bullets');
   tool.bullets.forEach((b) => bullets.append(el('li', null, rich(b))));
 
@@ -69,7 +66,6 @@ function buildChapter(host, tool) {
   });
 
   host.append(
-    kicker,
     el('h2', null, rich(tool.name)),
     ...(tool.highlights ? [highlights] : []),
     el('p', 'pp-tool__label', 'The problem'),
