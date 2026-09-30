@@ -2311,14 +2311,17 @@
 .homelab-page #project,
 .homelab-page #description,
 .homelab-page #hardware,
-.homelab-page #services {
+.homelab-page #services,
+.cb-page #project,
+.cb-page #description {
   padding-bottom: calc(var(--space) * 0.4);
 }
 
 /* no cover photo between title and intro on these pages, so the intro is the
    title's lede, not a new section: drop its leading dose and let kicker, title
    and intro read as one group. The hero's trimmed trailing edge is the gap. */
-.homelab-page #description {
+.homelab-page #description,
+.cb-page #description {
   padding-top: 0;
 }
 
@@ -5174,9 +5177,15 @@ button.pp-btn:active {
   transition: border-color var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out);
 }
 
-.cb-demo__tab:hover,
 .cb-demo__tab.is-on {
   border-color: var(--accent);
+}
+
+/* hover only where there is a real pointer; on touch it sticks to the last tap */
+@media (hover: hover) {
+  .cb-demo__tab:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
 }
 
 .cb-demo__tab.is-on {
@@ -5194,7 +5203,7 @@ button.pp-btn:active {
 }
 
 .cb-chat {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .cb-chat__bar {
@@ -5219,7 +5228,7 @@ button.pp-btn:active {
   border: 1px solid var(--ui-line);
   border-radius: 99px;
   color: var(--text-dim);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 
 .cb-chat__body {
@@ -5227,7 +5236,7 @@ button.pp-btn:active {
   flex-direction: column;
   gap: 0.7rem;
   padding: 1rem 0.9rem;
-  min-height: 22rem;
+  min-height: 25rem;
 }
 
 .cb-chat__body.is-on {
@@ -5236,6 +5245,7 @@ button.pp-btn:active {
 
 .cb-msg {
   margin: 0;
+  line-height: 1.45;
   padding: 0.65rem 0.85rem;
   border-radius: 12px;
   max-width: 88%;
@@ -5261,12 +5271,12 @@ button.pp-btn:active {
 .cb-tool {
   margin: 0;
   align-self: flex-start;
-  padding: 0.2rem 0.55rem;
+  padding: 0.25rem 0.6rem;
   border-radius: 6px;
   background: var(--ui-btn);
-  color: var(--text-dim);
+  color: color-mix(in srgb, var(--text) 70%, transparent);
   font-family: ui-monospace, monospace;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
 }
 
 .cb-bars {
@@ -5276,7 +5286,7 @@ button.pp-btn:active {
   height: 7rem;
   padding: 0 0.3rem;
   border-bottom: 1px solid var(--ui-line);
-  margin-bottom: 0.6rem;
+  margin-bottom: 1.4rem;
 }
 
 .cb-bars span {
@@ -5295,12 +5305,8 @@ button.pp-btn:active {
   margin-top: 0.2rem;
   text-align: center;
   font-style: normal;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-dim);
-}
-
-.cb-bars {
-  margin-bottom: 1.4rem;
 }
 
 .cb-src {
@@ -5311,12 +5317,12 @@ button.pp-btn:active {
 
 .cb-src span,
 .cb-src em {
-  padding: 0.2rem 0.55rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 99px;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-style: normal;
   color: var(--accent);
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
   background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
@@ -5353,7 +5359,6 @@ button.pp-btn:active {
   flex: 0 0 6.5rem;
   aspect-ratio: 4 / 3;
   border-radius: 8px;
-  background: radial-gradient(circle at 35% 40%, #3a3a3a, #171717 70%);
   border: 1px solid var(--ui-line);
 }
 
@@ -5364,10 +5369,9 @@ button.pp-btn:active {
   margin: 0;
 }
 
-.cb-sheet dt,
-.cb-dash__k {
+.cb-sheet dt {
   color: var(--text-dim);
-  font-size: 0.7rem;
+  font-size: 0.78rem;
 }
 
 .cb-sheet dd {
@@ -5400,86 +5404,33 @@ button.pp-btn:active {
   border-radius: 4px;
   background: color-mix(in srgb, var(--accent) 35%, transparent);
   color: var(--text);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   text-align: right;
   white-space: nowrap;
 }
 
 .cb-chat__input {
+  display: flex;
+  align-items: center;
   margin: 0 0.9rem 0.9rem;
   padding: 0.65rem 0.9rem;
   border: 1px solid var(--ui-line);
   border-radius: 99px;
   background: var(--ui-panel);
-  color: var(--text-dim);
-}
-
-.cb-dash {
-  margin-bottom: 1rem;
-  padding: 1rem;
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  gap: 1.25rem;
-}
-
-.cb-dash__tiles {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
-}
-
-.cb-dash__tiles > div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding: 0.7rem 0.8rem;
-  border: 1px solid var(--ui-line);
-  border-radius: 10px;
-  background: var(--ui-panel);
-}
-
-.cb-dash__v {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
   color: var(--text);
 }
 
-.cb-dash__v--ok {
-  color: var(--accent);
-}
 
-.cb-dash__tools p {
-  margin: 0 0 0.6rem;
-}
 
-.cb-dash__tools ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-}
 
-.cb-dash__tools li {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-family: ui-monospace, monospace;
-  font-size: 0.7rem;
-}
 
-.cb-dash__tools i {
-  display: block;
-  height: 0.35rem;
-  width: var(--w);
-  border-radius: 99px;
-  background: var(--accent-2);
-}
+
+
+
+
 
 @media (max-width: 860px) {
-  .cb-demo__grid,
-  .cb-dash {
+  .cb-demo__grid {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -5492,7 +5443,7 @@ button.pp-btn:active {
   }
 }
 
-/* company-brain.html: the graph canvas fills its column; the brain outline is drawn in JS */
+/* company-brain.html: the graph canvas fills its column; the systems and the answer card are drawn in JS */
 .cb-brain {
   min-width: 0;
 }
@@ -5540,11 +5491,10 @@ button.pp-btn:active {
   transform: translateX(-50%);
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
-  background: var(--text);
-  color: var(--bg);
-  font-size: 0.65rem;
+  color: color-mix(in srgb, var(--text) 80%, transparent);
+  font-size: 0.75rem;
   white-space: nowrap;
-  opacity: 0;
+  opacity: 1;
   pointer-events: none;
   transition: opacity var(--duration-fast) var(--ease-out);
 }
@@ -5589,10 +5539,37 @@ button.pp-btn:active {
   }
 }
 
+/* the sheet's photo: a pair of frames on a studio backdrop, in the colorway's own colour, so it
+   reads as a product shot and not as a loading placeholder */
 .cb-sheet__img {
   --hue: #3f4652;
-  background: radial-gradient(circle at 35% 40%, color-mix(in srgb, var(--hue) 80%, #fff 10%), #171717 72%);
+  --frame: color-mix(in srgb, var(--hue) 55%, #fff);
+  position: relative;
+  background:
+    linear-gradient(var(--frame), var(--frame)) 50% 44% / 12% 3px no-repeat,
+    radial-gradient(circle at 35% 40%, color-mix(in srgb, var(--hue) 80%, #fff 10%), #171717 72%);
   transition: background var(--duration-base) var(--ease-out);
+}
+
+.cb-sheet__img::before,
+.cb-sheet__img::after {
+  content: '';
+  position: absolute;
+  top: 30%;
+  width: 34%;
+  height: 40%;
+  border: 3px solid var(--frame);
+  border-radius: 42% 42% 50% 50%;
+  background: color-mix(in srgb, var(--hue) 35%, transparent);
+  transition: border-color var(--duration-base) var(--ease-out), background var(--duration-base) var(--ease-out);
+}
+
+.cb-sheet__img::before {
+  left: 10%;
+}
+
+.cb-sheet__img::after {
+  right: 10%;
 }
 
 .cb-sheet dd {
@@ -5625,12 +5602,6 @@ button.pp-btn:active {
 }
 
 /* the question is typed into the input before it is sent */
-.cb-chat__input {
-  display: flex;
-  align-items: center;
-  color: var(--text);
-}
-
 .cb-chat__placeholder {
   color: var(--text-dim);
 }
@@ -5694,66 +5665,11 @@ button.pp-btn:active {
   margin: 6rem 0 1.75rem;
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 2.6vw, 2.1rem);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: -0.01em;
   line-height: 1.15;
   text-wrap: balance;
   color: var(--text);
-}
-
-.cb-how .cb-sub--quiet {
-  margin-top: 5rem;
-  font-size: 1.15rem;
-  color: var(--text-dim);
-}
-
-/* the chain: the lead of the section */
-.cb-flow .vt-flow__node {
-  gap: 0.6rem;
-  padding: 1.6rem 1.5rem;
-  border-color: rgba(255, 255, 255, 0.16);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
-}
-
-.cb-flow .vt-flow__name {
-  font-size: clamp(1.25rem, 1.9vw, 1.5rem);
-}
-
-.cb-flow .vt-flow__text {
-  font-size: 0.95rem;
-  color: var(--cb-body);
-}
-
-/* a signal runs along each connector, node after node: the one authored moment here */
-.cb-flow .vt-flow__node:not(:last-child)::after {
-  height: 2px;
-  margin-top: -1px;
-  background:
-    linear-gradient(90deg, transparent, var(--accent), transparent) -100% 0 / 50% 100% no-repeat,
-    color-mix(in srgb, var(--accent) 35%, transparent);
-  animation: cb-signal 3.6s var(--ease-out) infinite;
-}
-
-.cb-flow .vt-flow__node:nth-child(2)::after { animation-delay: 0.6s; }
-.cb-flow .vt-flow__node:nth-child(3)::after { animation-delay: 1.2s; }
-
-@keyframes cb-signal {
-  0% { background-position: -100% 0, 0 0; }
-  45%, 100% { background-position: 200% 0, 0 0; }
-}
-
-/* steps: a rail under the chain */
-.cb-how .vt-step__gesture {
-  font-size: 1.2rem;
-}
-
-.cb-how .vt-step__text {
-  font-size: 0.95rem;
-  color: var(--cb-body);
-}
-
-.cb-how .vt-step::before {
-  font-size: 0.9rem;
 }
 
 /* design choices: one lead, five supporting. Six columns so the rows can be 3 + 2. */
@@ -5765,11 +5681,7 @@ button.pp-btn:active {
 .cb-details .vt-detail {
   grid-column: span 2;
   padding-top: 1.1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-.cb-details .vt-detail:nth-child(n + 5) {
-  grid-column: span 3;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .cb-details .vt-detail h3 {
@@ -5785,7 +5697,6 @@ button.pp-btn:active {
 
 /* the idea that carries the project, first and full width */
 .cb-details .cb-lead {
-  order: -1;
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
@@ -5797,8 +5708,8 @@ button.pp-btn:active {
 
 .cb-details .cb-lead h3 {
   margin: 0;
-  font-size: clamp(1.7rem, 3.2vw, 2.6rem);
-  line-height: 1.08;
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  line-height: 1.12;
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
@@ -5812,7 +5723,8 @@ button.pp-btn:active {
 /* monitoring: what it is on the left, what it looks like on the right */
 .cb-monitor {
   display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 44rem;
   gap: 2rem clamp(1.5rem, 5vw, 4rem);
   align-items: center;
   margin-top: 6rem;
@@ -5829,25 +5741,9 @@ button.pp-btn:active {
   color: var(--cb-body);
 }
 
-.cb-monitor .cb-dash {
-  margin: 0;
-  padding: 1.25rem;
-  gap: 1.5rem;
-  border-color: rgba(255, 255, 255, 0.16);
-}
 
-.cb-monitor .cb-dash__v {
-  font-size: clamp(1.15rem, 1.9vw, 1.45rem);
-  white-space: nowrap;
-}
 
-.cb-monitor .cb-dash__tiles > div {
-  padding: 0.9rem 1rem;
-}
 
-.cb-monitor .cb-dash__k {
-  font-size: 0.75rem;
-}
 
 /* lessons: type, no boxes, two by two */
 .cb-lessons {
@@ -5855,7 +5751,7 @@ button.pp-btn:active {
   gap: 2.5rem clamp(2rem, 6vw, 5rem);
 }
 
-.cb-lessons .vt-detail h3 {
+.cb-lessons .vt-detail h4 {
   margin-bottom: 0.5rem;
   font-size: clamp(1.25rem, 1.9vw, 1.5rem);
   line-height: 1.2;
@@ -5878,7 +5774,7 @@ button.pp-btn:active {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.cb-limits .vt-detail h3 {
+.cb-limits .vt-detail h4 {
   margin-bottom: 0.35rem;
   font-size: 1rem;
   color: var(--text-dim);
@@ -5889,8 +5785,7 @@ button.pp-btn:active {
 }
 
 @media (max-width: 1024px) {
-  .cb-details .vt-detail,
-  .cb-details .vt-detail:nth-child(n + 5) {
+  .cb-details .vt-detail {
     grid-column: span 3;
   }
 
@@ -5916,7 +5811,6 @@ button.pp-btn:active {
   }
 
   .cb-details .vt-detail,
-  .cb-details .vt-detail:nth-child(n + 5),
   .cb-details .cb-lead,
   .cb-details .vt-detail:last-child {
     grid-column: 1 / -1;
@@ -5926,28 +5820,6 @@ button.pp-btn:active {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* the chain runs top to bottom here, so its signal does too */
-  .cb-flow .vt-flow__node:not(:last-child)::after {
-    width: 2px;
-    height: var(--flow-gap);
-    margin: 0;
-    background:
-      linear-gradient(180deg, transparent, var(--accent), transparent) 0 -100% / 100% 50% no-repeat,
-      color-mix(in srgb, var(--accent) 35%, transparent);
-    animation-name: cb-signal-v;
-  }
-}
-
-@keyframes cb-signal-v {
-  0% { background-position: 0 -100%, 0 0; }
-  45%, 100% { background-position: 0 200%, 0 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cb-flow .vt-flow__node:not(:last-child)::after {
-    animation: none;
-    background: color-mix(in srgb, var(--accent) 55%, transparent);
-  }
 }
 
 /* ---- company-brain.html: three peers after the demo ----
@@ -5955,19 +5827,12 @@ button.pp-btn:active {
    the proof), Looking back (lessons lead, limits in a quiet side column). Each is an h2 at the
    site's section size, so the page reads as a sequence of chapters instead of one long list. */
 
-/* the steps annotate the flow above them: close to it, smaller heading than a chapter's sub */
-.cb-how .cb-sub--steps {
-  margin: 3.5rem 0 1.5rem;
-  font-size: clamp(1.15rem, 1.6vw, 1.35rem);
-  color: var(--cb-body);
-}
-
 /* in Design choices the lead sits right under the chapter heading */
-.cb-choices .cb-details .cb-lead {
+.cb-design .cb-details .cb-lead {
   padding-top: 1.5rem;
 }
 
-.cb-choices .cb-monitor {
+.cb-design .cb-monitor {
   margin-top: 5.5rem;
   padding-top: 2.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -5994,11 +5859,6 @@ button.pp-btn:active {
   padding: 1.5rem 1.5rem 1.75rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1rem;
-}
-
-.cb-retro .cb-sub--quiet {
-  margin: 0 0 1.25rem;
-  font-size: 1.05rem;
 }
 
 .cb-retro .cb-limits {
@@ -6028,10 +5888,10 @@ button.pp-btn:active {
 }
 
 /* under "Looking back" the two column heads are labels of that chapter, not rivals to it */
-.cb-retro .cb-sub:not(.cb-sub--quiet) {
+.cb-retro .cb-sub {
   margin-bottom: 1.5rem;
-  font-size: clamp(1.15rem, 1.6vw, 1.35rem);
-  color: var(--cb-body);
+  font-size: clamp(1.5rem, 2.4vw, 1.9rem);
+  color: var(--text);
 }
 
 /* Looking back, v2: more subdivision. Lessons are a 2 x 2 table ruled by hairlines (the 1px
@@ -6043,7 +5903,7 @@ button.pp-btn:active {
 }
 
 .cb-retro .cb-lessons {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -6061,18 +5921,18 @@ button.pp-btn:active {
   background: #111;
 }
 
-.cb-retro .cb-lessons .vt-detail h3 {
+.cb-retro .cb-lessons .vt-detail h4 {
   margin-bottom: 0.75rem;
 }
 
 /* a short accent tick opens each lesson, so the four read as four */
-.cb-retro .cb-lessons .vt-detail h3::before {
+.cb-retro .cb-lessons .vt-detail h4::before {
   content: '';
   display: block;
   width: 1.5rem;
   height: 2px;
   margin-bottom: 1rem;
-  background: var(--accent);
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
 }
 
 .cb-retro__side {
@@ -6085,12 +5945,8 @@ button.pp-btn:active {
   border-radius: 0;
 }
 
-.cb-retro .cb-sub--quiet {
-  margin: 0;
-}
-
 .cb-retro .cb-limits {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.5rem clamp(1.5rem, 3vw, 2.5rem);
 }
 
@@ -6111,4 +5967,483 @@ button.pp-btn:active {
   .cb-retro .cb-lessons {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+
+/* keyboard: the demo's tabs and choice buttons get the same ring as the rest of the site */
+.cb-demo__tab:focus-visible,
+.cb-choices .pp-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cb-caret {
+    animation: none;
+    opacity: 1;
+  }
+
+  .cb-demo__tab,
+  .cb-retro .cb-lessons .vt-detail,
+  .cb-sheet__img,
+  .cb-sheet dd,
+  .cb-bars span::after,
+  .cb-chat__body > *,
+  .cb-bars span,
+  .cb-list .cb-days {
+    transition: none;
+  }
+}
+
+
+@media (max-width: 1024px) {
+  .cb-retro .cb-lessons {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* touch: the colorway choices are the demo's real controls, so give them a finger-sized target */
+@media (pointer: coarse) {
+  .cb-choices .pp-btn {
+    min-height: 44px;
+    padding-inline: 1rem;
+  }
+}
+
+
+/* Bolder, the ending: the honest line is the closing statement of the page, in display type
+   under an accent rule, and the other limit drops to a plain note beneath it. Everything above
+   keeps its weight; this is the one place the page raises its voice at the end. */
+.cb-retro__side {
+  border-top: 1px solid var(--accent);
+  padding-top: 2.5rem;
+}
+
+.cb-retro .cb-retro__side .cb-sub {
+  margin-bottom: 0;
+  font-size: clamp(1.5rem, 2.4vw, 1.9rem);
+  color: var(--text);
+}
+
+.cb-retro .cb-limits {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem;
+}
+
+.cb-limits .vt-detail:nth-child(1) h4 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.cb-limits .vt-detail:nth-child(1) p {
+  max-width: 22ch;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4.2vw, 3.4rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: var(--text);
+}
+
+.cb-limits .vt-detail:nth-child(2) {
+  max-width: 44rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cb-limits .vt-detail:nth-child(2) p {
+  font-size: 1rem;
+  color: var(--cb-body);
+}
+
+/* room to land after the statement, before the way back */
+#retro + .project-back {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+
+/* ---- company-brain.html: critique pass ----
+   The demo never goes blank on a revisit and has a Replay/Skip control; the architecture is
+   read off the demo (the path strip lights the stage a question is at) instead of a separate
+   diagram; the second half of the page is rows, not cards. */
+
+.cb-chat__replay {
+  margin-left: auto;
+  padding: 0.15rem 0.65rem;
+  border: 1px solid var(--ui-line);
+  border-radius: 99px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.cb-chat__replay:hover {
+  border-color: var(--accent);
+}
+
+.cb-chat__replay + .cb-chat__ro {
+  margin-left: 0;
+}
+
+.cb-chat__replay[hidden] + .cb-chat__ro {
+  margin-left: auto;
+}
+
+.cb-chat__replay:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* the path a question takes: a real list, read before the demo and lit as the demo plays */
+.cb-path {
+  list-style: none;
+  margin: 0 0 2rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem clamp(1rem, 2.5vw, 2rem);
+}
+
+.cb-path li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.8rem;
+  border-top: 2px solid var(--ui-line);
+  transition: border-color var(--duration-base) var(--ease-out);
+}
+
+.cb-path li.is-lit {
+  border-top-color: var(--accent);
+}
+
+.cb-path__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text-dim);
+  transition: color var(--duration-base) var(--ease-out);
+}
+
+.cb-path li.is-lit .cb-path__name {
+  color: var(--text);
+}
+
+.cb-path__text {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--text) 78%, transparent);
+}
+
+/* phone: one stage per row, name beside what it does, so the whole path still reads at rest */
+@media (max-width: 860px) {
+  .cb-path {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .cb-path li {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 0.75rem;
+    padding-block: 0.7rem;
+  }
+}
+
+
+/* design choices: the lead stays big, the other three are rows */
+.cb-details {
+  gap: 0;
+}
+
+.cb-details .vt-detail:not(.cb-lead) {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 0.5rem clamp(1.5rem, 4vw, 3rem);
+  align-items: baseline;
+  padding-block: 1.1rem;
+}
+
+.cb-details .vt-detail:not(.cb-lead) h3 {
+  margin: 0;
+}
+
+.cb-details .vt-detail:not(.cb-lead) p {
+  margin: 0;
+}
+
+/* lessons: the same rows, no cells and no ticks */
+.cb-retro .cb-lessons {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.cb-retro .cb-lessons .vt-detail,
+.cb-retro .cb-lessons .vt-detail:hover {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 0.5rem clamp(1.5rem, 4vw, 3rem);
+  align-items: baseline;
+  padding: 1.1rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: none;
+}
+
+.cb-retro .cb-lessons .vt-detail h4,
+.cb-retro .cb-lessons .vt-detail p {
+  margin: 0;
+}
+
+.cb-retro .cb-lessons .vt-detail h4::before {
+  content: none;
+}
+
+@media (max-width: 860px) {
+  .cb-details .vt-detail:not(.cb-lead),
+  .cb-retro .cb-lessons .vt-detail,
+  .cb-retro .cb-lessons .vt-detail:hover {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* the chat is the point of the demo, so it stays near the top: only the open example
+     keeps its description */
+  .cb-demo__tabs {
+    gap: 0.5rem;
+  }
+
+  .cb-demo__tab:not(.is-on) {
+    padding-block: 0.7rem;
+  }
+
+  .cb-demo__tab:not(.is-on) .cb-demo__tab-text {
+    display: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .cb-chat__replay {
+    min-height: 44px;
+    padding-inline: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cb-path li,
+  .cb-path__name,
+  .cb-chat__replay {
+    transition: none;
+  }
+}
+
+/* the way out: back to the projects, or straight to contact */
+#back.project-back {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 2rem;
+}
+
+.cb-back__contact {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  text-underline-offset: 0.3em;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.cb-back__contact:hover {
+  color: var(--accent);
+}
+
+.cb-back__contact:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* polish: leading, measure, a target a finger can hit, and a prompt while the demo waits */
+.cb-chat {
+  line-height: 1.4;
+}
+
+.cb-details .vt-detail:not(.cb-lead) p,
+.cb-retro .cb-lessons .vt-detail p {
+  max-width: 65ch;
+}
+
+
+.cb-chat__replay {
+  min-height: 2rem;
+}
+
+.cb-msg .cb-choices__hint {
+  display: none;
+  margin: 0.6rem 0 0;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+
+.is-waiting .cb-msg .cb-choices__hint {
+  display: block;
+}
+
+@media (max-width: 560px) {
+  .cb-chat__body {
+    min-height: 16rem;
+  }
+}
+
+/* who did what, when, and where it stands: the facts a reader looks for under the title */
+.cb-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 2.5rem;
+  margin: 1.5rem 0 0;
+}
+
+.cb-meta div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.cb-meta dt {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+
+.cb-meta dd {
+  margin: 0;
+  color: var(--text);
+}
+
+/* one sentence that says what it is for, straight under the title */
+.cb-pitch {
+  max-width: 34rem;
+  margin: 1.25rem 0 0;
+  font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+  line-height: 1.45;
+  color: var(--text);
+}
+
+/* hero: the title and what it is on the left, the picture of the idea on the right, so the
+   first screen shows both. The two paragraphs that explain it sit under, side by side. */
+.cb-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 2rem clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+
+.cb-hero__text {
+  min-width: 0;
+}
+
+.cb-desc .project-description-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cb-desc .project-description-text {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem clamp(2rem, 5vw, 4rem);
+}
+
+.cb-desc .project-description-text p,
+.cb-desc.project-description p + p {
+  max-width: 34rem;
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 860px) {
+  .cb-hero,
+  .cb-desc .project-description-text {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* the Replay pill stays small, its hit area does not */
+.cb-chat__replay {
+  position: relative;
+}
+
+.cb-chat__replay::after {
+  content: '';
+  position: absolute;
+  inset: -0.6rem -0.4rem;
+}
+
+/* the chart states its values: touch and keyboard readers see what the answer talks about */
+.cb-bars {
+  margin-top: 1.4rem;
+}
+
+/* Looking back: group labels (h3) lead their items (h4) */
+.cb-retro .vt-detail h4 {
+  font-family: var(--font-display);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.cb-limits .vt-detail:nth-child(2) p {
+  max-width: 65ch;
+}
+
+.cb-back__contact {
+  display: inline-block;
+  padding-block: 0.6rem;
+}
+
+/* phone: the chat names the lit stage, since the path list sits far above it */
+.cb-chat {
+  scroll-margin-top: 5rem;
+}
+
+.cb-chat__stage {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .cb-chat__stage:not(:empty) {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    color: var(--accent);
+    font-size: 0.75rem;
+  }
+}
+
+/* the chat header holds up to four things on a phone: they keep their words whole and wrap
+   as a row instead */
+.cb-chat__bar {
+  flex-wrap: wrap;
+  row-gap: 0.4rem;
+}
+
+.cb-chat__stage,
+.cb-chat__ro,
+.cb-chat__replay {
+  white-space: nowrap;
+}
+
+/* Monitoring is a sub-block of Design choices: never louder than the lead idea */
+.cb-monitor .cb-sub {
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
 }

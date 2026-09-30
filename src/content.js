@@ -48,8 +48,9 @@ export const content = {
         'Five in-house tools for Maya, Unreal Engine, Omniverse and PowerPoint, from USD and MaterialX look-dev to renders and decks, each built to remove one slow, manual step from the 3D workflow.',
     },
     companyBrain: {
-      title: "Company Brain",
-      description: "A self-hosted AI assistant that answers questions about our products in plain language, reading live from the company systems and replying with photos, drawings and charts. Nothing leaves the company."
+      title: 'Company Brain',
+      description:
+        'A self-hosted AI assistant that answers questions about our products in plain language, reading live from the company systems and replying with photos, drawings and charts. Nothing leaves the company.',
     },
     three: {
       title: 'Personal project: Homelab',
@@ -79,13 +80,19 @@ export const content = {
         "Nothing in the booth is touched. A webcam follows one hand and the visitor's head, TouchDesigner turns that into gestures, and Unreal Engine answers in real time - both running on the same machine.",
       flow: [
         { name: 'Webcam', text: '1080p, one hand and the head' },
-        { name: 'TouchDesigner', text: 'MediaPipe hand and pose tracking, gestures built in CHOPs' },
+        {
+          name: 'TouchDesigner',
+          text: 'MediaPipe hand and pose tracking, gestures built in CHOPs',
+        },
         { name: 'OSC', text: 'One message per gesture channel, over localhost' },
         { name: 'Unreal Engine 5.7', text: 'Levels, sequences and UI driven by those messages' },
       ],
       journeyLabel: "The visitor's path",
       steps: [
-        { gesture: 'Thumbs up', text: 'An attract loop plays until someone holds a thumb up to start.' },
+        {
+          gesture: 'Thumbs up',
+          text: 'An attract loop plays until someone holds a thumb up to start.',
+        },
         { gesture: 'One or two fingers', text: 'Held up to pick one of the two Maisons.' },
         {
           gesture: 'Pick, zoom, grab',
@@ -95,7 +102,10 @@ export const content = {
           gesture: 'Pinch, move, flip',
           text: 'A gesture opens free exploration: pinch and hold to take the frame, move to turn it, push forward to zoom, flip the hand to change color.',
         },
-        { gesture: 'Thumbs up again', text: 'When the session runs long, a thumbs up keeps it going. Otherwise it returns to the loop.' },
+        {
+          gesture: 'Thumbs up again',
+          text: 'When the session runs long, a thumbs up keeps it going. Otherwise it returns to the loop.',
+        },
       ],
       detailLabel: 'The interesting part',
       details: [
@@ -117,120 +127,85 @@ export const content = {
   },
   // Company Brain: sanitized like pipelineProjects - no brand names, system names, vendors, hosts or real data.
   companyBrain: {
-    kicker: "Internal project",
-    meta: "A self-hosted AI assistant that answers questions about our products from the company systems",
-    "description1": "Information about a product lives in many systems: **technical data**, **commercial texts and attributes**, **official photos**, **technical drawings** and standard components, **prototype tracking**, plus design manuals and internal notes. Each has its own interface, its own login, its own way of searching, so a simple question like \"what material is this model, and how is it built?\" often means opening three or four programs and knowing exactly where to look.",
-    "description2": "**Company Brain** is one chat that fixes that. You ask in plain language, like you would ask an expert colleague, and it reads the answer live from the company systems and gives it back with photos, drawings and charts. It runs on our own servers, so nothing leaves the company, and every answer says which system each piece of data came from.",
+    kicker: 'Internal project',
+    meta: 'A self-hosted AI assistant that answers questions about our products from the company systems',
+    description1:
+      'Information about a product lives in many systems: **technical data**, **commercial texts and attributes**, **official photos**, **technical drawings** and standard components, **prototype tracking**, plus design manuals and internal notes. Each has its own interface, its own login, its own way of searching, so a simple question like "what material is this model, and how is it built?" often means opening three or four programs and knowing exactly where to look.',
+    description2:
+      '**Company Brain** is one chat that fixes that. You ask in plain language, like you would ask an expert colleague, and it reads the answer live from the company systems and gives it back with photos, drawings and charts. It runs on our own servers, so nothing leaves the company, and every answer says which system each piece of data came from.',
+    demoIntro:
+      'Redrawn with made-up data. One question goes through a chat, a language model that decides what to do, and small purpose-built tools that each know how to talk to one system. Pick a question to watch it travel.',
     how: {
-      title: "How it works",
-      intro: "One question goes through a chat, a language model that decides what to do, and small purpose-built tools that each know how to talk to one system.",
+      title: 'How it works',
       flow: [
         {
-          name: "Chat",
-          text: "Internal web chat, questions in plain language"
+          name: 'Chat',
+          text: 'Internal web chat, questions in plain language',
         },
         {
-          name: "Language model",
-          text: "Runs on our own server on a dedicated GPU, understands the question and picks a tool"
+          name: 'Language model',
+          text: 'Runs on our own server on a dedicated GPU, understands the question and picks a tool',
         },
         {
-          name: "Tools",
-          text: "Small custom programs, one per source: fetch, calculate, prepare the result"
+          name: 'Tools',
+          text: 'Small custom programs, one per source: fetch, calculate, prepare the result',
         },
         {
-          name: "Company systems",
-          text: "Technical data, catalog, photos, drawings, prototypes, manuals"
-        }
+          name: 'Company systems',
+          text: 'Technical data, catalog, photos, drawings, prototypes, manuals',
+        },
       ],
-      stepsLabel: "From question to answer",
-      steps: [
-        {
-          gesture: "Ask",
-          text: "The user writes a question."
-        },
-        {
-          gesture: "Understand",
-          text: "The language model works out what is needed."
-        },
-        {
-          gesture: "Call a tool",
-          text: "It calls the right tool, a program that knows how to query one system."
-        },
-        {
-          gesture: "Retrieve",
-          text: "The tool fetches the data, does the math and prepares the result."
-        },
-        {
-          gesture: "Present",
-          text: "The model presents it in a readable form, with its sources."
-        }
-      ],
-      detailLabel: "Design choices",
+      detailLabel: 'Design choices',
       details: [
         {
-          title: "Everything in-house",
-          text: "The model runs on an internal server with a dedicated GPU. No question and no data is ever sent to an external service."
+          title: 'Everything in-house',
+          text: 'The model runs on an internal server with a dedicated GPU. No question and no data is ever sent to an external service.',
         },
         {
-          title: "Read-only",
-          text: "It consults the company systems but cannot change them: every connection uses a read-only account."
+          title: 'Read-only, and gated',
+          text: 'It consults the company systems but cannot change them: every connection uses a read-only account, and each group only sees the tools relevant to its own work.',
         },
         {
-          title: "The code does the math",
-          text: "Language models are good with words and less reliable with numbers, so averages, counts, comparisons and charts are computed exactly by the tools. The model only receives the result to explain."
+          title: 'The code does the math',
+          text: 'Language models are good with words and less reliable with numbers, so averages, counts, comparisons and charts are computed exactly by the tools. The model only receives the result to explain.',
         },
         {
-          title: "No copies of the data",
-          text: "Photos, drawings and documents are read from the original source at the moment of the question, never duplicated on the server, so what you see is always current."
+          title: 'No copies of the data',
+          text: 'Photos, drawings and documents are read from the original source at the moment of the question, never duplicated on the server, so what you see is always current.',
         },
-        {
-          title: "It asks instead of guessing",
-          text: "When a question is ambiguous (which season? which colorway? which component type?) it shows choice buttons right in the chat."
-        },
-        {
-          title: "Controlled access",
-          text: "Only authenticated users can use it, and each group only sees the tools relevant to its own work."
-        }
       ],
-      monitorLabel: "Monitoring",
-      monitor: "An internal dashboard shows whether every service is up, how loaded the server is and how fast the model answers, how many questions are asked and which tools get used the most. It tells us whether the system is healthy and where to invest next.",
-      retroTitle: "Looking back",
-      lessonsLabel: "What I learned",
+      monitorLabel: 'Monitoring',
+      monitor:
+        'An internal dashboard shows whether every service is up, how loaded the server is and which tools get used the most. It tells us where to invest next.',
+      retroTitle: 'Looking back',
+      lessonsLabel: 'What I learned',
       lessons: [
         {
-          title: "Small and well taught beats big and alone",
-          text: "The real work is in the tools: giving the model data that is already clean, ordered and short."
+          title: 'Small and well taught beats big and alone',
+          text: 'The real work is in the tools: giving the model data that is already clean, ordered and short.',
         },
         {
-          title: "Less text is better",
-          text: "Long answers confuse the model and eat memory, so every tool returns only what is needed."
+          title: 'Less text is better',
+          text: 'Long answers confuse the model and eat memory, so every tool returns only what is needed.',
         },
         {
-          title: "Charts need a point",
-          text: "A chart earns its place when it shows a trend or a comparison, not fifty nearly equal values."
+          title: 'Charts need a point',
+          text: 'A chart earns its place when it shows a trend or a comparison, not fifty nearly equal values.',
         },
-        {
-          title: "Asking beats guessing",
-          text: "The choice buttons removed a lot of wrong answers."
-        }
       ],
-      limitsLabel: "Limits and next steps",
+      limitsLabel: 'Limits and next steps',
       limits: [
         {
-          title: "One GPU",
-          text: "With many users at once, answers slow down."
+          title: 'One GPU, for now',
+          text: 'With many users at once, answers slow down. More capable models would need a more powerful machine, which is the next step, along with more data sources and other departments.',
         },
         {
-          title: "Bigger models need more hardware",
-          text: "More capable models would need a more powerful machine, which is the next step, along with more data sources and other departments."
+          title: 'Finds and summarizes',
+          text: 'It is good at finding and summarizing. Decisions stay with people.',
         },
-        {
-          title: "Finds and summarizes",
-          text: "It is good at finding and summarizing. Decisions stay with people."
-        }
-      ]
+      ],
     },
-    backCta: "← Back to projects"
+    backCta: '← Back to projects',
   },
   // coming-soon page - a standing placeholder for whatever gets added next, not one named project
   projectTwo: {

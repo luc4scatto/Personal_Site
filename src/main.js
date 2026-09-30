@@ -489,10 +489,10 @@ if (DRAWER_MODE) {
     });
 }
 
-// company brain: knowledge-graph brain next to the intro (company-brain.html only)
-const brainGraph = document.getElementById('brain-graph');
-if (brainGraph) {
-  import('./brainGraph.js').then((m) => m.initBrainGraph(brainGraph));
+// company brain: company systems flowing into one answer, next to the intro (company-brain.html only)
+const sourcesGraph = document.getElementById('sources-graph');
+if (sourcesGraph) {
+  import('./sourcesGraph.js').then((m) => m.initSourcesGraph(sourcesGraph));
 }
 
 // company brain: the example chat plays each scene out (company-brain.html only)
@@ -514,7 +514,10 @@ if (projectsScroller) {
   const step = (dir) => {
     const card = grid.querySelector('.card');
     const by = card.getBoundingClientRect().width + parseFloat(getComputedStyle(grid).columnGap);
-    grid.scrollBy({ left: dir * by, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    grid.scrollBy({
+      left: dir * by,
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
   };
   prev.hidden = next.hidden = false;
   prev.addEventListener('click', () => step(-1));
