@@ -2359,6 +2359,182 @@ p.project-specs__kicker {
   display: block;
 }
 
+/* ---- vivatech.html: How it works ----
+   The installation's chain (webcam -> TouchDesigner -> OSC -> Unreal), then the visitor's
+   path through it as a numbered timeline - the numbers carry the order the gestures come
+   in - then the three decisions worth reading about. Flat cards like the Pipeline index. */
+.vt-how__intro {
+  font-size: 1.2rem;
+  color: var(--text-dim);
+  max-width: 44rem;
+  margin-bottom: 2.5rem;
+}
+
+.vt-how .vt-how__label {
+  margin: 3.5rem 0 1.25rem;
+}
+
+.vt-flow {
+  --flow-gap: 2.5rem;
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--flow-gap);
+}
+
+.vt-flow__node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  background: var(--bg);
+}
+
+.vt-flow__head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.vt-flow__icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.vt-flow__name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+.vt-flow__text,
+.vt-step__text,
+.vt-detail p {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+/* connector: a line across the gap and a drawn chevron at its end */
+.vt-flow__node:not(:last-child)::after,
+.vt-flow__node:not(:last-child)::before {
+  content: '';
+  position: absolute;
+}
+
+.vt-flow__node:not(:last-child)::after {
+  left: 100%;
+  top: 50%;
+  width: var(--flow-gap);
+  height: 1px;
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.vt-flow__node:not(:last-child)::before {
+  left: calc(100% + var(--flow-gap) - 7px);
+  top: calc(50% - 3.5px);
+  width: 7px;
+  height: 7px;
+  border-top: 1px solid var(--accent);
+  border-right: 1px solid var(--accent);
+  transform: rotate(45deg);
+}
+
+.vt-steps {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1.5rem;
+  counter-reset: step;
+}
+
+.vt-step {
+  counter-increment: step;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* the step's number sits on the rail, in the accent */
+.vt-step::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  top: -0.7rem;
+  left: 0;
+  padding-right: 0.6rem;
+  background: var(--bg);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.vt-step__gesture {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.vt-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+.vt-detail h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+  .vt-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 2.25rem;
+  }
+}
+
+@media (max-width: 860px) {
+  /* the chain turns to run top to bottom, and so does its connector */
+  .vt-flow {
+    --flow-gap: 2rem;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vt-flow__node:not(:last-child)::after {
+    left: 1.75rem;
+    top: 100%;
+    width: 1px;
+    height: var(--flow-gap);
+  }
+
+  .vt-flow__node:not(:last-child)::before {
+    left: calc(1.75rem - 3px);
+    top: calc(100% + var(--flow-gap) - 7px);
+    transform: rotate(135deg);
+  }
+
+  .vt-details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .vt-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .gallery {
   columns: 280px 3;
   gap: 1rem;
@@ -3908,7 +4084,8 @@ p.project-specs__kicker {
   margin-bottom: 1.5rem;
 }
 
-.pp-tool__label {
+.pp-tool__label,
+.vt-how__label {
   font-family: var(--font-display);
   font-size: 0.75rem;
   letter-spacing: 0.12em;

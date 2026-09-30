@@ -67,6 +67,48 @@ export const content = {
       "At Vivatech 2026 - the tenth edition of Europe's biggest tech event - LVMH brought ten of its Maisons to the Dream Gallery pavilion in Paris, showing how technology amplifies craftsmanship across the whole value chain.",
     description2:
       'For the Thélios space I developed the real-time interactive experience: a live 3D showcase of eyewear digital twins, built with TouchDesigner and Unreal Engine, letting visitors explore frames, materials and details up close as they interact with the installation.',
+    // "How it works": the installation's own chain and the visitor's path through it.
+    // Sanitized like pipelineProjects: no brand names, model codes, IPs or internal level names.
+    how: {
+      title: 'How it works',
+      intro:
+        "Nothing in the booth is touched. A webcam follows one hand and the visitor's head, TouchDesigner turns that into gestures, and Unreal Engine answers in real time - both running on the same machine.",
+      flow: [
+        { name: 'Webcam', text: '1080p, one hand and the head' },
+        { name: 'TouchDesigner', text: 'MediaPipe hand and pose tracking, gestures built in CHOPs' },
+        { name: 'OSC', text: 'One message per gesture channel, over localhost' },
+        { name: 'Unreal Engine 5.7', text: 'Levels, sequences and UI driven by those messages' },
+      ],
+      journeyLabel: "The visitor's path",
+      steps: [
+        { gesture: 'Thumbs up', text: 'An attract loop plays until someone holds a thumb up to start.' },
+        { gesture: 'One or two fingers', text: 'Held up to pick one of the two Maisons.' },
+        {
+          gesture: 'Pick, zoom, grab',
+          text: 'At a workbench the frame lies in parts: one finger picks, two zoom in, a closed fist puts it back together, each gesture playing its own assembly sequence.',
+        },
+        {
+          gesture: 'Pinch, move, flip',
+          text: 'A gesture opens free exploration: pinch and hold to take the frame, move to turn it, push forward to zoom, flip the hand to change color.',
+        },
+        { gesture: 'Thumbs up again', text: 'When the session runs long, a thumbs up keeps it going. Otherwise it returns to the loop.' },
+      ],
+      detailLabel: 'The interesting part',
+      details: [
+        {
+          title: 'Hold to confirm',
+          text: "Every choice fills a round progress bar while the gesture is held, so a hand passing through a crowded booth can't trigger anything by accident.",
+        },
+        {
+          title: 'Tuned on site',
+          text: "Every range and threshold lives in one control panel in TouchDesigner, so tracking could be recalibrated to the booth's distance and light without touching the network.",
+        },
+        {
+          title: 'Training built in',
+          text: 'Nobody reads instructions at a fair. Free exploration opens with four short video steps, and each one only moves on once the visitor has done the gesture.',
+        },
+      ],
+    },
     backCta: '← Back to projects',
   },
   // coming-soon page - a standing placeholder for whatever gets added next, not one named project

@@ -66,6 +66,83 @@
         </video>
       </section>
 
+      <section id="how" class="vt-how">
+        <h2 data-reveal data-copy="vivatech.how.title">How it works</h2>
+        <p class="vt-how__intro" data-reveal data-copy="vivatech.how.intro">Nothing in the booth is touched. A webcam follows one hand and the visitor's head, TouchDesigner turns that into gestures, and Unreal Engine answers in real time - both running on the same machine.</p>
+
+        <!-- the chain, left to right on wide screens and top to bottom on phones -->
+        <ol class="vt-flow" data-reveal>
+          <li class="vt-flow__node">
+            <span class="vt-flow__head">
+              <img class="vt-flow__icon" src="icons/webcam.svg" alt="" width="28" height="28" loading="lazy" />
+              <span class="vt-flow__name" data-copy="vivatech.how.flow.0.name">Webcam</span>
+            </span>
+            <span class="vt-flow__text" data-copy="vivatech.how.flow.0.text">1080p, one hand and the head</span>
+          </li>
+          <li class="vt-flow__node">
+            <span class="vt-flow__head">
+              <img class="vt-flow__icon" src="icons/touchdesigner.svg" alt="" width="28" height="28" loading="lazy" />
+              <span class="vt-flow__name" data-copy="vivatech.how.flow.1.name">TouchDesigner</span>
+            </span>
+            <span class="vt-flow__text" data-copy="vivatech.how.flow.1.text">MediaPipe hand and pose tracking, gestures built in CHOPs</span>
+          </li>
+          <li class="vt-flow__node">
+            <span class="vt-flow__head">
+              <img class="vt-flow__icon" src="icons/osc.svg" alt="" width="28" height="28" loading="lazy" />
+              <span class="vt-flow__name" data-copy="vivatech.how.flow.2.name">OSC</span>
+            </span>
+            <span class="vt-flow__text" data-copy="vivatech.how.flow.2.text">One message per gesture channel, over localhost</span>
+          </li>
+          <li class="vt-flow__node">
+            <span class="vt-flow__head">
+              <img class="vt-flow__icon" src="icons/unreal-engine.svg" alt="" width="28" height="28" loading="lazy" />
+              <span class="vt-flow__name" data-copy="vivatech.how.flow.3.name">Unreal Engine 5.7</span>
+            </span>
+            <span class="vt-flow__text" data-copy="vivatech.how.flow.3.text">Levels, sequences and UI driven by those messages</span>
+          </li>
+        </ol>
+
+        <p class="vt-how__label" data-reveal data-copy="vivatech.how.journeyLabel">The visitor's path</p>
+        <ol class="vt-steps" data-reveal>
+          <li class="vt-step">
+            <span class="vt-step__gesture" data-copy="vivatech.how.steps.0.gesture">Thumbs up</span>
+            <span class="vt-step__text" data-copy="vivatech.how.steps.0.text">An attract loop plays until someone holds a thumb up to start.</span>
+          </li>
+          <li class="vt-step">
+            <span class="vt-step__gesture" data-copy="vivatech.how.steps.1.gesture">One or two fingers</span>
+            <span class="vt-step__text" data-copy="vivatech.how.steps.1.text">Held up to pick one of the two Maisons.</span>
+          </li>
+          <li class="vt-step">
+            <span class="vt-step__gesture" data-copy="vivatech.how.steps.2.gesture">Pick, zoom, grab</span>
+            <span class="vt-step__text" data-copy="vivatech.how.steps.2.text">At a workbench the frame lies in parts: one finger picks, two zoom in, a closed fist puts it back together, each gesture playing its own assembly sequence.</span>
+          </li>
+          <li class="vt-step">
+            <span class="vt-step__gesture" data-copy="vivatech.how.steps.3.gesture">Pinch, move, flip</span>
+            <span class="vt-step__text" data-copy="vivatech.how.steps.3.text">A gesture opens free exploration: pinch and hold to take the frame, move to turn it, push forward to zoom, flip the hand to change color.</span>
+          </li>
+          <li class="vt-step">
+            <span class="vt-step__gesture" data-copy="vivatech.how.steps.4.gesture">Thumbs up again</span>
+            <span class="vt-step__text" data-copy="vivatech.how.steps.4.text">When the session runs long, a thumbs up keeps it going. Otherwise it returns to the loop.</span>
+          </li>
+        </ol>
+
+        <p class="vt-how__label" data-reveal data-copy="vivatech.how.detailLabel">The interesting part</p>
+        <div class="vt-details" data-reveal>
+          <div class="vt-detail">
+            <h3 data-copy="vivatech.how.details.0.title">Hold to confirm</h3>
+            <p data-copy="vivatech.how.details.0.text">Every choice fills a round progress bar while the gesture is held, so a hand passing through a crowded booth can't trigger anything by accident.</p>
+          </div>
+          <div class="vt-detail">
+            <h3 data-copy="vivatech.how.details.1.title">Tuned on site</h3>
+            <p data-copy="vivatech.how.details.1.text">Every range and threshold lives in one control panel in TouchDesigner, so tracking could be recalibrated to the booth's distance and light without touching the network.</p>
+          </div>
+          <div class="vt-detail">
+            <h3 data-copy="vivatech.how.details.2.title">Training built in</h3>
+            <p data-copy="vivatech.how.details.2.text">Nobody reads instructions at a fair. Free exploration opens with four short video steps, and each one only moves on once the visitor has done the gesture.</p>
+          </div>
+        </div>
+      </section>
+
       <section id="gallery" class="project-gallery">
         <h2 data-reveal>Gallery</h2>
         <!-- width/height set to each file's real pixel size: with only CSS width:100%
