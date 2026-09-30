@@ -12,7 +12,7 @@ export const content = {
     words: ['3D', '2D', 'AI'], // cycles through the accent word after "to life with"
     subtitle: '3D Technical Artist & Creative Technologist',
     tagline:
-      'I build 2D-3D pipelines across every major DCC softwares,\npowering also configurators and interactive 3D experiences.',
+      'I build 2D-3D pipelines across every major DCC tool,\nalso powering configurators and interactive 3D experiences,\nwith a touch of AI.',
     hint: '✦ click on an object to learn more',
     cta: 'See my works ↓',
   },
@@ -247,11 +247,11 @@ export const content = {
       {
         id: 'catalogue',
         name: 'Catalogue deck generator',
-        icon: 'python.svg',
+        icon: 'powerpoint.svg',
         highlights: [
+          { icon: 'powerpoint.svg', label: 'PowerPoint' },
           { icon: 'python.svg', label: 'Python' },
           { icon: 'qt-designer.svg', label: 'PyQt6' },
-          { icon: 'powerpoint.svg', label: 'PowerPoint' },
           { label: 'REST APIs' },
         ],
         // one line for the index card, under its Problem label; the full problem is in the chapter
@@ -269,11 +269,11 @@ export const content = {
       {
         id: 'review',
         name: 'Review deck builder',
-        icon: 'qt-designer.svg',
+        icon: 'powerpoint.svg',
         highlights: [
+          { icon: 'powerpoint.svg', label: 'PowerPoint' },
           { icon: 'python.svg', label: 'Python' },
           { icon: 'qt-designer.svg', label: 'PyQt5' },
-          { icon: 'powerpoint.svg', label: 'PowerPoint' },
         ],
         // one line for the index card, under its Problem label; the full problem is in the chapter
         teaser: 'Evaluation decks typed up slide by slide, one style at a time.',
@@ -477,6 +477,17 @@ export const content = {
         'Animation',
         'Modeling',
         'Rigging',
+      ],
+    },
+    houdini: {
+      title: 'Houdini',
+      text: "SideFX's procedural 3D software, node-based from modeling to FX. I'm currently learning Solaris, its USD-native context, to see how it builds, layers and renders USD scenes.",
+      color: '#FF4713',
+      bullets: [
+        'Solaris (LOPs) and USD stages',
+        'USD layering and scene assembly',
+        'Karma rendering',
+        'Procedural, node-based workflows',
       ],
     },
     'adobe-substance-3d': {

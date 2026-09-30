@@ -432,14 +432,16 @@ export function initSkillDrawer(host, strip) {
   // it, and stretching it would stretch the mouth with it. resize() picks the count and only
   // lands here when it actually differs, so this runs about once per visit.
   let drawerCount = 0;
+  const locked = []; // the shut fronts above the live drawer, each face + pull as one group
   function buildCabinet(total) {
     if (total === drawerCount) return;
     drawerCount = total;
     for (const o of [...cabinet.children]) {
       if (o === bay) continue;
       cabinet.remove(o);
-      o.geometry.dispose();
+      o.traverse((m) => m.geometry?.dispose());
     }
+    locked.length = 0;
     const top = cabTop(total);
 
     // The opening is a real hole with a board's worth of material around it, not a black
@@ -482,12 +484,17 @@ export function initSkillDrawer(host, strip) {
       // The same face as the open drawer's, on the same pitch: they are the same furniture,
       // and sized on their own the stack drifted out of step with the drawer below it.
       // FACE_W, not CAB_W, so the frame's border runs round them as it runs round the mouth.
+      // Face and pull ride together as one group, so a tug on a locked one (rattle()) moves
+      // the whole drawer front and not just the piece the ray happened to hit.
+      const shut = new THREE.Group();
+      shut.position.set(0, MOUTH_Y + PITCH * i, CAB_D / 2);
       const face = box(FACE_W, FRONT_H, 0.2, steel);
-      face.position.set(0, MOUTH_Y + PITCH * i, CAB_D / 2 + 0.06);
-      cabinet.add(face);
+      face.position.z = 0.06;
       const pull = box(W * 0.45, 0.16, 0.22, steel);
-      pull.position.set(0, face.position.y, CAB_D / 2 + 0.22);
-      cabinet.add(pull);
+      pull.position.z = 0.22;
+      shut.add(face, pull);
+      cabinet.add(shut);
+      locked.push(shut);
     }
   }
 
@@ -1572,11 +1579,27 @@ export function initSkillDrawer(host, strip) {
     zAxis.set(((b.x - a.x) * w) / 2, (-(b.y - a.y) * h) / 2);
   }
 
-  function grabsDrawer(e) {
+  function rayHits(e, objects) {
     const r = host.getBoundingClientRect();
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
-    return raycaster.intersectObjects([front, handle], false).length > 0;
+    return raycaster.intersectObjects(objects, true);
+  }
+  const grabsDrawer = (e) => rayHits(e, [front, handle]).length > 0;
+
+  /** Only one drawer is the index; the others are locked. A pull on one gives a short jerk
+   *  out against the lock and a rattle back into the carcass - the hand learns the drawer is
+   *  shut on purpose, rather than that the click missed. Never under reduced motion: the
+   *  whole drawer is gated off there (DRAWER_MODE in main.js). */
+  const RATTLE_OUT = 0.14; // world units of play before the lock catches
+  function rattle(shut) {
+    gsap.killTweensOf(shut.position);
+    shut.position.z = CAB_D / 2;
+    gsap
+      .timeline({ onUpdate: render })
+      .to(shut.position, { z: CAB_D / 2 + RATTLE_OUT, duration: 0.07, ease: 'power2.out' })
+      .to(shut.position, { z: CAB_D / 2, duration: 0.45, ease: 'elastic.out(1.1, 0.3)' });
+    pump(700);
   }
 
   /** A click on the face runs the drawer the rest of the way on its own. It toggles rather
@@ -1627,6 +1650,11 @@ export function initSkillDrawer(host, strip) {
     startX = e.clientX;
     startY = e.clientY;
     travel = 0;
+    const tugged = rayHits(e, locked)[0]?.object.parent;
+    if (tugged) {
+      rattle(tugged);
+      return; // not a drag of anything: no capture, the pointerup finds dragMode null
+    }
     if (grabsDrawer(e)) {
       dragMode = 'drawer';
       gsap.killTweensOf(drawer.position); // a hand on the handle beats the opening tween
