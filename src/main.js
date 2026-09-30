@@ -489,6 +489,41 @@ if (DRAWER_MODE) {
     });
 }
 
+// company brain: knowledge-graph brain next to the intro (company-brain.html only)
+const brainGraph = document.getElementById('brain-graph');
+if (brainGraph) {
+  import('./brainGraph.js').then((m) => m.initBrainGraph(brainGraph));
+}
+
+// company brain: the example chat plays each scene out (company-brain.html only)
+const cbChat = document.querySelector('.cb-chat');
+if (cbChat) {
+  import('./companyBrainDemo.js').then((m) => m.initCompanyBrainDemo(cbChat));
+}
+
+// projects row: light the edge fades and arrows only on the side that has more to scroll to
+const projectsScroller = document.getElementById('projects-scroller');
+if (projectsScroller) {
+  const grid = projectsScroller.querySelector('.projects-grid');
+  const [prev, next] = projectsScroller.querySelectorAll('.projects-arrow');
+  const update = () => {
+    const max = grid.scrollWidth - grid.clientWidth;
+    projectsScroller.classList.toggle('can-prev', grid.scrollLeft > 4);
+    projectsScroller.classList.toggle('can-next', grid.scrollLeft < max - 4);
+  };
+  const step = (dir) => {
+    const card = grid.querySelector('.card');
+    const by = card.getBoundingClientRect().width + parseFloat(getComputedStyle(grid).columnGap);
+    grid.scrollBy({ left: dir * by, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  };
+  prev.hidden = next.hidden = false;
+  prev.addEventListener('click', () => step(-1));
+  next.addEventListener('click', () => step(1));
+  grid.addEventListener('scroll', update, { passive: true });
+  new ResizeObserver(update).observe(grid);
+  update();
+}
+
 // homelab network diagram (homelab.html only) — real content, always renders;
 // only the connection-line pulse is gated by reduced-motion, in CSS
 const homelabDiagram = document.querySelector('#homelab-diagram');

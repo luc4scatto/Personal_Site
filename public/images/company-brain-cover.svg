@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-label="Redrawn chat: a question about a model, an answer with sources and a small price chart">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1d1d1d"/><stop offset="1" stop-color="#101010"/></linearGradient></defs>
+  <rect width="1600" height="1000" fill="url(#g)"/>
+  <g font-family="Space Grotesk, Arial, sans-serif">
+    <rect x="200" y="90" width="1200" height="820" rx="28" fill="#0a0a0a" stroke="#ffffff" stroke-opacity=".12" stroke-width="2"/>
+    <circle cx="250" cy="140" r="8" fill="#ff6a13"/><circle cx="282" cy="140" r="8" fill="#5c8dff"/><circle cx="314" cy="140" r="8" fill="#ffffff" fill-opacity=".25"/>
+    <rect x="720" y="200" width="620" height="90" rx="22" fill="#ff6a13" fill-opacity=".18" stroke="#ff6a13" stroke-opacity=".5" stroke-width="2"/>
+    <text x="750" y="255" font-size="30" fill="#f2f2f2">Chart the price of this season by category</text>
+    <rect x="260" y="330" width="1080" height="470" rx="22" fill="#ffffff" fill-opacity=".04" stroke="#ffffff" stroke-opacity=".12" stroke-width="2"/>
+    <text x="300" y="392" font-size="28" fill="#9a9a9a">Price by category, current season</text>
+    <g fill="#5c8dff"><rect x="320" y="600" width="90" height="140" rx="6"/><rect x="450" y="530" width="90" height="210" rx="6"/><rect x="580" y="470" width="90" height="270" rx="6"/><rect x="710" y="560" width="90" height="180" rx="6"/></g>
+    <line x1="300" y1="740" x2="840" y2="740" stroke="#ffffff" stroke-opacity=".25" stroke-width="2"/>
+    <g fill="#f2f2f2" font-size="26"><text x="900" y="480">Category B is the widest</text><text x="900" y="530">range in the collection.</text></g>
+    <g font-size="22"><rect x="900" y="590" width="190" height="46" rx="23" fill="#ff6a13" fill-opacity=".18" stroke="#ff6a13" stroke-opacity=".5" stroke-width="2"/><text x="924" y="622" fill="#ff6a13">Technical data</text>
+    <rect x="1110" y="590" width="150" height="46" rx="23" fill="#5c8dff" fill-opacity=".18" stroke="#5c8dff" stroke-opacity=".5" stroke-width="2"/><text x="1136" y="622" fill="#5c8dff">Catalog</text></g>
+    <rect x="260" y="830" width="1080" height="56" rx="28" fill="#ffffff" fill-opacity=".05" stroke="#ffffff" stroke-opacity=".12" stroke-width="2"/>
+    <text x="300" y="867" font-size="26" fill="#9a9a9a">Ask anything about a product...</text>
+  </g>
+</svg>

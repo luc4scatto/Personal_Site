@@ -14,11 +14,11 @@
     <meta property="og:url" content="https://lucascattolin.com/" />
     <meta property="og:title" content="Luca Scattolin - 3D Technical Artist & Creative Technologist" />
     <meta property="og:description" content="Portfolio of Luca Scattolin - 3D Technical Artist & Creative Technologist. 3D pipeline, real-time experiences, renders and configurators." />
-    <meta property="og:image" content="https://lucascattolin.com/images/Profile_pic_tshirt.webp" />
+    <meta property="og:image" content="https://lucascattolin.com/images/Profile_pic_orange.webp" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Luca Scattolin - 3D Technical Artist & Creative Technologist" />
     <meta name="twitter:description" content="Portfolio of Luca Scattolin - 3D Technical Artist & Creative Technologist. 3D pipeline, real-time experiences, renders and configurators." />
-    <meta name="twitter:image" content="https://lucascattolin.com/images/Profile_pic_tshirt.webp" />
+    <meta name="twitter:image" content="https://lucascattolin.com/images/Profile_pic_orange.webp" />
 
     <script type="application/ld+json">
       {
@@ -27,7 +27,7 @@
         "name": "Luca Scattolin",
         "jobTitle": "3D Technical Artist & Creative Technologist",
         "url": "https://lucascattolin.com/",
-        "image": "https://lucascattolin.com/images/Profile_pic_tshirt.webp",
+        "image": "https://lucascattolin.com/images/Profile_pic_orange.webp",
         "sameAs": [
           "https://github.com/luc4scatto",
           "https://www.linkedin.com/in/lucascattolin"
@@ -174,7 +174,11 @@
 
       <section id="projects" class="projects">
         <h2 data-reveal>Projects</h2>
-        <div class="projects-grid">
+        <div class="projects-scroller" id="projects-scroller">
+        <button class="projects-arrow projects-arrow--prev" type="button" aria-label="Previous projects" hidden>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
+        <div class="projects-grid" tabindex="0" role="region" aria-label="Projects, scrolls horizontally">
           <article class="card" data-reveal>
             <img class="card-thumb" src="images/1782142834983.webp" alt="Thélios booth at the LVMH Dream Gallery, Vivatech Paris" width="2048" height="1365" loading="lazy" />
             <h3 data-copy="projects.vivatech.title">Vivatech - Interactive Experience</h3>
@@ -192,6 +196,14 @@
             </div>
           </article>
           <article class="card" data-reveal>
+            <img class="card-thumb" src="images/company-brain-cover.svg" alt="Redrawn chat: a question about a collection and an answer with a price chart and its sources" width="1600" height="1000" loading="lazy" />
+            <h3 data-copy="projects.companyBrain.title">Company Brain</h3>
+            <p data-copy="projects.companyBrain.description">A self-hosted AI assistant that answers questions about our products in plain language, reading live from the company systems and replying with photos, drawings and charts. Nothing leaves the company.</p>
+            <div class="card-links">
+              <a href="company-brain.html">View project →</a>
+            </div>
+          </article>
+          <article class="card" data-reveal>
             <img class="card-thumb" src="images/homelab-rack.webp" alt="Rear view of the homelab rack: router, unmanaged switch and HP EliteDesk mini PC wired together" width="1800" height="2400" loading="lazy" />
             <h3 data-copy="projects.three.title">Personal project: Homelab</h3>
             <p data-copy="projects.three.description">A self-hosted rack running on Proxmox and TrueNAS, media, backups, automation and an AI agent, built from a 3D-printed case and one spare mini PC.</p>
@@ -200,6 +212,10 @@
             </div>
           </article>
         </div>
+        <button class="projects-arrow projects-arrow--next" type="button" aria-label="Next projects" hidden>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+        </button>
+      </div>
       </section>
 
       <section id="contact" class="contact">

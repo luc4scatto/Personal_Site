@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Company Brain · Luca Scattolin</title>
+    <meta name="description" content="A self-hosted AI assistant that answers questions about our products from the company systems." />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+    <link rel="canonical" href="https://lucascattolin.com/company-brain.html" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Luca Scattolin" />
+    <meta property="og:url" content="https://lucascattolin.com/company-brain.html" />
+    <meta property="og:title" content="Company Brain · Luca Scattolin" />
+    <meta property="og:description" content="A self-hosted AI assistant that answers questions about our products from the company systems." />
+    <meta property="og:image" content="https://lucascattolin.com/images/company-brain-cover.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Company Brain · Luca Scattolin" />
+    <meta name="twitter:description" content="A self-hosted AI assistant that answers questions about our products from the company systems." />
+    <meta name="twitter:image" content="https://lucascattolin.com/images/company-brain-cover.svg" />
+  </head>
+  <body class="homelab-page">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="nav">
+      <a class="nav-logo" href="index.html">LS</a>
+      <nav>
+        <a href="index.html#projects">← Back</a>
+        <a href="index.html#contact">Contact</a>
+      </nav>
+      <div class="scroll-progress" aria-hidden="true"></div>
+    </header>
+
+    <main id="main-content">
+      <section id="project" class="page-hero">
+        <p class="hero-kicker" data-stagger data-copy="companyBrain.kicker">Internal project</p>
+        <h1 data-stagger>Company <span class="accent">Brain</span></h1>
+      </section>
+
+      <section id="description" class="project-description">
+        <div class="project-description-grid">
+          <div class="project-description-text">
+          <p data-reveal data-copy="companyBrain.description1">Information about a product lives in many systems: technical data, commercial texts and attributes, official photos, technical drawings and standard components, prototype tracking, plus design manuals and internal notes. Each has its own interface, its own login, its own way of searching, so a simple question like "what material is this model, and how is it built?" often means opening three or four programs and knowing exactly where to look.</p>
+          <p data-reveal data-copy="companyBrain.description2">Company Brain is one chat that fixes that. You ask in plain language, like you would ask an expert colleague, and it reads the answer live from the company systems and gives it back with photos, drawings and charts. It runs on our own servers, so nothing leaves the company, and every answer says which system each piece of data came from.</p>
+          </div>
+          <div class="cb-brain" data-reveal>
+            <canvas id="brain-graph" aria-hidden="true"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section id="demo" class="cb-demo">
+        <h2 data-reveal>See it in action</h2>
+        <p class="vt-how__intro" data-reveal>Redrawn with made-up data. Pick a question to see how the Brain answers.</p>
+        <div class="cb-demo__grid" data-reveal>
+          <div class="cb-demo__tabs" role="tablist" aria-label="Example questions">
+            <button class="cb-demo__tab is-on" type="button" role="tab" aria-selected="true" data-cb-tab="chart">
+              <span class="cb-demo__tab-name">A chart</span>
+              <span class="cb-demo__tab-text">Numbers are computed by the tool, the chart comes back ready to download.</span>
+            </button>
+            <button class="cb-demo__tab" type="button" role="tab" aria-selected="false" data-cb-tab="ask">
+              <span class="cb-demo__tab-name">An ambiguous question</span>
+              <span class="cb-demo__tab-text">Instead of guessing, it shows choice buttons in the chat.</span>
+            </button>
+            <button class="cb-demo__tab" type="button" role="tab" aria-selected="false" data-cb-tab="proto">
+              <span class="cb-demo__tab-name">A status check</span>
+              <span class="cb-demo__tab-text">Live from the prototype tracker, sorted by what has waited longest.</span>
+            </button>
+          </div>
+
+          <div class="pp-win cb-chat" aria-hidden="true">
+            <div class="cb-chat__bar"><span class="cb-chat__dot"></span>Brain<span class="cb-chat__ro">read-only</span></div>
+
+            <div class="cb-chat__body is-on" data-cb-panel="chart">
+              <p class="cb-msg cb-msg--user">Chart the price of this season's collection by category</p>
+              <p class="cb-tool">price_stats &middot; season 26 &middot; 0.4 s</p>
+              <div class="cb-msg cb-msg--bot">
+                <p>Category C is the widest range, Category A the tightest. Median price per category:</p>
+                <div class="cb-bars">
+                  <span style="--h: 38%" data-v="€ 142"><i>A</i></span><span style="--h: 62%" data-v="€ 231"><i>B</i></span><span style="--h: 100%" data-v="€ 372"><i>C</i></span><span style="--h: 74%" data-v="€ 275"><i>D</i></span><span style="--h: 48%" data-v="€ 179"><i>E</i></span>
+                </div>
+                <div class="cb-src"><span>Technical data</span><span class="cb-src--b">Catalog</span><em>PNG</em><em>Excel</em></div>
+              </div>
+            </div>
+
+            <div class="cb-chat__body" data-cb-panel="ask">
+              <p class="cb-msg cb-msg--user">Show me the sheet for MODEL_A01</p>
+              <div class="cb-msg cb-msg--bot">
+                <p>Which colorway do you want to see?</p>
+                <div class="cb-choices"><button type="button" tabindex="-1" class="pp-btn" data-cw="0">Colorway 01</button><button type="button" tabindex="-1" class="pp-btn" data-cw="1">Colorway 02</button><button type="button" tabindex="-1" class="pp-btn" data-cw="2">Colorway 03</button></div>
+              </div>
+              <p class="cb-tool" data-after-choice>get_model_sheet &middot; MODEL_A01 &middot; <span data-cw-name>Colorway 03</span> &middot; 0.6 s</p>
+              <div class="cb-msg cb-msg--bot" data-after-choice>
+                <div class="cb-sheet">
+                  <div class="cb-sheet__img"></div>
+                  <dl><div><dt>Brand</dt><dd>Brand A</dd></div><div><dt>Material</dt><dd data-cw-material>Acetate</dd></div><div><dt>Season</dt><dd>26</dd></div><div><dt>Lens</dt><dd data-cw-lens>Grey gradient</dd></div></dl>
+                </div>
+                <div class="cb-src"><span>Technical data</span><span class="cb-src--b">Photos</span></div>
+              </div>
+            </div>
+
+            <div class="cb-chat__body" data-cb-panel="proto">
+              <p class="cb-msg cb-msg--user">Which prototypes of this collection have been stuck the longest?</p>
+              <p class="cb-tool">prototype_status &middot; 4 results &middot; 0.5 s</p>
+              <div class="cb-msg cb-msg--bot">
+                <p>Four prototypes have not moved in over two weeks:</p>
+                <ul class="cb-list">
+                  <li><b>MODEL_A01</b><span>Sampling</span><span class="cb-days" style="--w: 100%">34 d</span></li>
+                  <li><b>MODEL_A07</b><span>Review</span><span class="cb-days" style="--w: 71%">24 d</span></li>
+                  <li><b>MODEL_B02</b><span>Sampling</span><span class="cb-days" style="--w: 53%">18 d</span></li>
+                  <li><b>MODEL_B05</b><span>Tooling</span><span class="cb-days" style="--w: 44%">15 d</span></li>
+                </ul>
+                <div class="cb-src"><span>Prototype tracking</span></div>
+              </div>
+            </div>
+
+            <div class="cb-chat__input"><span data-cb-typed></span><span class="cb-caret"></span><span class="cb-chat__placeholder">Ask anything about a product...</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="how" class="vt-how cb-how">
+        <h2 data-reveal data-copy="companyBrain.how.title">How it works</h2>
+        <p class="cb-how__intro" data-reveal data-copy="companyBrain.how.intro">One question goes through a chat, a language model that decides what to do, and small purpose-built tools that each know how to talk to one system.</p>
+
+        <ol class="vt-flow cb-flow" data-reveal>
+          <li class="vt-flow__node">
+            <span class="vt-flow__head">
+              <span class="vt-flow__name" data-copy="companyBrain.how.flow.[object Object],[object Object],[object Object],[object Object].name">Chat</span>
+            </span>
+            <span class="vt-flow__text" data-copy="companyBrain.how.flow.[object Object],[object Object],[object Object],[object Object].text">Internal web chat, questions in plain language</span>
+          </li>
+          <li class="vt-flow__node">
+            <span class="vt-flow__head">
+              <span class="vt-flow__name" data-copy="companyBrain.how.flow.[object Object],[object Object],[object Object],[object Object].name">Language model</span>
+            </span>
+            <span class="vt-flow__text" data-copy="companyBrain.how.flow.[object Object],[object Object],[object Object],[object Object].text">Runs on our own server on a dedicated GPU, understands the question and picks a tool</span>
+          </li>
+          <li class="vt-flow__node">
+            <span class="vt-flow__head">
+              <span class="vt-flow__name" data-copy="companyBrain.how.flow.[object Object],[object Object],[object Object],[object Object].name">Tools</span>
+            </span>
+            <span class="vt-flow__text" data-copy="companyBrain.how.flow.[object Object],[object Object],[object Object],[object Object].text">Small custom programs, one per source: fetch, calculate, prepare the result</span>
+          </li>
+          <li class="vt-flow__node">
+            <span class="vt-flow__head">
+              <span class="vt-flow__name" data-copy="companyBrain.how.flow.[object Object],[object Object],[object Object],[object Object].name">Company systems</span>
+            </span>
+            <span class="vt-flow__text" data-copy="companyBrain.how.flow.[object Object],[object Object],[object Object],[object Object].text">Technical data, catalog, photos, drawings, prototypes, manuals</span>
+          </li>
+        </ol>
+
+        <h3 class="cb-sub cb-sub--steps" data-reveal data-copy="companyBrain.how.stepsLabel">From question to answer</h3>
+        <ol class="vt-steps" data-reveal>
+          <li class="vt-step">
+            <span class="vt-step__gesture" data-copy="companyBrain.how.steps.0.gesture">Ask</span>
+            <span class="vt-step__text" data-copy="companyBrain.how.steps.0.text">The user writes a question.</span>
+          </li>
+          <li class="vt-step">
+            <span class="vt-step__gesture" data-copy="companyBrain.how.steps.1.gesture">Understand</span>
+            <span class="vt-step__text" data-copy="companyBrain.how.steps.1.text">The language model works out what is needed.</span>
+          </li>
+          <li class="vt-step">
+            <span class="vt-step__gesture" data-copy="companyBrain.how.steps.2.gesture">Call a tool</span>
+            <span class="vt-step__text" data-copy="companyBrain.how.steps.2.text">It calls the right tool, a program that knows how to query one system.</span>
+          </li>
+          <li class="vt-step">
+            <span class="vt-step__gesture" data-copy="companyBrain.how.steps.3.gesture">Retrieve</span>
+            <span class="vt-step__text" data-copy="companyBrain.how.steps.3.text">The tool fetches the data, does the math and prepares the result.</span>
+          </li>
+          <li class="vt-step">
+            <span class="vt-step__gesture" data-copy="companyBrain.how.steps.4.gesture">Present</span>
+            <span class="vt-step__text" data-copy="companyBrain.how.steps.4.text">The model presents it in a readable form, with its sources.</span>
+          </li>
+        </ol>
+
+      </section>
+
+      <section id="choices" class="vt-how cb-how cb-choices">
+        <h2 data-reveal data-copy="companyBrain.how.detailLabel">Design choices</h2>
+        <div class="vt-details cb-details" data-reveal>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.details.0.title">Everything in-house</h3>
+            <p data-copy="companyBrain.how.details.0.text">The model runs on an internal server with a dedicated GPU. No question and no data is ever sent to an external service.</p>
+          </div>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.details.1.title">Read-only</h3>
+            <p data-copy="companyBrain.how.details.1.text">It consults the company systems but cannot change them: every connection uses a read-only account.</p>
+          </div>
+          <div class="vt-detail cb-lead">
+            <h3 data-copy="companyBrain.how.details.2.title">The code does the math</h3>
+            <p data-copy="companyBrain.how.details.2.text">Language models are good with words and less reliable with numbers, so averages, counts, comparisons and charts are computed exactly by the tools. The model only receives the result to explain.</p>
+          </div>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.details.3.title">No copies of the data</h3>
+            <p data-copy="companyBrain.how.details.3.text">Photos, drawings and documents are read from the original source at the moment of the question, never duplicated on the server, so what you see is always current.</p>
+          </div>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.details.4.title">It asks instead of guessing</h3>
+            <p data-copy="companyBrain.how.details.4.text">When a question is ambiguous (which season? which colorway? which component type?) it shows choice buttons right in the chat.</p>
+          </div>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.details.5.title">Controlled access</h3>
+            <p data-copy="companyBrain.how.details.5.text">Only authenticated users can use it, and each group only sees the tools relevant to its own work.</p>
+          </div>
+        </div>
+
+        <div class="cb-monitor">
+          <div>
+            <h3 class="cb-sub" data-reveal data-copy="companyBrain.how.monitorLabel">Monitoring</h3>
+            <p class="cb-monitor__text" data-reveal data-copy="companyBrain.how.monitor">An internal dashboard shows whether every service is up, how loaded the server is and how fast the model answers, how many questions are asked and which tools get used the most. It tells us whether the system is healthy and where to invest next.</p>
+          </div>
+          <div class="pp-win cb-dash" data-reveal aria-hidden="true">
+            <div class="cb-dash__tiles">
+              <div><span class="cb-dash__k">Services</span><span class="cb-dash__v cb-dash__v--ok">6 / 6 up</span></div>
+              <div><span class="cb-dash__k">GPU load</span><span class="cb-dash__v">41%</span></div>
+              <div><span class="cb-dash__k">Model speed</span><span class="cb-dash__v">62 tok/s</span></div>
+              <div><span class="cb-dash__k">Questions today</span><span class="cb-dash__v">128</span></div>
+            </div>
+            <div class="cb-dash__tools">
+              <p class="cb-dash__k">Most used tools</p>
+              <ul>
+                <li><span>model_sheet</span><i style="--w: 100%"></i></li>
+                <li><span>price_stats</span><i style="--w: 72%"></i></li>
+                <li><span>prototype_status</span><i style="--w: 55%"></i></li>
+                <li><span>manual_search</span><i style="--w: 31%"></i></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <section id="retro" class="vt-how cb-how cb-retro">
+        <h2 data-reveal data-copy="companyBrain.how.retroTitle">Looking back</h2>
+        <div class="cb-retro__grid">
+          <div>
+        <h3 class="cb-sub" data-reveal data-copy="companyBrain.how.lessonsLabel">What I learned</h3>
+        <div class="vt-details cb-lessons" data-reveal>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.lessons.0.title">Small and well taught beats big and alone</h3>
+            <p data-copy="companyBrain.how.lessons.0.text">The real work is in the tools: giving the model data that is already clean, ordered and short.</p>
+          </div>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.lessons.1.title">Less text is better</h3>
+            <p data-copy="companyBrain.how.lessons.1.text">Long answers confuse the model and eat memory, so every tool returns only what is needed.</p>
+          </div>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.lessons.2.title">Charts need a point</h3>
+            <p data-copy="companyBrain.how.lessons.2.text">A chart earns its place when it shows a trend or a comparison, not fifty nearly equal values.</p>
+          </div>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.lessons.3.title">Asking beats guessing</h3>
+            <p data-copy="companyBrain.how.lessons.3.text">The choice buttons removed a lot of wrong answers.</p>
+          </div>
+        </div>
+
+          </div>
+          <aside class="cb-retro__side">
+        <h3 class="cb-sub cb-sub--quiet" data-reveal data-copy="companyBrain.how.limitsLabel">Limits and next steps</h3>
+        <div class="vt-details cb-limits" data-reveal>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.limits.0.title">One GPU</h3>
+            <p data-copy="companyBrain.how.limits.0.text">With many users at once, answers slow down.</p>
+          </div>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.limits.1.title">Bigger models need more hardware</h3>
+            <p data-copy="companyBrain.how.limits.1.text">More capable models would need a more powerful machine, which is the next step, along with more data sources and other departments.</p>
+          </div>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.limits.2.title">Finds and summarizes</h3>
+            <p data-copy="companyBrain.how.limits.2.text">It is good at finding and summarizing. Decisions stay with people.</p>
+          </div>
+        </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="back" class="project-back">
+        <a class="btn" href="index.html#projects" data-reveal data-copy="companyBrain.backCta">← Back to projects</a>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p data-copy="footer.copyright">© 2026 Luca Scattolin</p>
+      <a href="index.html#contact">Contact</a>
+      <a href="privacy.html">Privacy</a>
+    </footer>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

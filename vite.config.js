@@ -14,6 +14,7 @@ export default defineConfig({
         main: 'index.html',
         vivatech: 'vivatech.html',
         homelab: 'homelab.html',
+        companyBrain: 'company-brain.html',
         pipelineProjects: 'pipeline-projects.html',
         notFound: '404.html',
         privacy: 'privacy.html',
