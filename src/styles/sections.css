@@ -917,6 +917,41 @@
 
 #skill-drawer.is-live .drawer__scene {
   position: absolute;
+/* the skill list as plain text under the drawer: what the folders say, readable without
+   opening anything. Built by mountSkillsGlance() in main.js, only once the drawer is live (the
+   flat wall already shows every tool). The drawer's own negative margin-bottom is added back
+   so the list starts clear of its faded tail and the player. */
+.skills-glance {
+  list-style: none;
+  padding: 0;
+  margin-top: 8rem;
+  max-width: 52rem;
+  border-top: 1px solid #1f1f1f;
+}
+
+#skill-drawer.is-live:has(.drawer__scene.is-overlay) ~ .skills-glance {
+  margin-top: 6rem;
+}
+
+.skills-glance li {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  gap: 0.25rem 2rem;
+  padding: 0.85rem 0.1rem;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+.skills-glance__name {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.skills-glance__tools {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+}
+
   inset: 0;
 }
 

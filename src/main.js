@@ -458,6 +458,36 @@ if (heroCanvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
   });
 }
 
+// The drawer hides the skill list behind tabs rendered at a few pixels in perspective. This is
+// the same list as plain text under it, built from the strip's own groups so there is one
+// source of truth. The groups are read BEFORE initSkillDrawer(), which lifts every folder out
+// of the strip into the 3D scene. aria-hidden: the real folders already carry the content for
+// assistive tech.
+function readSkillGroups(strip) {
+  return [...strip.querySelectorAll('.skill-group')].map((group) => ({
+    name: group.querySelector('h3').textContent.trim(),
+    tools: [...group.querySelectorAll('.skill-label')].map((l) => l.textContent.trim()),
+  }));
+}
+
+function mountSkillsGlance(drawer, groups) {
+  const list = document.createElement('ul');
+  list.className = 'skills-glance';
+  list.setAttribute('aria-hidden', 'true');
+  groups.forEach(({ name, tools }) => {
+    const item = document.createElement('li');
+    const label = document.createElement('span');
+    label.className = 'skills-glance__name';
+    label.textContent = name;
+    const text = document.createElement('span');
+    text.className = 'skills-glance__tools';
+    text.textContent = tools.join(' \u00b7 ');
+    item.append(label, text);
+    list.append(item);
+  });
+  drawer.after(list);
+}
+
 // the skill drawer's metal shell — lazy, same gate as the hero: under reduced motion the
 // three.js chunk is never fetched and the section falls back to the flat wall
 // below 701px a perspective drawer is unreadable, so the chunk is not even fetched there
@@ -465,12 +495,14 @@ if (DRAWER_MODE) {
   const skillDrawer = skillDrawerEl;
   const scene = skillDrawer.querySelector('.drawer__scene');
   const strip = skillDrawer.querySelector('.drawer__strip');
+  const skillGroups = readSkillGroups(strip);
   import('./skillDrawer.js')
     .then((m) => {
       m.initSkillDrawer(scene, strip);
       // only claim the drawer once the metal is actually there; CSS keys the whole layout
       // off this class
       skillDrawer.classList.add('is-live');
+      mountSkillsGlance(skillDrawer, skillGroups);
       // .is-live swaps the flat .drawer__strip grid (tall) for the drawer's own much
       // shorter aspect-ratio box — every ScrollTrigger below this point (Projects' h2 clip
       // reveal, its [data-reveal] cards, Contact) was measured against the taller layout a
