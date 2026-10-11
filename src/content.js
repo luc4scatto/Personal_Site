@@ -12,9 +12,9 @@ export const content = {
     words: ['3D', '2D', 'AI'], // cycles through the accent word after "to life with"
     subtitle: '3D Technical Artist & Creative Technologist',
     tagline:
-      'I build 2D-3D pipelines across every major DCC tool,\nalso powering configurators and interactive 3D experiences,\nwith a touch of AI.',
+      'I build 2D-3D pipelines across every major DCC tool, \nalso powering configurators and interactive 3D experiences, \nwith a touch of AI.',
     hint: '✦ click on an object to learn more',
-    cta: 'See my works ↓',
+    cta: 'See my work ↓',
   },
   // scrolling marquee band between hero and about (src/main.js builds the loop from this array)
   // keep an even number of words or the lime/violet alternation jumps at the loop seam

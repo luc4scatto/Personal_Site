@@ -6,8 +6,7 @@
   width: max-content;
   padding: 1.1rem 1.3rem;
   background: color-mix(in srgb, var(--surface) 90%, transparent);
-  border: 1px solid #2a2a2a;
-  border-left: 3px solid var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, #2a2a2a);
   border-radius: 0.9rem;
   backdrop-filter: blur(12px);
   box-shadow: 0 14px 44px rgba(0, 0, 0, 0.55);
@@ -256,6 +255,20 @@
   color: var(--accent);
 }
 
+/* touch: the links are 25px tall, under the 44px a finger needs. The hit area grows with a
+   pseudo-element so the bar keeps its height and the gap between links its look. */
+@media (pointer: coarse) {
+  .nav nav a {
+    position: relative;
+  }
+
+  .nav nav a::after {
+    content: '';
+    position: absolute;
+    inset: -0.7rem -0.4rem;
+  }
+}
+
 /* scroll progress bar under the nav */
 .scroll-progress {
   position: absolute;
@@ -318,7 +331,8 @@
 
 /* keyboard path to the 3D objects (hero3d.js): one real button per model, invisible
    until it receives focus, since the canvas itself is aria-hidden + pointer-events:none */
-.hero-objects button {
+.hero-objects button,
+.hero-objects a {
   position: absolute;
   top: 0;
   left: 0;
@@ -331,7 +345,8 @@
   padding: 0;
 }
 
-.hero-objects button:focus {
+.hero-objects button:focus,
+.hero-objects a:focus {
   top: 5.5rem;
   left: var(--pad-x);
   width: auto;
@@ -902,21 +917,6 @@
   cursor: grab;
 }
 
-/* -5rem was tuned against the non-overlay box, which stays 680-900px tall across its own
-   width range. The overlay box is shorter across its whole range (max ~650px, aspect-ratio
-   3/2 against a narrower frame), so the same fixed overlap eats a much bigger share of it -
-   there was only 25px left between the player and #projects before this, not enough room to
-   also pull the player away from the drawer above it without crowding one edge or the other. */
-#skill-drawer.is-live:has(.drawer__scene.is-overlay) {
-  margin-bottom: -3rem;
-}
-
-#skill-drawer.is-live:active {
-  cursor: grabbing;
-}
-
-#skill-drawer.is-live .drawer__scene {
-  position: absolute;
 /* the skill list as plain text under the drawer: what the folders say, readable without
    opening anything. Built by mountSkillsGlance() in main.js, only once the drawer is live (the
    flat wall already shows every tool). The drawer's own negative margin-bottom is added back
@@ -952,6 +952,21 @@
   font-size: 0.95rem;
 }
 
+/* -5rem was tuned against the non-overlay box, which stays 680-900px tall across its own
+   width range. The overlay box is shorter across its whole range (max ~650px, aspect-ratio
+   3/2 against a narrower frame), so the same fixed overlap eats a much bigger share of it -
+   there was only 25px left between the player and #projects before this, not enough room to
+   also pull the player away from the drawer above it without crowding one edge or the other. */
+#skill-drawer.is-live:has(.drawer__scene.is-overlay) {
+  margin-bottom: -3rem;
+}
+
+#skill-drawer.is-live:active {
+  cursor: grabbing;
+}
+
+#skill-drawer.is-live .drawer__scene {
+  position: absolute;
   inset: 0;
 }
 
@@ -1939,7 +1954,7 @@
   display: inline-block;
   margin-bottom: 0.5rem;
   padding: 0.15rem 0.5rem;
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-2);
@@ -2786,7 +2801,8 @@ p.project-specs__kicker {
 }
 
 .featured-links a {
-  color: var(--text-dim);
+  color: var(--text);
+  font-size: 1.05rem;
   transition: color 0.2s;
 }
 
@@ -2918,6 +2934,10 @@ p.project-specs__kicker {
    constrained by the viewport itself. */
 .homelab-services-section {
   max-width: calc(472px + 3.5rem + 28rem + 2 * var(--pad-x));
+  /* left edge where every other section's is: a section narrower than the 1200px cap would be
+     centred by its auto margins and sit ~40px right of the headings above and below it */
+  margin-left: max(0px, calc((100% - 1200px) / 2));
+  margin-right: auto;
 }
 
 /* the rows are buttons but nothing about a tree says "tap me", and on touch
@@ -3720,8 +3740,8 @@ p.project-specs__kicker {
 
 .footer .credits {
   margin-top: 0.5rem;
-  font-size: 0.7rem;
-  opacity: 0.6;
+  font-size: 0.75rem;
+  opacity: 0.8;
 }
 
 @media (max-width: 700px) {
@@ -5262,7 +5282,7 @@ button.pp-btn:active {
   border: 1px solid color-mix(in srgb, var(--sec, var(--accent)) 55%, transparent);
   color: var(--sec, var(--accent));
   font-family: var(--font-body);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   letter-spacing: 0.02em;
 }
 
@@ -6617,4 +6637,26 @@ button.pp-btn:active {
 /* Monitoring is a sub-block of Design choices: never louder than the lead idea */
 .cb-monitor .cb-sub {
   font-size: clamp(1.5rem, 2.4vw, 2rem);
+}
+
+/* the end of a Pipeline chapter: back to the five-tool index, so a phone does not have to scroll
+   the page back up by hand */
+.pp-tool__top {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding-block: 0.6rem;
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+
+.pp-tool__top:hover {
+  text-decoration: underline;
+}
+
+/* phone: the three hand-set line breaks of the hero lead leave "major DCC tool," alone on a line;
+   the text carries trailing spaces, so without the <br> it just wraps */
+@media (max-width: 700px) {
+  .hero-tagline br {
+    display: none;
+  }
 }

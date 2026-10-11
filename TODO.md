@@ -2,12 +2,16 @@
 
 Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-11.
 
-## Critique del 2026-10-11 (in corso, uno alla volta)
+## Da decidere (restate dalla critique del 2026-10-11)
 
-Risultati completi e spunte: https://claude.ai/artifact/NSxYmR8MCfeLwtaDYWDbUr
+Risultati completi: https://claude.ai/artifact/NSxYmR8MCfeLwtaDYWDbUr. Il resto della critique è stato sistemato.
 
-- [ ] **17. [P1] Riassunto leggibile accanto al cassetto, su desktop** (`/impeccable clarify`) - categorie e strumenti principali come testo vero; il cassetto non si tocca. Oggi linguette a 7-9px e card a ~11px.
-- [ ] **20. Polish finale** (`/impeccable polish`) - più le minori: "See my works" (`content.js:17`), "2D Softwares" (`index.html:155`), badge cartelle a 10px, pill Pipeline a 10.9px, rientro di "Services" in Homelab, a capo forzati nel lead dell'hero, due tasti play nel player, `border-left` della `.info-card`, `<h3>` vuoto vicino a Contact da verificare.
+- [ ] **Frase dell'hero** - "Bringing ideas to life with 3D/2D" è la più generica del sito; il lavoro vero lo fa la riga del ruolo sotto. Una frase più specifica (es. cosa costruisci e per chi) è una scelta di Luca.
+- [ ] **Homelab: Sonarr, Radarr, Prowlarr, qBittorrent** in bella vista possono essere letti da un recruiter prudente come strumenti per la pirateria. Tenerli, raggrupparli diversamente o toglierli?
+- [ ] **Marquee al neon** - ripete il racconto delle skill ed è l'elemento più da catalogo della home. Tenerla o toglierla?
+- [ ] **Player dei set: due tasti play** (il disco grande e quello piccolo nei controlli). Il piccolo fa da centro dei controlli, togliere il disco o il piccolo cambia il disegno del pannello.
+- [ ] **Nuvola 3D dell'hero con WebGL lento o assente** - in una scheda in background la nuvola non si è disegnata ma l'invito "click on an object" restava. Non riprodotto con certezza; da guardare su un dispositivo vero.
+- [ ] **Lettura con Tab dell'hero** - aggiunto il salto "Skip the 3D object list"; da provare con tastiera vera e con VoiceOver.
 
 ## Contenuto (quello che vede chi visita il sito)
 

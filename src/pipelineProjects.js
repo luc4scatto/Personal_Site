@@ -74,6 +74,7 @@ function buildChapter(host, tool) {
     bullets,
     el('p', 'pp-tool__label', 'The interesting part'),
     el('p', 'pp-tool__idea', rich(tool.idea)),
+    Object.assign(el('a', 'pp-tool__top', '\u2191 All five tools'), { href: '#tools' }),
   );
 }
 
