@@ -552,9 +552,8 @@ export const content = {
   // now needs a paid Artist Pro plan just for a client_id). The widget reports the real
   // number itself once its READY event fires, and the clock swaps to it - usually inside a
   // second, since the script and iframe are already loaded by the time anyone presses play.
-  // `peaks` files don't exist yet for these four: tools/peaks.js needs Luca's own local copy
-  // of each mp3 to generate them, not just the SoundCloud link. Until then a missing peaks
-  // fetch falls back to a flat rail (loadPeaks() in setPlayer.js) - fully playable and
+  // `peaks` files come from tools/peaks.js run on Luca's own local copy of each mp3. A missing
+  // peaks fetch falls back to a flat rail (loadPeaks() in setPlayer.js) - fully playable and
   // seekable, just without the real waveform shape.
   djSets: [
     {
