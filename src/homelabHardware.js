@@ -7,20 +7,12 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 // ON the blueprint grid (same <svg>, same coordinate space), not just over it
 const GRID = 25;
 
-// Same phone/tablet-portrait boundary as hero3d.js's STACKED_HERO (and the
-// breakpoint table in CLAUDE.md) — below it the two rooms no longer fit side
-// by side at a legible scale, so Studio Room drops below Server Room instead
-// of forcing horizontal scroll for what used to render as "half a diagram".
-const STACKED_HW = '(max-width: 700px), (max-width: 1024px) and (orientation: portrait)';
-const STUDIO_NODE_IDS = new Set(['strip-studio', 'computer', 'laptop', 'switch-studio']);
-// server room's own footprint (x50..650, y75..475) sets the stacked canvas
-// width and where Studio Room's translated block starts vertically
-const STACK_DX = 225 - 700; // centers Studio Room's 250-wide box under the 700-wide stacked canvas
-const STACK_DY = 550 - 75; // 75-unit gap below server room's y75..475 footprint
+// One layout at every width: the two rooms side by side, and on a narrow screen the canvas
+// keeps its own scale and scrolls sideways (.homelab-hardware-scroll). A stacked phone
+// variant used to shrink the labels to 8px to fit; a wiring diagram you can read beats one
+// that fits the screen.
 const VB_W = 1000;
 const VB_H = 525;
-const VB_W_STACKED = 700;
-const VB_H_STACKED = 1025; // Studio Room's new y550..950 footprint + a 75-unit bottom margin
 
 function svgEl(tag, attrs) {
   const el = document.createElementNS(SVG_NS, tag);
@@ -125,34 +117,17 @@ function nodeCenter(node) {
   return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
 }
 
-// Rigid-translates Studio Room (and its four devices) below Server Room
-// instead of beside it — every node keeps its own arrangement relative to
-// the others in its room, only the room's own offset on the page changes,
-// so CONNECTIONS (which reference node ids, not coordinates) need no edits:
-// the FTTH line between the two switches just becomes a longer diagonal.
-function stackStudioRoom(rooms, nodes) {
-  const shift = (item) => ({ ...item, x: item.x + STACK_DX, y: item.y + STACK_DY });
-  return {
-    rooms: rooms.map((r) => (r.label === 'Studio Room' ? shift(r) : r)),
-    nodes: nodes.map((n) => (STUDIO_NODE_IDS.has(n.id) ? shift(n) : n)),
-  };
-}
-
 export function initHomelabHardware(container) {
-  const mql = window.matchMedia(STACKED_HW);
-
   function render() {
     container.replaceChildren();
-    const stacked = mql.matches;
-    const vbW = stacked ? VB_W_STACKED : VB_W;
-    const vbH = stacked ? VB_H_STACKED : VB_H;
-    const { rooms, nodes } = stacked
-      ? stackStudioRoom(ROOMS, NODES)
-      : { rooms: ROOMS, nodes: NODES };
+    const vbW = VB_W;
+    const vbH = VB_H;
+    const rooms = ROOMS;
+    const nodes = NODES;
     const nodesById = Object.fromEntries(nodes.map((n) => [n.id, n]));
 
     const inner = document.createElement('div');
-    inner.className = stacked ? 'homelab-hardware is-stacked' : 'homelab-hardware';
+    inner.className = 'homelab-hardware';
 
     const svg = svgEl('svg', { viewBox: `0 0 ${vbW} ${vbH}`, 'aria-hidden': 'true' });
 
@@ -338,15 +313,9 @@ export function initHomelabHardware(container) {
     // sits outside the box's right edge, near its top — the strip's power lines
     // sweep diagonally through the whole left/lower approach to the box, and the
     // data lines converge on its top-center, but nothing reaches this corner.
-    // Skipped when stacked: fixed-rem icon/caption offsets (see .hw-label--icon)
-    // cover proportionally more of the smaller stacked canvas, so HDD's caption
-    // and Jet KVM's own icon+caption both drift into whatever corner this label
-    // tries next — the box border alone still shows the grouping at that size.
-    if (!stacked) {
-      GROUPS.forEach((group) =>
-        addLabel('hw-label hw-label--group', group.x + group.w + 10, group.y + 8, group.label),
-      );
-    }
+    GROUPS.forEach((group) =>
+      addLabel('hw-label hw-label--group', group.x + group.w + 10, group.y + 8, group.label),
+    );
     nodes.forEach((node) => {
       const isStrip = node.id.startsWith('strip-');
       const c = nodeCenter(node);
@@ -365,5 +334,4 @@ export function initHomelabHardware(container) {
   }
 
   render();
-  mql.addEventListener('change', render);
 }

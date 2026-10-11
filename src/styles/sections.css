@@ -3369,19 +3369,8 @@ p.project-specs__kicker {
    footprint on the static container removes that shift; the inner element's
    own rule still applies once JS appends it, harmlessly redundant. */
 #homelab-hardware {
-  min-width: 45rem;
+  min-width: 56rem;
   aspect-ratio: 1000 / 525;
-}
-
-/* mirrors homelabHardware.js's STACKED_HW: the stacked layout is taller and
-   narrower, so the pre-JS reservation has to match it or this box causes a
-   bigger shift than having no reservation at all */
-@media (max-width: 700px), (max-width: 1024px) and (orientation: portrait) {
-  #homelab-hardware {
-    min-width: 0;
-    max-width: 26rem;
-    aspect-ratio: 700 / 1025;
-  }
 }
 
 .homelab-hardware-scroll::-webkit-scrollbar {
@@ -3408,72 +3397,11 @@ p.project-specs__kicker {
 .homelab-hardware {
   --hw-lan: #22c3d1;
   position: relative;
-  min-width: 45rem;
+  /* the narrowest the canvas may get before it scrolls: labels and icons are fixed-rem, and
+     below ~56rem the two nvme nodes (75 viewBox units apart) sit closer than one icon is wide */
+  min-width: 56rem;
   aspect-ratio: 1000 / 525;
   margin: 0 auto;
-}
-
-/* Below the phone/tablet-portrait boundary (see STACKED_HW in
-   homelabHardware.js), Studio Room drops beneath Server Room instead of
-   sitting beside it, so the diagram no longer needs the min-width above —
-   it was what forced horizontal scroll for what rendered as half a room. */
-.homelab-hardware.is-stacked {
-  min-width: 0;
-  max-width: 26rem;
-  aspect-ratio: 700 / 1025;
-}
-
-/* Icon/caption sizing is fixed-rem (see .hw-label svg's own comment), so it
-   doesn't scale down with the smaller stacked canvas the way the SVG-drawn
-   rooms/lines do — at full size, icons and text cover a much bigger share of
-   the diagram here than on desktop. Shrink both, and re-derive
-   .hw-label--icon's anchor offset from the new icon diameter (1.4rem width +
-   0.45rem padding each side = 2.3rem, half = 1.15rem) the same way the
-   un-stacked value is half of 3.5rem, or the icon drifts off its own node's
-   connector point. */
-.homelab-hardware.is-stacked .hw-label {
-  gap: 0.2rem;
-  font-size: 0.52rem;
-  max-width: 4.5rem;
-}
-
-.homelab-hardware.is-stacked .hw-label svg {
-  width: 1.4rem;
-  height: 1.4rem;
-  padding: 0.45rem;
-}
-
-.homelab-hardware.is-stacked .hw-label--icon {
-  transform: translate(-50%, -1.15rem);
-}
-
-/* Phone only, and phone only on purpose. The stacked layout also serves tablet portrait,
-   where the diagram gets its full 26rem and the nodes sit far enough apart that the sizes
-   above hold. On a 390px screen the box is the 350px the padding leaves, so the canvas runs
-   at half scale: the two nvme nodes are 75 viewBox units apart, which is 37.5px, and a
-   2.3rem icon is 36.8px - measured, they overlapped by 4px, and the captions either side of
-   them by 14px. Shrinking both buys that back.
-
-   The anchor offset below is re-derived, not copied: it is half the new diameter
-   (1.4rem + 0.32rem either side = 2.04rem, half = 1.02rem). Leave it at 1.15rem and every
-   icon floats off its own connector point. */
-@media (max-width: 700px) {
-  .homelab-hardware.is-stacked .hw-label {
-    max-width: 3.9rem;
-  }
-
-  .homelab-hardware.is-stacked .hw-label svg {
-    padding: 0.32rem;
-  }
-
-  .homelab-hardware.is-stacked .hw-label--icon {
-    transform: translate(-50%, -1.02rem);
-  }
-}
-
-.homelab-hardware.is-stacked .hw-label--room {
-  font-size: 0.68rem;
-  padding: 0.22rem 0.55rem;
 }
 
 .homelab-hardware > svg,
@@ -3615,7 +3543,7 @@ p.project-specs__kicker {
   align-items: center;
   gap: 0.3rem;
   text-align: center;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   color: var(--text);
   max-width: 6rem;
   line-height: 1.25;
@@ -3672,7 +3600,7 @@ p.project-specs__kicker {
 .hw-label--group {
   transform: translate(0, -50%);
   text-align: left;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -6658,5 +6586,20 @@ button.pp-btn:active {
 @media (max-width: 700px) {
   .hero-tagline br {
     display: none;
+  }
+}
+
+/* phone: the diagram keeps its own scale and scrolls (see homelabHardware.js), so say so -
+   an iOS scrollbar only shows while the finger is already moving */
+.hw-scroll-hint {
+  display: none;
+  margin-top: 0.5rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .hw-scroll-hint {
+    display: block;
   }
 }
