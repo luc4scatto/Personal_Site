@@ -2,6 +2,13 @@
 
 Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-11.
 
+## Critique, secondo giro (2026-10-11, 23/32)
+
+Dettagli e spunte: https://claude.ai/artifact/NSxYmR8MCfeLwtaDYWDbUr. I due P1 sono fatti (diagramma di Homelab scorrevole su telefono con etichette a 12px). Quattro progetti su desktop: provato e scartato, Luca preferisce la fila a tre che scorre.
+
+- [ ] **Vivatech, resto del P2** - galleria fatta (7 foto, tolte quelle con marchi di altre Maison). Manca un primo piano del gesto o dell'interfaccia vicino a "How it works": serve una foto che non c'è. Da decidere: l'anteprima social (`og:image`, `vivatech-10.jpg`) mostra il pannello Louis Vuitton, e la copertina della pagina mostra i loghi Loro Piana e Moët Hennessy.
+- [ ] **[P2] Nav delle sottopagine e pill** (`/impeccable clarify`) - aggiungere "Projects" alla nav, pill dei tool piatte; titolo di Vivatech letto "Vivatech -Interactive" (manca uno spazio).
+
 ## Da decidere (restate dalla critique del 2026-10-11)
 
 Risultati completi: https://claude.ai/artifact/NSxYmR8MCfeLwtaDYWDbUr. Il resto della critique è stato sistemato.
