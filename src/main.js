@@ -506,10 +506,16 @@ const projectsScroller = document.getElementById('projects-scroller');
 if (projectsScroller) {
   const grid = projectsScroller.querySelector('.projects-grid');
   const [prev, next] = projectsScroller.querySelectorAll('.projects-arrow');
+  const count = projectsScroller.querySelector('.projects-count');
+  const cards = grid.querySelectorAll('.card');
   const update = () => {
     const max = grid.scrollWidth - grid.clientWidth;
     projectsScroller.classList.toggle('can-prev', grid.scrollLeft > 4);
     projectsScroller.classList.toggle('can-next', grid.scrollLeft < max - 4);
+    // the card the snap has parked at the left edge; at the end of the row, the last one
+    const step = cards[1].offsetLeft - cards[0].offsetLeft;
+    const at = grid.scrollLeft >= max - 4 ? cards.length : Math.round(grid.scrollLeft / step) + 1;
+    count.textContent = `${Math.min(at, cards.length)} / ${cards.length}`;
   };
   const step = (dir) => {
     const card = grid.querySelector('.card');

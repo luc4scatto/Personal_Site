@@ -59,8 +59,10 @@
              above): without them the video has no box until its metadata arrives over
              the network, so everything below it — the whole gallery — sits higher up
              the page for that window and the IntersectionObserver reveals below can
-             fire against the wrong, temporary position. -->
-        <video controls playsinline preload="metadata" width="1920" height="1080" data-reveal>
+             fire against the wrong, temporary position. The poster is the video's own first
+             frame (the Thélios title over the mountains), so the box shows how the video
+             opens instead of a grey spinner while the metadata loads. -->
+        <video controls playsinline preload="metadata" width="1920" height="1080" poster="images/vivatech-video-poster.webp" data-reveal>
           <source src="video/vivatech-2026.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
@@ -182,7 +184,17 @@
       </section>
 
       <section id="back" class="project-back">
-        <a class="btn" href="index.html#projects" data-reveal data-copy="vivatech.backCta">← Back to projects</a>
+        <a class="project-next" href="pipeline-projects.html" data-reveal>
+          <img class="project-next__thumb" src="images/pipeline-projects-cover.webp" alt="" width="1600" height="1200" loading="lazy" />
+          <span class="project-next__text">
+            <span class="project-next__title">Pipeline Projects</span>
+            <span class="project-next__hint">Next project →</span>
+          </span>
+        </a>
+        <div class="project-back__aside" data-reveal>
+          <p>Have a project like this in mind? <a href="index.html#contact">Get in touch</a>.</p>
+          <a class="btn" href="index.html#projects" data-copy="vivatech.backCta">← Back to projects</a>
+        </div>
       </section>
     </main>
 

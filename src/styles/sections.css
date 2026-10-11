@@ -657,7 +657,9 @@
   );
 }
 
-/* about */
+/* about: text and photo side by side on a wide screen. The photo comes first in the DOM so
+   that on a phone it can float into the start of the paragraph (below); here the grid puts
+   it back in the right-hand column. */
 .about-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -666,6 +668,8 @@
 }
 
 .about-grid p {
+  grid-column: 1;
+  grid-row: 1;
   font-size: 1.2rem;
   color: var(--text-dim);
 }
@@ -676,6 +680,8 @@
 }
 
 .about-photo {
+  grid-column: 2;
+  grid-row: 1;
   width: 100%;
   /* explicit height:auto beats the img's height="" attribute (a low-specificity
      presentational hint) so aspect-ratio, not the attribute, sizes the box */
@@ -690,6 +696,21 @@
     color-mix(in srgb, var(--accent-2) 20%, var(--surface)),
     color-mix(in srgb, var(--accent) 25%, var(--surface))
   );
+}
+
+/* phone: a full-width square under the text was most of a screen of face. Smaller, floated
+   into the start of the paragraph so the text runs beside it. */
+@media (max-width: 700px) {
+  .about-grid {
+    display: flow-root;
+  }
+
+  .about-photo {
+    float: right;
+    width: clamp(7rem, 30vw, 9rem);
+    margin: 0.3rem 0 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+  }
 }
 
 /* skills — a wall of tool marks. The section's own rhythm: each category is a display-scale
@@ -2041,12 +2062,15 @@
   color: var(--accent);
 }
 
+/* centred in the page margin, unless the margin is narrower than the arrow (a mouse on a narrow
+   window): then it stops 0.25rem inside the screen edge and overlaps the card instead of
+   being cut off */
 .projects-arrow--prev {
-  left: calc(-1 * var(--pad-x) / 2 - 1.375rem);
+  left: max(calc(-1 * var(--pad-x) / 2 - 1.375rem), calc(0.25rem - var(--pad-x)));
 }
 
 .projects-arrow--next {
-  right: calc(-1 * var(--pad-x) / 2 - 1.375rem);
+  right: max(calc(-1 * var(--pad-x) / 2 - 1.375rem), calc(0.25rem - var(--pad-x)));
 }
 
 /* arrows are for a mouse: a finger just swipes, and the fades already say there is more */
@@ -2063,9 +2087,25 @@
   }
 }
 
+/* a phone shows one card and a sliver of the next: a full-width card with nothing beside it
+   read as the only project, and the arrows are mouse-only. The count says how many there are. */
 @media (max-width: 640px) {
   .projects-scroller {
-    --cols: 1;
+    --cols: 1.15;
+  }
+}
+
+.projects-count {
+  display: none;
+  margin-top: 1rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .projects-count {
+    display: block;
   }
 }
 
@@ -2149,10 +2189,29 @@
   align-items: start;
 }
 
+/* stacked, the form comes before the direct links: writing is the main way in, and the links
+   follow it in the DOM too, so keyboard and screen reader order match what is seen. Side by
+   side, the links go back under the intro and the form takes the whole right column. */
 @media (min-width: 860px) {
   .contact {
     grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: clamp(3rem, 6vw, 6rem);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'intro form'
+      'links form';
+    gap: 2.5rem clamp(3rem, 6vw, 6rem);
+  }
+
+  .contact-intro {
+    grid-area: intro;
+  }
+
+  .contact-form {
+    grid-area: form;
+  }
+
+  .contact-links {
+    grid-area: links;
   }
 }
 
@@ -2161,7 +2220,28 @@
   font-size: 1.15rem;
   max-width: 32ch;
   text-wrap: balance;
-  margin-bottom: 2.5rem;
+}
+
+/* where, what for, how soon: a subtitle to the tagline, same weight in the reading order,
+   told apart by the italic and a step down in size. Switzer ships no italic file here, so
+   the browser slants the roman - close to a true italic on a sans this plain. */
+.contact-intro .contact-details {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  font-style: italic;
+  max-width: 44ch;
+}
+
+.contact-details a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  text-underline-offset: 0.25em;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.contact-details a:hover {
+  color: var(--accent);
 }
 
 /* direct lines: the secondary way in, set as a ruled list so it reads as a choice of its own
@@ -2684,8 +2764,96 @@ p.project-specs__kicker {
   color: var(--accent-2);
 }
 
+/* the end of every project page: the next project in the home row's order (it loops), and a
+   one-line way to the contact form. Without it the strongest proof ended on "back", the moment
+   right after it handed off to nothing. */
 .project-back {
-  text-align: center;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  align-items: center;
+  gap: 2rem 3rem;
+}
+
+.project-next {
+  display: grid;
+  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 1.25rem 1.5rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid #222;
+  border-radius: 1rem;
+  color: var(--text);
+  transition: border-color var(--duration-base) var(--ease-out);
+}
+
+.project-next:hover {
+  border-color: var(--accent);
+}
+
+.project-next:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.project-next__thumb {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, #1d1d1d, #101010);
+  display: block;
+}
+
+.project-next__text {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.project-next__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.project-next__hint {
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+
+.project-back__aside {
+  display: grid;
+  justify-items: start;
+  gap: 1.25rem;
+  color: var(--text-dim);
+}
+
+.project-back__aside p a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  text-underline-offset: 0.3em;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.project-back__aside p a:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 700px) {
+  .project-back {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .project-next {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* homelab service tree — everything runs on one Proxmox host, so this draws a
@@ -3522,10 +3690,6 @@ p.project-specs__kicker {
 }
 
 @media (max-width: 700px) {
-  .about-grid {
-    grid-template-columns: 1fr;
-  }
-
   .project-description-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -3766,8 +3930,9 @@ p.project-specs__kicker {
     /* top cleared past the fixed nav (measured ~65px/4.0625rem) - place-items: center
        otherwise centers on the full viewport height and a tall card (long bullet lists,
        e.g. Substance 3D) lands its top edge under the nav, which this z-index then draws
-       over */
-    inset: 4.25rem 0 0 0;
+       over. The bottom stops at the consent banner while it is up (--cookie-banner-h, set
+       by analytics.js), or the card centres on the full height and runs under the banner */
+    inset: 4.25rem 0 var(--cookie-banner-h, 0px) 0;
     z-index: 60; /* above .info-card's 50, comfortably above .nav's 10 */
     /* always laid out, never display:none - toggling display kills the card's own fade
        before it starts, and with it the transitionend that takes the card back out of the
@@ -3795,9 +3960,9 @@ p.project-specs__kicker {
        the viewport, so the gutters have to come back out by hand */
     width: calc((100vw - 2 * var(--pad-x)) * 0.44);
     /* caps to what .skills-modal's own reserved band (inset top 4.25rem, 0.75rem padding
-       top+bottom) can actually hold, so centering never has to push the top edge back up
+       top+bottom, minus the consent banner) can actually hold, so centering never has to push the top edge back up
        under the nav to fit a tall card */
-    max-height: calc(100vh - 4.25rem - 1.5rem);
+    max-height: calc(100vh - 4.25rem - 1.5rem - var(--cookie-banner-h, 0px));
     overflow-y: auto;
     margin: 0;
     pointer-events: auto;
@@ -6249,30 +6414,6 @@ button.pp-btn:active {
   }
 }
 
-/* the way out: back to the projects, or straight to contact */
-#back.project-back {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem 2rem;
-}
-
-.cb-back__contact {
-  color: var(--text);
-  text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent);
-  text-underline-offset: 0.3em;
-  transition: color var(--duration-fast) var(--ease-out);
-}
-
-.cb-back__contact:hover {
-  color: var(--accent);
-}
-
-.cb-back__contact:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-}
 
 /* polish: leading, measure, a target a finger can hit, and a prompt while the demo waits */
 .cb-chat {
@@ -6403,11 +6544,6 @@ button.pp-btn:active {
 
 .cb-limits .vt-detail:nth-child(2) p {
   max-width: 65ch;
-}
-
-.cb-back__contact {
-  display: inline-block;
-  padding-block: 0.6rem;
 }
 
 /* phone: the chat names the lit stage, since the path list sits far above it */

@@ -79,6 +79,12 @@ html {
      the bar - the thing you clicked to read is the thing you cannot see. Measured at 65px
      of bar, rounded up for air. */
   scroll-padding-top: 5.5rem;
+  /* The body's overflow-x below is not enough on its own: with html left visible, the body's
+     value is handed to the viewport, and a phone's viewport widens to fit what overflows anyway
+     (the cutting mat's -3rem bleed made the home 438px wide on a 390px screen, nav Contact off
+     the edge). Clipping here too gives the viewport its own value and lets the body's clip
+     actually clip. */
+  overflow-x: clip;
 }
 
 body {

@@ -79,15 +79,19 @@ export function initAnimations() {
     );
   });
 
-  // reveal on scroll for everything else
+  // reveal on scroll for everything else. Short and early on purpose: a block that waits
+  // until 85% and then fades for 0.8s is a blank screen on a fast scroll. A block taller than
+  // most of the screen (Homelab's diagram, a Pipeline tool's text) is the content itself,
+  // not a card arriving, so it is never hidden at all.
   gsap.utils.toArray('[data-reveal]').forEach((el) => {
     if (el.tagName === 'H2') return;
+    if (el.offsetHeight > window.innerHeight * 0.6) return;
     gsap.from(el, {
-      y: 40,
+      y: 24,
       opacity: 0,
-      duration: 0.8,
+      duration: 0.6,
       ease: 'power2.out',
-      scrollTrigger: { trigger: el, start: 'top 85%' },
+      scrollTrigger: { trigger: el, start: 'top 95%' },
     });
   });
 
