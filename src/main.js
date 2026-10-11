@@ -202,7 +202,13 @@ function initSkillsWall() {
     // Split into two <span>, each its own element with its own hint-shine timeline
     // (offset in CSS via animation-delay), so the second visibly trails the first instead
     // of moving in lockstep with it.
-    const text = content.skillsHint?.text ?? 'Click any tool to see what I actually do with it.';
+    // a finger taps: the phone layout is touch almost always, but the wording follows the
+    // pointer, not the width
+    const touch = matchMedia('(pointer: coarse)').matches;
+    const text =
+      (touch && content.skillsHint?.textTouch) ||
+      content.skillsHint?.text ||
+      'Click any tool to see what I actually do with it.';
     const words = text.split(' ');
     const mid = Math.ceil(words.length / 2);
     const line1 = document.createElement('span');
@@ -509,6 +515,11 @@ if (DRAWER_MODE) {
       // moment ago in initAnimations() and is now stale, firing at pixel offsets well past
       // where those sections actually sit. See refreshScrollTriggers() in animations.js.
       refreshScrollTriggers();
+      // the drawer's margin moves the whole page below it when it opens or shuts (see
+      // --shut-gap in sections.css), so the triggers down there are re-measured once it lands
+      skillDrawer.addEventListener('transitionend', (e) => {
+        if (e.target === skillDrawer && e.propertyName === 'margin-bottom') refreshScrollTriggers();
+      });
       // after is-live: the player's own CSS is scoped to it, and mounting first would flash
       // the flow-layout variant for a frame
       mountSets();

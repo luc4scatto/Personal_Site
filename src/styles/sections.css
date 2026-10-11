@@ -961,6 +961,22 @@
   margin-bottom: -3rem;
 }
 
+/* While the drawer is in, the page below rises into the band the frame keeps free for it
+   (--shut-gap, measured by skillDrawer.js's measureShutGap()), and goes back down with the
+   drawer as it comes out: same 1.5s as DRAWER_RUN, same curve as its power3.out. is-out,
+   not is-shut, so the invitation nudge does not move the page. */
+#skill-drawer.is-live {
+  transition: margin-bottom 1.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+#skill-drawer.is-live:has(.drawer__scene:not(.is-out)) {
+  margin-bottom: calc(-5rem - var(--shut-gap, 0px));
+}
+
+#skill-drawer.is-live:has(.drawer__scene.is-overlay:not(.is-out)) {
+  margin-bottom: calc(-3rem - var(--shut-gap, 0px));
+}
+
 #skill-drawer.is-live:active {
   cursor: grabbing;
 }
@@ -3941,7 +3957,7 @@ p.project-specs__kicker {
   .skills-modal .skill-card {
     /* a share of the same content width the drawer is a share of - the modal is fixed to
        the viewport, so the gutters have to come back out by hand */
-    width: calc((100vw - 2 * var(--pad-x)) * 0.44);
+    width: calc((100vw - 2 * var(--pad-x)) * 0.48);
     /* caps to what .skills-modal's own reserved band (inset top 4.25rem, 0.75rem padding
        top+bottom, minus the consent banner) can actually hold, so centering never has to push the top edge back up
        under the nav to fit a tall card */
@@ -3976,7 +3992,7 @@ p.project-specs__kicker {
        place-items: center end right-aligning each item in its grid cell, two different
        widths meant two different right gutters. Same formula as .skill-card's own width
        just below, so the two can never drift apart again. */
-    width: calc((100vw - 2 * var(--pad-x)) * 0.44);
+    width: calc((100vw - 2 * var(--pad-x)) * 0.48);
     margin: 0;
     opacity: 0;
     transition: opacity var(--duration-base) var(--ease-out);
@@ -4028,8 +4044,6 @@ p.project-specs__kicker {
      down to fit a panel this narrow */
   .skills-modal .skill-card__inner {
     padding: 0.9rem 0.8rem;
-    /* clear of the close button, which shrinks with everything else below */
-    padding-right: 2.2rem;
     border-radius: 0.7rem;
   }
 
@@ -4042,7 +4056,10 @@ p.project-specs__kicker {
     height: 1.6rem;
   }
 
+  /* only the title row shares the top-right corner with the close button; keeping the whole
+     card clear of it cost the text a quarter of a panel this narrow, 2-3 words a line */
   .skills-modal .skill-card__title {
+    padding-right: 1.6rem;
     font-size: 1.05rem;
     letter-spacing: -0.02em;
     line-height: 1.15;
@@ -4051,7 +4068,7 @@ p.project-specs__kicker {
   .skills-modal .skill-card__badge {
     margin-top: 0.5rem;
     padding: 0.15rem 0.45rem;
-    font-size: 0.6rem;
+    font-size: 0.75rem;
   }
 
   .skills-modal .skill-card__text {

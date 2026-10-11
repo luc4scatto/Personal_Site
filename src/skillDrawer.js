@@ -824,13 +824,20 @@ export function initSkillDrawer(host, strip) {
   // thing it describes. Derived from the real z instead, so it can't disagree with what's on
   // screen; skipped when it hasn't changed, same as every other write in cull().
   let shutState = null;
+  let outState = null;
   function render() {
     cull();
-    const shutNow = drawer.position.z <= SHUT_Z + 0.001;
+    // NUDGE_Z of slack: the invitation nudge (below) moves the face a hair out and back, and
+    // that must not read as the drawer opening - the hint and the names key off is-shut.
+    const shutNow = drawer.position.z <= SHUT_Z + NUDGE_Z + 0.001;
     if (shutNow !== shutState) {
       host.classList.toggle('is-shut', (shutState = shutNow));
       if (shutNow) host.classList.remove('has-opened');
     }
+    // is-out is what the page below listens to (sections.css: the drawer's margin): the frame
+    // gives back the room it keeps for an open drawer only while the drawer is really in.
+    const outNow = drawer.position.z > SHUT_Z + 0.3;
+    if (outNow !== outState) host.classList.toggle('is-out', (outState = outNow));
     if (scrub && !shutNow) placeScrub();
     renderer.render(scene, camera);
     css.render(scene, camera);
@@ -1131,6 +1138,23 @@ export function initSkillDrawer(host, strip) {
     hintArrowPath.setAttribute('d', `M${sx} ${sy} C ${sx} ${c1y}, ${c2x} ${ey}, ${ex} ${ey}`);
   }
 
+  /** How much of the frame stands empty below the furniture while it is shut: the frame is
+   *  sized for the open drawer, which comes out down and to the left, and a shut cabinet left
+   *  that whole band as black page. Written on the drawer's own element as --shut-gap, which
+   *  sections.css turns into a negative margin while the drawer is in, so the page below
+   *  sits up under the cabinet and moves down with the drawer as it comes out. Measured off
+   *  the carcass's lowest corners through the same camera the frame was fitted with. */
+  function measureShutGap() {
+    let bottom = 0;
+    for (const x of [-CAB_W / 2, CAB_W / 2]) {
+      for (const z of [-D / 2 - CAB_D - 0.05, -D / 2 + 0.3]) {
+        corner.set(x, CAB_BOTTOM, z).project(camera);
+        bottom = Math.max(bottom, ((1 - corner.y) / 2) * h);
+      }
+    }
+    host.parentElement.style.setProperty('--shut-gap', `${Math.max(0, Math.round(h - bottom))}px`);
+  }
+
   function resize() {
     scrubAvoidStale = true;
     w = host.clientWidth;
@@ -1143,6 +1167,7 @@ export function initSkillDrawer(host, strip) {
     const total = pickDrawerCount();
     buildCabinet(total);
     fit(total);
+    measureShutGap();
     layoutHintArrow();
     billboardQuat.copy(camera.quaternion);
     layoutLabels();
@@ -1567,6 +1592,9 @@ export function initSkillDrawer(host, strip) {
   // drawer reads as closed rather than as parked. The panel spans D/2 to D/2 + 0.22 in the
   // drawer's own space and the face sits at -D/2 - 0.05, which is the whole of this sum.
   const SHUT_Z = -D - 0.05;
+  // How far the invitation nudge brings the face out: enough to read as "this one moves",
+  // nowhere near enough to read as open.
+  const NUDGE_Z = 0.14;
   const raycaster = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
   // Screen pixels travelled per world unit along the drawer's own +z. Measured by projecting
@@ -1774,6 +1802,46 @@ export function initSkillDrawer(host, strip) {
   };
   host.addEventListener('focusin', onFocusIn);
 
+  // ---- and now and then it asks to be pulled --------------------------------------------
+  // A shut cabinet reads as a picture of furniture. Every few seconds, while it is shut, on
+  // screen and nobody has touched it yet, the drawer comes out a hair and settles back: the
+  // way a drawer that is not quite latched moves. It never opens, and the first real touch,
+  // click or Tab ends it for good. Under reduced motion this module never loads at all
+  // (DRAWER_MODE in main.js), so there is nothing to gate here.
+  const NUDGE_EVERY = 6000;
+  let nudgeTimer = 0;
+  let touched = false;
+  let onScreen = false;
+  function nudge() {
+    nudgeTimer = 0;
+    if (touched) return;
+    const idle = !gsap.isTweening(drawer.position) && drawer.position.z <= SHUT_Z + 0.001;
+    if (onScreen && !document.hidden && idle) {
+      gsap.to(drawer.position, {
+        z: SHUT_Z + NUDGE_Z,
+        duration: 0.32,
+        ease: 'power2.out',
+        yoyo: true,
+        repeat: 1,
+        repeatDelay: 0.08,
+        onUpdate: render,
+      });
+    }
+    nudgeTimer = setTimeout(nudge, NUDGE_EVERY);
+  }
+  const stopNudging = () => {
+    touched = true;
+    clearTimeout(nudgeTimer);
+  };
+  host.addEventListener('pointerdown', stopNudging, { capture: true });
+  host.addEventListener('focusin', stopNudging);
+  // Seen, not merely scrolled past: this only gates a nudge, never opens anything.
+  const seen = new IntersectionObserver(([entry]) => {
+    onScreen = entry.isIntersecting;
+    if (onScreen && !nudgeTimer && !touched) nudgeTimer = setTimeout(nudge, 2500);
+  }, { threshold: 0.5 });
+  seen.observe(host);
+
   const ro = new ResizeObserver(resize);
   ro.observe(host);
   resize();
@@ -1781,6 +1849,8 @@ export function initSkillDrawer(host, strip) {
   // hero3d.js has no teardown at all; this module keeps one.
   return function dispose() {
     ro.disconnect();
+    seen.disconnect();
+    clearTimeout(nudgeTimer);
     cancelAnimationFrame(frame);
     host.removeEventListener('focusin', onFocusIn);
     window.removeEventListener('keydown', onKey);

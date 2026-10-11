@@ -511,6 +511,7 @@ export const content = {
   skillsHint: {
     title: 'Pick a skill',
     text: 'Click any tool to see what I actually do with it.',
+    textTouch: 'Tap any tool to see what I actually do with it.',
     // shown beside the shut drawer (src/skillDrawer.js) in the dead space its own canvas
     // mask fades into on the right - the flat wall's line above talks about a tool, this one
     // about the drawer itself, since there's a whole extra gesture to invite first.
