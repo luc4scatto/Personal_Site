@@ -1,6 +1,13 @@
 # TODO
 
-Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-08.
+Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-11.
+
+## Critique del 2026-10-11 (in corso, uno alla volta)
+
+Risultati completi e spunte: https://claude.ai/artifact/NSxYmR8MCfeLwtaDYWDbUr
+
+- [ ] **17. [P1] Riassunto leggibile accanto al cassetto, su desktop** (`/impeccable clarify`) - categorie e strumenti principali come testo vero; il cassetto non si tocca. Oggi linguette a 7-9px e card a ~11px.
+- [ ] **20. Polish finale** (`/impeccable polish`) - più le minori: "See my works" (`content.js:17`), "2D Softwares" (`index.html:155`), badge cartelle a 10px, pill Pipeline a 10.9px, rientro di "Services" in Homelab, a capo forzati nel lead dell'hero, due tasti play nel player, `border-left` della `.info-card`, `<h3>` vuoto vicino a Contact da verificare.
 
 ## Contenuto (quello che vede chi visita il sito)
 
@@ -26,4 +33,4 @@ Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiest
 
 ## Percorso consigliato
 
-4 e 5 insieme (il 5 aspetta i dati); poi 8, 9, 10 in blocco; infine 6 per andare online.
+Prima i punti della critique (15-20) in ordine; poi 4 e 5 insieme (il 5 aspetta i dati); poi 8, 9, 10 in blocco; infine 6 per andare online.
