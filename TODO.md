@@ -6,8 +6,7 @@ Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiest
 
 Risultati completi: https://claude.ai/artifact/NSxYmR8MCfeLwtaDYWDbUr. Il resto della critique è stato sistemato.
 
-- [ ] **Frase dell'hero** - "Bringing ideas to life with 3D/2D" è la più generica del sito; il lavoro vero lo fa la riga del ruolo sotto. Una frase più specifica (es. cosa costruisci e per chi) è una scelta di Luca.
-- [ ] **Homelab: Sonarr, Radarr, Prowlarr, qBittorrent** in bella vista possono essere letti da un recruiter prudente come strumenti per la pirateria. Tenerli, raggrupparli diversamente o toglierli?
+- [ ] **Frase dell'hero** - "Bringing ideas to life with 3D/2D" è la più generica del sito; il lavoro vero lo fa la riga del ruolo sotto. Per ora lasciata com'è (scelta di Luca, 2026-10-11). Proposte scartate: "From sketch to screen, I build the [3D/2D/AI] pipeline"; "Making 3D work for [eyewear/configurators/...]"; o frase invariata con sottotitolo più specifico.
 - [ ] **Marquee al neon** - ripete il racconto delle skill ed è l'elemento più da catalogo della home. Tenerla o toglierla?
 - [ ] **Player dei set: due tasti play** (il disco grande e quello piccolo nei controlli). Il piccolo fa da centro dei controlli, togliere il disco o il piccolo cambia il disegno del pannello.
 - [ ] **Nuvola 3D dell'hero con WebGL lento o assente** - in una scheda in background la nuvola non si è disegnata ma l'invito "click on an object" restava. Non riprodotto con certezza; da guardare su un dispositivo vero.

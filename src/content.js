@@ -233,12 +233,11 @@ export const content = {
     diagram: {
       hub: 'Proxmox',
       categories: [
-        { label: 'Media Streaming', services: ['Jellyfin', 'Navidrome', 'Jellyseerr'] },
-        { label: 'Media Automation', services: ['Sonarr', 'Radarr', 'Prowlarr'] },
         {
-          label: 'Downloads & Networking',
-          services: ['qBittorrent', 'Qui', 'Tailscale', 'WireGuard'],
+          label: 'Media Library',
+          services: ['Jellyfin', 'Navidrome', 'Jellyseerr', 'Media Automation'],
         },
+        { label: 'Networking', services: ['Tailscale', 'WireGuard'] },
         { label: 'Photos & Backup', services: ['Immich'] },
         { label: 'Home Automation', services: ['Home Assistant'] },
         { label: 'Dashboard', services: ['Homarr', 'Beszel'] },
@@ -262,15 +261,9 @@ export const content = {
       Navidrome:
         'Music streaming for a local library. Subsonic-compatible, so any of the existing Subsonic clients works against it without a custom app.',
       Jellyseerr:
-        'Request front-end for Jellyfin. Turns "can you add this title" into an entry the automation stack below picks up on its own.',
-      Sonarr:
-        'Follows TV series and watches for new episodes, then hands each one to the download client without anyone checking manually.',
-      Radarr: 'The same job as Sonarr, for films: a wanted list, watched until a release shows up.',
-      Prowlarr:
-        'Indexer manager. Sources are configured once here and synced out to Sonarr and Radarr, instead of being set up twice and drifting apart.',
-      qBittorrent:
-        'The download client the rest of the stack hands work to. Open source, no ads, and controllable over its own API.',
-      Qui: 'Web dashboard for qBittorrent, built for running more than one instance from a single screen. Cross-seed automation, scheduled backups and orphan-file cleanup, in one Go binary.',
+        'Request front-end for Jellyfin. Turns "can you add this title" into an entry the automation below picks up on its own.',
+      'Media Automation':
+        'Keeps the library stocked on its own: what is wanted is tracked, sourced and filed without anyone checking by hand.',
       Tailscale:
         'Mesh VPN built on WireGuard. Puts every device on one private network without opening a single port on the router.',
       WireGuard:

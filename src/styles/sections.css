@@ -4165,7 +4165,7 @@ p.project-specs__kicker {
     --hd-leaf-h: 1.85rem;
   }
 
-  /* the desktop scale is set by how much room "Downloads & Networking" needs
+  /* the desktop scale is set by how much room "Personal Finance" needs
      beside a card; on a phone it is the only thing that has to fit at all, and
      at 1.3rem it lands within 20px of the edge at 390 */
   .hd-branch__label {
