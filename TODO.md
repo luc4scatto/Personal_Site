@@ -1,14 +1,34 @@
 # TODO
 
-Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-19 (quarto giro di critique).
+Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-19 (settimo giro di critique, 25/32).
 
-## Critique, quarto giro (2026-10-19, 23/32)
+## Critique, settimo giro (2026-10-19, 25/32)
 
-Dettagli e spunte: https://claude.ai/artifact/NSxYmR8MCfeLwtaDYWDbUr. Chiusi dal terzo giro: pausa del grafico di Company Brain, banner cookie compatto, aree di tocco di Homelab, nav "Projects", pill piatte, ritmo delle sezioni, rail dei tool su Pipeline Projects, cavi di Vivatech, "What the pilot taught me", Monitoring nelle scelte di design, gergo spiegato, link CV, etichetta fissa del titolo in home, e gli oggetti 3D in famiglia (stessa colorazione della home via `src/objectStyle.js`, stessa luce, stesso riquadro e posto). Quattro progetti su desktop: provato e scartato, Luca preferisce la fila a tre che scorre.
+Fatti prima del giro (suggerimenti del sesto): dato del pilota sotto il titolo di Company Brain ("82% of 318 answers needed live company data", link ai risultati); LXC, OpenPBR ed Editor Utility Widgets spiegati alla prima comparsa; "tap an object" su touch nell'hint della home; una riga "What changed" per ognuno dei cinque tool (qualitativa, ricavata da quello che il tool fa: da sostituire con un numero misurato quando c'è). Il voto resta 25/32: i punti chiesti sono chiusi, il nuovo revisore alza l'asticella. Archivio: `.impeccable/critique/` (giro del 2026-10-19 sera).
 
-- [x] **Oggetti 3D negli hero** - provati in tutte le varianti (ogni pagina, solo due, uniformati) e tolti il 19 ottobre: non funzionavano in alto. Hero e spazi tornati come prima; gotcha in `CLAUDE.md`. Pausa del grafico di Company Brain con icona sul bordo del grafico.
-- [x] **Schema unico dei progetti** - etichetta "provenienza · tipo" uguale sull'hero di ogni pagina e sulla sua card in home (stessa chiave di `content.js`): "Work · Live installation" (Vivatech), "Work · Pipeline tools", "Work · AI assistant" (Company Brain), "Personal · Self-hosting" (Homelab). Card "next" e card in home con il solo nome ("Homelab"). Da confermare le parole con Luca.
-- [x] **Aree di tocco** - footer, logo "LS" e controlli del mockup di Omniverse portati a 44px su touch con pseudo-elementi (misurato in emulazione).
+- [ ] **P1 Titolo della home** (`/impeccable clarify`) - "Bringing ideas to life with AI" letto come posizionamento da generalista AI; la parola ruota tra 3D, 2D e AI. Già lasciato com'è da Luca il 2026-10-11 (vedi "Da decidere"): serve una scelta, non un fix.
+- [ ] **P2 Skill su telefono a 9,6px** (`/impeccable typeset`) - griglia piatta, etichette e categorie verticali: misurato e visto su screenshot, non è un falso allarme. Portare ad almeno 12px.
+- [ ] **P2 Pagine progetto lunghe su telefono** (`/impeccable distill`) - Pipeline ~15 schermate, Vivatech ~11. "What it does" chiuso o a 3 voci, galleria a scorrimento orizzontale, chip del tool attivo fisso.
+- [ ] **P2 Demo di Company Brain che si apre vuota** (`/impeccable polish`) - quando entra in vista la scena riparte da zero: mostrare subito la domanda, scrittura dal vivo solo per la risposta.
+- [ ] **P2 Banner cookie** - Decline con lo stesso peso di Accept.
+- [ ] **P3 Rail dei tool senza nomi** sul desktop (tre icone simili) e About assente dalla nav del telefono.
+- [ ] **Minori** - arancio del titolo diverso tra pagine (parola intera su Homelab e Pipeline, ultima parola su Vivatech e Company Brain); side-tab a 3px sulle sezioni arrotondate del mockup di Omniverse; nota dei risultati di Company Brain a ~93 caratteri per riga su desktop; "CV" largo 20px su touch da ricontrollare; scritta del video di Vivatech sotto i controlli nativi.
+
+## Critique, quinto giro (2026-10-19, 23/32)
+
+Dettagli e spunte: https://claude.ai/artifact/NSxYmR8MCfeLwtaDYWDbUr. Archivio: `.impeccable/critique/2026-10-19T14-46-06Z__index-html.md`. Fatti il 19 ottobre:
+
+- [x] **Chat di Company Brain che saltava** - ogni scena prende l'altezza della più alta, contando anche i puntini di "sta scrivendo" (`evenOut()` in `companyBrainDemo.js`, ricalcolato al resize e a font caricati); barra su una riga, domanda digitata su una riga con i puntini di sospensione. CLS a 390 da 0,189 a 0; a 1440 resta a volte ~0,06 nei primi 100ms di caricamento, intermittente (font), 0,001 nella build di produzione.
+- [x] **Titolo delle pagine progetto lento** - sulle pagine senza le righe mascherate della home l'ingresso parte a 0,05s invece di 0,45s (`animations.js`): titolo di Company Brain visibile al 78% a 0,5s invece di 0.
+- [x] **Risultati di Company Brain** - "Pilot results": prima la riga "Measured" (10 settimane, 7 persone, 318 risposte, 566 interrogazioni) e l'82% in una frase; sotto "Team estimates" come prima/dopo barrato (scheda prodotto, report di collezione, componente standard); il rientro in tre mesi in una frase; "Built to spread" in chiusura. Niente più eco con "What the pilot taught me".
+- [x] **Ruolo, periodo e stato in ogni hero** - `.project-facts` (era `.cb-meta`; il nome `.project-meta` esisteva già su privacy e 404). Vivatech: "Built the real-time experience / 2026, for Vivatech Paris / Shown live at the event"; Homelab: "Designed, built and run it / Ongoing / In daily use"; Pipeline Projects: "Designed and built them / Team: 3D R&D, Thélios / In use by the team". Vivatech ha una riga di risultato sopra "Featured on".
+- [x] **Nav del telefono** - sotto i 560px la home mostra solo Projects, Contact e CV.
+- [x] **Aree di tocco** - logo, link della nav e del footer larghi almeno 44px su touch; link di "Featured on" estesi; righe dei servizi di Homelab a 44px pieni.
+- [x] **Minori** - poster del video di Vivatech: un fotogramma del video a 7s (designer alla postazione CAD) al posto del cielo; "Contact" nel footer della home; "read-only" nella chat di Company Brain con una spiegazione al passaggio del mouse.
+- [x] **Ruolo, periodo e stato confermati** - Pipeline Projects: "2023 - today" (Luca, 19 ottobre).
+- [x] **Video di Vivatech** - va bene così (scelta di Luca, 19 ottobre): non toccarlo.
+- [ ] **Lasciati com'erano** - skill "Second Brain" e "Agentic Workflow" (nomi scelti da Luca); su telefono le card domanda della demo di Company Brain mostrano la descrizione solo per quella attiva (voluto).
+
 - [ ] **Spunti dalla critique, non decisi** - Pipeline Projects potrebbe mostrare un tool per intero e gli altri quattro come card (oggi ~14 schermi su telefono); l'albero servizi di Homelab è ~5 schermi su telefono.
 - [ ] **Ricontrollare su un telefono vero** - banner cookie ora 99px (prima ~140), aree di tocco di Homelab (close X e righe dei servizi) estese a 44px su touch, pill del grafico di Company Brain su due righe a 390px. Fatti e misurati in emulazione, non su un dispositivo.
 - [ ] **Vivatech, resto del P2** - manca un primo piano del gesto o dell'interfaccia vicino a "How it works": serve una foto che non c'è. Da decidere: l'anteprima social (`og:image`, `vivatech-10.jpg`) mostra il pannello Louis Vuitton, e la copertina della pagina mostra i loghi Loro Piana e Moët Hennessy.
@@ -28,10 +48,6 @@ Dettagli e spunte: https://claude.ai/artifact/NSxYmR8MCfeLwtaDYWDbUr. Chiusi dal
 - [ ] **5. Company Brain: risultato** - inserita la sezione "What the pilot showed" (prima di Design choices) dai documenti Use Case e Business Case di Luca, in forma generale: dati misurati del pilota (10 settimane, 7 utenti, 318 risposte, 566 interrogazioni, 82% con dati aziendali), tempi prima/dopo dichiarati come stime, rientro in circa tre mesi nel caso più prudente, nessun costo di licenza, estendibile ad altri reparti. Niente cifre in euro, nomi di sistemi o codici. Da rileggere con Luca prima del merge.
 - [ ] **6. (in standby, Luca: non è ancora il momento) Merge di `preview/combined` su `main`** - unico modo per mettere online i commit. Dopo 4 e 5, così non vanno online testi non verificati. ~5 min più la verifica sul dev server.
 
-## Rifiniture veloci (in blocco, prima del merge)
-
-- [ ] **10. Misurare l'altezza minima della chat su desktop** (25rem) - solo verifica che non salti tra le scene. ~5 min.
-
 ## Rimandabili
 
 - [ ] **11. Distanza player/cassetto su tablet (`is-overlay`)** - estetica, solo tablet. C'era una soluzione funzionante (mask-image del canvas più stretta) annullata prima del commit: prima decidere cosa si vuole. ~30-60 min. Dettagli in `CLAUDE.md`.
@@ -44,4 +60,4 @@ Dettagli e spunte: https://claude.ai/artifact/NSxYmR8MCfeLwtaDYWDbUr. Chiusi dal
 
 ## Percorso consigliato
 
-Prima la rilettura della sezione risultati di Company Brain (5), poi la rilettura di Pipeline Projects (4); in parallelo le decisioni su Vivatech (copertina e anteprima social) e sulla foto della card Homelab; infine 6 per andare online.
+Prima la rilettura di Pipeline Projects (4) e dei risultati di Company Brain (5), infine 6 per andare online.

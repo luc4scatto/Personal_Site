@@ -14,6 +14,7 @@ export const content = {
     tagline:
       'I build 2D-3D pipelines across every major DCC tool, \nalso powering configurators and interactive 3D experiences, \nwith a touch of AI.',
     hint: '✦ click on an object to learn more',
+    hintTouch: '✦ tap an object to learn more',
     cta: 'See my work ↓',
   },
   // scrolling marquee band between hero and about (src/main.js builds the loop from this array)
@@ -222,7 +223,7 @@ export const content = {
     description2:
       'The rack is now a **two-node Proxmox cluster**: an **HP EliteDesk 800 G5** with **32GB of RAM** and a **Lenovo ThinkCentre M910q** with 16GB, both on added **2.5G network cards** and tied together by a dedicated cluster link. Storage moved off the hosts onto a **UniFi UNAS 4** with two mirrored 4TB drives. It all lives in a **3D-printed rack case**: an open design I found and adapted, swapping in other printable parts until it fit what I actually needed. A **JetKVM** sits on top for headless remote management; BIOS access and reboots from anywhere, no monitor or keyboard needed on-site.',
     description3:
-      'Every service runs in its own **LXC container** on **Proxmox**: media streaming and automation, photo backup, DNS ad-blocking, a password manager, personal finance, with **Hermes** for agentic workflows. Around them sits the boring part that keeps it alive: nightly deduplicated backups to **Proxmox Backup Server**, single sign-on with passkeys, metrics in **Grafana**, push alerts to my phone, automatic security patches, and remote access over **Tailscale** with no port open to the internet.',
+      'Every service runs in its own **LXC container** (a lightweight Linux box sharing the host kernel) on **Proxmox**: media streaming and automation, photo backup, DNS ad-blocking, a password manager, personal finance, with **Hermes** for agentic workflows. Around them sits the boring part that keeps it alive: nightly deduplicated backups to **Proxmox Backup Server**, single sign-on with passkeys, metrics in **Grafana**, push alerts to my phone, automatic security patches, and remote access over **Tailscale** with no port open to the internet.',
     description4:
       'Most of what I know about networking and sysadmin work, I picked up here, one broken config at a time.',
     backCta: '← Back to projects',
@@ -319,7 +320,7 @@ export const content = {
     intro1:
       'In the **3D R&D team** at Thélios, a lot of the slow work was not modeling or rendering, it was everything around it: cleaning and naming meshes by hand, building the variants for every colorway, renaming hundreds of renders, assembling presentation decks slide by slide.',
     intro2:
-      'None of these tools were planned as a system. Each one started from a specific problem the team kept hitting, and grew until those problems went away. They were built to make the most of what **Maya**, **Unreal Engine** and **NVIDIA Omniverse** can do, or as standalone **Python** desktop apps. The look-dev side is built on open standards: **USD** for everything in the scene and **OpenPBR in MaterialX** for every material.',
+      'None of these tools were planned as a system. Each one started from a specific problem the team kept hitting, and grew until those problems went away. They were built to make the most of what **Maya**, **Unreal Engine** and **NVIDIA Omniverse** can do, or as standalone **Python** desktop apps. The look-dev side is built on open standards: **USD** for everything in the scene and **OpenPBR in MaterialX** (an open material model and the file format that carries it) for every material.',
     disclaimer:
       'Built in-house. Tool names, data and interfaces shown here are generalized and redrawn - no proprietary code, data or assets.',
     indexHint: 'Five tools, each built to fix one problem. Pick one to see it.',
@@ -348,6 +349,8 @@ export const content = {
           'Batch-renders the selected SKUs with **Omniverse RTX**, the ray-traced renderer that runs on NVIDIA GPUs',
           'Steps through every model and colorway in the scene to check each look before it goes out',
         ],
+        // qualitative, from what the tool does; swap in a measured number when there is one
+        result: 'A look-dev scene starts from product data: models, materials and renders come in from one panel instead of being set up one at a time.',
         idea: 'The whole kit is built around two open standards: **USD** for everything in the scene, from templates to models, and **OpenPBR in MaterialX** for every material, so a material is written once in a standard format that any USD or MaterialX-compatible tool can open, with no conversion. Materials are also **portable**: whenever one is created or updated, its links to textures and to its master material are saved as relative paths, so a material folder can be moved anywhere in the library and every scene that uses it keeps working.',
       },
       {
@@ -373,6 +376,8 @@ export const content = {
           'A second tab looks the model up in product data: its SKUs, and which material goes on which component',
           'Exports that as JSON, one file per SKU or a whole release at once, ready for the render tools downstream',
         ],
+        // qualitative, from what the tool does; swap in a measured number when there is one
+        result: 'Every model leaves Maya cleaned, unwrapped and named the same way, so nothing has to be fixed again before rendering.',
         idea: "Naming comes from **product data**, not memory: the panel loads the model's component list and builds a tree, and picking a node renames the selected mesh to the standard convention, suffixes included. Every tool after it can trust the names.",
       },
       {
@@ -382,7 +387,7 @@ export const content = {
         highlights: [
           { icon: 'unreal-engine.svg', label: 'Unreal Engine' },
           { icon: 'python.svg', label: 'Python' },
-          { label: 'Editor Utility Widgets' },
+          { label: 'Editor Utility Widgets', title: 'Custom panels built inside the Unreal editor' },
           { label: 'Movie Render Graph' },
         ],
         // one line for the index card, under its Problem label; the full problem is in the chapter
@@ -395,6 +400,8 @@ export const content = {
           'Creates Level Variant Sets for every pass from a data table, one variant per colorway',
           'Copies camera and light keyframes across sequences, then drives Movie Render Graph',
         ],
+        // qualitative, from what the tool does; swap in a measured number when there is one
+        result: 'A new colorway is one click instead of a rebuild, and every render comes out already named.',
         idea: 'Everything is **incremental**: the scripts compare what is already in the project with the data table and only add the difference, so a new colorway is one click, not a rebuild. When the render queue finishes, a hook renames every EXR from frame numbers to Model_Colorway.Camera.',
       },
       {
@@ -417,6 +424,8 @@ export const content = {
           'Places a hero image and up to seven variant groups per slide',
           'Gives variant families their own slides and flags prescription-ready models',
         ],
+        // qualitative, from what the tool does; swap in a measured number when there is one
+        result: 'A seasonal catalogue is a release and a brand picked from a list, with no copying between systems.',
         idea: 'The layout is a small **engine**, not a fixed template: positions are computed from how many variant groups land on each slide, product images are auto-cropped, and one list of slide jobs decides both how many slides exist and what goes on each.',
       },
       {
@@ -438,6 +447,8 @@ export const content = {
           'Fills sizes, materials and specs straight from product data',
           'A second tab splits any finished deck into 4K PNGs, named after the model on each slide',
         ],
+        // qualitative, from what the tool does; swap in a measured number when there is one
+        result: 'An evaluation deck builds itself from product data, one slide per style, with nothing typed by hand.',
         idea: 'python-pptx cannot duplicate slides faithfully, so the builder drives **PowerPoint itself** to clone the template, then hands the file back to python-pptx to fill every placeholder.',
       },
     ],

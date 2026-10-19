@@ -26,10 +26,56 @@ const contactForm = document.getElementById('contact-form');
 if (contactForm) {
   const status = contactForm.querySelector('.contact-status');
   const submitBtn = contactForm.querySelector('button[type="submit"]');
+  const say = (text, kind = '') => {
+    status.textContent = text;
+    status.className = `contact-status${kind ? ` is-${kind}` : ''}`;
+  };
+
+  // each field says what is missing right under it, in words, instead of the browser's bubble.
+  // Checked on leaving a field the visitor has typed in, and again as they fix it.
+  const fields = [...contactForm.querySelectorAll('input, textarea')];
+  const MISSING = {
+    name: 'Your name, so I know who is writing.',
+    email: 'Your email, so I can reply.',
+    message: 'A few words about the project.',
+  };
+  const checks = fields.map((field) => {
+    const error = document.createElement('p');
+    error.className = 'contact-error';
+    error.id = `${field.id}-error`;
+    field.setAttribute('aria-describedby', error.id);
+    field.after(error);
+    const check = () => {
+      const v = field.validity;
+      const text = v.valueMissing
+        ? MISSING[field.name]
+        : v.typeMismatch
+          ? 'That email looks incomplete: check the @ and the part after it.'
+          : '';
+      error.textContent = text;
+      if (text) field.setAttribute('aria-invalid', 'true');
+      else field.removeAttribute('aria-invalid');
+      return !text;
+    };
+    field.addEventListener('blur', () => field.value && check());
+    field.addEventListener('input', () => field.hasAttribute('aria-invalid') && check());
+    return { field, check };
+  });
+
   contactForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+    const bad = checks.filter(({ check }) => !check());
+    if (bad.length) {
+      say(bad.length === 1 ? 'One field needs a look.' : `${bad.length} fields need a look.`, 'error');
+      bad[0].field.focus();
+      return;
+    }
+    if (!navigator.onLine) {
+      say("You seem to be offline. Your message is still here: send it once you're back.", 'error');
+      return;
+    }
     submitBtn.disabled = true;
-    status.textContent = 'Sending...';
+    say('Sending...');
     try {
       const res = await fetch(content.contact.formEndpoint, {
         method: 'POST',
@@ -37,13 +83,13 @@ if (contactForm) {
         body: new FormData(contactForm),
       });
       if (res.ok) {
-        status.textContent = "Thanks! I'll get back to you soon.";
+        say("Sent. Thanks, I'll get back to you soon.", 'ok');
         contactForm.reset();
       } else {
-        status.textContent = 'Something went wrong - please try again.';
+        say("It didn't go through, and your message is still here. Try again, or reach me on LinkedIn below.", 'error');
       }
     } catch {
-      status.textContent = 'Something went wrong - please try again.';
+      say("It didn't go through, and your message is still here. Try again, or reach me on LinkedIn below.", 'error');
     } finally {
       submitBtn.disabled = false;
     }
@@ -460,7 +506,10 @@ if (heroCanvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     m.initHero3D(heroCanvas);
     // the "click the objects" hint only makes sense once the 3D scene exists
     const hint = document.querySelector('.hero-hint');
-    if (hint) hint.hidden = false;
+    if (!hint) return;
+    if (matchMedia('(pointer: coarse)').matches && content.hero?.hintTouch)
+      hint.textContent = content.hero.hintTouch;
+    hint.hidden = false;
   });
 }
 

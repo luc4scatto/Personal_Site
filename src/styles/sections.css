@@ -265,7 +265,7 @@
   .nav nav a::after {
     content: '';
     position: absolute;
-    inset: -0.7rem -0.4rem;
+    inset: -0.7rem min(-0.4rem, calc(50% - 22px));
   }
 }
 
@@ -2450,6 +2450,29 @@
   margin: 0;
 }
 
+.contact-status.is-ok {
+  color: var(--text);
+}
+
+/* a soft red, the one the site already uses for errors: it reads as "look here", not alarm */
+.contact-status.is-error,
+.contact-error {
+  color: #e57373;
+}
+
+.contact-error {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+}
+
+.contact-error:empty {
+  display: none;
+}
+
+.contact-field [aria-invalid='true'] {
+  border-color: #e57373;
+}
+
 /* project page (vivatech.html) */
 .page-hero {
   padding-top: calc(var(--space) + 4rem);
@@ -3418,7 +3441,7 @@ p.project-specs__kicker {
   .hd-leaf__button::after {
     content: '';
     position: absolute;
-    inset: -0.45rem 0;
+    inset: -0.5rem 0;
   }
 }
 
@@ -6578,36 +6601,57 @@ button.pp-btn:active {
 }
 
 /* who did what, when, and where it stands: the facts a reader looks for under the title */
-.cb-meta {
+/* role, timeline and status under the title: the same three lines on every project page */
+.project-facts {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem 2.5rem;
   margin: 1.5rem 0 0;
 }
 
-.cb-meta div {
+.project-facts div {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
 }
 
-.cb-meta dt {
+.project-facts dt {
   color: var(--text-dim);
   font-size: 0.8rem;
 }
 
-.cb-meta dd {
+.project-facts dd {
   margin: 0;
   color: var(--text);
 }
 
 /* one sentence that says what it is for, straight under the title */
-.cb-pitch {
+.cb-pitch,
+.cb-proof {
   max-width: 34rem;
   margin: 1.25rem 0 0;
   font-size: clamp(1.1rem, 1.6vw, 1.3rem);
   line-height: 1.45;
   color: var(--text);
+}
+
+/* the pilot's headline number under the pitch, quieter than the pitch itself */
+.cb-proof {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  color: var(--text-dim);
+}
+
+.cb-proof a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  white-space: nowrap;
+}
+
+.cb-proof strong {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 /* hero: the title and what it is on the left, the picture of the idea on the right, so the
@@ -6707,6 +6751,30 @@ button.pp-btn:active {
 .cb-chat__ro,
 .cb-chat__replay {
   white-space: nowrap;
+}
+
+/* the bar stays one line when Replay shows up next to the stage chip: the chip gives way */
+.cb-chat__bar {
+  flex-wrap: nowrap;
+}
+
+.cb-chat__stage {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* a long question stays on one line while it is typed and trails off, like a real input field,
+   so the chat never grows mid-sentence and moves the page below it */
+.cb-chat__input [data-cb-typed] {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cb-caret {
+  flex-shrink: 0;
 }
 
 /* the end of a Pipeline chapter: back to the five-tool index, so a phone does not have to scroll
@@ -6861,7 +6929,22 @@ button.pp-btn:active {
   .pp-omni .pp-btn::after {
     content: '';
     position: absolute;
-    inset: -0.4rem -0.3rem;
+    /* at least 44px wide too: a short word like "LS" or "CV" is narrower than a finger */
+    inset: -0.4rem min(-0.3rem, calc(50% - 22px));
+  }
+
+  .featured-links {
+    gap: 1.5rem;
+  }
+
+  .featured-links a {
+    position: relative;
+  }
+
+  .featured-links a::after {
+    content: '';
+    position: absolute;
+    inset: -0.75rem 0;
   }
 
   .pp-omni__sec > summary {
@@ -6869,27 +6952,47 @@ button.pp-btn:active {
   }
 }
 
-/* Company Brain results: four figures the eye catches first. Measured ones stand alone, estimates
-   carry a tag saying so. No boxes: the hairline above each figure is the page's own rule. */
+/* Company Brain results: what was measured comes first and largest; the team's estimates sit
+   under it, smaller, as before and after, and say what they are. */
 .cb-results {
-  list-style: none;
-  margin: 2.5rem 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 2.5rem clamp(1.5rem, 3vw, 2.5rem);
-}
-
-.cb-results li {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.6rem;
+  margin-top: 2.5rem;
   padding-top: 1.25rem;
   border-top: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
-.cb-results__num {
+.cb-results--estimate {
+  margin-top: 3.5rem;
+  border-top-color: rgba(255, 255, 255, 0.14);
+}
+
+.cb-results__tag {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.cb-results--estimate .cb-results__tag {
+  color: var(--text-dim);
+}
+
+.cb-facts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.cb-facts div {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.35rem;
+}
+
+.cb-facts dd {
+  margin: 0;
   font-family: var(--font-display);
   font-size: clamp(3rem, 6vw, 4.75rem);
   font-weight: 700;
@@ -6899,33 +7002,79 @@ button.pp-btn:active {
   color: var(--accent);
 }
 
-.cb-results__num small {
-  font-size: 0.4em;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-}
-
-.cb-results h3 {
-  margin: 0;
-  font-size: 1.15rem;
-  line-height: 1.25;
-  color: var(--text);
-  text-wrap: balance;
-}
-
-.cb-results p {
-  margin: 0;
+.cb-facts dt {
   font-size: 0.95rem;
-  line-height: 1.5;
   color: var(--text-dim);
 }
 
-.cb-results__tag {
-  margin-top: auto;
-  padding: 0.2rem 0.55rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 99px;
+.cb-results__lead {
+  max-width: 44rem;
+  margin: 2rem 0 0;
+  font-size: 1.15rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.cb-results__lead strong {
+  color: var(--accent);
+}
+
+.cb-before {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+
+.cb-before li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.25rem 1.5rem;
+  align-items: baseline;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cb-before__task {
+  color: var(--text);
+  font-family: var(--font-display);
+}
+
+.cb-before__was {
+  color: var(--text-dim);
+}
+
+/* column heads say which side is which, so "before" needs no strikethrough to read as old */
+.cb-before .cb-before__head {
+  padding-block: 0 0.5rem;
   font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.cb-before .cb-before__head span:last-child {
+  color: var(--accent);
+}
+
+.cb-before__now {
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.cb-before__now::before {
+  content: '→ ';
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+.cb-results__note {
+  max-width: 44rem;
+  margin: 1.5rem 0 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
   color: var(--text-dim);
 }
 
@@ -6937,15 +7086,49 @@ button.pp-btn:active {
   color: var(--text-dim);
 }
 
-@media (max-width: 1024px) {
-  .cb-results {
+@media (max-width: 700px) {
+  .cb-facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cb-before li {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .cb-before__task {
+    grid-column: 1 / -1;
+  }
+
+  .cb-before .cb-before__head span:first-child {
+    display: none;
   }
 }
 
+/* the one line of outcome that opens Vivatech's press list */
+.featured-lead {
+  max-width: 44rem;
+  margin: -0.5rem 0 1.5rem;
+  font-size: 1.1rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+/* phone: the home nav keeps the three links a visitor jumps to - Projects, Contact and the CV.
+   About and Skills are the next two screens down anyway. */
 @media (max-width: 560px) {
-  .cb-results {
-    grid-template-columns: minmax(0, 1fr);
+  .nav nav a[href="#about"],
+  .nav nav a[href="#skills"] {
+    display: none;
+  }
+}
+
+/* phone: role, timeline and status in the same two-column grid on every project page, so the
+   hero does not stack three rows on one page and two columns on another */
+@media (max-width: 560px) {
+  .project-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 1.5rem;
   }
 }
 

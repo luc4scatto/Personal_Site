@@ -36,6 +36,38 @@ export function initCompanyBrainDemo(chat) {
   let run = { cancelled: true };
   let current = panels.find((p) => p.classList.contains('is-on'));
 
+  // every scene keeps the height of the tallest one, so switching scenes never moves the page
+  // below the chat (a phone read it as a layout shift of 0.19). A scene's steps are in the DOM from
+  // the start, only faded, so each panel's natural height is its finished height.
+  let evenWidth = 0;
+  function evenOut() {
+    if (chat.offsetWidth === evenWidth) return;
+    evenWidth = chat.offsetWidth;
+    panels.forEach((p) => (p.style.minHeight = ''));
+    // while a scene plays, the typing dots sit in the panel as one more row: measure with them in
+    const dots = document.createElement('p');
+    dots.className = 'cb-msg cb-msg--bot cb-typing';
+    dots.innerHTML = '<i></i><i></i><i></i>';
+    const tallest = Math.max(
+      ...panels.map((p) => {
+        const was = p.style.display;
+        p.style.display = 'flex';
+        p.append(dots);
+        const h = p.offsetHeight;
+        dots.remove();
+        p.style.display = was;
+        return h;
+      }),
+    );
+    panels.forEach((p) => (p.style.minHeight = `${tallest}px`));
+  }
+  evenOut();
+  addEventListener('resize', evenOut);
+  document.fonts?.ready.then(() => {
+    evenWidth = 0;
+    evenOut();
+  });
+
   // light one stage of the path; no argument clears it
   function light(name) {
     stages.forEach((s) => s.classList.toggle('is-lit', s.dataset.stage === name));

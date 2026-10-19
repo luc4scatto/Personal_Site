@@ -37,7 +37,8 @@
           <p class="hero-kicker" data-stagger data-copy="companyBrain.kicker">Work · AI assistant</p>
           <h1 data-stagger>Company <span class="accent">Brain</span></h1>
           <p class="cb-pitch" data-stagger>Ask about a product in plain language and get the answer, with photos, drawings and charts, straight from the company systems.</p>
-          <dl class="cb-meta" data-stagger>
+          <p class="cb-proof" data-stagger>In the pilot, <strong>82%</strong> of 318 answers needed live company data. <a href="#results">See the results ↓</a></p>
+          <dl class="project-facts" data-stagger>
             <div><dt>Role</dt><dd>Designed and built it</dd></div>
             <div><dt>Timeline</dt><dd>2026, a few months</dd></div>
             <div><dt>Status</dt><dd>Pilot, 10 weeks, 7 users</dd></div>
@@ -84,7 +85,7 @@
           </div>
 
           <div class="pp-win cb-chat">
-            <div class="cb-chat__bar"><span class="cb-chat__dot"></span>Brain<span class="cb-chat__stage" aria-hidden="true"></span><button type="button" class="cb-chat__replay" aria-label="Replay this example">Replay</button><span class="cb-chat__ro">read-only</span></div>
+            <div class="cb-chat__bar"><span class="cb-chat__dot"></span>Brain<span class="cb-chat__stage" aria-hidden="true"></span><button type="button" class="cb-chat__replay" aria-label="Replay this example">Replay</button><span class="cb-chat__ro" title="It can read the company systems but never change them">read-only</span></div>
 
 
             <div class="cb-chat__body is-on" data-cb-panel="chart" role="tabpanel" id="cb-panel-chart" aria-labelledby="cb-tab-chart">
@@ -139,34 +140,31 @@
       <!-- results: measured pilot figures first, then the estimates, each named as such.
            General on purpose: no system names, no costs, no internal codes (see CLAUDE.md). -->
       <section id="results" class="vt-how cb-how cb-results-section">
-        <h2 data-reveal>What the pilot showed</h2>
-        <p class="vt-how__intro" data-reveal>Ten weeks, seven people in the prototyping team: 318 answers, backed by 566 queries to the company systems.</p>
-        <ol class="cb-results" data-reveal>
-          <li>
-            <span class="cb-results__num">82%</span>
-            <h3>of answers needed live company data</h3>
-            <p>They called at least one tool. Without the connections, four answers in five could not have been given at all.</p>
-          </li>
-          <li>
-            <span class="cb-results__num">90%</span>
-            <h3>less time for a full product sheet</h3>
-            <p>Three systems, three logins and 10 to 15 minutes before; about one minute now, with the differences between systems already flagged.</p>
-            <span class="cb-results__tag">Team estimate</span>
-          </li>
-          <li>
-            <span class="cb-results__num">95%</span>
-            <h3>less time for a collection report</h3>
-            <p>30 to 60 minutes of exports and spreadsheets before; a chart in one or two minutes now, ready to download.</p>
-            <span class="cb-results__tag">Team estimate</span>
-          </li>
-          <li>
-            <span class="cb-results__num">3<small> months</small></span>
-            <h3>to pay back, on cautious numbers</h3>
-            <p>Ten questions a day and two minutes saved on each, across the whole product area. Open-source stack, no licence costs.</p>
-            <span class="cb-results__tag">Business case</span>
-          </li>
-        </ol>
-        <p class="cb-results__next" data-reveal>Built to spread: one model and one tool per system, so sales, supply chain, quality, IT and HR can reuse the same platform by connecting their own sources. A measured before-and-after on more users is the next step.</p>
+        <h2 data-reveal>Pilot results</h2>
+
+        <div class="cb-results" data-reveal>
+          <p class="cb-results__tag">Measured</p>
+          <dl class="cb-facts">
+            <div><dt>weeks of pilot</dt><dd>10</dd></div>
+            <div><dt>people, one team</dt><dd>7</dd></div>
+            <div><dt>answers given</dt><dd>318</dd></div>
+            <div><dt>queries to company systems</dt><dd>566</dd></div>
+          </dl>
+          <p class="cb-results__lead"><strong>82%</strong> of the answers called at least one tool: without the live connections to the company systems, four answers in five could not have been given at all.</p>
+        </div>
+
+        <div class="cb-results cb-results--estimate" data-reveal>
+          <p class="cb-results__tag">Team estimates, a measured comparison is next</p>
+          <ul class="cb-before">
+            <li class="cb-before__head" aria-hidden="true"><span></span><span>Before</span><span>With the Brain</span></li>
+            <li><span class="cb-before__task">A full product sheet</span><span class="cb-before__was">10-15 min, 3 logins</span><span class="cb-before__now">about 1 min</span></li>
+            <li><span class="cb-before__task">A collection price report</span><span class="cb-before__was">30-60 min of exports</span><span class="cb-before__now">1-2 min, as a chart</span></li>
+            <li><span class="cb-before__task">Finding a standard component</span><span class="cb-before__was">5-10 min of browsing</span><span class="cb-before__now">1-2 min</span></li>
+          </ul>
+          <p class="cb-results__note">On the most cautious scenario of the business case, ten questions a day and two minutes saved on each, opening it to the whole product area pays back in about three months. The software stack is open source, with no licence costs.</p>
+        </div>
+
+        <p class="cb-results__next" data-reveal>Built to spread: one model and one tool per system, so sales, supply chain, quality, IT and HR can reuse the same platform by connecting their own sources.</p>
       </section>
 
       <section id="choices" class="vt-how cb-how cb-design">

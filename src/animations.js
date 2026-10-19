@@ -52,14 +52,16 @@ export function initAnimations() {
     (document.fonts?.ready ?? Promise.resolve()).then(run);
   }
 
-  // kicker / tagline / cta follow
+  // kicker / tagline / cta follow. On the home they wait for the masked title lines; a project
+  // page has no such lines, and there its h1 is one of these: waiting 0.45s left the page's
+  // largest text (its LCP) blank for most of a second
   gsap.from('[data-stagger]', {
     y: 40,
     opacity: 0,
     duration: 1,
     ease: 'power3.out',
     stagger: 0.08,
-    delay: 0.45,
+    delay: heroLines.length ? 0.45 : 0.05,
   });
 
   // section titles: clip reveal from the left

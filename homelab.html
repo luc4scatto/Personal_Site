@@ -35,6 +35,9 @@
       <section id="project" class="page-hero">
         <p class="hero-kicker" data-stagger data-copy="homelab.kicker">Personal · Self-hosting</p>
         <h1 data-stagger><span class="accent">Homelab</span></h1>
+        <dl class="project-facts" data-stagger>
+          <div><dt>Role</dt><dd>Designed, built and run it</dd></div><div><dt>Timeline</dt><dd>Ongoing</dd></div><div><dt>Status</dt><dd>In daily use</dd></div>
+        </dl>
       </section>
 
       <section id="description" class="project-description">
@@ -42,7 +45,7 @@
           <div class="project-description-text">
             <p data-reveal data-copy="homelab.description1">It started with something simple: a shared folder my Windows machine and my Mac could both reach, instead of shuffling files between them by hand with an external hard drive, inconvenient enough over time, that I went looking for a better way. That one NAS folder opened a door into self-hosted software, and I never really came back out.</p>
             <p data-reveal data-copy="homelab.description2">The rack is now a two-node Proxmox cluster: an HP EliteDesk 800 G5 with 32GB of RAM and a Lenovo ThinkCentre M910q with 16GB, both on added 2.5G network cards and tied together by a dedicated cluster link. Storage moved off the hosts onto a UniFi UNAS 4 with two mirrored 4TB drives. It all lives in a 3D-printed rack case: an open design I found and adapted, swapping in other printable parts until it fit what I actually needed. A JetKVM sits on top for headless remote management; BIOS access and reboots from anywhere, no monitor or keyboard needed on-site.</p>
-            <p data-reveal data-copy="homelab.description3">Every service runs in its own LXC container on Proxmox: media streaming and automation, photo backup, DNS ad-blocking, a password manager, personal finance, with Hermes for agentic workflows. Around them sits the boring part that keeps it alive: nightly deduplicated backups to Proxmox Backup Server, single sign-on with passkeys, metrics in Grafana, push alerts to my phone, automatic security patches, and remote access over Tailscale with no port open to the internet.</p>
+            <p data-reveal data-copy="homelab.description3">Every service runs in its own LXC container (a lightweight Linux box sharing the host kernel) on Proxmox: media streaming and automation, photo backup, DNS ad-blocking, a password manager, personal finance, with Hermes for agentic workflows. Around them sits the boring part that keeps it alive: nightly deduplicated backups to Proxmox Backup Server, single sign-on with passkeys, metrics in Grafana, push alerts to my phone, automatic security patches, and remote access over Tailscale with no port open to the internet.</p>
             <p data-reveal data-copy="homelab.description4">Most of what I know about networking and sysadmin work, I picked up here, one broken config at a time.</p>
           </div>
           <div class="project-description-photos" data-reveal>

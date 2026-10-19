@@ -62,6 +62,7 @@ function buildChapter(host, tool) {
     const li = el('li');
     if (h.icon) li.append(icon(h.icon, 18)); // no mark in public/icons: text-only pill
     li.append(document.createTextNode(h.label));
+    if (h.title) li.title = h.title;
     highlights.append(li);
   });
 
@@ -74,6 +75,9 @@ function buildChapter(host, tool) {
     bullets,
     el('p', 'pp-tool__label', 'The interesting part'),
     el('p', 'pp-tool__idea', rich(tool.idea)),
+    ...(tool.result
+      ? [el('p', 'pp-tool__label', 'What changed'), el('p', 'pp-tool__result', rich(tool.result))]
+      : []),
     Object.assign(el('a', 'pp-tool__top', '\u2191 All five tools'), { href: '#tools' }),
   );
 }
