@@ -3,7 +3,7 @@
 // small packet along a curve to the answer card on the right, and the matching source pill on
 // the card lights up. The card is what the Brain returns: a heading, a line of text, a chart
 // and the systems it came from. Canvas 2D, no deps. Decorative: the canvas is aria-hidden,
-// reduced-motion gets one still frame.
+// reduced-motion gets one still frame, everyone else a pause button.
 
 const ORANGE = '#ff6a13';
 const BLUE = '#5c8dff';
@@ -37,6 +37,7 @@ export function initSourcesGraph(canvas) {
   let scale = 1;
   let raf = 0;
   let visible = true;
+  let userPaused = false;
   let start = performance.now() / 1000;
 
   const px = (x) => w / 2 + x * scale;
@@ -163,30 +164,47 @@ export function initSourcesGraph(canvas) {
       { text: 'Catalog', color: BLUE },
       { text: 'Drawings', color: TEAL },
     ];
-    // the three pills share the card's width, so the type gives way before the pills do
+    // the pills share the card's width: the type gives way first, and when even the smallest
+    // type will not fit on one row (a phone), they wrap onto a second row above the first
     let fs = Math.max(10, scale * 0.046);
-    const span = () => {
+    const inner = cw - pad * 2;
+    const widths = () => {
       ctx.font = font(fs);
-      return tags.reduce((n, tag) => n + ctx.measureText(tag.text).width + 14 + 5, -5);
+      return tags.map((tag) => ctx.measureText(tag.text).width + 14);
     };
-    while (span() > cw - pad * 2 && fs > 8) fs -= 0.5;
-    const th = 0.085 * scale;
-    let tx = cx + pad;
-    const ty = cy + ch - pad - th;
+    const total = () => widths().reduce((n, w) => n + w + 5, -5);
+    while (total() > inner && fs > 9) fs -= 0.5;
+    const ws = widths();
+    const rows = [[]];
+    let rowW = 0;
     tags.forEach((tag, i) => {
-      const tw = ctx.measureText(tag.text).width + 14;
-      const on = 0.35 + lit[i] * 0.65;
-      ctx.strokeStyle = tag.color;
-      ctx.fillStyle = tag.color;
-      ctx.beginPath();
-      ctx.roundRect(tx, ty, tw, th, th / 2);
-      ctx.globalAlpha = on * (0.1 + lit[i] * 0.25);
-      ctx.fill();
-      ctx.globalAlpha = on;
-      ctx.stroke();
-      ctx.fillStyle = INK;
-      ctx.fillText(tag.text, tx + 7, ty + th / 2 + 0.5);
-      tx += tw + 5;
+      if (rowW && rowW + 5 + ws[i] > inner) {
+        rows.push([]);
+        rowW = 0;
+      }
+      rows[rows.length - 1].push(i);
+      rowW += (rowW ? 5 : 0) + ws[i];
+    });
+    const th = 0.085 * scale;
+    rows.forEach((row, r) => {
+      let tx = cx + pad;
+      const ty = cy + ch - pad - th - (rows.length - 1 - r) * (th + 5);
+      row.forEach((i) => {
+        const tag = tags[i];
+        const tw = ws[i];
+        const on = 0.35 + lit[i] * 0.65;
+        ctx.strokeStyle = tag.color;
+        ctx.fillStyle = tag.color;
+        ctx.beginPath();
+        ctx.roundRect(tx, ty, tw, th, th / 2);
+        ctx.globalAlpha = on * (0.1 + lit[i] * 0.25);
+        ctx.fill();
+        ctx.globalAlpha = on;
+        ctx.stroke();
+        ctx.fillStyle = INK;
+        ctx.fillText(tag.text, tx + 7, ty + th / 2 + 0.5);
+        tx += tw + 5;
+      });
     });
     ctx.globalAlpha = 1;
 
@@ -229,7 +247,7 @@ export function initSourcesGraph(canvas) {
     raf = requestAnimationFrame(frame);
   }
   const run = () => {
-    if (raf || reduced || !visible || document.hidden) return;
+    if (raf || reduced || userPaused || !visible || document.hidden) return;
     start = performance.now() / 1000;
     raf = requestAnimationFrame(frame);
   };
@@ -237,6 +255,17 @@ export function initSourcesGraph(canvas) {
     cancelAnimationFrame(raf);
     raf = 0;
   };
+
+  // WCAG 2.2.2: motion that runs past 5s needs a way to stop it. Pausing leaves the frame as it is.
+  const toggle = canvas.parentElement.querySelector('.cb-brain__pause');
+  if (toggle) {
+    toggle.hidden = reduced;
+    toggle.addEventListener('click', () => {
+      userPaused = !userPaused;
+      toggle.textContent = userPaused ? 'Play animation' : 'Pause animation';
+      userPaused ? halt() : run();
+    });
+  }
 
   new ResizeObserver(resize).observe(canvas);
   new IntersectionObserver(([e]) => {

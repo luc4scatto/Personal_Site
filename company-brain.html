@@ -25,7 +25,7 @@
     <header class="nav">
       <a class="nav-logo" href="index.html">LS</a>
       <nav>
-        <a href="index.html#projects">← Back</a>
+        <a href="index.html#projects">← Projects</a>
         <a href="index.html#contact">Contact</a>
       </nav>
       <div class="scroll-progress" aria-hidden="true"></div>
@@ -36,6 +36,7 @@
         <div class="cb-hero__text">
           <p class="hero-kicker" data-stagger data-copy="companyBrain.kicker">Internal project</p>
           <h1 data-stagger>Company <span class="accent">Brain</span></h1>
+          <div class="obj-stage obj-stage--corner" data-obj-model="integrated_circuit_01" aria-hidden="true"></div>
           <p class="cb-pitch" data-stagger>Ask about a product in plain language and get the answer, with photos, drawings and charts, straight from the company systems.</p>
           <dl class="cb-meta" data-stagger>
             <div><dt>Role</dt><dd>Designed and built it</dd></div>
@@ -45,6 +46,7 @@
         </div>
         <div class="cb-brain" data-reveal>
           <canvas id="sources-graph" aria-hidden="true"></canvas>
+          <button type="button" class="cb-brain__pause">Pause animation</button>
         </div>
       </section>
 
@@ -154,22 +156,19 @@
             <h3 data-copy="companyBrain.how.details.3.title">No copies of the data</h3>
             <p data-copy="companyBrain.how.details.3.text">Photos, drawings and documents are read from the original source at the moment of the question, never duplicated on the server, so what you see is always current.</p>
           </div>
-        </div>
-
-        <div class="cb-monitor">
-          <div>
-            <h3 class="cb-sub" data-reveal data-copy="companyBrain.how.monitorLabel">Monitoring</h3>
-            <p class="cb-monitor__text" data-reveal data-copy="companyBrain.how.monitor">An internal dashboard shows whether every service is up, how loaded the server is and which tools get used the most. It tells us where to invest next.</p>
+          <div class="vt-detail">
+            <h3 data-copy="companyBrain.how.monitorLabel">Monitoring</h3>
+            <p data-copy="companyBrain.how.monitor">An internal dashboard shows whether every service is up, how loaded the server is and which tools get used the most. It tells us where to invest next.</p>
           </div>
         </div>
 
       </section>
 
       <section id="retro" class="vt-how cb-how cb-retro">
-        <h2 data-reveal data-copy="companyBrain.how.retroTitle">Looking back</h2>
+        <h2 data-reveal data-copy="companyBrain.how.retroTitle">What the pilot taught me</h2>
         <div class="cb-retro__grid">
           <div>
-        <h3 class="cb-sub" data-reveal data-copy="companyBrain.how.lessonsLabel">What I learned</h3>
+        <h3 class="cb-sub cb-sub--hidden" data-copy="companyBrain.how.lessonsLabel">What I learned</h3>
         <div class="vt-details cb-lessons" data-reveal>
           <div class="vt-detail">
             <h4 data-copy="companyBrain.how.lessons.0.title">Small and well taught beats big and alone</h4>
@@ -204,7 +203,7 @@
 
       <section id="back" class="project-back">
         <a class="project-next" href="homelab.html" data-reveal>
-          <img class="project-next__thumb" src="images/homelab-rack.webp" alt="" width="1800" height="2400" loading="lazy" />
+          <img class="project-next__thumb" src="images/homelab-case.webp" alt="" width="1800" height="2400" loading="lazy" />
           <span class="project-next__text">
             <span class="project-next__title">Personal project: Homelab</span>
             <span class="project-next__hint">Next project →</span>

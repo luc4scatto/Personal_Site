@@ -28,6 +28,9 @@ export function initAnimations() {
     // inline-block conversion doesn't reflow the line mid-animation (that caused a jump)
     gsap.set(heroLines, { yPercent: 110 });
     const run = () => {
+      // the word in the headline changes every 1.8s: a screen reader gets the sentence once, as it is on load
+      const h1 = document.querySelector('.hero h1');
+      h1.setAttribute('aria-label', h1.textContent.replace(/\s+/g, ' ').trim());
       const startWordLoop = initWordCycler(document.querySelector('.hero h1 .accent'));
       gsap.to(heroLines, {
         yPercent: 0,

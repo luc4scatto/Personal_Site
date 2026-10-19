@@ -38,7 +38,7 @@ export const content = {
   },
   projects: {
     vivatech: {
-      title: 'Vivatech - Interactive Experience',
+      title: 'Vivatech Interactive Experience',
       description:
         'Real-time interactive installation built with TouchDesigner and Unreal Engine, showcased at Vivatech in Paris.',
     },
@@ -82,9 +82,9 @@ export const content = {
         { name: 'Webcam', text: '1080p, one hand and the head' },
         {
           name: 'TouchDesigner',
-          text: 'MediaPipe hand and pose tracking, gestures built in CHOPs',
+          text: 'MediaPipe hand and pose tracking, gestures built from live data channels (CHOPs)',
         },
-        { name: 'OSC', text: 'One message per gesture channel, over localhost' },
+        { name: 'OSC', text: 'A lightweight message protocol: one message per gesture channel, over localhost' },
         { name: 'Unreal Engine 5.7', text: 'Levels, sequences and UI driven by those messages' },
       ],
       journeyLabel: "The visitor's path",
@@ -177,7 +177,7 @@ export const content = {
       monitorLabel: 'Monitoring',
       monitor:
         'An internal dashboard shows whether every service is up, how loaded the server is and which tools get used the most. It tells us where to invest next.',
-      retroTitle: 'Looking back',
+      retroTitle: 'What the pilot taught me',
       lessonsLabel: 'What I learned',
       lessons: [
         {
@@ -413,7 +413,7 @@ export const content = {
           'Seasonal catalogues were assembled by hand in PowerPoint, copying product data from one system, images from another and marketing copy from a third.',
         bullets: [
           'Pick a release and a brand, get a finished deck',
-          'Merges product data, PIM attributes and DAM images for every SKU',
+          'Merges product data, attributes from the product database (PIM) and images from the media library (DAM) for every SKU',
           'Places a hero image and up to seven variant groups per slide',
           'Gives variant families their own slides and flags prescription-ready models',
         ],

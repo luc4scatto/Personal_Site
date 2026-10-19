@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vivatech - Interactive Experience · Luca Scattolin</title>
+    <title>Vivatech Interactive Experience · Luca Scattolin</title>
     <meta name="description" content="Real-time interactive experience for Thélios at the LVMH Dream Gallery, Vivatech Paris - built with TouchDesigner and Unreal Engine." />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -12,11 +12,11 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Luca Scattolin" />
     <meta property="og:url" content="https://lucascattolin.com/vivatech.html" />
-    <meta property="og:title" content="Vivatech - Interactive Experience · Luca Scattolin" />
+    <meta property="og:title" content="Vivatech Interactive Experience · Luca Scattolin" />
     <meta property="og:description" content="Real-time interactive experience for Thélios at the LVMH Dream Gallery, Vivatech Paris - built with TouchDesigner and Unreal Engine." />
     <meta property="og:image" content="https://lucascattolin.com/images/vivatech-10.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Vivatech - Interactive Experience · Luca Scattolin" />
+    <meta name="twitter:title" content="Vivatech Interactive Experience · Luca Scattolin" />
     <meta name="twitter:description" content="Real-time interactive experience for Thélios at the LVMH Dream Gallery, Vivatech Paris - built with TouchDesigner and Unreal Engine." />
     <meta name="twitter:image" content="https://lucascattolin.com/images/vivatech-10.jpg" />
   </head>
@@ -25,17 +25,18 @@
     <header class="nav">
       <a class="nav-logo" href="index.html">LS</a>
       <nav>
-        <a href="index.html#projects">← Back</a>
+        <a href="index.html#projects">← Projects</a>
         <a href="index.html#contact">Contact</a>
       </nav>
       <div class="scroll-progress" aria-hidden="true"></div>
     </header>
 
     <main id="main-content">
-      <section id="project" class="page-hero">
+      <section id="project" class="page-hero page-hero--obj">
         <p class="hero-kicker" data-stagger data-copy="vivatech.kicker">Project</p>
-        <h1 data-stagger>Vivatech -<br />Interactive <span class="accent">Experience</span></h1>
-        <img class="project-cover" src="images/1782142834983.webp" alt="Thélios booth at the LVMH Dream Gallery, Vivatech Paris" data-stagger />
+        <h1 data-stagger>Vivatech<br />Interactive <span class="accent">Experience</span></h1>
+        <div class="obj-stage" data-obj-model="sunglasses_04" aria-hidden="true"></div>
+        <img class="project-cover" src="images/1782142834983.webp" alt="Thélios booth at the LVMH Dream Gallery, Vivatech Paris" width="2048" height="1365" data-stagger />
       </section>
 
       <section id="description" class="project-description">
@@ -86,14 +87,14 @@
               <img class="vt-flow__icon" src="icons/touchdesigner.svg" alt="" width="28" height="28" loading="lazy" />
               <span class="vt-flow__name" data-copy="vivatech.how.flow.1.name">TouchDesigner</span>
             </span>
-            <span class="vt-flow__text" data-copy="vivatech.how.flow.1.text">MediaPipe hand and pose tracking, gestures built in CHOPs</span>
+            <span class="vt-flow__text" data-copy="vivatech.how.flow.1.text">MediaPipe hand and pose tracking, gestures built from live data channels (CHOPs)</span>
           </li>
           <li class="vt-flow__node">
             <span class="vt-flow__head">
               <img class="vt-flow__icon" src="icons/osc.svg" alt="" width="28" height="28" loading="lazy" />
               <span class="vt-flow__name" data-copy="vivatech.how.flow.2.name">OSC</span>
             </span>
-            <span class="vt-flow__text" data-copy="vivatech.how.flow.2.text">One message per gesture channel, over localhost</span>
+            <span class="vt-flow__text" data-copy="vivatech.how.flow.2.text">A lightweight message protocol: one message per gesture channel, over localhost</span>
           </li>
           <li class="vt-flow__node">
             <span class="vt-flow__head">

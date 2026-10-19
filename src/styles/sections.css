@@ -2446,6 +2446,90 @@
   padding-top: calc(var(--space) + 4rem);
 }
 
+/* a project page can carry one object of its own beside the title, the way the home is made of
+   the maker's own gear: the title and kicker on the left, the object turning on the right, and
+   anything after them (a cover) across the full width */
+.page-hero--obj {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 18rem);
+  column-gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: center;
+}
+
+.page-hero--obj > :not(.obj-stage) {
+  grid-column: 1;
+}
+
+.page-hero--obj > .project-cover {
+  grid-column: 1 / -1;
+}
+
+.obj-stage {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  aspect-ratio: 1;
+  width: 100%;
+  opacity: 0;
+  transition: opacity var(--duration-slow, 0.8s) var(--ease-out);
+}
+
+.obj-stage.is-ready {
+  opacity: 1;
+}
+
+.obj-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  /* vertical scroll stays with the page; only a sideways drag turns the object */
+  touch-action: pan-y;
+}
+
+.obj-stage canvas.is-grabbed {
+  cursor: grabbing;
+}
+
+/* Company Brain already has its picture on the right, so its object is a small one that sits at
+   the corner of the title, and drops under it on a narrow screen */
+.cb-hero__text {
+  position: relative;
+}
+
+.obj-stage--corner {
+  position: absolute;
+  top: -0.5rem;
+  right: 0;
+  width: clamp(6rem, 9vw, 7.5rem);
+}
+
+@media (max-width: 860px) {
+  .obj-stage--corner {
+    position: static;
+    width: 7.5rem;
+    margin: 0.25rem 0 1rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .page-hero--obj {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .obj-stage {
+    grid-column: 1;
+    grid-row: auto;
+    aspect-ratio: 16 / 10;
+    margin: 0.5rem 0 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .obj-stage {
+    transition: none;
+  }
+}
+
 /* homelab.html's content is diagrams-and-text, thinner than vivatech's cover
    photo/video/gallery sections — the shared --space rhythm (a full dose on
    both sides of every seam) compounds into dead space with nothing to bridge
@@ -2461,6 +2545,22 @@
 .cb-page #project,
 .cb-page #description {
   padding-bottom: calc(var(--space) * 0.4);
+}
+
+/* the same trailing trim for the sections that follow, so the seams between them vary:
+   a full breath into a new idea (the demo, the retrospective), a short one between related
+   blocks (design choices) and between the five tools. */
+.cb-page #demo,
+.cb-page #choices {
+  padding-bottom: calc(var(--space) * 0.5);
+}
+
+.cb-page #retro {
+  padding-bottom: calc(var(--space) * 0.7);
+}
+
+.pp-page .pp-tool {
+  padding-block: calc(var(--space) * 0.6);
 }
 
 /* no cover photo between title and intro on these pages, so the intro is the
@@ -2483,6 +2583,9 @@
 
 .project-cover {
   width: 100%;
+  /* explicit height:auto beats the img's height="" attribute (a low-specificity presentational
+     hint), so aspect-ratio, not the attribute, sizes the box */
+  height: auto;
   aspect-ratio: 21 / 9;
   object-fit: cover;
   border-radius: 1rem;
@@ -2671,8 +2774,37 @@ p.project-specs__kicker {
   left: 100%;
   top: 50%;
   width: var(--flow-gap);
-  height: 1px;
-  background: color-mix(in srgb, var(--accent) 45%, transparent);
+  height: 2px;
+  margin-top: -1px;
+  /* the wire is visible at rest; a short bright pulse runs along it, one node after the other,
+     the way a gesture travels down the chain (webcam, TouchDesigner, OSC, Unreal) */
+  background:
+    linear-gradient(90deg, transparent, var(--accent), transparent) no-repeat -60% 0 / 60% 100%,
+    color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .vt-flow__node:not(:last-child)::after {
+    animation: vt-wire 2.4s var(--ease-out) infinite;
+  }
+
+  .vt-flow__node:nth-child(2)::after {
+    animation-delay: 0.6s;
+  }
+
+  .vt-flow__node:nth-child(3)::after {
+    animation-delay: 1.2s;
+  }
+}
+
+@keyframes vt-wire {
+  0% {
+    background-position: -60% 0, 0 0;
+  }
+  45%,
+  100% {
+    background-position: 160% 0, 0 0;
+  }
 }
 
 .vt-flow__node:not(:last-child)::before {
@@ -2736,6 +2868,16 @@ p.project-specs__kicker {
   margin-bottom: 0.5rem;
 }
 
+@keyframes vt-wire-v {
+  0% {
+    background-position: 0 -60%, 0 0;
+  }
+  45%,
+  100% {
+    background-position: 0 160%, 0 0;
+  }
+}
+
 @media (max-width: 1024px) {
   .vt-steps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2753,8 +2895,13 @@ p.project-specs__kicker {
   .vt-flow__node:not(:last-child)::after {
     left: 1.75rem;
     top: 100%;
-    width: 1px;
+    width: 2px;
     height: var(--flow-gap);
+    margin: 0 0 0 -1px;
+    background:
+      linear-gradient(180deg, transparent, var(--accent), transparent) no-repeat 0 -60% / 100% 60%,
+      color-mix(in srgb, var(--accent) 55%, transparent);
+    animation-name: vt-wire-v;
   }
 
   .vt-flow__node:not(:last-child)::before {
@@ -3328,6 +3475,27 @@ p.project-specs__kicker {
   height: 14px;
 }
 
+/* touch: the close X is 28px and the service rows 30px, under the 44px a finger needs. The hit
+   area grows with a pseudo-element, so the look and the layout of the tree do not change. */
+@media (pointer: coarse) {
+  .hd-card__close,
+  .hd-leaf__button {
+    position: relative;
+  }
+
+  .hd-card__close::after {
+    content: '';
+    position: absolute;
+    inset: -0.5rem;
+  }
+
+  .hd-leaf__button::after {
+    content: '';
+    position: absolute;
+    inset: -0.45rem 0;
+  }
+}
+
 /* Only from here up is there room beside the tree for the card to live in, and
    the number is arithmetic, not a device: the tree is ~473px at this scale, the
    gutter 56, the card 448, the section's own padding 2x64 — which needs about
@@ -3633,7 +3801,7 @@ p.project-specs__kicker {
   margin: 1rem auto 0;
   padding-top: 1rem;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--text-dim);
 }
 
@@ -5271,27 +5439,29 @@ button.pp-btn:active {
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  /* the pills are the chapter's subtitle now: tight to the h2, a clear
+  gap: 0.4rem 0.75rem;
+  /* the labels are the chapter's subtitle now: tight to the h2, a clear
      break before the body */
   margin: -0.5rem 0 2.25rem; /* collapses with the label's 1.5rem top, so it must beat it */
-}
-
-.pp-tool__highlights li:has(img) {
-  padding-left: 0.55rem;
 }
 
 .pp-tool__highlights li {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-  background: color-mix(in srgb, var(--accent) 7%, transparent);
   font-family: var(--font-display);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text);
+}
+
+/* plain labels, not buttons: nothing here is clickable, so no border or fill; a dot between */
+.pp-tool__highlights li + li::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -5611,6 +5781,34 @@ button.pp-btn:active {
 /* company-brain.html: the graph canvas fills its column; the systems and the answer card are drawn in JS */
 .cb-brain {
   min-width: 0;
+}
+
+/* the pause control for the looping canvas: a quiet pill under it, 44px to hit on touch */
+.cb-brain__pause {
+  display: block;
+  margin: 0.25rem 0 0 auto;
+  min-height: 44px;
+  padding: 0 0.9rem;
+  border: 0;
+  background: none;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.cb-brain__pause:hover {
+  color: var(--text);
+}
+
+.cb-brain__pause:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.cb-brain__pause[hidden] {
+  display: none;
 }
 
 .cb-brain canvas {
@@ -6052,7 +6250,19 @@ button.pp-btn:active {
   }
 }
 
-/* under "Looking back" the two column heads are labels of that chapter, not rivals to it */
+/* the lessons head stays for screen readers (it keeps h2 > h3 > h4 in order) but the chapter title
+   already says it, so it is not drawn */
+.cb-retro .cb-sub--hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* under "What the pilot taught me" the two column heads are labels of that chapter, not rivals to it */
 .cb-retro .cb-sub {
   margin-bottom: 1.5rem;
   font-size: clamp(1.5rem, 2.4vw, 1.9rem);
@@ -6618,5 +6828,105 @@ button.pp-btn:active {
 @media (max-width: 900px) {
   .hw-scroll-hint {
     display: block;
+  }
+}
+
+/* the tool rail (pipelineProjects.js): in the left gutter, only on screens wide enough to have
+   one, and only while a chapter is under the reader's eye. A name opens on hover or focus. */
+.pp-rail {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .pp-rail {
+    position: fixed;
+    top: 50%;
+    left: 1.25rem;
+    z-index: 5;
+    display: block;
+    transform: translateY(-50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+
+  .pp-rail.is-shown {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .pp-rail ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .pp-rail a {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    background: var(--bg);
+    opacity: 0.55;
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      border-color var(--duration-fast) var(--ease-out);
+  }
+
+  .pp-rail a:hover,
+  .pp-rail a:focus-visible,
+  .pp-rail a.is-on {
+    opacity: 1;
+  }
+
+  .pp-rail a.is-on {
+    border-color: var(--accent);
+  }
+
+  .pp-rail a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .pp-rail img {
+    display: block;
+  }
+
+  .pp-rail__name {
+    position: absolute;
+    left: calc(100% + 0.6rem);
+    top: 50%;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.4rem;
+    background: var(--bg);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-4px, -50%);
+    transition:
+      opacity var(--duration-fast) var(--ease-out),
+      transform var(--duration-fast) var(--ease-out);
+  }
+
+  .pp-rail a:hover .pp-rail__name,
+  .pp-rail a:focus-visible .pp-rail__name {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pp-rail,
+  .pp-rail a,
+  .pp-rail__name {
+    transition: none;
   }
 }

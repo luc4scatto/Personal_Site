@@ -219,6 +219,45 @@ function buildCollage(host) {
   });
 }
 
+// A rail down the left edge, once the reader is inside the chapters: the five tools stay one
+// click away instead of back up at the index, and the one being read is lit. Wide screens only
+// (it lives in the gutter), and it is a plain list of links, so it needs no keyboard path.
+function buildRail(tools) {
+  const nav = el('nav', 'pp-rail');
+  nav.setAttribute('aria-label', 'Tools');
+  const list = el('ul');
+  const links = new Map();
+  tools.forEach((tool) => {
+    const a = el('a');
+    a.href = `#${tool.id}`;
+    const name = rich(tool.name);
+    const plain = el('span', 'pp-rail__name', name);
+    a.append(icon(tool.icon, 22), plain);
+    a.setAttribute('aria-label', plain.textContent);
+    const li = el('li');
+    li.append(a);
+    list.append(li);
+    links.set(tool.id, a);
+  });
+  nav.append(list);
+  document.body.append(nav);
+
+  const seen = new Set();
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => (e.isIntersecting ? seen.add(e.target.id) : seen.delete(e.target.id)));
+      links.forEach((a, id) => a.classList.toggle('is-on', seen.has(id)));
+      nav.classList.toggle('is-shown', seen.size > 0);
+    },
+    // a thin band across the middle of the screen: the chapter under the reader's eye
+    { rootMargin: '-45% 0px -45% 0px' },
+  );
+  tools.forEach((tool) => {
+    const sec = document.getElementById(tool.id);
+    if (sec) io.observe(sec);
+  });
+}
+
 export function initPipelineProjects() {
   document.querySelectorAll('.pp-win').forEach(initMockup);
   const collage = document.querySelector('.pp-collage');
@@ -226,6 +265,7 @@ export function initPipelineProjects() {
   const { tools } = content.pipelineProjects;
   const index = document.querySelector('#pp-index');
   if (index) buildIndex(index, tools);
+  buildRail(tools);
   tools.forEach((tool) => {
     const host = document.querySelector(`.pp-tool__text[data-tool="${tool.id}"]`);
     if (host) buildChapter(host, tool);

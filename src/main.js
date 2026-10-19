@@ -532,6 +532,11 @@ if (DRAWER_MODE) {
     });
 }
 
+// project pages: one 3D object next to the title (vivatech.html, pipeline-projects.html)
+document.querySelectorAll('[data-obj-model]').forEach((stage) => {
+  import('./heroObject.js').then((m) => m.initHeroObject(stage)).catch(() => stage.remove());
+});
+
 // company brain: company systems flowing into one answer, next to the intro (company-brain.html only)
 const sourcesGraph = document.getElementById('sources-graph');
 if (sourcesGraph) {

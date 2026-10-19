@@ -273,6 +273,32 @@ section {
   cursor: pointer;
 }
 
+/* phone: the banner sits over the first screen, so it gives back what it can - tighter text and
+   padding, buttons on one row, and both buttons still 44px tall to tap (WCAG 2.5.8 floor is 24) */
+@media (max-width: 700px) {
+  .cookie-banner {
+    gap: 0.25rem;
+    padding: 0.6rem var(--pad-x) 0.4rem;
+  }
+
+  .cookie-banner p {
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  .cookie-banner__actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .cookie-banner__decline,
+  .cookie-banner__accept {
+    min-height: 44px;
+    padding-inline: 1rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
