@@ -40,6 +40,12 @@ function buildIndex(list, tools) {
       el('span', 'pp-index__name', rich(tool.name)),
       el('span', 'pp-index__label', 'Problem'),
       el('span', 'pp-index__problem', rich(tool.teaser)),
+      ...(tool.outcome
+        ? [
+            el('span', 'pp-index__label', 'What changed'),
+            el('span', 'pp-index__problem pp-index__outcome', rich(tool.outcome)),
+          ]
+        : []),
       // arrow down: the chapter is further down this page, not another page
       el(
         'span',
@@ -53,23 +59,31 @@ function buildIndex(list, tools) {
   });
 }
 
+// phone only (CSS): a block folds behind a button, so five chapters do not run to fifteen
+// screens - the outcome, the problem and the mockup carry the chapter, the detail is one tap
+// away. On wider screens the button is hidden and the block always shows.
+function fold(block, id, closed, opened) {
+  const btn = el('button', 'pp-tool__more', closed);
+  btn.type = 'button';
+  btn.setAttribute('aria-expanded', 'false');
+  block.id = id;
+  block.classList.add('pp-fold');
+  btn.setAttribute('aria-controls', id);
+  btn.addEventListener('click', () => {
+    const open = block.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', open);
+    btn.textContent = open ? opened : closed;
+  });
+  return btn;
+}
+
 function buildChapter(host, tool) {
   const bullets = el('ul', 'pp-tool__bullets');
   tool.bullets.forEach((b) => bullets.append(el('li', null, rich(b))));
-  // phone only (CSS): the list folds behind a button, so five chapters do not run to fifteen
-  // screens - problem, mockup and what changed carry the chapter, the detail is one tap away.
-  // On wider screens the button is hidden and the list always shows.
   const n = tool.bullets.length;
-  const btn = el('button', 'pp-tool__more', `Show all ${n} points`);
-  btn.type = 'button';
-  btn.setAttribute('aria-expanded', 'false');
-  bullets.id = `${tool.id}-points`;
-  btn.setAttribute('aria-controls', bullets.id);
-  btn.addEventListener('click', () => {
-    const open = bullets.classList.toggle('is-open');
-    btn.setAttribute('aria-expanded', open);
-    btn.textContent = open ? 'Hide the points' : `Show all ${n} points`;
-  });
+  const moreBullets = fold(bullets, `${tool.id}-points`, `Show all ${n} points`, 'Hide the points');
+  const idea = el('p', 'pp-tool__idea', rich(tool.idea));
+  const moreIdea = fold(idea, `${tool.id}-idea`, 'Read how it works', 'Hide it');
 
   const highlights = el('ul', 'pp-tool__highlights');
   (tool.highlights || []).forEach((h) => {
@@ -83,16 +97,18 @@ function buildChapter(host, tool) {
   host.append(
     el('h2', null, rich(tool.name)),
     ...(tool.highlights ? [highlights] : []),
-    el('p', 'pp-tool__label', 'The problem'),
-    el('p', 'pp-tool__problem', rich(tool.problem)),
-    el('p', 'pp-tool__label', 'What it does'),
-    btn,
-    bullets,
-    el('p', 'pp-tool__label', 'The interesting part'),
-    el('p', 'pp-tool__idea', rich(tool.idea)),
+    // the outcome first: a reader with a minute per page should leave with it
     ...(tool.result
       ? [el('p', 'pp-tool__label', 'What changed'), el('p', 'pp-tool__result', rich(tool.result))]
       : []),
+    el('p', 'pp-tool__label', 'The problem'),
+    el('p', 'pp-tool__problem', rich(tool.problem)),
+    el('p', 'pp-tool__label', 'What it does'),
+    moreBullets,
+    bullets,
+    el('p', 'pp-tool__label', 'The interesting part'),
+    moreIdea,
+    idea,
     Object.assign(el('a', 'pp-tool__top', '\u2191 All five tools'), { href: '#tools' }),
   );
 }

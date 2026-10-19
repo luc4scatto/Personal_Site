@@ -405,13 +405,13 @@
   bottom: calc(2.2rem + var(--cookie-banner-h, 0px));
   right: 25%;
   transform: translateX(50%);
-  /* quieter than the skills-wall hint on purpose — decorative feature, not the
-     professional signal the skills wall carries, so it doesn't animate for attention */
+  /* quieter than the skills-wall hint on purpose (no animation), but full strength: it is the
+     only thing that says the hero can be clicked */
   color: var(--text-dim);
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   letter-spacing: 0.04em;
-  opacity: 0.75;
+  opacity: 1;
   transition: opacity 0.4s;
 }
 
@@ -2161,18 +2161,12 @@
   }
 }
 
+/* every width: on desktop the fourth card hides behind the arrow, the count says it is there */
 .projects-count {
-  display: none;
   margin-top: 1rem;
   color: var(--text-dim);
   font-size: 0.9rem;
   font-variant-numeric: tabular-nums;
-}
-
-@media (max-width: 640px) {
-  .projects-count {
-    display: block;
-  }
 }
 
 .card {
@@ -2493,6 +2487,12 @@
 .cb-page #project,
 .cb-page #description {
   padding-bottom: calc(var(--space) * 0.4);
+}
+
+/* vivatech keeps a fuller rhythm than the thinner pages, since photos and video fill its seams,
+   but not two full doses back to back: the void after "Featured on" read as the page ending */
+.vt-page main > section:not(#back) {
+  padding-bottom: calc(var(--space) * 0.55);
 }
 
 /* the same trailing trim for the sections that follow, so the seams between them vary:
@@ -3023,6 +3023,47 @@ p.project-specs__kicker {
   color: var(--text-dim);
 }
 
+/* every project one tap away from the end of any of them, not only the next one */
+.project-all {
+  margin-bottom: 1.25rem;
+}
+
+.project-all__label {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.project-all ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+}
+
+.project-all a {
+  display: inline-block;
+  padding-block: 0.6rem;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--text) 30%, transparent);
+  text-underline-offset: 0.25em;
+}
+
+.project-all a:hover {
+  color: var(--accent);
+}
+
+.project-all a[aria-current='page'] {
+  color: var(--accent);
+  text-decoration: none;
+}
+
 .project-back__aside p a {
   color: var(--text);
   text-decoration: underline;
@@ -3187,6 +3228,22 @@ p.project-specs__kicker {
 .hd-hub .hd-icon {
   width: var(--hd-hub-icon);
   height: var(--hd-hub-icon);
+}
+
+.hd-cols {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* below 1200px the three lists are one trunk again: the joins between them are not ends */
+.hd-branches:not(:last-child) .hd-branch:last-of-type,
+.hd-branches:not(:first-child) .hd-branch:first-of-type {
+  border-left-color: var(--hd-rule);
+}
+
+.hd-branches:not(:last-child) .hd-branch:last-of-type::after,
+.hd-branches:not(:first-child) .hd-branch:first-of-type::after {
+  content: none;
 }
 
 .hd-branches,
@@ -3455,7 +3512,7 @@ p.project-specs__kicker {
 /* touch: the close X is 28px and the service rows 30px, under the 44px a finger needs. The hit
    area grows with a pseudo-element, so the look and the layout of the tree do not change. */
 @media (pointer: coarse) {
-  .hd-card__close,
+  /* the close X is already absolute in its corner: making it relative dropped it to the top left */
   .hd-leaf__button {
     position: relative;
   }
@@ -3473,40 +3530,77 @@ p.project-specs__kicker {
   }
 }
 
-/* Only from here up is there room beside the tree for the card to live in, and
-   the number is arithmetic, not a device: the tree is ~473px at this scale, the
-   gutter 56, the card 448, the section's own padding 2x64 — which needs about
-   1100px of viewport, so 1200 leaves slack. Widen the tree or the card and this
-   has to move with them, or the card runs off the right edge.
-   `top: auto` keeps the static position it already had — level with the row
-   that opened it — so nothing measures anything. The containing block is
-   .hd-branch (it is positioned, for its own connectors) whose right edge is
-   the tree's right edge, so `left: 100% + gap` lands just clear of the tree. */
+/* Wide screens: the hub on top, three trunks hanging off one bus under it, so ~25 services
+   use the width instead of one 1,400px column. The hub's card opens beside the hub; a
+   service's card unfolds inside its own column, in flow, so nothing is covered. */
 @media (min-width: 1200px) {
-  /* the card hangs out of flow, so a card opened on one of the last rows would
-     run past the tree and into the section below. Room is reserved only while
-     one is open, rather than as permanent dead space under the tree. Padding
-     sits outside the flex content box, so the hub stays centred on the branches */
   .hd-tree {
-    align-items: center;
+    --hd-col-gap: 2.5rem;
+    display: grid;
+    grid-template-columns: var(--hd-hub-size) minmax(0, 1fr);
+    column-gap: var(--hd-gap);
+    row-gap: var(--hd-gap);
+    /* bottom-aligned, so the hub's connector always spans exactly the row gap to the bus */
+    align-items: end;
   }
 
-  .hd-tree.is-focused {
-    padding-bottom: 5rem;
+  .hd-hub {
+    margin: 0;
   }
 
-  .hd-card {
+  .hd-hub::after {
+    left: 50%;
+    top: 100%;
+    width: 0;
+    height: var(--hd-gap);
+    border-top: 0;
+    border-left: 1px solid var(--hd-rule);
+  }
+
+  .hd-tree > .hd-card {
+    margin: 0;
+  }
+
+  /* the trunks start under the hub's centre */
+  .hd-cols {
+    position: relative;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--hd-col-gap);
+    align-items: start;
+    margin-left: calc(var(--hd-hub-size) / 2);
+  }
+
+  /* the bus: from the first trunk to the last one */
+  .hd-cols::before {
+    content: '';
     position: absolute;
-    left: calc(100% + var(--hd-gap));
-    top: auto;
-    width: 28rem;
-    /* The static position puts the card's top at the row's bottom; this pulls
-       it back up until the card's own mark sits level with the row's mark,
-       which is what ties the two together across the gap. Written out of the
-       same tokens the two are built from, so scaling the tree cannot silently
-       knock the alignment out: half a row, plus the card's top padding, plus
-       half the card's mark. */
-    margin: calc(-1 * (var(--hd-leaf-h) / 2 + var(--hd-card-pad) + var(--hd-card-icon) / 2)) 0 0;
+    top: 0;
+    left: 0;
+    right: calc((100% - 2 * var(--hd-col-gap)) / 3);
+    border-top: 1px solid var(--hd-rule);
+  }
+
+  /* every trunk reaches the bus at its top and stops at its last elbow */
+  .hd-branches .hd-branch:first-of-type {
+    border-left-color: var(--hd-rule);
+  }
+
+  .hd-branches .hd-branch:first-of-type::after {
+    content: none;
+  }
+
+  .hd-branches .hd-branch:last-of-type {
+    border-left-color: transparent;
+  }
+
+  .hd-branches .hd-branch:last-of-type::after {
+    content: '';
+    top: 0;
+    bottom: auto;
+    height: calc(var(--hd-branch-pad) + var(--hd-stub));
   }
 }
 
@@ -4277,7 +4371,7 @@ p.project-specs__kicker {
      label inside the stroke instead of spilling below it. */
   .hd-hub__button {
     gap: 0.25rem;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
   }
 
   .hd-hub .hd-icon {
@@ -4296,7 +4390,7 @@ p.project-specs__kicker {
     border-left: 1px solid var(--hd-rule);
   }
 
-  .hd-branches {
+  .hd-cols {
     margin-left: calc(var(--hd-hub-size) / 2);
   }
 }
@@ -4381,18 +4475,18 @@ p.project-specs__kicker {
   gap: 1rem;
 }
 
-/* each card is a subgrid over five shared rows (icon, name, label, problem,
-   link), so a two-line name pushes every card's label down with it and the
+/* each card is a subgrid over seven shared rows (icon, name, label, problem,
+   label, outcome, link), so a two-line name pushes every card's label down with it and the
    five read as one table, not five boxes that happen to sit side by side */
 .pp-index > li {
   display: grid;
-  grid-row: span 5;
+  grid-row: span 7;
   grid-template-rows: subgrid;
 }
 
 .pp-index__tile {
   display: grid;
-  grid-row: span 5;
+  grid-row: span 7;
   grid-template-rows: subgrid;
   row-gap: 0.6rem;
   justify-items: start;
@@ -4435,6 +4529,10 @@ p.project-specs__kicker {
   margin-top: -0.35rem;
   font-size: 0.9rem;
   color: var(--text-dim);
+}
+
+.pp-index__outcome {
+  color: var(--text);
 }
 
 /* says the card is a way in: a small round arrow, filled on hover */
@@ -4511,11 +4609,12 @@ p.project-specs__kicker {
   font-weight: 500;
 }
 
-/* the outcome, last and in full colour: what the reader should leave the chapter with */
+/* the outcome, first and larger: what the reader should leave the chapter with */
 .pp-tool__result {
   color: var(--text);
-  font-size: 1.05rem;
-  line-height: 1.55;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.6vw, 1.35rem);
+  line-height: 1.4;
   padding-left: 0.9rem;
   border-left: 2px solid var(--accent);
 }
@@ -4525,7 +4624,7 @@ p.project-specs__kicker {
 }
 
 @media (max-width: 700px) {
-  .pp-tool__bullets:not(.is-open) {
+  .pp-fold:not(.is-open) {
     display: none;
   }
 
@@ -4813,6 +4912,14 @@ button.pp-btn:active {
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+/* the Omniverse mockup is the one screen readers get (the others are aria-hidden), so its
+   labels keep a 12px floor; the decorative ones stay at their tool-like size */
+#omniverse .pp-field > span:first-child,
+#omniverse .pp-label,
+#omniverse .pp-table__head {
+  font-size: 0.75rem;
 }
 
 .pp-code {
@@ -6456,6 +6563,7 @@ button.pp-btn:active {
 
 /* the path a question takes: a real list, read before the demo and lit as the demo plays */
 .cb-path {
+  counter-reset: stage;
   list-style: none;
   margin: 0 0 2rem;
   padding: 0;
@@ -6475,6 +6583,15 @@ button.pp-btn:active {
 
 .cb-path li.is-lit {
   border-top-color: var(--accent);
+}
+
+/* numbered, so the four read as a sequence at rest, not only once the demo lights them */
+.cb-path__name::before {
+  counter-increment: stage;
+  content: counter(stage, decimal-leading-zero);
+  margin-right: 0.5em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 
 .cb-path__name {
@@ -6816,6 +6933,28 @@ button.pp-btn:active {
 @media (max-width: 700px) {
   .hero-tagline br {
     display: none;
+  }
+
+  /* phone: a tighter text block, so the 3D cloud starts on the first screen instead of
+     just under it. Same words, smaller steps between them. */
+  .hero {
+    gap: 1rem;
+    padding-top: 5.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem;
+    margin-top: 0.25rem;
+  }
+
+  .hero-tagline {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-top: 0;
+  }
+
+  #hero-canvas {
+    margin-top: 0.75rem;
   }
 }
 

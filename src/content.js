@@ -350,6 +350,8 @@ export const content = {
           'Steps through every model and colorway in the scene to check each look before it goes out',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
+        // the same outcome, short, for the index card
+        outcome: 'Scenes start from product data, not by hand.',
         result: 'A look-dev scene starts from product data: models, materials and renders come in from one panel instead of being set up one at a time.',
         idea: 'The whole kit is built around two open standards: **USD** for everything in the scene, from templates to models, and **OpenPBR in MaterialX** for every material, so a material is written once in a standard format that any USD or MaterialX-compatible tool can open, with no conversion. Materials are also **portable**: whenever one is created or updated, its links to textures and to its master material are saved as relative paths, so a material folder can be moved anywhere in the library and every scene that uses it keeps working.',
       },
@@ -377,6 +379,8 @@ export const content = {
           'Exports that as JSON, one file per SKU or a whole release at once, ready for the render tools downstream',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
+        // the same outcome, short, for the index card
+        outcome: 'Every model arrives cleaned and named the same way.',
         result: 'Every model leaves Maya cleaned, unwrapped and named the same way, so nothing has to be fixed again before rendering.',
         idea: "Naming comes from **product data**, not memory: the panel loads the model's component list and builds a tree, and picking a node renames the selected mesh to the standard convention, suffixes included. Every tool after it can trust the names.",
       },
@@ -401,6 +405,8 @@ export const content = {
           'Copies camera and light keyframes across sequences, then drives Movie Render Graph',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
+        // the same outcome, short, for the index card
+        outcome: 'A new colorway is one click, renders come out named.',
         result: 'A new colorway is one click instead of a rebuild, and every render comes out already named.',
         idea: 'Everything is **incremental**: the scripts compare what is already in the project with the data table and only add the difference, so a new colorway is one click, not a rebuild. When the render queue finishes, a hook renames every EXR from frame numbers to Model_Colorway.Camera.',
       },
@@ -425,6 +431,8 @@ export const content = {
           'Gives variant families their own slides and flags prescription-ready models',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
+        // the same outcome, short, for the index card
+        outcome: 'A release and a brand in, a finished deck out.',
         result: 'A seasonal catalogue is a release and a brand picked from a list, with no copying between systems.',
         idea: 'The layout is a small **engine**, not a fixed template: positions are computed from how many variant groups land on each slide, product images are auto-cropped, and one list of slide jobs decides both how many slides exist and what goes on each.',
       },
@@ -448,6 +456,8 @@ export const content = {
           'A second tab splits any finished deck into 4K PNGs, named after the model on each slide',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
+        // the same outcome, short, for the index card
+        outcome: 'Evaluation decks build themselves from product data.',
         result: 'An evaluation deck builds itself from product data, one slide per style, with nothing typed by hand.',
         idea: 'python-pptx cannot duplicate slides faithfully, so the builder drives **PowerPoint itself** to clone the template, then hands the file back to python-pptx to fill every placeholder.',
       },

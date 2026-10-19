@@ -1,17 +1,27 @@
 # TODO
 
-Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-19 (ottavo giro di critique, 24/32).
+Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-19 (nono giro di critique, 25/32).
+
+## Critique, nono giro (2026-10-19, 25/32)
+
+Dopo tutti i punti dell'ottavo giro. Voto di nuovo 25/32: il revisore ha letto il codice del modulo e ridà 4 al recupero dagli errori. Zero errori in console, nessun testo visibile sotto 12px, tocchi a 44px. Il CLS sul dev server (fino a 0,075 su Pipeline desktop) viene dal CSS iniettato da Vite in sviluppo: sulla build di produzione è 0 sulle pagine progetto e 0,014 in home. Aggiunto comunque un fallback metrico per Space Grotesk (`base.css`) per lo scambio di font su reti lente.
+
+- [ ] **P1 Pipeline ripetitivo su telefono** (`/impeccable distill`) - 10.700px; le card dell'indice ripetono problema e risultato dei capitoli. Su telefono card come soli link, mockup prima del testo, un capitolo con layout diverso.
+- [ ] **P2 Spazi vuoti su telefono** (`/impeccable adapt`) - ~300px tra skill e Projects in home; spazio lungo prima di "Design choices" su Company Brain.
+- [ ] **P2 Hero delle pagine progetto con la prova** (`/impeccable bolder`) - tutte aprono con lo stesso schema; numeri del pilota, poster del video, foto del rack più in alto. Cambio di struttura: decide Luca.
+- [ ] **P2 Banner cookie su telefono** - copre "Send message" e lo stato del modulo finché non si risponde; "Read the privacy policy" alto 26px.
+- [ ] **P3 Incoerenze** - "View project" in home contro "Next project" in fondo ai progetti; pulsante dell'hero contornato e quello del modulo pieno; orari del player a 11,5px.
 
 ## Critique, ottavo giro (2026-10-19, 24/32)
 
 Dopo i P1-P3 e i minori del settimo giro (titolo di Pipeline con l'arancio solo su "Projects", contorno tinto nel mockup di Omniverse, etichetta delle stime non più maiuscola, nota dei risultati più stretta). Il revisore dà 24/32: il punto perso è il recupero dagli errori (4 -> 3) perché non ha provato l'invio fallito, mentre le misure automatiche confermano il modulo come prima. Nella sostanza 25/32: le rifiniture sono finite, per salire servono cambi di struttura. Zero errori in console, CLS massimo 0,018, nessun overflow, tocchi a 44px.
 
-- [ ] **P1 Risultato di ogni tool in cima** (`/impeccable distill`) - "What changed" è il quarto blocco; spostarlo sotto il titolo, più grande, e metterlo anche sulle card dell'indice di Pipeline. "The interesting part" chiusa su telefono come "What it does". Su Company Brain l'82% compare nell'hero e nei risultati (voluto: l'hero rimanda ai risultati).
-- [ ] **P2 Navigazione dalle pagine progetto** (`/impeccable layout`) - CV nella nav di ogni pagina progetto; i quattro progetti elencati sopra il footer oltre a "Next project".
-- [ ] **P2 Servizi di Homelab su desktop** (`/impeccable layout`) - circa 25 servizi in un albero stretto da 1.500px: da 1024px categorie su 3-4 colonne sotto Proxmox, albero solo su telefono.
-- [ ] **P2 Nuvola 3D sotto il primo schermo su telefono** (`/impeccable adapt`) - hero più compatto o nuvola dietro il titolo a opacità bassa. Tocca l'hero della home: decide Luca.
-- [ ] **P3 Spazi tra le sezioni irregolari** - mezza schermata vuota dopo "Featured on" su Vivatech, sotto i servizi di Homelab, tra le sezioni di Company Brain.
-- [ ] **Minori** - testo del mockup di Omniverse a 10,9-11,5px (è l'unico mockup letto dagli screen reader); etichette dei nodi dei servizi di Homelab a 11,2px su telefono; contatore 1/4 anche sul carosello desktop; passi "Chat / Language model / Tools / Company systems" da numerare o collegare; hint dell'hero poco visibile.
+- [x] **P1 Risultato di ogni tool in cima** - fatto: "What changed" sotto il titolo di ogni tool, più grande; versione corta (`outcome` in `content.js`) sulle card dell'indice; "The interesting part" chiusa su telefono dietro "Read how it works". L'82% doppio su Company Brain è voluto (l'hero rimanda ai risultati).
+- [x] **P2 Navigazione dalle pagine progetto** - fatto: CV nella nav delle quattro pagine progetto; "All projects" con i quattro link (quello corrente in arancio) sopra "Get in touch".
+- [x] **P2 Servizi di Homelab su desktop** - fatto: da 1200px Proxmox in alto con la sua card accanto, tre tronchi su un bus (categorie divise in ordine e bilanciate per righe in `homelabDiagram.js`), la card di un servizio si apre nella sua colonna; albero da 1.420 a 740px. Sotto 1200px un tronco solo come prima. Sistemata anche la X della card su touch, che finiva in alto a sinistra.
+- [x] **P2 Nuvola 3D sotto il primo schermo su telefono** - fatto (scelta di Luca: hero più compatto): sotto 700px meno spazio tra le righe, sottotitolo e testo più piccoli; la nuvola parte a ~520px invece di 660.
+- [x] **P3 Spazi tra le sezioni irregolari** - fatto: Vivatech (`body.vt-page`) con padding finale delle sezioni a 0,55 di `--space`, salti da 150-200px a 110-160px come le altre pagine.
+- [x] **Minori** - fatto: etichette del mockup di Omniverse a 12px (solo quello, gli altri sono decorativi); nome di Proxmox nel diagramma a 12px su telefono; contatore del carosello anche su desktop ("1-3 / 4"); passi di Company Brain numerati 01-04; hint dell'hero a piena opacità e un po' più grande.
 
 ## Critique, settimo giro (2026-10-19, 25/32)
 

@@ -13,9 +13,8 @@ import { content } from './content.js';
 // Picking a service dims the rest of the tree and opens its card: the same
 // "focus one thing, let the rest recede" grammar as the 3D hero cloud and the
 // skills wall. The card is a single element moved to sit right after the active
-// row, which is the whole trick — on a phone that position IS the layout (it
-// unfolds in place), and on desktop CSS lifts it out of flow into the empty
-// column beside the tree without any measuring code. No breakpoint twin.
+// row, which is the whole trick: it unfolds in place, in the row's own column
+// on wide screens, with no measuring code. No breakpoint twin.
 
 // A service name maps to public/icons/services/<slug>.svg by slug. Marks whose
 // upstream file has a different name, or aren't SVG at all, are listed here.
@@ -126,8 +125,8 @@ export function initHomelabDiagram(container) {
     cardTitle.textContent = name;
     cardText.textContent = serviceInfo[name];
 
-    // the row's own <li> is the anchor; on desktop CSS takes the card out of
-    // flow from here, on a phone it simply unfolds at this spot
+    // the row's own <li> is the anchor: the card unfolds at this spot, inside the
+    // row's own column on wide screens, beside the hub when it is the hub's
     gsap.killTweensOf(card);
     gsap.killTweensOf(inner);
     button.closest('li, .hd-hub').after(card);
@@ -175,10 +174,28 @@ export function initHomelabDiagram(container) {
   const hubButton = buildRow(hub, 'hd-hub__button', 36);
   hubEl.append(hubButton);
 
-  const branches = document.createElement('ul');
-  branches.className = 'hd-branches';
+  // Categories go into three lists, split in page order and balanced by rows (a label counts
+  // about one and a half). From 1200px they stand side by side as three trunks off one bus
+  // under the hub; narrower, CSS joins them back into the single trunk.
+  const COLUMNS = 3;
+  const weight = (cat) => cat.services.length + 1.5;
+  const target = categories.reduce((sum, cat) => sum + weight(cat), 0) / COLUMNS;
+  const cols = document.createElement('div');
+  cols.className = 'hd-cols';
+  let branches = null;
+  let filled = target; // forces a first list
 
   categories.forEach((cat) => {
+    const w = weight(cat);
+    // a new list once this one is full, unless it is the last one allowed
+    if (filled + w / 2 > target && cols.children.length < COLUMNS) {
+      branches = document.createElement('ul');
+      branches.className = 'hd-branches';
+      cols.append(branches);
+      filled = 0;
+    }
+    filled += w;
+
     const branch = document.createElement('li');
     branch.className = 'hd-branch';
 
@@ -200,12 +217,11 @@ export function initHomelabDiagram(container) {
     branches.append(branch);
   });
 
-  tree.append(hubEl, branches);
+  tree.append(hubEl, cols);
   container.append(tree);
 
-  // Opens with the hub's own card already showing. Two reasons: it fills the
-  // gutter the card layout otherwise leaves empty next to a short tree (see
-  // sections.css's side-column media query), and it demonstrates the
+  // Opens with the hub's own card already showing. Two reasons: on wide screens
+  // it fills the space beside the hub, above the three columns, and it demonstrates the
   // click-a-row interaction before a visitor has to discover it themselves.
   // focusWall: false skips the wall-dim for this automatic open, so every
   // service icon still shows its real brand color until a visitor actually

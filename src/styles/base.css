@@ -38,6 +38,18 @@
   line-gap-override: 0%;
 }
 
+/* the same for Space Grotesk, measured against Arial in the browser: wider by ~7% at regular and
+   ~1% at bold (headings are 500-700, so 104%), ascent 0.98 and descent 0.29 of the em. Without it
+   the swap moved a whole project hero by 4px (CLS 0.06 on Pipeline Projects, desktop) */
+@font-face {
+  font-family: 'Space Grotesk Fallback';
+  src: local('Arial');
+  size-adjust: 104%;
+  ascent-override: 94%;
+  descent-override: 28%;
+  line-gap-override: 0%;
+}
+
 :root {
   /* palette — change the identity here */
   --bg: #0a0a0a;
@@ -50,7 +62,7 @@
   /* Space Grotesk is the voice: quirky, technical, built for size. It is a display
      face though - set at 17px across a paragraph it fights the reader. Switzer takes
      the reading roles, which is the one job the display face demonstrably cannot do. */
-  --font-display: 'Space Grotesk', sans-serif;
+  --font-display: 'Space Grotesk', 'Space Grotesk Fallback', sans-serif;
   --font-body: 'Switzer', 'Switzer Fallback', sans-serif;
 
   --space: clamp(4rem, 10vh, 8rem);

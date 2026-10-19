@@ -605,9 +605,13 @@ if (projectsScroller) {
     projectsScroller.classList.toggle('can-prev', grid.scrollLeft > 4);
     projectsScroller.classList.toggle('can-next', grid.scrollLeft < max - 4);
     // the card the snap has parked at the left edge; at the end of the row, the last one
+    // on wide screens several cards show at once, so the count names the range: "1-3 / 4"
     const step = cards[1].offsetLeft - cards[0].offsetLeft;
-    const at = grid.scrollLeft >= max - 4 ? cards.length : Math.round(grid.scrollLeft / step) + 1;
-    count.textContent = `${Math.min(at, cards.length)} / ${cards.length}`;
+    const shown = Math.max(1, Math.floor((grid.clientWidth + 8) / step));
+    const last = grid.scrollLeft >= max - 4 ? cards.length : Math.round(grid.scrollLeft / step) + shown;
+    const first = Math.max(1, Math.min(last, cards.length) - shown + 1);
+    const end = Math.min(last, cards.length);
+    count.textContent = `${first === end ? end : `${first}-${end}`} / ${cards.length}`;
   };
   const step = (dir) => {
     const card = grid.querySelector('.card');
