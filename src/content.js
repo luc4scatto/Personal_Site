@@ -220,9 +220,9 @@ export const content = {
     description1:
       'It started with something simple: a shared folder my Windows machine and my Mac could both reach, instead of shuffling files between them by hand with an external hard drive, inconvenient enough over time, that I went looking for a better way. That one NAS folder opened a door into **self-hosted software**, and I never really came back out.',
     description2:
-      'The rack runs on an **HP EliteDesk 800G5** mini PC with **32GB of RAM**, 2.5G custom Network card and an unmanaged switch, wired into a **3D-printed rack case**: an open design I found and adapted, swapping in other printable parts until it fit what I actually needed. A **JetKVM** sits on top for headless remote management; BIOS access and reboots from anywhere, no monitor or keyboard needed on-site.',
+      'The rack is now a **two-node Proxmox cluster**: an **HP EliteDesk 800 G5** with **32GB of RAM** and a **Lenovo ThinkCentre M910q** with 16GB, both on added **2.5G network cards** and tied together by a dedicated cluster link. Storage moved off the hosts onto a **UniFi UNAS 4** with two mirrored 4TB drives. It all lives in a **3D-printed rack case**: an open design I found and adapted, swapping in other printable parts until it fit what I actually needed. A **JetKVM** sits on top for headless remote management; BIOS access and reboots from anywhere, no monitor or keyboard needed on-site.',
     description3:
-      'Virtualized on **Proxmox**: **TrueNAS SCALE** runs the containerized stack on **ZFS** storage, media streaming and automation, photo backup, personal finance, network tooling, while **Hermes** handles agentic workflows.',
+      'Every service runs in its own **LXC container** on **Proxmox**: media streaming and automation, photo backup, DNS ad-blocking, a password manager, personal finance, with **Hermes** for agentic workflows. Around them sits the boring part that keeps it alive: nightly deduplicated backups to **Proxmox Backup Server**, single sign-on with passkeys, metrics in **Grafana**, push alerts to my phone, automatic security patches, and remote access over **Tailscale** with no port open to the internet.',
     description4:
       'Most of what I know about networking and sysadmin work, I picked up here, one broken config at a time.',
     backCta: '← Back to projects',
@@ -235,14 +235,20 @@ export const content = {
       categories: [
         {
           label: 'Media Library',
-          services: ['Jellyfin', 'Navidrome', 'Jellyseerr', 'Media Automation'],
+          services: ['Jellyfin', 'Navidrome', 'Media Automation'],
         },
-        { label: 'Networking', services: ['Tailscale', 'WireGuard'] },
-        { label: 'Photos & Backup', services: ['Immich'] },
+        { label: 'Networking', services: ['Tailscale', 'WireGuard', 'Caddy', 'Pi-hole'] },
+        { label: 'Security', services: ['Pocket ID', 'Vaultwarden'] },
+        { label: 'Photos & Backup', services: ['Immich', 'Proxmox Backup Server'] },
+        {
+          label: 'Monitoring',
+          services: ['Uptime Kuma', 'Grafana', 'Prometheus', 'Beszel', 'Speedtest Tracker'],
+        },
+        { label: 'Alerts & Updates', services: ['ntfy', 'Diun'] },
         { label: 'Home Automation', services: ['Home Assistant'] },
-        { label: 'Dashboard', services: ['Homarr', 'Beszel'] },
+        { label: 'Dashboard', services: ['Homarr'] },
         { label: 'Personal Finance', services: ['Actual Budget'] },
-        { label: 'Infra & Dev Tools', services: ['TrueNAS', 'Dockge', 'code-server'] },
+        { label: 'Infra Tools', services: ['Dockge'] },
         { label: 'Agent', services: ['Hermes Agent'] },
       ],
     },
@@ -255,13 +261,11 @@ export const content = {
     // rack, what it replaced, what it's for here - is Luca's to add.
     serviceInfo: {
       Proxmox:
-        'The hypervisor the whole lab runs on. One machine split into VMs and containers, so every service below is isolated from the others and can be snapshotted or rolled back on its own.',
+        'The hypervisor the whole lab runs on. Two machines joined into one cluster and split into containers and VMs, so every service below is isolated from the others and can be backed up or rolled back on its own.',
       Jellyfin:
         'Open-source media server. Streams a personal film and TV library to any device, with no subscription and nothing reporting back to a vendor.',
       Navidrome:
         'Music streaming for a local library. Subsonic-compatible, so any of the existing Subsonic clients works against it without a custom app.',
-      Jellyseerr:
-        'Request front-end for Jellyfin. Turns "can you add this title" into an entry the automation below picks up on its own.',
       'Media Automation':
         'Keeps the library stocked on its own: what is wanted is tracked, sourced and filed without anyone checking by hand.',
       Tailscale:
@@ -278,12 +282,30 @@ export const content = {
         'Home automation hub. Pulls smart-home devices from different brands onto one local dashboard and rule engine, instead of a separate app per manufacturer.',
       'Actual Budget':
         'Local-first envelope budgeting. The data lives on the server and the app syncs to it, rather than to somebody else.',
-      TrueNAS:
-        'Storage operating system. Runs the ZFS pools everything else reads and writes, with snapshots and scheduled scrubs underneath.',
       Dockge:
         'Manager for Docker Compose stacks. Edits the compose file and tails the logs from a browser instead of over ssh.',
-      'code-server':
-        'VS Code running on the server and reached through a browser, so a config can be edited from any machine without setting one up first.',
+      Caddy:
+        'Reverse proxy with automatic HTTPS. Every service gets its own private address with a real certificate, reachable only inside the tailnet.',
+      'Pi-hole':
+        'Network-wide DNS with ad and tracker blocking. A primary and a backup instance on different nodes, kept in sync, so the house never loses name resolution.',
+      'Pocket ID':
+        'Single sign-on with passkeys. One login in front of the hypervisor, backups, dashboards and photos; a small auth proxy covers the apps that cannot speak OIDC on their own.',
+      Vaultwarden:
+        'Self-hosted password manager, compatible with the Bitwarden apps. The vault lives here, not on a third-party cloud.',
+      'Proxmox Backup Server':
+        'Deduplicated, incremental backups of every container and VM, every night onto the NAS, with pruning and a weekly integrity check that proves they can actually be restored.',
+      'Uptime Kuma':
+        'Availability monitor. Checks every service on a short interval and receives a heartbeat from each backup job, so a silent failure still raises an alert.',
+      Grafana:
+        'Dashboards over the metrics: nodes, cluster, backups, DNS, uptime and connection speed on one screen, with three months of history behind them.',
+      Prometheus:
+        'Time-series database behind the dashboards. Scrapes the exporters on each node and service and keeps the numbers Grafana draws.',
+      'Speedtest Tracker':
+        'Runs a connection speed test on a schedule and logs the results, so a slow line shows up as a trend rather than a feeling.',
+      ntfy:
+        'Self-hosted push notifications. Monitors, backups and update checks all report here, and it lands on the phone without a third-party app server.',
+      Diun:
+        'Watches the container images in use and sends a notification when a new version is out. Updates stay a deliberate, manual step.',
       'Hermes Agent':
         'Self-hosted AI agent from Nous Research, reachable over Telegram and Discord instead of a web UI. Builds its own skills from experience and keeps memory across sessions, rather than starting blank every chat.',
     },

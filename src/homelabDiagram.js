@@ -1,7 +1,7 @@
 import gsap from 'gsap';
 import { content } from './content.js';
 
-// Service tree for the homelab page — everything runs on one Proxmox host, so
+// Service tree for the homelab page - everything runs on one Proxmox cluster, so
 // the drawing is a hierarchy, not a star: hub → category → service. Connectors
 // are orthogonal elbows, the same routing language as the hardware wiring
 // diagram above it on the page, so the two read as one system.
@@ -27,6 +27,9 @@ import { content } from './content.js';
 // treatment as the skills wall's Ableton/Unreal marks).
 const ICON_OVERRIDES = {
   'Hermes Agent': '/icons/services/hermes-agent.png',
+  // PBS ships the Proxmox mark, Diun has no SVG upstream
+  'Proxmox Backup Server': '/icons/services/proxmox.svg',
+  Diun: '/icons/services/diun.png',
 };
 
 function iconSrc(name) {

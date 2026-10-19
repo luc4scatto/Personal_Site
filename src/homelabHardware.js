@@ -26,8 +26,8 @@ const ROOMS = [
   { label: 'Studio Room', x: 700, y: 75, w: 250, h: 400, cls: 'hw-room' },
 ];
 
-// padded 12 units on every side around the Mini PC node it wraps
-const GROUPS = [{ label: 'Proxmox Cluster', x: 338, y: 203.25, w: 174, h: 99 }];
+// padded 12 units on every side around the two node boxes it wraps
+const GROUPS = [{ label: 'Proxmox Cluster', x: 288, y: 203.25, w: 249, h: 99 }];
 
 // one small monoline glyph per device family, viewBox 0 0 24 24, stroke-only —
 // same "hand-drawn, no unicode glyph" rule as the rest of the site's icon system
@@ -36,7 +36,7 @@ const ICONS = {
   minipc:
     '<rect x="3" y="6" width="18" height="12" rx="1.5"/><circle cx="17.5" cy="12" r="1.2" fill="currentColor" stroke="none"/><path d="M8 21h8M12 18v3"/>',
   nvme: '<rect x="4" y="3" width="16" height="16" rx="1.5"/><path d="M8 3v-1.5M12 3v-1.5M16 3v-1.5M8 22.5V19M12 22.5V19M16 22.5V19"/>',
-  hdd: '<rect x="3" y="6" width="18" height="12" rx="1.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="0.6" fill="currentColor" stroke="none"/>',
+  nas: '<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M7.5 7h9M7.5 11h9M7.5 15h9"/><circle cx="12" cy="18.5" r="0.6" fill="currentColor" stroke="none"/>',
   kvm: '<rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 17v3"/><circle cx="12" cy="11" r="2"/>',
   switch:
     '<rect x="3" y="8" width="18" height="9" rx="1.5"/><path d="M6.5 12v2M10 12v2M13.5 12v2M17 12v2"/>',
@@ -56,11 +56,16 @@ const ICONS = {
 const NODES = [
   { id: 'ups', x: 100, y: 215.25, w: 75, h: 75, label: 'UPS', icon: 'ups' },
   { id: 'strip-server', x: 230, y: 165.25, w: 15, h: 175, label: 'Power Strip' },
-  { id: 'minipc', x: 350, y: 215.25, w: 150, h: 75, label: 'Mini PC', icon: 'minipc' },
-  { id: 'nvme1', x: 350, y: 90.25, w: 50, h: 75, label: 'nvme', icon: 'nvme' },
-  { id: 'nvme2', x: 425, y: 90.25, w: 50, h: 75, label: 'nvme', icon: 'nvme' },
-  { id: 'hdd', x: 500, y: 90.25, w: 100, h: 75, label: '2x 4TB HDD (USB)', icon: 'hdd' },
+  // node 1 (the main one) sits on the right, next to the JetKVM it drives, so
+  // that short data line doesn't cross node 2's icon
+  { id: 'node2', x: 300, y: 215.25, w: 100, h: 75, label: 'Node 2', icon: 'minipc' },
+  { id: 'node1', x: 425, y: 215.25, w: 100, h: 75, label: 'Node 1', icon: 'minipc' },
+  { id: 'nvme2', x: 325, y: 90.25, w: 50, h: 75, label: 'nvme', icon: 'nvme' },
+  { id: 'nvme1', x: 450, y: 90.25, w: 50, h: 75, label: 'nvme', icon: 'nvme' },
   { id: 'jetkvm', x: 550, y: 240.25, w: 75, h: 50, label: 'Jet KVM', icon: 'kvm' },
+  // top row with the drives, not beside the switch: there it sat on the FTTH
+  // line running across to the studio
+  { id: 'unas', x: 550, y: 90.25, w: 75, h: 75, label: 'UNAS 2x 4TB', icon: 'nas' },
   {
     id: 'switch-server',
     x: 350,
@@ -87,9 +92,11 @@ const NODES = [
 
 // type: power | lan | ftth | data | usb — arrow: end | both | none
 const CONNECTIONS = [
-  { from: 'strip-server', to: 'minipc', type: 'power', arrow: 'end' },
+  { from: 'strip-server', to: 'unas', type: 'power', arrow: 'end' },
+  { from: 'strip-server', to: 'node2', type: 'power', arrow: 'end' },
+  { from: 'strip-server', to: 'node1', type: 'power', arrow: 'end' },
   { from: 'strip-server', to: 'jetkvm', type: 'power', arrow: 'end' },
-  // ups sits in the middle of these five — the exact center of five evenly
+  // ups sits in the middle of these seven - the exact center of seven evenly
   // spaced sockets — so its line stays perfectly horizontal for free, no
   // special-casing needed
   { from: 'strip-server', to: 'ups', type: 'power', arrow: 'end' },
@@ -99,12 +106,15 @@ const CONNECTIONS = [
   { from: 'strip-studio', to: 'switch-studio', type: 'power', arrow: 'end' },
   { from: 'strip-studio', to: 'laptop', type: 'power', arrow: 'end' },
 
-  { from: 'nvme1', to: 'minipc', type: 'data', arrow: 'end' },
-  { from: 'nvme2', to: 'minipc', type: 'data', arrow: 'end' },
-  { from: 'hdd', to: 'minipc', type: 'data', arrow: 'end' },
-  { from: 'minipc', to: 'jetkvm', type: 'data', arrow: 'end' },
+  { from: 'nvme1', to: 'node1', type: 'data', arrow: 'end' },
+  { from: 'nvme2', to: 'node2', type: 'data', arrow: 'end' },
+  { from: 'node1', to: 'jetkvm', type: 'data', arrow: 'end' },
 
-  { from: 'switch-server', to: 'minipc', type: 'lan', arrow: 'end' },
+  { from: 'switch-server', to: 'node1', type: 'lan', arrow: 'end' },
+  { from: 'switch-server', to: 'node2', type: 'lan', arrow: 'end' },
+  { from: 'switch-server', to: 'unas', type: 'lan', arrow: 'end' },
+  // dedicated cluster link, cabled node to node outside the switch
+  { from: 'node2', to: 'node1', type: 'lan', arrow: 'both' },
   { from: 'switch-server', to: 'jetkvm', type: 'lan', arrow: 'end' },
   { from: 'modem', to: 'switch-server', type: 'lan', arrow: 'end' },
   { from: 'switch-studio', to: 'computer', type: 'lan', arrow: 'end' },
