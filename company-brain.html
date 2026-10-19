@@ -34,19 +34,18 @@
     <main id="main-content">
       <section id="project" class="page-hero cb-hero">
         <div class="cb-hero__text">
-          <p class="hero-kicker" data-stagger data-copy="companyBrain.kicker">Internal project</p>
+          <p class="hero-kicker" data-stagger data-copy="companyBrain.kicker">Work · AI assistant</p>
           <h1 data-stagger>Company <span class="accent">Brain</span></h1>
-          <div class="obj-stage obj-stage--corner" data-obj-model="integrated_circuit_01" aria-hidden="true"></div>
           <p class="cb-pitch" data-stagger>Ask about a product in plain language and get the answer, with photos, drawings and charts, straight from the company systems.</p>
           <dl class="cb-meta" data-stagger>
             <div><dt>Role</dt><dd>Designed and built it</dd></div>
             <div><dt>Timeline</dt><dd>2026, a few months</dd></div>
-            <div><dt>Status</dt><dd>Pilot, few users</dd></div>
+            <div><dt>Status</dt><dd>Pilot, 10 weeks, 7 users</dd></div>
           </dl>
         </div>
-        <div class="cb-brain" data-reveal>
+        <div class="cb-brain" data-stagger>
           <canvas id="sources-graph" aria-hidden="true"></canvas>
-          <button type="button" class="cb-brain__pause">Pause animation</button>
+          <button type="button" class="cb-brain__pause"><span>Pause animation</span></button>
         </div>
       </section>
 
@@ -137,6 +136,39 @@
         </div>
       </section>
 
+      <!-- results: measured pilot figures first, then the estimates, each named as such.
+           General on purpose: no system names, no costs, no internal codes (see CLAUDE.md). -->
+      <section id="results" class="vt-how cb-how cb-results-section">
+        <h2 data-reveal>What the pilot showed</h2>
+        <p class="vt-how__intro" data-reveal>Ten weeks, seven people in the prototyping team: 318 answers, backed by 566 queries to the company systems.</p>
+        <ol class="cb-results" data-reveal>
+          <li>
+            <span class="cb-results__num">82%</span>
+            <h3>of answers needed live company data</h3>
+            <p>They called at least one tool. Without the connections, four answers in five could not have been given at all.</p>
+          </li>
+          <li>
+            <span class="cb-results__num">90%</span>
+            <h3>less time for a full product sheet</h3>
+            <p>Three systems, three logins and 10 to 15 minutes before; about one minute now, with the differences between systems already flagged.</p>
+            <span class="cb-results__tag">Team estimate</span>
+          </li>
+          <li>
+            <span class="cb-results__num">95%</span>
+            <h3>less time for a collection report</h3>
+            <p>30 to 60 minutes of exports and spreadsheets before; a chart in one or two minutes now, ready to download.</p>
+            <span class="cb-results__tag">Team estimate</span>
+          </li>
+          <li>
+            <span class="cb-results__num">3<small> months</small></span>
+            <h3>to pay back, on cautious numbers</h3>
+            <p>Ten questions a day and two minutes saved on each, across the whole product area. Open-source stack, no licence costs.</p>
+            <span class="cb-results__tag">Business case</span>
+          </li>
+        </ol>
+        <p class="cb-results__next" data-reveal>Built to spread: one model and one tool per system, so sales, supply chain, quality, IT and HR can reuse the same platform by connecting their own sources. A measured before-and-after on more users is the next step.</p>
+      </section>
+
       <section id="choices" class="vt-how cb-how cb-design">
         <h2 data-reveal data-copy="companyBrain.how.detailLabel">Design choices</h2>
         <div class="vt-details cb-details" data-reveal>
@@ -205,7 +237,7 @@
         <a class="project-next" href="homelab.html" data-reveal>
           <img class="project-next__thumb" src="images/homelab-case.webp" alt="" width="1800" height="2400" loading="lazy" />
           <span class="project-next__text">
-            <span class="project-next__title">Personal project: Homelab</span>
+            <span class="project-next__title">Homelab</span>
             <span class="project-next__hint">Next project →</span>
           </span>
         </a>

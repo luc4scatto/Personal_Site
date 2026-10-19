@@ -2217,6 +2217,15 @@
   font-size: 0.95rem;
 }
 
+/* one label scheme for every project, the same words as the kicker on its own page:
+   where it was made (Work / Personal), then what it is */
+.card .card-kicker {
+  margin: 0;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+}
+
 .card-links {
   display: flex;
   gap: 1rem;
@@ -2446,90 +2455,6 @@
   padding-top: calc(var(--space) + 4rem);
 }
 
-/* a project page can carry one object of its own beside the title, the way the home is made of
-   the maker's own gear: the title and kicker on the left, the object turning on the right, and
-   anything after them (a cover) across the full width */
-.page-hero--obj {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 18rem);
-  column-gap: clamp(1.5rem, 4vw, 3rem);
-  align-items: center;
-}
-
-.page-hero--obj > :not(.obj-stage) {
-  grid-column: 1;
-}
-
-.page-hero--obj > .project-cover {
-  grid-column: 1 / -1;
-}
-
-.obj-stage {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  aspect-ratio: 1;
-  width: 100%;
-  opacity: 0;
-  transition: opacity var(--duration-slow, 0.8s) var(--ease-out);
-}
-
-.obj-stage.is-ready {
-  opacity: 1;
-}
-
-.obj-stage canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  cursor: grab;
-  /* vertical scroll stays with the page; only a sideways drag turns the object */
-  touch-action: pan-y;
-}
-
-.obj-stage canvas.is-grabbed {
-  cursor: grabbing;
-}
-
-/* Company Brain already has its picture on the right, so its object is a small one that sits at
-   the corner of the title, and drops under it on a narrow screen */
-.cb-hero__text {
-  position: relative;
-}
-
-.obj-stage--corner {
-  position: absolute;
-  top: -0.5rem;
-  right: 0;
-  width: clamp(6rem, 9vw, 7.5rem);
-}
-
-@media (max-width: 860px) {
-  .obj-stage--corner {
-    position: static;
-    width: 7.5rem;
-    margin: 0.25rem 0 1rem;
-  }
-}
-
-@media (max-width: 700px) {
-  .page-hero--obj {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .obj-stage {
-    grid-column: 1;
-    grid-row: auto;
-    aspect-ratio: 16 / 10;
-    margin: 0.5rem 0 1.5rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .obj-stage {
-    transition: none;
-  }
-}
-
 /* homelab.html's content is diagrams-and-text, thinner than vivatech's cover
    photo/video/gallery sections — the shared --space rhythm (a full dose on
    both sides of every seam) compounds into dead space with nothing to bridge
@@ -2551,6 +2476,7 @@
    a full breath into a new idea (the demo, the retrospective), a short one between related
    blocks (design choices) and between the five tools. */
 .cb-page #demo,
+.cb-page #results,
 .cb-page #choices {
   padding-bottom: calc(var(--space) * 0.5);
 }
@@ -5783,12 +5709,21 @@ button.pp-btn:active {
   min-width: 0;
 }
 
-/* the pause control for the looping canvas: a quiet pill under it, 44px to hit on touch */
+/* the pause control for the looping canvas: on the graph's own frame, bottom right, an icon
+   (two bars, or a play triangle once paused) and its label, 44px to hit on touch */
+.cb-brain {
+  position: relative;
+}
+
 .cb-brain__pause {
-  display: block;
-  margin: 0.25rem 0 0 auto;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   min-height: 44px;
-  padding: 0 0.9rem;
+  padding: 0 0.75rem;
   border: 0;
   background: none;
   color: var(--text-dim);
@@ -5796,6 +5731,22 @@ button.pp-btn:active {
   font-size: 0.8rem;
   cursor: pointer;
   transition: color var(--duration-fast) var(--ease-out);
+}
+
+.cb-brain__pause::before {
+  content: '';
+  width: 8px;
+  height: 10px;
+  border-inline: 3px solid currentColor;
+  box-sizing: border-box;
+}
+
+.cb-brain__pause.is-paused::before {
+  width: 0;
+  height: 0;
+  border-inline: 0;
+  border-left: 9px solid currentColor;
+  border-block: 5.5px solid transparent;
 }
 
 .cb-brain__pause:hover {
@@ -6083,26 +6034,6 @@ button.pp-btn:active {
   color: var(--text);
 }
 
-/* monitoring: what it is on the left, what it looks like on the right */
-.cb-monitor {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  max-width: 44rem;
-  gap: 2rem clamp(1.5rem, 5vw, 4rem);
-  align-items: center;
-  margin-top: 6rem;
-}
-
-.cb-monitor .cb-sub {
-  margin-top: 0;
-}
-
-.cb-monitor__text {
-  margin: 0;
-  font-size: 1.05rem;
-  line-height: 1.55;
-  color: var(--cb-body);
-}
 
 
 
@@ -6163,11 +6094,6 @@ button.pp-btn:active {
     margin-top: 4.5rem;
   }
 
-  .cb-monitor {
-    grid-template-columns: minmax(0, 1fr);
-    margin-top: 4.5rem;
-  }
-
   .cb-details,
   .cb-lessons {
     grid-template-columns: minmax(0, 1fr);
@@ -6193,12 +6119,6 @@ button.pp-btn:active {
 /* in Design choices the lead sits right under the chapter heading */
 .cb-design .cb-details .cb-lead {
   padding-top: 1.5rem;
-}
-
-.cb-design .cb-monitor {
-  margin-top: 5.5rem;
-  padding-top: 2.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Looking back: lessons take the room, limits sit beside them, quieter */
@@ -6789,11 +6709,6 @@ button.pp-btn:active {
   white-space: nowrap;
 }
 
-/* Monitoring is a sub-block of Design choices: never louder than the lead idea */
-.cb-monitor .cb-sub {
-  font-size: clamp(1.5rem, 2.4vw, 2rem);
-}
-
 /* the end of a Pipeline chapter: back to the five-tool index, so a phone does not have to scroll
    the page back up by hand */
 .pp-tool__top {
@@ -6930,3 +6845,107 @@ button.pp-btn:active {
     transition: none;
   }
 }
+
+/* touch: the last targets under 44px - the footer links, the LS logo and the Omniverse mockup's
+   controls (the one mockup that is live and not aria-hidden). The hit area grows with a
+   pseudo-element, so nothing moves on screen. */
+@media (pointer: coarse) {
+  .footer a,
+  .nav-logo,
+  .pp-omni .pp-btn {
+    position: relative;
+  }
+
+  .footer a::after,
+  .nav-logo::after,
+  .pp-omni .pp-btn::after {
+    content: '';
+    position: absolute;
+    inset: -0.4rem -0.3rem;
+  }
+
+  .pp-omni__sec > summary {
+    min-height: 44px;
+  }
+}
+
+/* Company Brain results: four figures the eye catches first. Measured ones stand alone, estimates
+   carry a tag saying so. No boxes: the hairline above each figure is the page's own rule. */
+.cb-results {
+  list-style: none;
+  margin: 2.5rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2.5rem clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.cb-results li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.cb-results__num {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 4.75rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.cb-results__num small {
+  font-size: 0.4em;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.cb-results h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  color: var(--text);
+  text-wrap: balance;
+}
+
+.cb-results p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.cb-results__tag {
+  margin-top: auto;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 99px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.cb-results__next {
+  max-width: 44rem;
+  margin: 3rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+@media (max-width: 1024px) {
+  .cb-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .cb-results {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+

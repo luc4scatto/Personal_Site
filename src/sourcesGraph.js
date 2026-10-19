@@ -262,7 +262,8 @@ export function initSourcesGraph(canvas) {
     toggle.hidden = reduced;
     toggle.addEventListener('click', () => {
       userPaused = !userPaused;
-      toggle.textContent = userPaused ? 'Play animation' : 'Pause animation';
+      toggle.classList.toggle('is-paused', userPaused);
+      toggle.querySelector('span').textContent = userPaused ? 'Play animation' : 'Pause animation';
       userPaused ? halt() : run();
     });
   }

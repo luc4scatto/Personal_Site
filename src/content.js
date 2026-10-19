@@ -53,9 +53,9 @@ export const content = {
         'A self-hosted AI assistant that answers questions about our products in plain language, reading live from the company systems and replying with photos, drawings and charts. Nothing leaves the company.',
     },
     three: {
-      title: 'Personal project: Homelab',
+      title: 'Homelab',
       description:
-        'A self-hosted rack running on Proxmox and TrueNAS, media, backups, automation and an AI agent, built from a 3D-printed case and one spare mini PC.',
+        'A two-node Proxmox cluster and a UniFi NAS in a 3D-printed rack case, running media, backups, automation and an AI agent.',
     },
   },
   contact: {
@@ -67,7 +67,7 @@ export const content = {
     copyright: '© 2026 Luca Scattolin',
   },
   vivatech: {
-    kicker: 'Project',
+    kicker: 'Work · Live installation',
     description1:
       "At Vivatech 2026 - the tenth edition of Europe's biggest tech event - LVMH brought ten of its Maisons to the Dream Gallery pavilion in Paris, showing how technology amplifies craftsmanship across the whole value chain.",
     description2:
@@ -127,7 +127,7 @@ export const content = {
   },
   // Company Brain: sanitized like pipelineProjects - no brand names, system names, vendors, hosts or real data.
   companyBrain: {
-    kicker: 'Internal project',
+    kicker: 'Work · AI assistant',
     meta: 'A self-hosted AI assistant that answers questions about our products from the company systems',
     description1:
       'Information about a product lives in many systems: **technical data**, **commercial texts and attributes**, **official photos**, **technical drawings** and standard components, **prototype tracking**, plus design manuals and internal notes. Each has its own interface, its own login, its own way of searching, so a simple question like "what material is this model, and how is it built?" often means opening three or four programs and knowing exactly where to look.',
@@ -216,7 +216,7 @@ export const content = {
     backCta: '← Back to projects',
   },
   homelab: {
-    kicker: 'Personal Project',
+    kicker: 'Personal · Self-hosting',
     description1:
       'It started with something simple: a shared folder my Windows machine and my Mac could both reach, instead of shuffling files between them by hand with an external hard drive, inconvenient enough over time, that I went looking for a better way. That one NAS folder opened a door into **self-hosted software**, and I never really came back out.',
     description2:
@@ -315,7 +315,7 @@ export const content = {
   // codes - only what each tool does, in general terms. The mockups in
   // pipeline-projects.html follow the same rule (redrawn, fake data).
   pipelineProjects: {
-    kicker: 'Built at Thélios',
+    kicker: 'Work · Pipeline tools',
     intro1:
       'In the **3D R&D team** at Thélios, a lot of the slow work was not modeling or rendering, it was everything around it: cleaning and naming meshes by hand, building the variants for every colorway, renaming hundreds of renders, assembling presentation decks slide by slide.',
     intro2:
