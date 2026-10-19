@@ -2904,6 +2904,34 @@ p.project-specs__kicker {
   transform: none;
 }
 
+/* phone: one row to swipe instead of seven photos stacked (~3400px, four screens). Same height
+   for every photo, so the next one always peeks in at the right edge. */
+@media (max-width: 560px) {
+  .gallery {
+    display: flex;
+    gap: 0.75rem;
+    columns: auto;
+    margin-inline: calc(-1 * var(--pad-x));
+    padding-inline: var(--pad-x);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--pad-x);
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .gallery img {
+    flex: 0 0 auto;
+    width: auto;
+    height: 20rem;
+    /* a landscape shot would fill the screen and hide the next one: cap it and crop the sides */
+    max-width: 82vw;
+    object-fit: cover;
+    margin-bottom: 0;
+    scroll-snap-align: start;
+  }
+}
+
 .featured-links {
   list-style: none;
   padding: 0;
@@ -3911,12 +3939,12 @@ p.project-specs__kicker {
     flex: 0 0 auto;
     align-items: center;
     gap: 0.45rem;
-    width: 18px;
+    width: 20px;
     margin: 0;
     /* rotated as well as vertical, so it reads bottom-to-top the way a spine does */
     writing-mode: vertical-rl;
     transform: rotate(180deg);
-    font-size: 0.6rem;
+    font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -4028,7 +4056,8 @@ p.project-specs__kicker {
   }
 
   .skill-label {
-    font-size: 0.6rem;
+    /* 12px floor: 9.6px read as decoration, not as the name of the tool */
+    font-size: 0.75rem;
     /* two of these still clear the 2.65rem of tab on show, so the long names wrap instead
        of forcing the whole stack wider than the frame can afford - measured against
        "Adobe Substance 3D", the only one that needs the second line at 390px */
@@ -4482,6 +4511,39 @@ p.project-specs__kicker {
   font-weight: 500;
 }
 
+/* the outcome, last and in full colour: what the reader should leave the chapter with */
+.pp-tool__result {
+  color: var(--text);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--accent);
+}
+
+.pp-tool__more {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .pp-tool__bullets:not(.is-open) {
+    display: none;
+  }
+
+  .pp-tool__more {
+    display: inline-block;
+    min-height: 44px;
+    margin-bottom: 0.5rem;
+    padding: 0 1.1rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: none;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+}
+
 .pp-tool__bullets {
   padding-left: 1.1rem;
 }
@@ -4803,8 +4865,8 @@ button.pp-btn:active {
 }
 
 .pp-omni__sec {
-  border: 1px solid var(--ui-line);
-  border-left: 3px solid var(--sec);
+  /* the section colour tints the whole outline, not a thick stripe down one rounded side */
+  border: 1px solid color-mix(in srgb, var(--sec) 45%, var(--ui-line));
   border-radius: 10px;
   background: color-mix(in srgb, var(--sec) 6%, var(--ui-panel));
 }
@@ -5938,32 +6000,8 @@ button.pp-btn:active {
   }
 }
 
-/* the question is typed into the input before it is sent */
 .cb-chat__placeholder {
   color: var(--text-dim);
-}
-
-.cb-chat__input.is-typing .cb-chat__placeholder {
-  display: none;
-}
-
-.cb-caret {
-  display: none;
-  width: 1px;
-  height: 1em;
-  margin-left: 1px;
-  background: var(--accent);
-  animation: cb-blink 1s steps(1) infinite;
-}
-
-.cb-chat__input.is-typing .cb-caret {
-  display: inline-block;
-}
-
-@keyframes cb-blink {
-  50% {
-    opacity: 0;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -6296,11 +6334,6 @@ button.pp-btn:active {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cb-caret {
-    animation: none;
-    opacity: 1;
-  }
-
   .cb-demo__tab,
   .cb-retro .cb-lessons .vt-detail,
   .cb-sheet__img,
@@ -6764,19 +6797,6 @@ button.pp-btn:active {
   text-overflow: ellipsis;
 }
 
-/* a long question stays on one line while it is typed and trails off, like a real input field,
-   so the chat never grows mid-sentence and moves the page below it */
-.cb-chat__input [data-cb-typed] {
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.cb-caret {
-  flex-shrink: 0;
-}
-
 /* the end of a Pipeline chapter: back to the five-tool index, so a phone does not have to scroll
    the page back up by hand */
 .pp-tool__top {
@@ -6815,7 +6835,8 @@ button.pp-btn:active {
 }
 
 /* the tool rail (pipelineProjects.js): in the left gutter, only on screens wide enough to have
-   one, and only while a chapter is under the reader's eye. A name opens on hover or focus. */
+   one, and only while a chapter is under the reader's eye. A name opens on hover or focus, and
+   for a moment when its chapter is reached. */
 .pp-rail {
   display: none;
 }
@@ -6900,7 +6921,8 @@ button.pp-btn:active {
   }
 
   .pp-rail a:hover .pp-rail__name,
-  .pp-rail a:focus-visible .pp-rail__name {
+  .pp-rail a:focus-visible .pp-rail__name,
+  .pp-rail a.is-flash .pp-rail__name {
     opacity: 1;
     transform: translate(0, -50%);
   }
@@ -6968,9 +6990,8 @@ button.pp-btn:active {
 .cb-results__tag {
   margin: 0 0 1.25rem;
   font-family: var(--font-display);
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.95rem;
+  font-weight: 500;
   color: var(--accent);
 }
 
@@ -7071,7 +7092,7 @@ button.pp-btn:active {
 }
 
 .cb-results__note {
-  max-width: 44rem;
+  max-width: 38rem;
   margin: 1.5rem 0 0;
   font-size: 0.95rem;
   line-height: 1.55;
@@ -7113,10 +7134,9 @@ button.pp-btn:active {
   color: var(--text);
 }
 
-/* phone: the home nav keeps the three links a visitor jumps to - Projects, Contact and the CV.
-   About and Skills are the next two screens down anyway. */
+/* phone: four links fit beside the logo, five do not. Skills goes, since it sits right after
+   About and a tap on About lands one screen above it. */
 @media (max-width: 560px) {
-  .nav nav a[href="#about"],
   .nav nav a[href="#skills"] {
     display: none;
   }

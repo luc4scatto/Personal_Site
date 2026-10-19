@@ -56,6 +56,20 @@ function buildIndex(list, tools) {
 function buildChapter(host, tool) {
   const bullets = el('ul', 'pp-tool__bullets');
   tool.bullets.forEach((b) => bullets.append(el('li', null, rich(b))));
+  // phone only (CSS): the list folds behind a button, so five chapters do not run to fifteen
+  // screens - problem, mockup and what changed carry the chapter, the detail is one tap away.
+  // On wider screens the button is hidden and the list always shows.
+  const n = tool.bullets.length;
+  const btn = el('button', 'pp-tool__more', `Show all ${n} points`);
+  btn.type = 'button';
+  btn.setAttribute('aria-expanded', 'false');
+  bullets.id = `${tool.id}-points`;
+  btn.setAttribute('aria-controls', bullets.id);
+  btn.addEventListener('click', () => {
+    const open = bullets.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', open);
+    btn.textContent = open ? 'Hide the points' : `Show all ${n} points`;
+  });
 
   const highlights = el('ul', 'pp-tool__highlights');
   (tool.highlights || []).forEach((h) => {
@@ -72,6 +86,7 @@ function buildChapter(host, tool) {
     el('p', 'pp-tool__label', 'The problem'),
     el('p', 'pp-tool__problem', rich(tool.problem)),
     el('p', 'pp-tool__label', 'What it does'),
+    btn,
     bullets,
     el('p', 'pp-tool__label', 'The interesting part'),
     el('p', 'pp-tool__idea', rich(tool.idea)),
@@ -250,7 +265,16 @@ function buildRail(tools) {
   const io = new IntersectionObserver(
     (entries) => {
       entries.forEach((e) => (e.isIntersecting ? seen.add(e.target.id) : seen.delete(e.target.id)));
-      links.forEach((a, id) => a.classList.toggle('is-on', seen.has(id)));
+      links.forEach((a, id) => {
+        const on = seen.has(id);
+        // a chapter just reached shows its name for a moment: three of the five icons look alike
+        if (on && !a.classList.contains('is-on')) {
+          a.classList.add('is-flash');
+          clearTimeout(a._flash);
+          a._flash = setTimeout(() => a.classList.remove('is-flash'), 1800);
+        }
+        a.classList.toggle('is-on', on);
+      });
       nav.classList.toggle('is-shown', seen.size > 0);
     },
     // a thin band across the middle of the screen: the chapter under the reader's eye

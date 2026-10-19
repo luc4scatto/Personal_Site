@@ -67,6 +67,7 @@ Vite MPA, input in `vite.config.js`: `index.html` (home), `vivatech.html`, `home
 - **Palette in due posti**: `hero3d.js` legge `--accent`/`--accent-2` da CSS, ma `sourcesGraph.js` ha `ORANGE`/`BLUE` scritti in esadecimale (canvas 2D). Se cambi la palette in `base.css`, cambia anche lì.
 - **Oggetti 3D negli hero delle pagine progetto: provati e tolti** (2026-10-19, scelta di Luca). Un modello della home trascinabile accanto al titolo di ogni progetto (occhiali, portatile costruito a scatole, server, chip), anche uniformato per colore, luce, scala e posizione: sembravano buttati lì, su telefono rubavano il primo schermo e su Homelab e Pipeline Projects competevano con foto e mockup veri. Il codice (`heroObject.js`) è nella storia di git (commit `90bc11f`). Non riproporli come decorazione dell'hero.
 - **Video di Vivatech**: `public/video/vivatech-2026.mp4` è il video ufficiale e resta com'è (scelta di Luca, 2026-10-19), anche se mostra il marchio di una Maison: la regola di sanitizzazione vale per i testi, i mockup e le immagini scelte da noi, non per questo file.
+- **Titolo della home** ("Bringing ideas to life with 3D/2D/AI"): le critique lo segnalano come generico o "da generalista AI". Luca l'ha confermato due volte (2026-10-11 e 2026-10-19): resta com'è, non riproporlo.
 - **Cassetti chiusi del mobile skill**: i frontali sopra il cassetto vivo sono bloccati di proposito (un gruppo ciascuno, al click uno strattone contro la serratura e rimbalzo elastico), così il click non sembra perso. Non renderli apribili.
 
 ## TODO

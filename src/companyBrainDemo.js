@@ -1,5 +1,6 @@
 // Company Brain "See it in action": a scene plays like a live chat the first time it is shown -
-// the question is typed into the input, sent, the answer follows, with its chart or list
+// the question is there at once (typing it first left an empty panel for a beat, right where the
+// proof is promised), the answer follows, with its chart or list
 // growing in. Coming back to a scene shows it finished, never blank; the Replay button plays
 // it again and doubles as Skip while it runs. The strip above the chat lights the stage the
 // question is at (chat, model, tools, systems), so the architecture is read off the demo
@@ -25,8 +26,6 @@ export function initCompanyBrainDemo(chat) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const tabs = [...document.querySelectorAll('[data-cb-tab]')];
   const panels = [...chat.querySelectorAll('[data-cb-panel]')];
-  const typed = chat.querySelector('[data-cb-typed]');
-  const input = chat.querySelector('.cb-chat__input');
   const replay = chat.querySelector('.cb-chat__replay');
   const stages = [...document.querySelectorAll('[data-stage]')];
   const stageChip = chat.querySelector('.cb-chat__stage');
@@ -106,8 +105,6 @@ export function initCompanyBrainDemo(chat) {
     panel.classList.remove('is-waiting');
     steps(panel).forEach((s) => s.classList.add('is-shown'));
     panel.classList.add('is-done');
-    typed.textContent = '';
-    input.classList.remove('is-typing');
     light('');
     setPlaying(false);
   }
@@ -138,17 +135,8 @@ export function initCompanyBrainDemo(chat) {
     setPlaying(true);
 
     try {
-      // the question is typed into the input, then sent
+      // the question is on screen from the first frame; only the answer is played
       const [question, ...rest] = all;
-      input.classList.add('is-typing');
-      typed.textContent = '';
-      for (const ch of question.textContent) {
-        typed.textContent += ch;
-        await wait(10 + Math.random() * 18, me);
-      }
-      await wait(200, me);
-      typed.textContent = '';
-      input.classList.remove('is-typing');
       question.classList.add('is-shown');
       light('chat');
       await wait(350, me);

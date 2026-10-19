@@ -1,17 +1,28 @@
 # TODO
 
-Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-19 (settimo giro di critique, 25/32).
+Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-19 (ottavo giro di critique, 24/32).
+
+## Critique, ottavo giro (2026-10-19, 24/32)
+
+Dopo i P1-P3 e i minori del settimo giro (titolo di Pipeline con l'arancio solo su "Projects", contorno tinto nel mockup di Omniverse, etichetta delle stime non più maiuscola, nota dei risultati più stretta). Il revisore dà 24/32: il punto perso è il recupero dagli errori (4 -> 3) perché non ha provato l'invio fallito, mentre le misure automatiche confermano il modulo come prima. Nella sostanza 25/32: le rifiniture sono finite, per salire servono cambi di struttura. Zero errori in console, CLS massimo 0,018, nessun overflow, tocchi a 44px.
+
+- [ ] **P1 Risultato di ogni tool in cima** (`/impeccable distill`) - "What changed" è il quarto blocco; spostarlo sotto il titolo, più grande, e metterlo anche sulle card dell'indice di Pipeline. "The interesting part" chiusa su telefono come "What it does". Su Company Brain l'82% compare nell'hero e nei risultati (voluto: l'hero rimanda ai risultati).
+- [ ] **P2 Navigazione dalle pagine progetto** (`/impeccable layout`) - CV nella nav di ogni pagina progetto; i quattro progetti elencati sopra il footer oltre a "Next project".
+- [ ] **P2 Servizi di Homelab su desktop** (`/impeccable layout`) - circa 25 servizi in un albero stretto da 1.500px: da 1024px categorie su 3-4 colonne sotto Proxmox, albero solo su telefono.
+- [ ] **P2 Nuvola 3D sotto il primo schermo su telefono** (`/impeccable adapt`) - hero più compatto o nuvola dietro il titolo a opacità bassa. Tocca l'hero della home: decide Luca.
+- [ ] **P3 Spazi tra le sezioni irregolari** - mezza schermata vuota dopo "Featured on" su Vivatech, sotto i servizi di Homelab, tra le sezioni di Company Brain.
+- [ ] **Minori** - testo del mockup di Omniverse a 10,9-11,5px (è l'unico mockup letto dagli screen reader); etichette dei nodi dei servizi di Homelab a 11,2px su telefono; contatore 1/4 anche sul carosello desktop; passi "Chat / Language model / Tools / Company systems" da numerare o collegare; hint dell'hero poco visibile.
 
 ## Critique, settimo giro (2026-10-19, 25/32)
 
 Fatti prima del giro (suggerimenti del sesto): dato del pilota sotto il titolo di Company Brain ("82% of 318 answers needed live company data", link ai risultati); LXC, OpenPBR ed Editor Utility Widgets spiegati alla prima comparsa; "tap an object" su touch nell'hint della home; una riga "What changed" per ognuno dei cinque tool (qualitativa, ricavata da quello che il tool fa: da sostituire con un numero misurato quando c'è). Il voto resta 25/32: i punti chiesti sono chiusi, il nuovo revisore alza l'asticella. Archivio: `.impeccable/critique/` (giro del 2026-10-19 sera).
 
-- [ ] **P1 Titolo della home** (`/impeccable clarify`) - "Bringing ideas to life with AI" letto come posizionamento da generalista AI; la parola ruota tra 3D, 2D e AI. Già lasciato com'è da Luca il 2026-10-11 (vedi "Da decidere"): serve una scelta, non un fix.
-- [ ] **P2 Skill su telefono a 9,6px** (`/impeccable typeset`) - griglia piatta, etichette e categorie verticali: misurato e visto su screenshot, non è un falso allarme. Portare ad almeno 12px.
-- [ ] **P2 Pagine progetto lunghe su telefono** (`/impeccable distill`) - Pipeline ~15 schermate, Vivatech ~11. "What it does" chiuso o a 3 voci, galleria a scorrimento orizzontale, chip del tool attivo fisso.
-- [ ] **P2 Demo di Company Brain che si apre vuota** (`/impeccable polish`) - quando entra in vista la scena riparte da zero: mostrare subito la domanda, scrittura dal vivo solo per la risposta.
-- [ ] **P2 Banner cookie** - Decline con lo stesso peso di Accept.
-- [ ] **P3 Rail dei tool senza nomi** sul desktop (tre icone simili) e About assente dalla nav del telefono.
+- [x] **P1 Titolo della home** - resta com'è (Luca, 19 ottobre, seconda conferma dopo l'11 ottobre). Non riproporlo.
+- [x] **P2 Skill su telefono a 9,6px** - fatto: etichette e categorie a 12px, colonna delle categorie da 18 a 20px.
+- [x] **P2 Pagine progetto lunghe su telefono** - fatto: su telefono e tablet stretto (sotto 700px) "What it does" è chiuso dietro "Show all N points" (Pipeline da 12.300 a 11.000px); galleria di Vivatech in una riga a scorrimento, foto alte 20rem (pagina da 8.700 a 5.800px). Chip fisso del tool attivo non fatto: c'è già "All five tools" in fondo a ogni capitolo.
+- [x] **P2 Demo di Company Brain che si apre vuota** - fatto: la domanda c'è dal primo frame, si gioca solo la risposta (tolta la digitazione nel campo, cursore e relativo CSS).
+- [x] **P2 Banner cookie** - fatto: Decline è una pill come Accept, in neutro.
+- [x] **P3 Rail dei tool senza nomi** - fatto: il nome del tool appare per 1,8s quando si arriva al suo capitolo; su telefono la nav torna ad avere About (nascosto solo Skills).
 - [ ] **Minori** - arancio del titolo diverso tra pagine (parola intera su Homelab e Pipeline, ultima parola su Vivatech e Company Brain); side-tab a 3px sulle sezioni arrotondate del mockup di Omniverse; nota dei risultati di Company Brain a ~93 caratteri per riga su desktop; "CV" largo 20px su touch da ricontrollare; scritta del video di Vivatech sotto i controlli nativi.
 
 ## Critique, quinto giro (2026-10-19, 23/32)
