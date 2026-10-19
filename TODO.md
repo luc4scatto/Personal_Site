@@ -4,9 +4,11 @@ Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiest
 
 ## Critique, decimo giro (2026-10-19, 25/32)
 
+Dopo il giro, su richiesta di Luca: copertina del video di Vivatech di nuovo il primo fotogramma; stato di Pipeline "In use by the 3D team"; foto frontale di Homelab di nuovo accanto al retro (hero solo testo e riga di risultato); servizi di Homelab con etichetta N1/N2 per nodo e legenda, WireGuard tolto (non è un servizio a sé).
+
 Dopo tutti i punti del nono giro. Voto stabile a 25/32 (quattro giri su cinque): tutto quello che si misura è pulito (CLS in produzione al massimo 0,008, zero errori, testo a 12px, tocchi a 44px), i revisori ora cambiano idea tra un giro e l'altro (il risultato sulle card, chiesto all'ottavo, al decimo è una ripetizione). Restano punti di contenuto.
 
-- [x] **P1 Riga di risultato per Vivatech e Homelab** - fatto: Homelab "Over twenty services in daily use..."; Vivatech "Four days live at an event of over 200,000 visitors. What held people at the screen was the gestures..." (200.000 è la cifra degli organizzatori per tutto l'evento, non per lo stand: un conteggio dello stand non esiste; 17-20 giugno, stand aperto tutti e quattro i giorni).
+- [x] **P1 Riga di risultato per Vivatech e Homelab** - fatto: Homelab "Over twenty services in daily use..."; Vivatech "Live for all four days of Vivatech, which drew more than 200,000 visitors. People stayed for the gestures: no buttons, just their hands." (200.000 è la cifra degli organizzatori per tutto l'evento, non per lo stand: un conteggio dello stand non esiste; 17-20 giugno, stand aperto tutti e quattro i giorni).
 - [x] **P1 Pipeline ripete il risultato** - fatto (scelta di Luca: solo nei capitoli): le card dell'indice mostrano di nuovo solo il problema, tolti i campi `outcome` da `content.js`.
 - [x] **P2 Vivatech la pagina meno costruita** - galleria lasciata intera (scelta di Luca: tutte le foto sono interessanti).
 - [x] **P3 Rail di Pipeline** - fatto: numero 1-5 su ogni icona (contatore CSS).

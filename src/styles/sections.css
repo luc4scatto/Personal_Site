@@ -2580,12 +2580,6 @@
   gap: 1rem;
 }
 
-/* one photo left beside the build sheet (the front view moved up to the hero): half the column,
-   not a 3:4 picture the full width of it */
-.project-photo-row > .project-photo:only-child {
-  flex: 0 1 50%;
-}
-
 .project-photo {
   flex: 1;
   min-width: 0;
@@ -2647,16 +2641,6 @@ p.project-specs__kicker {
   color: var(--accent-2);
 }
 
-/* Vivatech opens on the video itself, at its own 16:9 rather than the cover's 21:9 crop */
-/* a project hero with its proof beside the title (Homelab's rack): text left, picture right,
-   stacked on narrow screens */
-.page-hero--split {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
-  gap: clamp(2rem, 5vw, 4rem);
-  align-items: center;
-}
-
 /* one concrete outcome under the facts, the same slot Company Brain fills with its 82% */
 .project-outcome {
   max-width: 34rem;
@@ -2669,25 +2653,7 @@ p.project-specs__kicker {
   color: var(--text);
 }
 
-.page-hero__media {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
-  object-position: 50% 70%;
-  border-radius: 1rem;
-}
-
-@media (max-width: 700px) {
-  .page-hero--split {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .page-hero__media {
-    aspect-ratio: 4 / 3;
-  }
-}
-
+/* Vivatech opens on the video itself, at its own 16:9 rather than the cover's 21:9 crop */
 .project-cover--video {
   aspect-ratio: 16 / 9;
   display: block;
@@ -3145,37 +3111,13 @@ p.project-specs__kicker {
   }
 }
 
-/* homelab service tree — everything runs on one Proxmox host, so this draws a
-   hierarchy (hub → category → service), not a star. Connectors are orthogonal
-   elbows, matching the hardware wiring diagram below it, so the page reads in
-   one drawing language. Built in src/homelabDiagram.js from content.js data.
-
-   The lines are borders on the list items, not SVG: the rows are text, so the
-   browser's own layout is what makes the tree reflow onto a phone with no
-   second markup path. Each level trims its trunk at the first/last stub with a
-   pseudo-element, otherwise the line overshoots past the outermost branch. */
-/* left-aligned, not centered: the tree reads left-to-right from its root, and
-   it is narrower than the section, so centering it would float the root into
-   the middle of the page away from the heading it belongs under */
+/* homelab services - built in src/homelabDiagram.js from content.js. The cluster is one bar on
+   top (pick it for what Proxmox does, with the node legend beside it), the categories are flat
+   cards in the same language as the site's index cards, and each service row says which node it
+   runs on. A picked service unfolds its card in place, inside its own category, so nothing is
+   ever covered and nothing needs measuring. */
 .homelab-diagram {
-  width: fit-content;
-  max-width: 100%;
-}
-
-/* Hardware fills the sitewide 1200px section width because its diagram is
-   genuinely that wide. The services tree is ~472px at rest and ~976px with a
-   card open (see .hd-card's ≥1200px width) — inheriting the same 1200px cap
-   left up to 660px of dead gutter beside it, making the two sections read as
-   different layout systems. Capping this section to its own footprint (plus
-   this file's --pad-x on each side) removes the gutter instead of papering
-   over it. Only bites above 1200px; narrower viewports are already
-   constrained by the viewport itself. */
-.homelab-services-section {
-  max-width: calc(472px + 3.5rem + 28rem + 2 * var(--pad-x));
-  /* left edge where every other section's is: a section narrower than the 1200px cap would be
-     centred by its auto margins and sit ~40px right of the headings above and below it */
-  margin-left: max(0px, calc((100% - 1200px) / 2));
-  margin-right: auto;
+  width: 100%;
 }
 
 /* the rows are buttons but nothing about a tree says "tap me", and on touch
@@ -3223,193 +3165,14 @@ p.project-specs__kicker {
 }
 
 .hd-tree {
-  position: relative;
-  display: flex;
-  /* the hub only centres against the branches where the card is out of flow
-     (see the min-width rule below). Anywhere else the card grows the list when
-     it opens, and a centred hub would jump every time */
-  align-items: flex-start;
-  --hd-rule: color-mix(in srgb, var(--text-dim) 50%, transparent);
-  --hd-stub: 0.78rem; /* where a branch's elbow meets its label's first line */
-  --hd-branch-pad: 0.9rem;
-  --hd-hub-size: 8.5rem;
-  --hd-gap: 3.5rem; /* hub to trunk, and trunk to card, so both reads are equal */
-  /* 16 leaves stacked are what drives the block's height, so they stay a step
-     below the category labels: those are only 8, and they are what sets its
-     width instead */
-  --hd-leaf-h: 1.95rem;
-  --hd-leaf-icon: 23px;
-  --hd-card-pad: 1.5rem;
-  --hd-card-icon: 36px;
-  --hd-hub-icon: 36px; /* separate from --hd-card-icon: the open card's own
-    header icon needs to stay full size, only the hub disc's icon shrinks */
+  display: grid;
+  gap: 1rem;
+  --hd-line: rgba(255, 255, 255, 0.1);
+  --hd-leaf-icon: 22px;
+  --hd-card-pad: 1rem;
 }
 
-/* the one filled node in the diagram — the thing every branch answers to */
-.hd-hub {
-  position: relative;
-  flex: none;
-  width: var(--hd-hub-size);
-  height: var(--hd-hub-size);
-  margin-right: var(--hd-gap);
-  border: 1px solid var(--text);
-  border-radius: 50%;
-}
-
-.hd-hub::after {
-  content: '';
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  width: var(--hd-gap);
-  border-top: 1px solid var(--hd-rule);
-}
-
-/* the whole disc is the target, not just the mark inside it */
-.hd-hub__button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--text);
-}
-
-.hd-hub .hd-icon {
-  width: var(--hd-hub-icon);
-  height: var(--hd-hub-icon);
-}
-
-.hd-cols {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-/* below 1200px the three lists are one trunk again: the joins between them are not ends */
-.hd-branches:not(:last-child) .hd-branch:last-of-type,
-.hd-branches:not(:first-child) .hd-branch:first-of-type {
-  border-left-color: var(--hd-rule);
-}
-
-.hd-branches:not(:last-child) .hd-branch:last-of-type::after,
-.hd-branches:not(:first-child) .hd-branch:first-of-type::after {
-  content: none;
-}
-
-.hd-branches,
-.hd-leaves {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.hd-branch {
-  position: relative;
-  padding: var(--hd-branch-pad) 0 var(--hd-branch-pad) 2.25rem;
-  border-left: 1px solid var(--hd-rule);
-}
-
-/* the elbow from the trunk to this branch's label */
-.hd-branch::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: calc(var(--hd-branch-pad) + var(--hd-stub));
-  width: 1.6rem;
-  border-top: 1px solid var(--hd-rule);
-}
-
-/* trunk trimmed to the outermost elbows instead of running past them */
-.hd-branch:first-of-type,
-.hd-branch:last-of-type {
-  border-left-color: transparent;
-}
-
-.hd-branch:first-of-type::after,
-.hd-branch:last-of-type::after {
-  content: '';
-  position: absolute;
-  left: -1px;
-  border-left: 1px solid var(--hd-rule);
-}
-
-.hd-branch:first-of-type::after {
-  top: calc(var(--hd-branch-pad) + var(--hd-stub));
-  bottom: 0;
-}
-
-.hd-branch:last-of-type::after {
-  top: 0;
-  height: calc(var(--hd-branch-pad) + var(--hd-stub));
-}
-
-.hd-branch__label {
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-  color: var(--text);
-}
-
-.hd-leaves {
-  margin-top: 0.5rem;
-}
-
-/* the leaf trunk descends out of the label above it — no top trim, so the
-   sub-level visibly hangs off its category rather than floating beside it */
-.hd-leaf {
-  position: relative;
-  padding-left: 1.6rem;
-  border-left: 1px solid var(--hd-rule);
-}
-
-.hd-leaf__button {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-height: var(--hd-leaf-h);
-  padding-right: 0.4rem;
-  font-size: 1rem;
-  color: var(--text-dim);
-}
-
-.hd-leaf::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 1.1rem;
-  border-top: 1px solid var(--hd-rule);
-}
-
-/* :only-child is a last one too, so a single-service category gets exactly the
-   top half: the elbow, no line hanging below it. Matched by -of-type, not
-   -child, because the open card is a div inserted after a leaf, which would
-   otherwise steal :last-child from it and leave the trunk un-trimmed. */
-.hd-leaf:last-of-type {
-  border-left-color: transparent;
-}
-
-.hd-leaf:last-of-type::after {
-  content: '';
-  position: absolute;
-  left: -1px;
-  top: 0;
-  height: 50%;
-  border-left: 1px solid var(--hd-rule);
-}
-
-/* Rows are real buttons, so they get a real reset and real states. Nothing
-   here fights the tree lines: the <li> draws those, the <button> only carries
-   the mark and the name. */
+/* Rows are real buttons, so they get a real reset and real states */
 .hd-hub__button,
 .hd-leaf__button {
   appearance: none;
@@ -3421,7 +3184,7 @@ p.project-specs__kicker {
   cursor: pointer;
   transition:
     color 0.2s ease,
-    opacity 0.2s ease;
+    background-color 0.2s ease;
 }
 
 .hd-hub__button:disabled,
@@ -3429,59 +3192,180 @@ p.project-specs__kicker {
   cursor: default;
 }
 
-.hd-leaf__button:hover:not(:disabled),
-.hd-leaf__button[aria-expanded='true'] {
+/* the cluster: one bar across the top, the same flat surface and border as the cards */
+.hd-hub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  padding: 0.4rem 1rem 0.4rem 0.4rem;
+  border: 1px solid var(--hd-line);
+  border-radius: 1rem;
+  background: var(--bg);
+}
+
+.hd-hub__button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.75rem 0.35rem 0.6rem;
+  border-radius: 0.7rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
   color: var(--text);
 }
 
-/* The rest of the wall recedes so the open card has somewhere to be read from
-   — the same move the skills wall and the 3D hero make. Only the icon (a
-   decorative brand mark, not a text run) drops to a hard 0.4 opacity; the name
-   is real text, so it gets an actual dimmer color instead of a transparency
-   trick — 0.4 opacity on `--text-dim` over this near-black background lands
-   at ~2:1, well under the 4.5:1 a reader needs. */
-.hd-tree.is-focused .hd-leaf__button:not([aria-expanded='true']) .hd-icon,
-.hd-tree.is-focused .hd-hub__button:not([aria-expanded='true']) .hd-icon {
-  opacity: 0.4;
+.hd-hub .hd-icon {
+  width: 28px;
+  height: 28px;
 }
 
-/* ~5:1 against --bg — dim enough to read as receded, still real text */
-.hd-tree.is-focused .hd-leaf__button:not([aria-expanded='true']) .hd-row-label,
-.hd-tree.is-focused .hd-hub__button:not([aria-expanded='true']) .hd-row-label {
-  color: color-mix(in srgb, var(--text-dim) 83%, var(--bg));
-}
-
-/* full brightness when open, same as a leaf row — not the accent color,
-   which is reserved for the trunk lines lighting up (see :has() below) */
+.hd-hub__button:hover,
 .hd-hub__button[aria-expanded='true'] {
-  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-/* Opening a row lights up the trunk lines back to it, the tree's own version
-   of the hardware diagram's animated power lines — same "the active path
-   glows" idea, no animation loop needed since state changes are discrete. */
-.hd-hub:has(.hd-hub__button[aria-expanded='true'])::after {
-  border-top-color: var(--accent);
+/* which cluster node a service runs on (content.homelab.diagram.nodes), and its legend */
+.hd-node {
+  flex: none;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+  border-radius: 0.3rem;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* node 1 orange, node 2 blue: the site's two accents */
+.hd-node--1 {
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  color: var(--accent);
+}
+
+.hd-node--2 {
+  border-color: color-mix(in srgb, var(--accent-2) 60%, transparent);
+  color: var(--accent-2);
+}
+
+.hd-nodes {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.hd-node__said {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.hd-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1.25rem;
+  margin: 0 0 0 auto;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+.hd-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* the categories: three columns of cards, split in page order by homelabDiagram.js */
+.hd-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.hd-branches,
+.hd-leaves {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* same gap everywhere; content.js arranges the columns to come out (nearly) the same height,
+   and at rest the last card of each column takes up what is left, so the three end on one line.
+   While a service is open its column simply grows. */
+.hd-branches {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hd-cols:not(:has(.hd-card)) .hd-branch:last-child {
+  flex-grow: 1;
+}
+
+.hd-branch {
+  padding: 0.9rem 0.5rem 0.5rem;
+  border: 1px solid var(--hd-line);
+  border-radius: 1rem;
+  background: var(--bg);
+  transition: border-color 0.2s ease;
 }
 
 .hd-branch:has(.hd-leaf__button[aria-expanded='true']) {
-  border-left-color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
 }
 
-.hd-branch:has(.hd-leaf__button[aria-expanded='true'])::before {
-  border-top-color: var(--accent);
+.hd-branch__label {
+  margin: 0 0 0.35rem;
+  padding: 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
-.hd-leaf:has(.hd-leaf__button[aria-expanded='true']) {
-  border-left-color: var(--accent);
+/* every row is a full-width 44px target, so touch needs no extra hit area */
+.hd-leaf__button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  color: var(--text-dim);
 }
 
-.hd-leaf:has(.hd-leaf__button[aria-expanded='true'])::before {
-  border-top-color: var(--accent);
+.hd-leaf__button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
 }
 
-/* brand marks carry their own color: the services are what you're meant to
-   recognise, the rules and labels are the plumbing around them */
+.hd-leaf__button[aria-expanded='true'] {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--text);
+}
+
+/* The rest recedes so the open card has somewhere to be read from - the same move the skills
+   wall and the 3D hero make. The icon (a brand mark) drops to 0.4 opacity; the name is real text,
+   so it gets a dimmer colour instead (~5:1 against --bg). */
+.hd-tree.is-focused .hd-leaf__button:not([aria-expanded='true']) .hd-icon {
+  opacity: 0.4;
+}
+
+.hd-tree.is-focused .hd-leaf__button:not([aria-expanded='true']) .hd-row-label {
+  color: color-mix(in srgb, var(--text-dim) 83%, var(--bg));
+}
+
+/* brand marks carry their own color: the services are what you're meant to recognise */
 .hd-icon {
   flex: none;
   width: var(--hd-leaf-icon);
@@ -3489,53 +3373,69 @@ p.project-specs__kicker {
   object-fit: contain;
 }
 
-/* The card is one element, moved in the DOM to sit right after the active row.
-   By default it just opens there, in flow — which is the whole layout on a
-   phone. Only where there is actually a column free beside the tree (see the
-   min-width rule below) is it lifted out of flow into it. */
-/* GSAP animates this shell's height/opacity (see homelabDiagram.js) — the
-   look (padding/border/background) lives on .hd-card__inner instead, same
-   split as .skill-card / .skill-card__inner, so the box doesn't render a
+/* The card is one element, moved in the DOM to sit right after the active row, and opens there
+   in flow. GSAP animates this shell's height/opacity (see homelabDiagram.js) - the look lives on
+   .hd-card__inner, same split as .skill-card / .skill-card__inner, so the box doesn't render a
    bare padded rectangle for a frame while it's still at height 0. */
 .hd-card {
   position: relative;
-  max-width: 32rem;
-  margin: 0.75rem 0 0.35rem;
+  margin: 0.35rem 0;
   overflow: hidden;
+}
+
+/* a service's card is the open row's own lower half: same tint, no seam, text lined up under
+   the name, so row and description read as one tab */
+.hd-leaf:has(> .hd-leaf__button[aria-expanded='true']) > .hd-leaf__button {
+  border-radius: 0.6rem 0.6rem 0 0;
+}
+
+.hd-leaves > .hd-card {
+  margin: 0 0 0.35rem;
+}
+
+.hd-leaves .hd-card__inner {
+  padding: 0.15rem 2.5rem 0.9rem calc(0.6rem + var(--hd-leaf-icon) + 0.75rem);
+  border: 0;
+  border-radius: 0 0 0.6rem 0.6rem;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.hd-leaves .hd-card__close {
+  top: 0.1rem;
+}
+
+/* the hub's own card spans the row under the bar, at reading width */
+.hd-tree > .hd-card {
+  max-width: 40rem;
+  margin: 0;
 }
 
 .hd-card__inner {
   position: relative;
   padding: var(--hd-card-pad) calc(var(--hd-card-pad) + 0.1rem) calc(var(--hd-card-pad) + 0.15rem);
   border: 1px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
-  border-radius: 0.6rem;
+  border-radius: 0.75rem;
   background: color-mix(in srgb, var(--text) 4%, var(--bg));
 }
 
+/* the row above already shows the mark and the name (the Proxmox bar, for the hub's card): the
+   card keeps them for screen readers only and shows just what the service does */
 .hd-card__head {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-  padding-right: 1.75rem;
-}
-
-.hd-card__head .hd-icon {
-  width: var(--hd-card-icon);
-  height: var(--hd-card-icon);
-}
-
-.hd-card__title {
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  color: var(--text);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .hd-card__text {
-  font-size: 1rem;
-  line-height: 1.65;
+  padding-right: 1.75rem;
+}
+
+.hd-card__text {
+  font-size: 0.95rem;
+  line-height: 1.6;
   color: var(--text-dim);
 }
 
@@ -3566,98 +3466,40 @@ p.project-specs__kicker {
   height: 14px;
 }
 
-/* touch: the close X is 28px and the service rows 30px, under the 44px a finger needs. The hit
-   area grows with a pseudo-element, so the look and the layout of the tree do not change. */
+/* touch: the close X is 28px, the hit area grows to 44 with a pseudo-element */
 @media (pointer: coarse) {
-  /* the close X is already absolute in its corner: making it relative dropped it to the top left */
-  .hd-leaf__button {
-    position: relative;
-  }
-
   .hd-card__close::after {
     content: '';
     position: absolute;
     inset: -0.5rem;
   }
+}
 
-  .hd-leaf__button::after {
-    content: '';
-    position: absolute;
-    inset: -0.5rem 0;
+/* narrower: the three lists open up and the cards flow two to a row, then one */
+@media (max-width: 1024px) {
+  .hd-cols,
+  .hd-branches {
+    display: contents;
+  }
+
+  .hd-tree {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hd-hub,
+  .hd-tree > .hd-card {
+    grid-column: 1 / -1;
   }
 }
 
-/* Wide screens: the hub on top, three trunks hanging off one bus under it, so ~25 services
-   use the width instead of one 1,400px column. The hub's card opens beside the hub; a
-   service's card unfolds inside its own column, in flow, so nothing is covered. */
-@media (min-width: 1200px) {
+@media (max-width: 640px) {
   .hd-tree {
-    --hd-col-gap: 2.5rem;
-    display: grid;
-    grid-template-columns: var(--hd-hub-size) minmax(0, 1fr);
-    column-gap: var(--hd-gap);
-    row-gap: var(--hd-gap);
-    /* bottom-aligned, so the hub's connector always spans exactly the row gap to the bus */
-    align-items: end;
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .hd-hub {
-    margin: 0;
-  }
-
-  .hd-hub::after {
-    left: 50%;
-    top: 100%;
-    width: 0;
-    height: var(--hd-gap);
-    border-top: 0;
-    border-left: 1px solid var(--hd-rule);
-  }
-
-  .hd-tree > .hd-card {
-    margin: 0;
-  }
-
-  /* the trunks start under the hub's centre */
-  .hd-cols {
-    position: relative;
-    grid-column: 1 / -1;
-    grid-row: 2;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    column-gap: var(--hd-col-gap);
-    align-items: start;
-    margin-left: calc(var(--hd-hub-size) / 2);
-  }
-
-  /* the bus: from the first trunk to the last one */
-  .hd-cols::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: calc((100% - 2 * var(--hd-col-gap)) / 3);
-    border-top: 1px solid var(--hd-rule);
-  }
-
-  /* every trunk reaches the bus at its top and stops at its last elbow */
-  .hd-branches .hd-branch:first-of-type {
-    border-left-color: var(--hd-rule);
-  }
-
-  .hd-branches .hd-branch:first-of-type::after {
-    content: none;
-  }
-
-  .hd-branches .hd-branch:last-of-type {
-    border-left-color: transparent;
-  }
-
-  .hd-branches .hd-branch:last-of-type::after {
-    content: '';
-    top: 0;
-    bottom: auto;
-    height: calc(var(--hd-branch-pad) + var(--hd-stub));
+  .hd-legend {
+    margin-left: 0.6rem;
+    font-size: 0.85rem;
   }
 }
 
@@ -4393,63 +4235,6 @@ p.project-specs__kicker {
 
   .set-player__disc {
     margin-top: 0.1rem;
-  }
-
-  /* the tree keeps its shape on a phone, it just stops sitting side by side:
-     the hub moves above the trunk and its connector turns vertical. The trunk
-     is indented by exactly half the hub so it lands under the hub's center —
-     change one of these two values and the connector stops meeting the trunk */
-  .hd-tree {
-    flex-direction: column;
-    align-items: flex-start;
-    --hd-branch-pad: 0.7rem;
-    --hd-hub-size: 5rem;
-    --hd-leaf-icon: 22px;
-    --hd-leaf-h: 1.85rem;
-  }
-
-  /* the desktop scale is set by how much room "Personal Finance" needs
-     beside a card; on a phone it is the only thing that has to fit at all, and
-     at 1.3rem it lands within 20px of the edge at 390 */
-  .hd-branch__label {
-    font-size: 1.15rem;
-  }
-
-  .hd-leaf__button {
-    font-size: 0.95rem;
-  }
-
-  .hd-hub {
-    margin: 0 0 2rem;
-  }
-
-  /* at 8.5rem down to 5rem, the hub shrinks by nearly half but its label
-     never did — "Proxmox" at the desktop 1rem/700-weight overflowed past
-     the circle's own edge. Smaller type + a tighter gap keep icon and
-     label inside the stroke instead of spilling below it. */
-  .hd-hub__button {
-    gap: 0.25rem;
-    font-size: 0.75rem;
-  }
-
-  .hd-hub .hd-icon {
-    --hd-hub-icon: 28px;
-  }
-
-  /* runs past the gap all the way to the first branch's elbow, which sits one
-     branch-pad plus one stub into the list — stopping at the margin leaves a
-     visible break between the hub and the trunk */
-  .hd-hub::after {
-    left: 50%;
-    top: 100%;
-    width: 0;
-    height: calc(2rem + var(--hd-branch-pad) + var(--hd-stub));
-    border-top: 0;
-    border-left: 1px solid var(--hd-rule);
-  }
-
-  .hd-cols {
-    margin-left: calc(var(--hd-hub-size) / 2);
   }
 }
 

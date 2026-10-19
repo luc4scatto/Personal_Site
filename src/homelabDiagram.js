@@ -1,20 +1,16 @@
 import gsap from 'gsap';
 import { content } from './content.js';
 
-// Service tree for the homelab page - everything runs on one Proxmox cluster, so
-// the drawing is a hierarchy, not a star: hub → category → service. Connectors
-// are orthogonal elbows, the same routing language as the hardware wiring
-// diagram above it on the page, so the two read as one system.
-//
-// The tree lines are drawn in CSS (borders on the list items, see sections.css)
-// rather than SVG — the rows are text, so letting the browser lay them out is
-// what makes the whole thing reflow onto a phone with no second markup path.
+// Services on the homelab page - everything runs on one Proxmox cluster: a bar for the cluster
+// (with the node legend), then the categories as cards, each service row tagged with the node it
+// runs on. Real lists and buttons laid out by CSS (sections.css), so the same markup reflows from
+// three columns to one with no second path.
 //
 // Picking a service dims the rest of the tree and opens its card: the same
 // "focus one thing, let the rest recede" grammar as the 3D hero cloud and the
 // skills wall. The card is a single element moved to sit right after the active
-// row, which is the whole trick: it unfolds in place, in the row's own column
-// on wide screens, with no measuring code. No breakpoint twin.
+// row, which is the whole trick: it unfolds in place inside its category card,
+// with no measuring code. No breakpoint twin.
 
 // A service name maps to public/icons/services/<slug>.svg by slug. Marks whose
 // upstream file has a different name, or aren't SVG at all, are listed here.
@@ -49,8 +45,15 @@ function buildIcon(name, size) {
   return img;
 }
 
+function nodeTag(n) {
+  const tag = document.createElement('span');
+  tag.className = `hd-node hd-node--${n}`;
+  tag.textContent = `N${n}`;
+  return tag;
+}
+
 export function initHomelabDiagram(container) {
-  const { hub, categories } = content.homelab.diagram;
+  const { hub, categories, nodes = {}, nodeNames = {} } = content.homelab.diagram;
   const { serviceInfo } = content.homelab;
 
   const tree = document.createElement('div');
@@ -159,6 +162,20 @@ export function initHomelabDiagram(container) {
     label.textContent = name;
     button.append(label);
 
+    // which node it runs on: a small tag for the eye, words for a screen reader
+    const node = nodes[name];
+    if (node) {
+      // one badge per node, each in its node's colour; on both nodes, both badges
+      const tags = document.createElement('span');
+      tags.className = 'hd-nodes';
+      tags.setAttribute('aria-hidden', 'true');
+      (node === 'both' ? ['1', '2'] : [node]).forEach((n) => tags.append(nodeTag(n)));
+      const said = document.createElement('span');
+      said.className = 'hd-node__said';
+      said.textContent = node === 'both' ? ', on both nodes' : `, on node ${node}`;
+      button.append(tags, said);
+    }
+
     if (serviceInfo[name]) {
       button.setAttribute('aria-expanded', 'false');
       button.setAttribute('aria-controls', card.id);
@@ -173,29 +190,34 @@ export function initHomelabDiagram(container) {
   hubEl.className = 'hd-hub';
   const hubButton = buildRow(hub, 'hd-hub__button', 36);
   hubEl.append(hubButton);
+  // the node legend sits in the cluster bar, beside the cluster it describes; the rows already
+  // say their node in words for a screen reader, so this is for the eye only
+  if (Object.keys(nodeNames).length) {
+    const legend = document.createElement('p');
+    legend.className = 'hd-legend';
+    legend.setAttribute('aria-hidden', 'true');
+    Object.entries(nodeNames).forEach(([n, name]) => {
+      const item = document.createElement('span');
+      item.append(nodeTag(n), `Node ${n}, ${name}`);
+      legend.append(item);
+    });
+    hubEl.append(legend);
+  }
 
-  // Categories go into three lists, split in page order and balanced by rows (a label counts
-  // about one and a half). From 1200px they stand side by side as three trunks off one bus
-  // under the hub; narrower, CSS joins them back into the single trunk.
-  const COLUMNS = 3;
-  const weight = (cat) => cat.services.length + 1.5;
-  const target = categories.reduce((sum, cat) => sum + weight(cat), 0) / COLUMNS;
+  // Categories go into three lists, one per column, as content.js arranges them (balanced there
+  // by hand so the columns end on one line). Narrower than 1024px CSS opens the lists up and the
+  // cards flow two to a row, then one.
   const cols = document.createElement('div');
   cols.className = 'hd-cols';
-  let branches = null;
-  let filled = target; // forces a first list
+  const lists = [0, 1, 2].map(() => {
+    const ul = document.createElement('ul');
+    ul.className = 'hd-branches';
+    cols.append(ul);
+    return ul;
+  });
 
   categories.forEach((cat) => {
-    const w = weight(cat);
-    // a new list once this one is full, unless it is the last one allowed
-    if (filled + w / 2 > target && cols.children.length < COLUMNS) {
-      branches = document.createElement('ul');
-      branches.className = 'hd-branches';
-      cols.append(branches);
-      filled = 0;
-    }
-    filled += w;
-
+    const branches = lists[cat.column ?? 0];
     const branch = document.createElement('li');
     branch.className = 'hd-branch';
 
@@ -226,7 +248,8 @@ export function initHomelabDiagram(container) {
   // focusWall: false skips the wall-dim for this automatic open, so every
   // service icon still shows its real brand color until a visitor actually
   // clicks something.
-  openCard(hubButton, hub, { focusWall: false });
+  // Not on a phone: there the open card would take a whole screen before the first category.
+  if (!matchMedia('(max-width: 640px)').matches) openCard(hubButton, hub, { focusWall: false });
 
   close.addEventListener('click', () => {
     const previous = active;

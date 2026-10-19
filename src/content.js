@@ -85,7 +85,10 @@ export const content = {
           name: 'TouchDesigner',
           text: 'MediaPipe hand and pose tracking, gestures built from live data channels (CHOPs)',
         },
-        { name: 'OSC', text: 'A lightweight message protocol: one message per gesture channel, over localhost' },
+        {
+          name: 'OSC',
+          text: 'A lightweight message protocol: one message per gesture channel, over localhost',
+        },
         { name: 'Unreal Engine 5.7', text: 'Levels, sequences and UI driven by those messages' },
       ],
       journeyLabel: "The visitor's path",
@@ -233,25 +236,61 @@ export const content = {
     // dashes) - add a service here and drop its mark in that folder.
     diagram: {
       hub: 'Proxmox',
+      // three columns of cards, top to bottom. Arranged so the columns come out the same height
+      // with the same gap between cards: two columns of four cards with 7 services, one of
+      // three cards with 8 (a card with one more row weighs about as much as one more card).
+      // The last card of the shorter column takes up the last ~20px. Moving a category or
+      // adding a service means re-balancing by hand.
       categories: [
         {
+          column: 0,
           label: 'Media Library',
           services: ['Jellyfin', 'Navidrome', 'Media Automation'],
         },
-        { label: 'Networking', services: ['Tailscale', 'WireGuard', 'Caddy', 'Pi-hole'] },
-        { label: 'Security', services: ['Pocket ID', 'Vaultwarden'] },
-        { label: 'Photos & Backup', services: ['Immich', 'Proxmox Backup Server'] },
+        { column: 0, label: 'Photos & Backup', services: ['Immich', 'Proxmox Backup Server'] },
+        { column: 0, label: 'Personal Finance', services: ['Actual Budget'] },
+        { column: 0, label: 'Dashboard', services: ['Homarr'] },
+        { column: 1, label: 'Networking', services: ['Tailscale', 'Caddy', 'Pi-hole'] },
+        { column: 1, label: 'Alerts & Updates', services: ['ntfy', 'Diun'] },
+        { column: 1, label: 'Infra Tools', services: ['Dockge'] },
+        { column: 1, label: 'Agent', services: ['Hermes Agent'] },
         {
+          column: 2,
           label: 'Monitoring',
           services: ['Uptime Kuma', 'Grafana', 'Prometheus', 'Beszel', 'Speedtest Tracker'],
         },
-        { label: 'Alerts & Updates', services: ['ntfy', 'Diun'] },
-        { label: 'Home Automation', services: ['Home Assistant'] },
-        { label: 'Dashboard', services: ['Homarr'] },
-        { label: 'Personal Finance', services: ['Actual Budget'] },
-        { label: 'Infra Tools', services: ['Dockge'] },
-        { label: 'Agent', services: ['Hermes Agent'] },
+        { column: 2, label: 'Security', services: ['Pocket ID', 'Vaultwarden'] },
+        { column: 2, label: 'Home Automation', services: ['Home Assistant'] },
       ],
+      // which cluster node each service runs on: 1 = HP EliteDesk, 2 = Lenovo ThinkCentre, both
+      // when there is an instance on each (from the lab's own inventory, 2026-10-19). Node
+      // names only, never hostnames or IDs. Update when a container moves.
+      // the legend in the cluster bar
+      nodeNames: { 1: 'HP EliteDesk', 2: 'Lenovo ThinkCentre' },
+      nodes: {
+        Jellyfin: '1',
+        Navidrome: '1',
+        'Media Automation': '2',
+        Tailscale: 'both',
+        Caddy: '2',
+        'Pi-hole': 'both',
+        'Pocket ID': '2',
+        Vaultwarden: '2',
+        Immich: '1',
+        'Proxmox Backup Server': '2',
+        'Uptime Kuma': '2',
+        Grafana: '2',
+        Prometheus: '2',
+        Beszel: '1',
+        'Speedtest Tracker': '2',
+        ntfy: '2',
+        Diun: 'both',
+        'Home Assistant': '1',
+        Homarr: '2',
+        'Actual Budget': '2',
+        Dockge: '2',
+        'Hermes Agent': '1',
+      },
     },
     servicesHint: 'Pick a service to read what it does.',
     // Card copy for the service tree, keyed by the same name used above - a
@@ -271,8 +310,6 @@ export const content = {
         'Keeps the library stocked on its own: what is wanted is tracked, sourced and filed without anyone checking by hand.',
       Tailscale:
         'Mesh VPN built on WireGuard. Puts every device on one private network without opening a single port on the router.',
-      WireGuard:
-        'The VPN protocol underneath Tailscale. Small enough to audit in an afternoon, which is why it displaced the older, heavier stacks.',
       Immich:
         'Self-hosted photo and video backup. Phone gallery sync, search and albums, without handing the library to a cloud provider.',
       Homarr:
@@ -303,10 +340,8 @@ export const content = {
         'Time-series database behind the dashboards. Scrapes the exporters on each node and service and keeps the numbers Grafana draws.',
       'Speedtest Tracker':
         'Runs a connection speed test on a schedule and logs the results, so a slow line shows up as a trend rather than a feeling.',
-      ntfy:
-        'Self-hosted push notifications. Monitors, backups and update checks all report here, and it lands on the phone without a third-party app server.',
-      Diun:
-        'Watches the container images in use and sends a notification when a new version is out. Updates stay a deliberate, manual step.',
+      ntfy: 'Self-hosted push notifications. Monitors, backups and update checks all report here, and it lands on the phone without a third-party app server.',
+      Diun: 'Watches the container images in use and sends a notification when a new version is out. Updates stay a deliberate, manual step.',
       'Hermes Agent':
         'Self-hosted AI agent from Nous Research, reachable over Telegram and Discord instead of a web UI. Builds its own skills from experience and keeps memory across sessions, rather than starting blank every chat.',
     },
@@ -350,7 +385,8 @@ export const content = {
           'Steps through every model and colorway in the scene to check each look before it goes out',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
-        result: 'A look-dev scene starts from product data: models, materials and renders come in from one panel instead of being set up one at a time.',
+        result:
+          'A look-dev scene starts from product data: models, materials and renders come in from one panel instead of being set up one at a time.',
         idea: 'The whole kit is built around two open standards: **USD** for everything in the scene, from templates to models, and **OpenPBR in MaterialX** for every material, so a material is written once in a standard format that any USD or MaterialX-compatible tool can open, with no conversion. Materials are also **portable**: whenever one is created or updated, its links to textures and to its master material are saved as relative paths, so a material folder can be moved anywhere in the library and every scene that uses it keeps working.',
       },
       {
@@ -377,7 +413,8 @@ export const content = {
           'Exports that as JSON, one file per SKU or a whole release at once, ready for the render tools downstream',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
-        result: 'Every model leaves Maya cleaned, unwrapped and named the same way, so nothing has to be fixed again before rendering.',
+        result:
+          'Every model leaves Maya cleaned, unwrapped and named the same way, so nothing has to be fixed again before rendering.',
         idea: "Naming comes from **product data**, not memory: the panel loads the model's component list and builds a tree, and picking a node renames the selected mesh to the standard convention, suffixes included. Every tool after it can trust the names.",
       },
       {
@@ -387,7 +424,10 @@ export const content = {
         highlights: [
           { icon: 'unreal-engine.svg', label: 'Unreal Engine' },
           { icon: 'python.svg', label: 'Python' },
-          { label: 'Editor Utility Widgets', title: 'Custom panels built inside the Unreal editor' },
+          {
+            label: 'Editor Utility Widgets',
+            title: 'Custom panels built inside the Unreal editor',
+          },
           { label: 'Movie Render Graph' },
         ],
         // one line for the index card, under its Problem label; the full problem is in the chapter
@@ -401,7 +441,8 @@ export const content = {
           'Copies camera and light keyframes across sequences, then drives Movie Render Graph',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
-        result: 'A new colorway is one click instead of a rebuild, and every render comes out already named.',
+        result:
+          'A new colorway is one click instead of a rebuild, and every render comes out already named.',
         idea: 'Everything is **incremental**: the scripts compare what is already in the project with the data table and only add the difference, so a new colorway is one click, not a rebuild. When the render queue finishes, a hook renames every EXR from frame numbers to Model_Colorway.Camera.',
       },
       {
@@ -425,7 +466,8 @@ export const content = {
           'Gives variant families their own slides and flags prescription-ready models',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
-        result: 'A seasonal catalogue is a release and a brand picked from a list, with no copying between systems.',
+        result:
+          'A seasonal catalogue is a release and a brand picked from a list, with no copying between systems.',
         idea: 'The layout is a small **engine**, not a fixed template: positions are computed from how many variant groups land on each slide, product images are auto-cropped, and one list of slide jobs decides both how many slides exist and what goes on each.',
       },
       {
@@ -448,7 +490,8 @@ export const content = {
           'A second tab splits any finished deck into 4K PNGs, named after the model on each slide',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
-        result: 'An evaluation deck builds itself from product data, one slide per style, with nothing typed by hand.',
+        result:
+          'An evaluation deck builds itself from product data, one slide per style, with nothing typed by hand.',
         idea: 'python-pptx cannot duplicate slides faithfully, so the builder drives **PowerPoint itself** to clone the template, then hands the file back to python-pptx to fill every placeholder.',
       },
     ],
