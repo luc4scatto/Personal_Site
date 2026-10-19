@@ -40,12 +40,6 @@ function buildIndex(list, tools) {
       el('span', 'pp-index__name', rich(tool.name)),
       el('span', 'pp-index__label', 'Problem'),
       el('span', 'pp-index__problem', rich(tool.teaser)),
-      ...(tool.outcome
-        ? [
-            el('span', 'pp-index__label', 'What changed'),
-            el('span', 'pp-index__problem pp-index__outcome', rich(tool.outcome)),
-          ]
-        : []),
       // arrow down: the chapter is further down this page, not another page
       el(
         'span',

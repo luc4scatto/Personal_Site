@@ -2296,8 +2296,7 @@
    the browser slants the roman - close to a true italic on a sans this plain. */
 .contact-intro .contact-details {
   margin-top: 0.75rem;
-  font-size: 0.9rem;
-  font-style: italic;
+  font-size: 0.95rem;
   max-width: 44ch;
 }
 
@@ -2656,6 +2655,18 @@ p.project-specs__kicker {
   grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
   gap: clamp(2rem, 5vw, 4rem);
   align-items: center;
+}
+
+/* one concrete outcome under the facts, the same slot Company Brain fills with its 82% */
+.project-outcome {
+  max-width: 34rem;
+  margin-top: 1.5rem;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--accent);
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+  line-height: 1.4;
+  color: var(--text);
 }
 
 .page-hero__media {
@@ -3068,7 +3079,8 @@ p.project-specs__kicker {
   color: var(--text-dim);
 }
 
-/* every project one tap away from the end of any of them, not only the next one */
+/* every project one tap away from the end of any of them, not only the next one. Two columns,
+   so the four never wrap three-and-one */
 .project-all {
   margin-bottom: 1.25rem;
 }
@@ -3084,9 +3096,9 @@ p.project-specs__kicker {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 0 1.5rem;
 }
 
 .project-all a {
@@ -4521,18 +4533,18 @@ p.project-specs__kicker {
   gap: 1rem;
 }
 
-/* each card is a subgrid over seven shared rows (icon, name, label, problem,
-   label, outcome, link), so a two-line name pushes every card's label down with it and the
+/* each card is a subgrid over five shared rows (icon, name, label, problem,
+   link), so a two-line name pushes every card's label down with it and the
    five read as one table, not five boxes that happen to sit side by side */
 .pp-index > li {
   display: grid;
-  grid-row: span 7;
+  grid-row: span 5;
   grid-template-rows: subgrid;
 }
 
 .pp-index__tile {
   display: grid;
-  grid-row: span 7;
+  grid-row: span 5;
   grid-template-rows: subgrid;
   row-gap: 0.6rem;
   justify-items: start;
@@ -4575,10 +4587,6 @@ p.project-specs__kicker {
   margin-top: -0.35rem;
   font-size: 0.9rem;
   color: var(--text-dim);
-}
-
-.pp-index__outcome {
-  color: var(--text);
 }
 
 /* says the card is a way in: a small round arrow, filled on hover */
@@ -7110,7 +7118,9 @@ button.pp-btn:active {
     pointer-events: auto;
   }
 
+  /* numbered like the index above, so the two deck tools (same PowerPoint mark) tell apart */
   .pp-rail ul {
+    counter-reset: tool;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -7150,6 +7160,28 @@ button.pp-btn:active {
 
   .pp-rail img {
     display: block;
+  }
+
+  .pp-rail li {
+    counter-increment: tool;
+  }
+
+  .pp-rail a::before {
+    content: counter(tool);
+    position: absolute;
+    right: -0.3rem;
+    bottom: -0.3rem;
+    display: grid;
+    place-items: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    background: var(--bg);
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    line-height: 1;
+    color: var(--text);
   }
 
   .pp-rail__name {

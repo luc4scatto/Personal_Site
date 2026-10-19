@@ -6,11 +6,11 @@ Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiest
 
 Dopo tutti i punti del nono giro. Voto stabile a 25/32 (quattro giri su cinque): tutto quello che si misura è pulito (CLS in produzione al massimo 0,008, zero errori, testo a 12px, tocchi a 44px), i revisori ora cambiano idea tra un giro e l'altro (il risultato sulle card, chiesto all'ottavo, al decimo è una ripetizione). Restano punti di contenuto.
 
-- [ ] **P1 Una riga di risultato per Vivatech e Homelab** - nello stesso punto di Company Brain e Pipeline, sotto ruolo/periodo/stato. Homelab si può scrivere dai testi (servizi in esecuzione, nessuna porta aperta); Vivatech serve un dato di Luca (visitatori, durata, cosa ha funzionato).
-- [ ] **P1 Pipeline ripete il risultato** - card dell'indice, "What changed" e problema. Decidere se il risultato sta sulle card o nei capitoli; "What it does" a tre punti.
-- [ ] **P2 Vivatech la pagina meno costruita** - galleria a 4-5 foto con una principale, stampa come card con il nome della fonte.
-- [ ] **P3 Rail di Pipeline** - le due icone PowerPoint sono uguali: un numero accanto a ogni icona.
-- [ ] **P3 Minori** - "All projects" che va a capo lasciando Homelab da solo; troppi grassetti nei testi di Pipeline e Homelab; "I usually reply within a few hours" in corsivo piccolo.
+- [x] **P1 Riga di risultato per Vivatech e Homelab** - fatto: Homelab "Over twenty services in daily use..."; Vivatech "Four days live at an event of over 200,000 visitors. What held people at the screen was the gestures..." (200.000 è la cifra degli organizzatori per tutto l'evento, non per lo stand: un conteggio dello stand non esiste; 17-20 giugno, stand aperto tutti e quattro i giorni).
+- [x] **P1 Pipeline ripete il risultato** - fatto (scelta di Luca: solo nei capitoli): le card dell'indice mostrano di nuovo solo il problema, tolti i campi `outcome` da `content.js`.
+- [x] **P2 Vivatech la pagina meno costruita** - galleria lasciata intera (scelta di Luca: tutte le foto sono interessanti).
+- [x] **P3 Rail di Pipeline** - fatto: numero 1-5 su ogni icona (contatore CSS).
+- [x] **P3 Minori** - fatto: "All projects" su due colonne (niente più Homelab da solo); grassetti tolti dai nomi di prodotti e servizi nei testi di Pipeline e Homelab; "I usually reply within a few hours" in testo normale.
 
 ## Critique, nono giro (2026-10-19, 25/32)
 
