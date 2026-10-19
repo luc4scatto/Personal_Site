@@ -3386,7 +3386,7 @@ p.project-specs__kicker {
    own rule still applies once JS appends it, harmlessly redundant. */
 #homelab-hardware {
   min-width: 56rem;
-  aspect-ratio: 1000 / 525;
+  aspect-ratio: 1000 / 600;
 }
 
 .homelab-hardware-scroll::-webkit-scrollbar {
@@ -3414,9 +3414,9 @@ p.project-specs__kicker {
   --hw-lan: #22c3d1;
   position: relative;
   /* the narrowest the canvas may get before it scrolls: labels and icons are fixed-rem, and
-     below ~56rem the two nvme nodes (75 viewBox units apart) sit closer than one icon is wide */
+     below ~56rem the two cluster nodes (75 viewBox units apart) sit closer than one icon is wide */
   min-width: 56rem;
-  aspect-ratio: 1000 / 525;
+  aspect-ratio: 1000 / 600;
   margin: 0 auto;
 }
 
@@ -3614,8 +3614,8 @@ p.project-specs__kicker {
 }
 
 .hw-label--group {
-  transform: translate(0, -50%);
-  text-align: left;
+  transform: translate(-100%, -50%);
+  text-align: right;
   font-size: 0.75rem;
   color: var(--accent);
   text-transform: uppercase;
