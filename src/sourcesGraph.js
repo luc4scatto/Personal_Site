@@ -14,11 +14,11 @@ const LINE = 'rgba(190, 200, 220, 0.16)';
 
 // unit space: x in [-1, 1], y in [-0.8, 0.8]; the card holds x from 0.2 to 0.98
 const SOURCES = [
-  { label: 'Technical data', color: ORANGE, x: -0.5, y: -0.62, tag: 0 },
+  { label: 'Technical data', color: ORANGE, x: -0.64, y: -0.62, tag: 0 },
   { label: 'Catalog', color: BLUE, x: -0.86, y: -0.24, tag: 1 },
   { label: 'Photos', color: BLUE, x: -0.46, y: 0.04, tag: 1 },
   { label: 'Drawings', color: TEAL, x: -0.88, y: 0.34, tag: 2 },
-  { label: 'Prototypes', color: ORANGE, x: -0.5, y: 0.64, tag: 0 },
+  { label: 'Prototypes', color: ORANGE, x: -0.6, y: 0.64, tag: 0 },
 ];
 const CARD = { x: 0.2, y: -0.55, w: 0.78, h: 1.1 };
 // packet order: not top to bottom, so the card does not read as a scan line
@@ -38,7 +38,6 @@ export function initSourcesGraph(canvas) {
   let raf = 0;
   let visible = true;
   let start = performance.now() / 1000;
-  let done = false;
 
   const px = (x) => w / 2 + x * scale;
   const py = (y) => h / 2 + y * scale;
@@ -48,14 +47,23 @@ export function initSourcesGraph(canvas) {
     x: CARD.x,
     y: CARD.y + 0.2 + (i / (SOURCES.length - 1)) * (CARD.h - 0.4),
   });
-  const point = (s, i, t) => {
-    const a = { x: px(s.x), y: py(s.y) };
+  // a curve starts just past its label, so the line never runs under the text
+  const labelW = SOURCES.map(() => 0);
+  const from = (s, i) => ({ x: px(s.x) + 12 + labelW[i] + 6, y: py(s.y) });
+  // an S: leaves the label level and meets the card level, so it never kinks at either end
+  const curve = (s, i) => {
+    const a = from(s, i);
     const b = { x: px(landing(i).x), y: py(landing(i).y) };
-    const c = { x: (a.x + b.x) / 2, y: a.y };
+    const k = (b.x - a.x) * 0.55;
+    return [a, { x: a.x + k, y: a.y }, { x: b.x - k, y: b.y }, b];
+  };
+  const point = (s, i, t) => {
+    const [a, c1, c2, b] = curve(s, i);
     const u = 1 - t;
+    const q = [u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t];
     return {
-      x: u * u * a.x + 2 * u * t * c.x + t * t * b.x,
-      y: u * u * a.y + 2 * u * t * c.y + t * t * b.y,
+      x: q[0] * a.x + q[1] * c1.x + q[2] * c2.x + q[3] * b.x,
+      y: q[0] * a.y + q[1] * c1.y + q[2] * c2.y + q[3] * b.y,
     };
   };
 
@@ -63,6 +71,9 @@ export function initSourcesGraph(canvas) {
     ctx.clearRect(0, 0, w, h);
     const t = now - start;
     const font = (size, weight = 400) => `${weight} ${size}px ${family}`;
+    const labelFont = font(Math.max(11, scale * 0.052));
+    ctx.font = labelFont;
+    SOURCES.forEach((s, i) => (labelW[i] = ctx.measureText(s.label).width));
 
     // how lit each tag on the card is, 0 to 1
     const lit = [0, 0, 0];
@@ -87,10 +98,9 @@ export function initSourcesGraph(canvas) {
     SOURCES.forEach((s, i) => {
       ctx.strokeStyle = LINE;
       ctx.beginPath();
-      const a = { x: px(s.x), y: py(s.y) };
-      const b = { x: px(landing(i).x), y: py(landing(i).y) };
+      const [a, c1, c2, b] = curve(s, i);
       ctx.moveTo(a.x, a.y);
-      ctx.quadraticCurveTo((a.x + b.x) / 2, a.y, b.x, b.y);
+      ctx.bezierCurveTo(c1.x, c1.y, c2.x, c2.y, b.x, b.y);
       ctx.stroke();
     });
 
@@ -181,7 +191,7 @@ export function initSourcesGraph(canvas) {
     ctx.globalAlpha = 1;
 
     // sources: a dot and a label each
-    ctx.font = font(Math.max(11, scale * 0.052));
+    ctx.font = labelFont;
     SOURCES.forEach((s) => {
       ctx.fillStyle = s.color;
       ctx.beginPath();
@@ -210,26 +220,17 @@ export function initSourcesGraph(canvas) {
     canvas.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     scale = Math.min(w / 2.1, h / 1.75);
-    draw(performance.now() / 1000, reduced || done);
+    draw(performance.now() / 1000, reduced);
   }
 
-  // one full round each time the picture comes into view, then it rests on the finished
-  // answer: every source has arrived and every pill is lit. Motion never runs for long.
-  const ROUND = SOURCES.length * PERIOD + FLIGHT + 1.1;
+  // loops while on screen; off screen or in a hidden tab it stops on its last frame
   function frame(now) {
-    if (now / 1000 - start > ROUND) {
-      draw(now / 1000, true);
-      done = true;
-      raf = 0;
-      return;
-    }
     draw(now / 1000, false);
     raf = requestAnimationFrame(frame);
   }
   const run = () => {
     if (raf || reduced || !visible || document.hidden) return;
     start = performance.now() / 1000;
-    done = false;
     raf = requestAnimationFrame(frame);
   };
   const halt = () => {
