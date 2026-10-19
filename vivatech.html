@@ -39,7 +39,13 @@
         <dl class="project-facts" data-stagger>
           <div><dt>Role</dt><dd>Built the real-time experience</dd></div><div><dt>Timeline</dt><dd>2026, for Vivatech Paris</dd></div><div><dt>Status</dt><dd>Shown live at the event</dd></div>
         </dl>
-        <img class="project-cover" src="images/1782142834983.webp" alt="Thélios booth at the LVMH Dream Gallery, Vivatech Paris" width="2048" height="1365" data-stagger />
+        <!-- the proof first: the installation running, not a photo of the booth. width/height are
+             the real pixel size, so the box is there before the metadata arrives; the poster is a
+             frame from the video itself (a designer at the CAD station, 7s in) -->
+        <video class="project-cover project-cover--video" controls playsinline preload="metadata" width="1920" height="1080" poster="images/vivatech-video-poster.webp" data-stagger>
+          <source src="video/vivatech-2026.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       </section>
 
       <section id="description" class="project-description">
@@ -58,18 +64,8 @@
         </p>
       </section>
 
-      <section id="video" class="project-video">
-        <!-- width/height are the real pixel size (same reasoning as the gallery images
-             above): without them the video has no box until its metadata arrives over
-             the network, so everything below it — the whole gallery — sits higher up
-             the page for that window and the IntersectionObserver reveals below can
-             fire against the wrong, temporary position. The poster is a frame from the
-             video itself (a designer at the CAD station, 7s in), so the box shows the work
-             instead of a grey spinner while the metadata loads. -->
-        <video controls playsinline preload="metadata" width="1920" height="1080" poster="images/vivatech-video-poster.webp" data-reveal>
-          <source src="video/vivatech-2026.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+      <section id="booth" class="project-booth">
+        <img class="project-cover" src="images/1782142834983.webp" alt="Thélios booth at the LVMH Dream Gallery, Vivatech Paris" width="2048" height="1365" loading="lazy" data-reveal />
       </section>
 
       <section id="how" class="vt-how">

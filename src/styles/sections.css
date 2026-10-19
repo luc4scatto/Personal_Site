@@ -1419,7 +1419,7 @@
   align-items: center;
   gap: 0.4rem;
   margin: 0.45rem 0 0;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   color: var(--text-dim);
 }
@@ -2581,6 +2581,12 @@
   gap: 1rem;
 }
 
+/* one photo left beside the build sheet (the front view moved up to the hero): half the column,
+   not a 3:4 picture the full width of it */
+.project-photo-row > .project-photo:only-child {
+  flex: 0 1 50%;
+}
+
 .project-photo {
   flex: 1;
   min-width: 0;
@@ -2640,6 +2646,45 @@ p.project-specs__kicker {
 .project-specs__credit a::before {
   content: '↗ ';
   color: var(--accent-2);
+}
+
+/* Vivatech opens on the video itself, at its own 16:9 rather than the cover's 21:9 crop */
+/* a project hero with its proof beside the title (Homelab's rack): text left, picture right,
+   stacked on narrow screens */
+.page-hero--split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+
+.page-hero__media {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 50% 70%;
+  border-radius: 1rem;
+}
+
+@media (max-width: 700px) {
+  .page-hero--split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page-hero__media {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.project-cover--video {
+  aspect-ratio: 16 / 9;
+  display: block;
+  background: #000;
+}
+
+.project-booth .project-cover {
+  margin-top: 0;
 }
 
 .project-video video {
@@ -3960,8 +4005,9 @@ p.project-specs__kicker {
        scrollPanelBesideStack() in main.js), so with none of this the drawer's rounded
        corner could end up flush against the viewport's own top edge with an open card
        right behind it, or the strip's foot could land close enough to "Projects" for the
-       two to read as one run */
-    margin: 2.5rem 0 3.5rem;
+       two to read as one run. The section padding below already keeps it apart from
+       "Projects": 3.5rem on top of it left ~225px of empty mat on the phone */
+    margin: 2.5rem 0 1rem;
     width: 50%;
     padding: 7px;
     border-radius: 0.55rem;
@@ -4669,6 +4715,64 @@ p.project-specs__kicker {
      content's min width, and the mockups' nowrap log lines widened the page */
   .pp-tool {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* phone: the index is a plain list of five links (each chapter opens with its own problem and
+   outcome, the cards were saying it twice), and every chapter shows its mockup right after the
+   title and the outcome, not six screens of text later */
+@media (max-width: 700px) {
+  .pp-index {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .pp-index > li {
+    display: block;
+  }
+
+  .pp-index__tile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.5rem;
+    padding: 0.6rem 1rem;
+  }
+
+  .pp-index__label,
+  .pp-index__problem {
+    display: none;
+  }
+
+  .pp-index__go {
+    margin-left: auto;
+  }
+
+  .pp-tool {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* the text column opens up so the mockup can slot in after title, tools and outcome */
+  .pp-tool__text {
+    display: contents;
+  }
+
+  .pp-tool__text > * {
+    order: 2;
+  }
+
+  .pp-tool__text > :nth-child(-n + 4) {
+    order: 0;
+  }
+
+  .pp-tool__ui {
+    order: 1;
+    /* a flex item keeps its content's min width: the mockups' nowrap lines pushed it off screen */
+    width: 100%;
+    min-width: 0;
+    margin-block: 1.75rem 0.5rem;
   }
 }
 
@@ -6785,13 +6889,6 @@ button.pp-btn:active {
   color: var(--text);
 }
 
-/* the pilot's headline number under the pitch, quieter than the pitch itself */
-.cb-proof {
-  margin-top: 0.75rem;
-  font-size: 1rem;
-  color: var(--text-dim);
-}
-
 .cb-proof a {
   color: var(--text);
   text-decoration: underline;
@@ -6799,9 +6896,24 @@ button.pp-btn:active {
   white-space: nowrap;
 }
 
-.cb-proof strong {
-  color: var(--accent);
+/* the pilot's headline number, big: the first thing the page proves, before any explaining */
+.cb-proof {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  color: var(--text-dim);
+}
+
+.cb-proof__num {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6vw, 4.25rem);
   font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--accent);
 }
 
 /* hero: the title and what it is on the left, the picture of the idea on the right, so the

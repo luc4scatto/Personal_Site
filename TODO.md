@@ -1,16 +1,26 @@
 # TODO
 
-Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-19 (nono giro di critique, 25/32).
+Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-19 (decimo giro di critique, 25/32).
+
+## Critique, decimo giro (2026-10-19, 25/32)
+
+Dopo tutti i punti del nono giro. Voto stabile a 25/32 (quattro giri su cinque): tutto quello che si misura è pulito (CLS in produzione al massimo 0,008, zero errori, testo a 12px, tocchi a 44px), i revisori ora cambiano idea tra un giro e l'altro (il risultato sulle card, chiesto all'ottavo, al decimo è una ripetizione). Restano punti di contenuto.
+
+- [ ] **P1 Una riga di risultato per Vivatech e Homelab** - nello stesso punto di Company Brain e Pipeline, sotto ruolo/periodo/stato. Homelab si può scrivere dai testi (servizi in esecuzione, nessuna porta aperta); Vivatech serve un dato di Luca (visitatori, durata, cosa ha funzionato).
+- [ ] **P1 Pipeline ripete il risultato** - card dell'indice, "What changed" e problema. Decidere se il risultato sta sulle card o nei capitoli; "What it does" a tre punti.
+- [ ] **P2 Vivatech la pagina meno costruita** - galleria a 4-5 foto con una principale, stampa come card con il nome della fonte.
+- [ ] **P3 Rail di Pipeline** - le due icone PowerPoint sono uguali: un numero accanto a ogni icona.
+- [ ] **P3 Minori** - "All projects" che va a capo lasciando Homelab da solo; troppi grassetti nei testi di Pipeline e Homelab; "I usually reply within a few hours" in corsivo piccolo.
 
 ## Critique, nono giro (2026-10-19, 25/32)
 
 Dopo tutti i punti dell'ottavo giro. Voto di nuovo 25/32: il revisore ha letto il codice del modulo e ridà 4 al recupero dagli errori. Zero errori in console, nessun testo visibile sotto 12px, tocchi a 44px. Il CLS sul dev server (fino a 0,075 su Pipeline desktop) viene dal CSS iniettato da Vite in sviluppo: sulla build di produzione è 0 sulle pagine progetto e 0,014 in home. Aggiunto comunque un fallback metrico per Space Grotesk (`base.css`) per lo scambio di font su reti lente.
 
-- [ ] **P1 Pipeline ripetitivo su telefono** (`/impeccable distill`) - 10.700px; le card dell'indice ripetono problema e risultato dei capitoli. Su telefono card come soli link, mockup prima del testo, un capitolo con layout diverso.
-- [ ] **P2 Spazi vuoti su telefono** (`/impeccable adapt`) - ~300px tra skill e Projects in home; spazio lungo prima di "Design choices" su Company Brain.
-- [ ] **P2 Hero delle pagine progetto con la prova** (`/impeccable bolder`) - tutte aprono con lo stesso schema; numeri del pilota, poster del video, foto del rack più in alto. Cambio di struttura: decide Luca.
-- [ ] **P2 Banner cookie su telefono** - copre "Send message" e lo stato del modulo finché non si risponde; "Read the privacy policy" alto 26px.
-- [ ] **P3 Incoerenze** - "View project" in home contro "Next project" in fondo ai progetti; pulsante dell'hero contornato e quello del modulo pieno; orari del player a 11,5px.
+- [x] **P1 Pipeline ripetitivo su telefono** - fatto: sotto 700px l'indice è un elenco di cinque link (icona e nome), ogni capitolo mostra il mockup subito dopo titolo, strumenti e "What changed" (`.pp-tool__text` in `display: contents` e `order`). Pagina da 10.700 a 10.000px.
+- [x] **P2 Spazi vuoti su telefono** - fatto in home: margine sotto il cassetto delle skill da 3,5rem a 1rem. Lo spazio sotto la chat di Company Brain resta: è l'altezza uguale per tutte le scene che evita lo spostamento del layout.
+- [x] **P2 Hero delle pagine progetto con la prova** - fatto (scelta di Luca): Company Brain con "82%" grande accanto alla frase; Vivatech apre con il video (16:9) e la foto dello stand scende al posto del video; Homelab con la foto frontale del rack accanto al titolo (`.page-hero--split`), la foto del retro resta accanto alla scheda tecnica a metà larghezza.
+- [x] **P2 Banner cookie su telefono** - fatto: `body` con `padding-bottom` pari all'altezza del banner e `scroll-padding-bottom` uguale, così Send e lo stato del modulo escono da sotto; link della privacy a 44px su touch.
+- [x] **P3 Incoerenze** - orari del player a 12px. Lasciati com'erano: "View project" (card in home) e "Next project" (in fondo ai progetti) dicono cose diverse; il pulsante pieno del modulo è l'azione principale della pagina, quello contornato dell'hero è un rimando.
 
 ## Critique, ottavo giro (2026-10-19, 24/32)
 

@@ -91,6 +91,9 @@ html {
      the bar - the thing you clicked to read is the thing you cannot see. Measured at 65px
      of bar, rounded up for air. */
   scroll-padding-top: 5.5rem;
+  /* same at the foot while the consent banner is up (analytics.js sets the variable), so a
+     field focused by the form's validation never lands behind it */
+  scroll-padding-bottom: var(--cookie-banner-h, 0px);
   /* The body's overflow-x below is not enough on its own: with html left visible, the body's
      value is handed to the viewport, and a phone's viewport widens to fit what overflows anyway
      (the cutting mat's -3rem bleed made the home 438px wide on a 390px screen, nav Contact off
@@ -225,6 +228,25 @@ section {
 }
 
 /* cookie consent — injected by src/analytics.js, only when no choice is stored yet */
+/* the banner sits over the end of the page until it is answered: room for it, so the last
+   thing on the page (the contact form's Send and its status line) can scroll clear of it */
+body {
+  padding-bottom: var(--cookie-banner-h, 0px);
+}
+
+/* touch: the policy link is a 26px line of text, the hit area grows to 44 without moving it */
+@media (pointer: coarse) {
+  .cookie-banner p a {
+    position: relative;
+  }
+
+  .cookie-banner p a::after {
+    content: '';
+    position: absolute;
+    inset: -9px 0;
+  }
+}
+
 .cookie-banner {
   position: fixed;
   inset: auto 0 0 0;
