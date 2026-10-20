@@ -70,15 +70,15 @@ export const content = {
   vivatech: {
     kicker: 'Work · Live installation',
     description1:
-      "At Vivatech 2026 - the tenth edition of Europe's biggest tech event - LVMH brought ten of its Maisons to the Dream Gallery pavilion in Paris, showing how technology amplifies craftsmanship across the whole value chain.",
+      "Vivatech 2026 was the tenth edition of Europe's biggest tech event. LVMH brought ten of its Maisons to the Dream Gallery pavilion in Paris, showing how technology amplifies craftsmanship across the whole value chain.",
     description2:
-      'For the Thélios space I developed the real-time interactive experience: a live 3D showcase of eyewear digital twins, built with TouchDesigner and Unreal Engine, letting visitors explore frames, materials and details up close as they interact with the installation.',
+      'For the Thélios space, my colleagues and I developed the real-time interactive experience: a live 3D showcase of eyewear digital twins, built with TouchDesigner and Unreal Engine, letting visitors explore frames, materials and details up close as they interact with the installation.',
     // "How it works": the installation's own chain and the visitor's path through it.
     // Sanitized like pipelineProjects: no brand names, model codes, IPs or internal level names.
     how: {
       title: 'How it works',
       intro:
-        "Nothing in the booth is touched. A webcam follows one hand and the visitor's head, TouchDesigner turns that into gestures, and Unreal Engine answers in real time - both running on the same machine.",
+        "Nothing in the booth is touched. A webcam follows one hand and the visitor's head, TouchDesigner turns that into gestures, and Unreal Engine answers in real time, both running on the same machine.",
       flow: [
         { name: 'Webcam', text: '1080p, one hand and the head' },
         {

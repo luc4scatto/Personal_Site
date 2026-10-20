@@ -138,6 +138,10 @@ sections.forEach((s) => observer.observe(s));
 initAnimations();
 initAnalytics();
 
+// vivatech "The visitor's path": an animated hand under each step
+const vtSteps = document.querySelector('.vt-steps');
+if (vtSteps) import('./gestureHands.js').then((m) => m.initGestureHands(vtSteps));
+
 // vivatech gallery: reveal each image as it scrolls into view. A plain
 // IntersectionObserver rather than the GSAP data-reveal system the rest of the site
 // uses, so this is self-contained and keeps working correctly if the gallery ever ends
