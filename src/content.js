@@ -461,7 +461,7 @@ export const content = {
           'Seasonal catalogues were assembled by hand in PowerPoint, copying product data from one system, images from another and marketing copy from a third.',
         bullets: [
           'Pick a release and a brand, get a finished deck',
-          'Merges product data, attributes from the product database (PIM) and images from the media library (DAM) for every SKU',
+          'Merges product data, attributes from the product database (PIM), images from the media library (DAM) and data from the product lifecycle system (PLM) for every SKU',
           'Places a hero image and up to seven variant groups per slide',
           'Gives variant families their own slides and flags prescription-ready models',
         ],
@@ -487,6 +487,8 @@ export const content = {
           'Finds every style for a release, category and brand, and gives each one a slide',
           'Places renders and worn shots in layouts tuned for one to six images',
           'Fills sizes, materials and specs straight from product data',
+          'Every slide carries a voting system, so each model can be rated during the review, built with PowerPoint macros',
+          'The deck ends with a slide of buttons that build a report of the votes each model received, which can also be exported to Excel',
           'A second tab splits any finished deck into 4K PNGs, named after the model on each slide',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
