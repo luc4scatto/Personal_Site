@@ -138,7 +138,7 @@ export const content = {
     description2:
       '**Company Brain** is one chat that fixes that. You ask in plain language, like you would ask an expert colleague, and it reads the answer live from the company systems and gives it back with photos, drawings and charts. It runs on our own servers, so nothing leaves the company, and every answer says which system each piece of data came from.',
     demoIntro:
-      'Redrawn with made-up data. One question goes through a chat, a language model that decides what to do, and small purpose-built tools that each know how to talk to one system. Pick a question to watch it travel.',
+      'Everything shown uses sample data. A question enters the chat, a language model decides which tools to use, and each tool talks to a single company system. Pick a question and follow it through.',
     how: {
       title: 'How it works',
       flow: [
@@ -200,12 +200,16 @@ export const content = {
       limitsLabel: 'Limits and next steps',
       limits: [
         {
-          title: 'One GPU, for now',
-          text: 'With many users at once, answers slow down. More capable models would need a more powerful machine, which is the next step, along with more data sources and other departments.',
+          title: 'Sized for a pilot',
+          text: 'It runs on a single GPU: enough for a small team, slower when many people ask at once. Next comes a more powerful machine for more capable models, then more data sources and other departments.',
         },
         {
-          title: 'Finds and summarizes',
-          text: 'It is good at finding and summarizing. Decisions stay with people.',
+          title: 'Assists, does not decide',
+          text: 'It finds the data and puts it in front of you, with the source. What to do with it is still up to people.',
+        },
+        {
+          title: 'Only as good as the data',
+          text: 'Answers can only be as accurate as what is written in the systems. Data is often entered wrongly because of loose organization or because nothing helps people avoid mistakes, and messy data means messy answers.',
         },
       ],
     },

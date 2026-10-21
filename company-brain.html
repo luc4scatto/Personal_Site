@@ -62,7 +62,7 @@
 
       <section id="demo" class="cb-demo">
         <h2 data-reveal>See it in action</h2>
-        <p class="vt-how__intro" data-reveal data-copy="companyBrain.demoIntro">Redrawn with made-up data. One question goes through a chat, a language model that decides what to do, and small purpose-built tools that each know how to talk to one system. Pick a question to watch it travel.</p>
+        <p class="vt-how__intro" data-reveal data-copy="companyBrain.demoIntro">Everything shown uses sample data. A question enters the chat, a language model decides which tools to use, and each tool talks to a single company system. Pick a question and follow it through.</p>
         <ol class="cb-path" aria-label="The path of a question" data-reveal>
           <li data-stage="chat"><span class="cb-path__name" data-copy="companyBrain.how.flow.0.name">Chat</span><span class="cb-path__text" data-copy="companyBrain.how.flow.0.text">Internal web chat, questions in plain language</span></li>
           <li data-stage="model"><span class="cb-path__name" data-copy="companyBrain.how.flow.1.name">Language model</span><span class="cb-path__text" data-copy="companyBrain.how.flow.1.text">Runs on our own server on a dedicated GPU, understands the question and picks a tool</span></li>
@@ -220,12 +220,16 @@
         <h3 class="cb-sub" data-reveal data-copy="companyBrain.how.limitsLabel">Limits and next steps</h3>
         <div class="vt-details cb-limits" data-reveal>
           <div class="vt-detail">
-            <h4 data-copy="companyBrain.how.limits.1.title">Finds and summarizes</h4>
-            <p data-copy="companyBrain.how.limits.1.text">It is good at finding and summarizing. Decisions stay with people.</p>
+            <h4 data-copy="companyBrain.how.limits.1.title">Assists, does not decide</h4>
+            <p data-copy="companyBrain.how.limits.1.text">It finds the data and puts it in front of you, with the source. What to do with it is still up to people.</p>
           </div>
           <div class="vt-detail">
-            <h4 data-copy="companyBrain.how.limits.0.title">One GPU, for now</h4>
-            <p data-copy="companyBrain.how.limits.0.text">With many users at once, answers slow down. More capable models would need a more powerful machine, which is the next step, along with more data sources and other departments.</p>
+            <h4 data-copy="companyBrain.how.limits.2.title">Only as good as the data</h4>
+            <p data-copy="companyBrain.how.limits.2.text">Answers can only be as accurate as what is written in the systems. Data is often entered wrongly because of loose organization or because nothing helps people avoid mistakes, and messy data means messy answers.</p>
+          </div>
+          <div class="vt-detail">
+            <h4 data-copy="companyBrain.how.limits.0.title">Sized for a pilot</h4>
+            <p data-copy="companyBrain.how.limits.0.text">It runs on a single GPU: enough for a small team, slower when many people ask at once. Next comes a more powerful machine for more capable models, then more data sources and other departments.</p>
           </div>
         </div>
           </aside>
@@ -241,13 +245,11 @@
           </span>
         </a>
         <div class="project-back__aside" data-reveal>
-          <nav class="project-all" aria-label="All projects">
-            <p class="project-all__label">All projects</p>
+          <nav class="project-all" aria-label="Other projects">
+            <p class="project-all__label">Other projects</p>
             <ul>
             <li><a href="vivatech.html">Vivatech</a></li>
             <li><a href="pipeline-projects.html">Pipeline Projects</a></li>
-            <li><a href="company-brain.html" aria-current="page">Company Brain</a></li>
-            <li><a href="homelab.html">Homelab</a></li>
             </ul>
           </nav>
           <p>Have a project like this in mind? <a href="index.html#contact">Get in touch</a>.</p>
