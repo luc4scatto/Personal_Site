@@ -356,6 +356,12 @@ export function initHero3D(container) {
     const d = DESCRIPTIONS[item.model] || DESCRIPTIONS._default;
     info.title.textContent = d.title;
     info.text.textContent = d.text;
+    if (d.link) {
+      const a = document.createElement('a');
+      a.href = d.link.href;
+      a.textContent = d.link.label;
+      info.text.append(' ', a);
+    }
     info.el.hidden = false;
     // only a keyboard trigger asks for focus back on close — a mouse click has nowhere
     // meaningful to return it to

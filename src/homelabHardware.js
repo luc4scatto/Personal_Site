@@ -112,8 +112,18 @@ const power = (from, to, socket, y, rest = [[nodeCenterX(to), y]]) => ({
 
 const CONNECTIONS = [
   // modem and switch take the two channels round the left edge of the room,
-  // nested so they never cross; the UPS drops under the strip
-  power('strip-server', 'ups', 275, 530, [[200, 530]]),
+  // nested so they never cross; the UPS feeds the strip from below
+  {
+    from: 'ups',
+    to: 'strip-server',
+    type: 'power',
+    arrow: 'end',
+    via: [
+      [200, 530],
+      [275, 530],
+      [275, 462.5],
+    ],
+  },
   power('strip-server', 'switch-server', 300, 410, [
     [75, 410],
     [75, 100],

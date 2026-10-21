@@ -35,7 +35,7 @@ export const content = {
     paragraph:
       'My path into 3D started at **EssilorLuxottica**, where I spent over four years as a 3D Render Specialist working on **Prada Group**, **Burberry** and **Oliver Peoples** eyewear lines. \n' +
       'In my last two years there I moved into improving and building new features for the 3D pipeline itself, a focus I carried forward into **Thélios**.\n' +
-      "Today I'm part of the 3D R&D team at **Thélios** (**LVMH** eyewear), where I develop and maintain the 3D pipeline, from 2D design all the way to renders, 3D configurators and videos.\n",
+      "Today I'm part of the 3D R&D team at **Thélios** (**LVMH** eyewear), where I build internal tools that make work easier for different departments, 3D above all, and develop and maintain the 3D pipeline, from 2D design all the way to renders, 3D configurators and videos.\n",
   },
   projects: {
     vivatech: {
@@ -520,72 +520,82 @@ export const content = {
   // shown when a 3D hero object is clicked (src/hero3d.js) — keyed by model filename
   hero3dObjects: {
     turntable: {
-      title: 'Vinyl Playing',
-      text: 'I spin records and love the ritual of mixing on a real turntable in my studio.',
+      title: 'Turntables',
+      text: 'Mixing on vinyl is slow and unforgiving, and that is exactly why I like it.',
     },
     pile_of_vinyl: {
-      title: 'Vinyl Collection',
-      text: 'An ever-growing crate of records I hunt for on weekends.',
+      title: 'Record Crate',
+      text: 'An ever-growing crate of records, mostly house, funk and disco, dug out on weekends.',
     },
     mixing_board_01: {
-      title: 'Mixing',
-      text: "Mixing audio across vinyl and digital gives me the flexibility and refinement I'm seeking.",
+      title: 'DJ Mixer',
+      text: 'Where every set comes together. Four of my sets are streaming in the player further down the page. Go find it!',
     },
     mixing_board_03: {
       title: 'CDJs',
-      text: 'Where vinyl brings warmth and fragility, digital brings versatility. I like working the line between them.',
+      text: 'Vinyl brings warmth and fragility, digital brings range. I like working the line between them.',
     },
     synthesizer: {
       title: 'Music Production',
-      text: 'When I have time, I like messing around with music production too, with Ableton and all the plugins out there..',
+      text: 'When I find the time, I produce my own tracks in Ableton, digging through synths and plugins for the right sound.',
     },
-    knob_39: { title: 'Tweaking', text: 'Endless fine-tuning is half the fun.' },
-    knob_44: { title: 'Tweaking', text: 'Endless fine-tuning is half the fun.' },
+    knob_39: { title: 'Fine-tuning', text: 'Endless fine-tuning is half the fun.' },
+    knob_44: { title: 'Knobs', text: "One more quarter turn, then it's done. Probably." },
     gaming_computer: {
-      title: 'PC & Technology',
-      text: "Always been a fan of computers and technology, forever chasing what's new in the field.",
+      title: 'Workstation',
+      text: "I build my own PCs, and I'm forever chasing what's new in the field.",
     },
     gaming_gpu: {
-      title: 'Hardware',
-      text: "Always hunting for the best deal on PC and server components. Sadly they're very expensive right now!",
+      title: 'GPU',
+      text: 'Renders, games and local AI models all want more of it. Always hunting for the next good deal.',
     },
     integrated_circuit_01: {
       title: 'Electronics',
-      text: 'Tinkering with circuits and small hardware projects.',
+      text: 'Small hardware projects, mostly for the fun of seeing them work.',
     },
     integrated_circuit_02: {
       title: 'Chips & Boards',
-      text: 'Tinkering with circuits and small hardware projects.',
+      text: "Microcontrollers and sensors wired into things that didn't need them.",
     },
     transistor_03: {
       title: 'Tinkering',
-      text: 'Tinkering with circuits and small hardware projects.',
+      text: 'Taking things apart to see how they work. Putting them back together is optional.',
     },
     '3d_printer': {
       title: '3D Printing',
-      text: 'Lets me give concrete shape to my craziest ideas, one layer at a time.',
+      text: 'From idea to object overnight. The homelab rack case came off this printer.',
     },
     classical_computer_mouse_03: {
-      title: 'Everyday Tools',
-      text: 'The trusty tools I work with every day.',
+      title: 'Mouse',
+      text: 'Thousands of clicks a day, between modeling, code and node graphs.',
+      link: { href: 'pipeline-projects.html', label: 'See the tools I built' },
     },
-    cable_ethernet_coiled: { title: 'Connectivity', text: 'A tidy network is a happy network.' },
+    cable_ethernet_coiled: {
+      title: 'Networking',
+      text: 'VLANs, DNS and a lot of cable management. Also part of the homelab.',
+    },
     sunglasses_04: {
       title: 'Eyewear',
-      text: 'Eyewear is where my day job at Thélios meets technology.',
+      text: 'My day job: at Thélios I build the 3D pipeline and tools behind LVMH eyewear.',
+      link: { href: 'vivatech.html', label: 'See the Vivatech project' },
     },
-    concert_speaker_02: { title: 'Speakers', text: 'I like listening to music wherever I am.' },
+    concert_speaker_02: {
+      title: 'Speakers',
+      text: 'There is always something playing, at home, at work, on the road.',
+    },
     server_console_station: {
-      title: 'Server',
-      text: 'My self-hosted homelab. Head to the Projects section for more info!',
+      title: 'Homelab',
+      text: 'The server rack at home, running everything I self-host.',
+      // rendered as a real <a> after the text (src/hero3d.js)
+      link: { href: 'homelab.html', label: 'Read the full story' },
     },
     compact_camera: {
-      title: 'Photography/Video',
-      text: 'I like documenting the trips I take with photos and videos.',
+      title: 'Photo & Video',
+      text: 'I document my trips in photos and short videos.',
     },
     _default: {
       title: 'One of my things',
-      text: 'Placeholder description - this object represents one of my interests.',
+      text: 'Another piece of the things I spend my time on.',
     },
   },
   // invitation shown above the skills grid until a tile is clicked (.skills-hint,
