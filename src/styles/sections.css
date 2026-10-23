@@ -2336,6 +2336,7 @@
 }
 
 .contact-links a span {
+  font-variant-emoji: text; /* iOS draws a bare arrow as a coloured emoji tile */
   color: var(--text-dim);
   transition:
     color var(--duration-base) var(--ease-out),
@@ -5801,6 +5802,7 @@ button.pp-btn:active {
 
 .cb-msg--bot {
   align-self: flex-start;
+  min-width: 0;
   background: var(--ui-panel);
   border: 1px solid var(--ui-line);
 }
@@ -5888,6 +5890,7 @@ button.pp-btn:active {
 
 .cb-sheet {
   display: flex;
+  flex-wrap: wrap; /* on a phone the facts drop under the photo instead of spilling out of the bubble */
   gap: 0.8rem;
   margin-bottom: 0.6rem;
 }
@@ -5900,8 +5903,10 @@ button.pp-btn:active {
 }
 
 .cb-sheet dl {
+  flex: 1 1 12rem;
+  min-width: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.4rem 1rem;
   margin: 0;
 }
@@ -5913,6 +5918,7 @@ button.pp-btn:active {
 
 .cb-sheet dd {
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .cb-list {

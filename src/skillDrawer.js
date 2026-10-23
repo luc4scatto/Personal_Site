@@ -133,7 +133,12 @@ function buildFolder(li) {
 
   const tab = document.createElement('div');
   tab.className = 'folder__tab';
-  if (icon) tab.append(icon);
+  if (icon) {
+    // lazy loading keys off the viewport, and a CSS3D folder is parked far from it: on WebKit
+    // the icons of the folders deep in the drawer never fired. They are 34px marks, load them now.
+    icon.loading = 'eager';
+    tab.append(icon);
+  }
   if (label) tab.append(label);
   sheet.append(tab);
 
