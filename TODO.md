@@ -79,7 +79,7 @@ Dettagli e spunte: https://claude.ai/artifact/NSxYmR8MCfeLwtaDYWDbUr. Archivio: 
 
 - [ ] **4. Pipeline Projects: rileggere i testi e verificare la completezza dei mockup** - il punto più importante per il risultato: pagina pubblica sul lavoro vero, alcune frasi sono dedotte e non verificate (es. OpenPBR MaterialX "reads the same in any tool and renderer"). Riga `stack` e pill già sistemate. Controllare le parti forse mancanti (tab Color spec del widget Unreal, Datasmith/CAD import, material library). Costo: ~30-45 min insieme, le correzioni poi sono veloci.
 - [ ] **5. Company Brain: risultato** - inserita la sezione "What the pilot showed" (prima di Design choices) dai documenti Use Case e Business Case di Luca, in forma generale: dati misurati del pilota (10 settimane, 7 utenti, 318 risposte, 566 interrogazioni, 82% con dati aziendali), tempi prima/dopo dichiarati come stime, rientro in circa tre mesi nel caso più prudente, nessun costo di licenza, estendibile ad altri reparti. Niente cifre in euro, nomi di sistemi o codici. Da rileggere con Luca prima del merge.
-- [ ] **6. (in standby, Luca: non è ancora il momento) Merge di `preview/combined` su `main`** - unico modo per mettere online i commit. Dopo 4 e 5, così non vanno online testi non verificati. ~5 min più la verifica sul dev server.
+- [x] **6. Merge di `preview/combined` su `main`** (fatto il 2026-10-23) - unico modo per mettere online i commit. Dopo 4 e 5, così non vanno online testi non verificati. ~5 min più la verifica sul dev server.
 
 ## Rimandabili
 

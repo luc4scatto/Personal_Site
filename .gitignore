@@ -7,8 +7,9 @@ _originals
 # short dev asset tools/peaks.js is tested against.
 public/audio
 .agents/skills/
-.claude/skills/
-.claude/settings.local.json
 skills-lock.json
 .impeccable/
 plans/001-drawer-card-open-close-timing.md
+
+# local Claude Code config (agents, skills, settings, locks)
+.claude/
