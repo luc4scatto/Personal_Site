@@ -449,6 +449,14 @@ function initPage(signal, firstLoad) {
       );
     };
 
+    // A list may only hold list items, and these tiles are buttons: each category becomes a
+    // labelled group of buttons instead (axe's "list" rule, Lighthouse a11y on phone).
+    document.querySelectorAll('.skills-grid').forEach((grid) => {
+      grid.setAttribute('role', 'group');
+      const name = grid.closest('.skill-group')?.querySelector('h3')?.textContent.trim();
+      if (name) grid.setAttribute('aria-label', name);
+    });
+
     skillTiles.forEach((li) => {
       // the tiles are <li>, so keyboard access has to be granted explicitly
       li.tabIndex = 0;
