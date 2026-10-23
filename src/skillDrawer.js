@@ -1841,10 +1841,13 @@ export function initSkillDrawer(host, strip) {
   host.addEventListener('pointerdown', stopNudging, { capture: true });
   host.addEventListener('focusin', stopNudging);
   // Seen, not merely scrolled past: this only gates a nudge, never opens anything.
-  const seen = new IntersectionObserver(([entry]) => {
-    onScreen = entry.isIntersecting;
-    if (onScreen && !nudgeTimer && !touched) nudgeTimer = setTimeout(nudge, 2500);
-  }, { threshold: 0.5 });
+  const seen = new IntersectionObserver(
+    ([entry]) => {
+      onScreen = entry.isIntersecting;
+      if (onScreen && !nudgeTimer && !touched) nudgeTimer = setTimeout(nudge, 2500);
+    },
+    { threshold: 0.5 },
+  );
   seen.observe(host);
 
   const ro = new ResizeObserver(resize);

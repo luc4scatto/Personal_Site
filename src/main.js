@@ -66,7 +66,10 @@ if (contactForm) {
     event.preventDefault();
     const bad = checks.filter(({ check }) => !check());
     if (bad.length) {
-      say(bad.length === 1 ? 'One field needs a look.' : `${bad.length} fields need a look.`, 'error');
+      say(
+        bad.length === 1 ? 'One field needs a look.' : `${bad.length} fields need a look.`,
+        'error',
+      );
       bad[0].field.focus();
       return;
     }
@@ -86,10 +89,16 @@ if (contactForm) {
         say("Sent. Thanks, I'll get back to you soon.", 'ok');
         contactForm.reset();
       } else {
-        say("It didn't go through, and your message is still here. Try again, or reach me on LinkedIn below.", 'error');
+        say(
+          "It didn't go through, and your message is still here. Try again, or reach me on LinkedIn below.",
+          'error',
+        );
       }
     } catch {
-      say("It didn't go through, and your message is still here. Try again, or reach me on LinkedIn below.", 'error');
+      say(
+        "It didn't go through, and your message is still here. Try again, or reach me on LinkedIn below.",
+        'error',
+      );
     } finally {
       submitBtn.disabled = false;
     }
@@ -612,7 +621,8 @@ if (projectsScroller) {
     // on wide screens several cards show at once, so the count names the range: "1-3 / 4"
     const step = cards[1].offsetLeft - cards[0].offsetLeft;
     const shown = Math.max(1, Math.floor((grid.clientWidth + 8) / step));
-    const last = grid.scrollLeft >= max - 4 ? cards.length : Math.round(grid.scrollLeft / step) + shown;
+    const last =
+      grid.scrollLeft >= max - 4 ? cards.length : Math.round(grid.scrollLeft / step) + shown;
     const first = Math.max(1, Math.min(last, cards.length) - shown + 1);
     const end = Math.min(last, cards.length);
     count.textContent = `${first === end ? end : `${first}-${end}`} / ${cards.length}`;

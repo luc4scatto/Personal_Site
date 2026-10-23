@@ -640,17 +640,17 @@
   background-position: left bottom 1.5rem;
   mask-image: radial-gradient(
     ellipse 85% 120% at 0% 100%,
-    rgb(0 0 0 / 1.000) 0.0%,
+    rgb(0 0 0 / 1) 0%,
     rgb(0 0 0 / 0.976) 8.5%,
-    rgb(0 0 0 / 0.905) 17.0%,
+    rgb(0 0 0 / 0.905) 17%,
     rgb(0 0 0 / 0.794) 25.5%,
-    rgb(0 0 0 / 0.655) 34.0%,
-    rgb(0 0 0 / 0.500) 42.5%,
-    rgb(0 0 0 / 0.345) 51.0%,
+    rgb(0 0 0 / 0.655) 34%,
+    rgb(0 0 0 / 0.5) 42.5%,
+    rgb(0 0 0 / 0.345) 51%,
     rgb(0 0 0 / 0.206) 59.5%,
-    rgb(0 0 0 / 0.095) 68.0%,
+    rgb(0 0 0 / 0.095) 68%,
     rgb(0 0 0 / 0.024) 76.5%,
-    rgb(0 0 0 / 0.000) 85.0%
+    rgb(0 0 0 / 0) 85%
   );
 }
 
@@ -658,17 +658,17 @@
   background-position: right top 2.5rem;
   mask-image: radial-gradient(
     ellipse 75% 110% at 100% 0%,
-    rgb(0 0 0 / 1.000) 0.0%,
+    rgb(0 0 0 / 1) 0%,
     rgb(0 0 0 / 0.976) 8.5%,
-    rgb(0 0 0 / 0.905) 17.0%,
+    rgb(0 0 0 / 0.905) 17%,
     rgb(0 0 0 / 0.794) 25.5%,
-    rgb(0 0 0 / 0.655) 34.0%,
-    rgb(0 0 0 / 0.500) 42.5%,
-    rgb(0 0 0 / 0.345) 51.0%,
+    rgb(0 0 0 / 0.655) 34%,
+    rgb(0 0 0 / 0.5) 42.5%,
+    rgb(0 0 0 / 0.345) 51%,
     rgb(0 0 0 / 0.206) 59.5%,
-    rgb(0 0 0 / 0.095) 68.0%,
+    rgb(0 0 0 / 0.095) 68%,
     rgb(0 0 0 / 0.024) 76.5%,
-    rgb(0 0 0 / 0.000) 85.0%
+    rgb(0 0 0 / 0) 85%
   );
 }
 
@@ -1194,13 +1194,7 @@
   /* polished, where the drawer is brushed: brighter than the steel around it, with a hard
      highlight up-left (the same side the scene is lit from) and a dark ring to cut it out of
      the metal it slides over */
-  background: radial-gradient(
-    circle at 35% 30%,
-    #ffffff 0,
-    #e3e6ea 22%,
-    #9ba1a9 58%,
-    #5b6068 100%
-  );
+  background: radial-gradient(circle at 35% 30%, #ffffff 0, #e3e6ea 22%, #9ba1a9 58%, #5b6068 100%);
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.75),
     0 2px 4px rgba(0, 0, 0, 0.6);
@@ -2095,8 +2089,20 @@
   scrollbar-width: none;
   --fade-l: 0px;
   --fade-r: 0px;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-l),
+    #000 calc(100% - var(--fade-r)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-l),
+    #000 calc(100% - var(--fade-r)),
+    transparent 100%
+  );
 }
 
 .projects-grid::-webkit-scrollbar {
@@ -2129,7 +2135,9 @@
   background: color-mix(in srgb, var(--bg) 85%, transparent);
   color: var(--text);
   cursor: pointer;
-  transition: border-color var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out);
+  transition:
+    border-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out);
 }
 
 .projects-arrow:hover {
@@ -2780,11 +2788,15 @@ p.project-specs__kicker {
 
 @keyframes vt-wire {
   0% {
-    background-position: -60% 0, 0 0;
+    background-position:
+      -60% 0,
+      0 0;
   }
   45%,
   100% {
-    background-position: 160% 0, 0 0;
+    background-position:
+      160% 0,
+      0 0;
   }
 }
 
@@ -3038,11 +3050,15 @@ p.project-specs__kicker {
 
 @keyframes vt-wire-v {
   0% {
-    background-position: 0 -60%, 0 0;
+    background-position:
+      0 -60%,
+      0 0;
   }
   45%,
   100% {
-    background-position: 0 160%, 0 0;
+    background-position:
+      0 160%,
+      0 0;
   }
 }
 
@@ -4784,7 +4800,6 @@ p.project-specs__kicker {
   box-shadow: 0 30px 80px -40px rgba(0, 0, 0, 0.9);
 }
 
-
 .pp-win__body {
   display: flex;
   flex-direction: column;
@@ -4903,8 +4918,10 @@ button.pp-btn:active {
 .pp-input--select {
   padding-right: 1.4rem;
   background:
-    linear-gradient(45deg, transparent 50%, var(--text-dim) 50%) calc(100% - 0.75rem) 50% / 0.3rem 0.3rem no-repeat,
-    linear-gradient(-45deg, transparent 50%, var(--text-dim) 50%) calc(100% - 0.45rem) 50% / 0.3rem 0.3rem no-repeat,
+    linear-gradient(45deg, transparent 50%, var(--text-dim) 50%) calc(100% - 0.75rem) 50% / 0.3rem
+      0.3rem no-repeat,
+    linear-gradient(-45deg, transparent 50%, var(--text-dim) 50%) calc(100% - 0.45rem) 50% / 0.3rem
+      0.3rem no-repeat,
     #0b0b0b;
 }
 
@@ -5131,8 +5148,7 @@ button.pp-btn:active {
   border-radius: 6px;
   background:
     radial-gradient(circle at 30% 40%, rgba(40, 20, 5, 0.8) 0 12%, transparent 13%),
-    radial-gradient(circle at 70% 60%, rgba(40, 20, 5, 0.7) 0 10%, transparent 11%),
-    #b07840;
+    radial-gradient(circle at 70% 60%, rgba(40, 20, 5, 0.7) 0 10%, transparent 11%), #b07840;
 }
 
 .pp-view {
@@ -5721,7 +5737,9 @@ button.pp-btn:active {
   color: var(--text-dim);
   font: inherit;
   cursor: pointer;
-  transition: border-color var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out);
+  transition:
+    border-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out);
 }
 
 .cb-demo__tab.is-on {
@@ -5972,15 +5990,6 @@ button.pp-btn:active {
   color: var(--text);
 }
 
-
-
-
-
-
-
-
-
-
 @media (max-width: 860px) {
   .cb-demo__grid {
     grid-template-columns: minmax(0, 1fr);
@@ -6063,7 +6072,9 @@ button.pp-btn:active {
 .cb-chat__body > * {
   opacity: 0;
   transform: translateY(8px);
-  transition: opacity var(--duration-base) var(--ease-out), transform var(--duration-base) var(--ease-out);
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
 }
 
 .cb-chat__body > .is-shown {
@@ -6082,10 +6093,18 @@ button.pp-btn:active {
   transform: scaleY(1);
 }
 
-.is-shown .cb-bars span:nth-child(2) { transition-delay: 0.06s; }
-.is-shown .cb-bars span:nth-child(3) { transition-delay: 0.12s; }
-.is-shown .cb-bars span:nth-child(4) { transition-delay: 0.18s; }
-.is-shown .cb-bars span:nth-child(5) { transition-delay: 0.24s; }
+.is-shown .cb-bars span:nth-child(2) {
+  transition-delay: 0.06s;
+}
+.is-shown .cb-bars span:nth-child(3) {
+  transition-delay: 0.12s;
+}
+.is-shown .cb-bars span:nth-child(4) {
+  transition-delay: 0.18s;
+}
+.is-shown .cb-bars span:nth-child(5) {
+  transition-delay: 0.24s;
+}
 
 /* hover a bar for its value */
 .cb-bars span::after {
@@ -6135,8 +6154,12 @@ button.pp-btn:active {
   animation: cb-pulse 1.6s var(--ease-out) infinite;
 }
 
-.is-waiting .cb-choices .pp-btn:nth-child(2) { animation-delay: 0.2s; }
-.is-waiting .cb-choices .pp-btn:nth-child(3) { animation-delay: 0.4s; }
+.is-waiting .cb-choices .pp-btn:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.is-waiting .cb-choices .pp-btn:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 @keyframes cb-pulse {
   50% {
@@ -6166,7 +6189,9 @@ button.pp-btn:active {
   border: 3px solid var(--frame);
   border-radius: 42% 42% 50% 50%;
   background: color-mix(in srgb, var(--hue) 35%, transparent);
-  transition: border-color var(--duration-base) var(--ease-out), background var(--duration-base) var(--ease-out);
+  transition:
+    border-color var(--duration-base) var(--ease-out),
+    background var(--duration-base) var(--ease-out);
 }
 
 .cb-sheet__img::before {
@@ -6196,8 +6221,12 @@ button.pp-btn:active {
   animation: cb-dot 1s ease-in-out infinite;
 }
 
-.cb-typing i:nth-child(2) { animation-delay: 0.15s; }
-.cb-typing i:nth-child(3) { animation-delay: 0.3s; }
+.cb-typing i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.cb-typing i:nth-child(3) {
+  animation-delay: 0.3s;
+}
 
 @keyframes cb-dot {
   30% {
@@ -6301,11 +6330,6 @@ button.pp-btn:active {
   color: var(--text);
 }
 
-
-
-
-
-
 /* lessons: type, no boxes, two by two */
 .cb-lessons {
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6375,7 +6399,6 @@ button.pp-btn:active {
   .cb-details .cb-lead {
     grid-template-columns: minmax(0, 1fr);
   }
-
 }
 
 /* ---- company-brain.html: three peers after the demo ----
@@ -6531,7 +6554,6 @@ button.pp-btn:active {
   }
 }
 
-
 /* keyboard: the demo's tabs and choice buttons get the same ring as the rest of the site */
 .cb-demo__tab:focus-visible,
 .cb-choices .pp-btn:focus-visible {
@@ -6552,7 +6574,6 @@ button.pp-btn:active {
   }
 }
 
-
 @media (max-width: 1024px) {
   .cb-retro .cb-lessons {
     grid-template-columns: minmax(0, 1fr);
@@ -6566,7 +6587,6 @@ button.pp-btn:active {
     padding-inline: 1rem;
   }
 }
-
 
 /* Bolder, the ending: the honest line is the closing statement of the page, in display type
    under an accent rule, and the other limit drops to a plain note beneath it. Everything above
@@ -6623,7 +6643,6 @@ button.pp-btn:active {
   padding-top: 2rem;
   padding-bottom: 2rem;
 }
-
 
 /* ---- company-brain.html: critique pass ----
    The demo never goes blank on a revisit and has a Replay/Skip control; the architecture is
@@ -6726,7 +6745,6 @@ button.pp-btn:active {
   }
 }
 
-
 /* design choices: the lead stays big, the other three are rows */
 .cb-details {
   gap: 0;
@@ -6816,7 +6834,6 @@ button.pp-btn:active {
   }
 }
 
-
 /* polish: leading, measure, a target a finger can hit, and a prompt while the demo waits */
 .cb-chat {
   line-height: 1.4;
@@ -6826,7 +6843,6 @@ button.pp-btn:active {
 .cb-retro .cb-lessons .vt-detail p {
   max-width: 65ch;
 }
-
 
 .cb-chat__replay {
   min-height: 2rem;
@@ -7407,7 +7423,7 @@ button.pp-btn:active {
 /* phone: four links fit beside the logo, five do not. Skills goes, since it sits right after
    About and a tap on About lands one screen above it. */
 @media (max-width: 560px) {
-  .nav nav a[href="#skills"] {
+  .nav nav a[href='#skills'] {
     display: none;
   }
 }
@@ -7421,4 +7437,3 @@ button.pp-btn:active {
     gap: 0.75rem 1.5rem;
   }
 }
-
