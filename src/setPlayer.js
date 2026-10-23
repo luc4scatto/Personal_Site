@@ -25,7 +25,11 @@ import { content } from './content.js';
  *   playhead locally and the release is the only thing that moves the actual playback.
  *
  * The iframe lives on document.body, not inside the panel, so closing a skill card or
- * shutting the drawer cannot touch it. The site is an MPA, so navigation stops it for free.
+ * shutting the drawer cannot touch it. The site is an MPA, but once a set has started,
+ * src/router.js swaps pages in place instead of loading them, so the iframes - and the music -
+ * survive the move. There is one player per document: a second initSetPlayer() only moves
+ * the same panel to its new mount (back into the drawer, on returning home), and leaving
+ * the home page docks it in the nav bar (dockPlayer()).
  */
 
 // px of pitch per bar: a 2px bar and a 1px gap. A one-device-pixel bar is invisible at 2x,
@@ -107,11 +111,49 @@ function loadWidgetScript() {
   return widgetScriptPromise;
 }
 
+// The one player in this document, kept across in-place page swaps (src/router.js).
+let player = null;
+
+/** True once a set has been started: from then on, leaving the page must not stop it. */
+export const playerActive = () => !!player?.started;
+
+/** Move the player into `target`: the nav bar (docked, compact) or the drawer again. A
+ *  player closed from the nav bar comes back with the drawer, which is the one place that
+ *  offers it. */
+export function dockPlayer(target, { docked = false } = {}) {
+  if (!player || !target) return;
+  player.el.classList.toggle('is-docked', docked);
+  if (!docked) player.el.classList.remove('is-closed');
+  target.appendChild(player.el);
+}
+
+/** Before a page swap: lift the player out of the page that is about to be replaced. */
+export function liftPlayer(nav) {
+  if (player && !nav.contains(player.el)) dockPlayer(nav, { docked: true });
+}
+
 export function initSetPlayer(mount) {
+  // Back on the home page with the player docked in the nav: it stays up there, over a page
+  // that has no room for it, until the drawer opens and its corner exists again. With no
+  // live drawer (reduced motion, the flat wall) there is no corner to wait for.
+  if (player) {
+    const scene = mount.querySelector('.drawer__scene');
+    if (!player.el.classList.contains('is-docked') || !scene) {
+      dockPlayer(mount);
+      return;
+    }
+    const mo = new MutationObserver(() => {
+      if (scene.classList.contains('is-shut')) return;
+      mo.disconnect();
+      dockPlayer(mount);
+    });
+    mo.observe(scene, { attributes: true, attributeFilter: ['class'] });
+    return;
+  }
   const sets = (content.djSets ?? []).filter((s) => s?.track);
   // No sets, no panel. An empty player is worse than none, and this is what keeps the
   // feature invisible on the live site until the real URLs are pasted into content.js.
-  if (!mount || !sets.length) return () => {};
+  if (!mount || !sets.length) return;
 
   const order = shuffled(sets);
   let index = 0;
@@ -155,6 +197,7 @@ export function initSetPlayer(mount) {
         <input class="set-player__volume" type="range" min="0" max="100" value="100" aria-label="Volume" />
       </div>
     </div>
+    <button class="set-player__close" type="button" aria-label="Stop and close the player">${svg('<path d="M7 7l10 10M17 7 7 17" />', 'set-player__close-glyph')}</button>
     </div>`;
 
   const disc = el.querySelector('.set-player__disc');
@@ -528,6 +571,12 @@ export function initSetPlayer(mount) {
   el.querySelectorAll('.set-player__skip').forEach((btn) => {
     btn.addEventListener('click', () => seekTo(audio.currentTime + Number(btn.dataset.dir) * SKIP));
   });
+  // only shown docked in the nav: stops the set and puts the player away until the drawer
+  // offers it again (dockPlayer() back into the drawer clears is-closed)
+  el.querySelector('.set-player__close').addEventListener('click', () => {
+    audio.pause();
+    el.classList.add('is-closed');
+  });
   volumeInput.addEventListener('input', () => {
     audio.volume = Number(volumeInput.value) / 100;
   });
@@ -536,6 +585,12 @@ export function initSetPlayer(mount) {
   // DOM element here to addEventListener on.
   const onPlay = () => {
     curPaused = false;
+    if (!player.started) {
+      player.started = true;
+      // main.js loads the page router (src/router.js) on this, not before: a visitor who never
+      // presses play never downloads it
+      window.dispatchEvent(new Event('setplayer:start'));
+    }
     clearTimeout(playWatchdog);
     if (!el.classList.contains('is-error')) noteEl.hidden = true;
     el.classList.add('is-playing');
@@ -637,14 +692,6 @@ export function initSetPlayer(mount) {
   const ro = new ResizeObserver(() => drawWave());
   ro.observe(wave);
 
+  player = { el, started: false };
   load(order[0]);
-
-  return function dispose() {
-    ro.disconnect();
-    cancelAnimationFrame(frame);
-    clearTimeout(playWatchdog);
-    widget?.pause();
-    for (const e of engines.values()) e.iframe.remove();
-    el.remove();
-  };
 }

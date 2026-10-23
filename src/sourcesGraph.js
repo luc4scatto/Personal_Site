@@ -28,7 +28,7 @@ const FLIGHT = 1.9; // seconds one packet takes to cross
 
 const ease = (t) => 1 - Math.pow(1 - t, 3);
 
-export function initSourcesGraph(canvas) {
+export function initSourcesGraph(canvas, signal) {
   const ctx = canvas.getContext('2d');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const family = getComputedStyle(document.body).fontFamily;
@@ -268,12 +268,22 @@ export function initSourcesGraph(canvas) {
     });
   }
 
-  new ResizeObserver(resize).observe(canvas);
-  new IntersectionObserver(([e]) => {
+  const ro = new ResizeObserver(resize);
+  ro.observe(canvas);
+  const io = new IntersectionObserver(([e]) => {
     visible = e.isIntersecting;
     visible ? run() : halt();
-  }).observe(canvas);
-  document.addEventListener('visibilitychange', () => (document.hidden ? halt() : run()));
+  });
+  io.observe(canvas);
+  document.addEventListener('visibilitychange', () => (document.hidden ? halt() : run()), {
+    signal,
+  });
+  // an in-place page swap (src/router.js) ends the loop with the page
+  signal?.addEventListener('abort', () => {
+    halt();
+    ro.disconnect();
+    io.disconnect();
+  });
   resize();
   run();
 }

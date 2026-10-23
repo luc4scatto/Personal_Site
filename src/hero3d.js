@@ -149,7 +149,11 @@ function createInfoCard(onClose) {
   };
 }
 
-export function initHero3D(container) {
+export function initHero3D(container, signal) {
+  // window/document listeners all go through here, so an in-place page swap (src/router.js)
+  // aborting `signal` drops every one of them at once
+  const on = (target, type, fn, opts = {}) =>
+    target.addEventListener(type, fn, { ...opts, signal });
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 50);
   camera.position.z = 9.5;
@@ -448,7 +452,7 @@ export function initHero3D(container) {
     return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
   }
 
-  window.addEventListener('pointerdown', (e) => {
+  on(window, 'pointerdown', (e) => {
     if (focusedItem || !insideCanvas(e.clientX, e.clientY)) return;
     e.preventDefault(); // the press may land on text behind the (pointer-events:none) canvas — stop native text selection
     dragging = true;
@@ -458,16 +462,17 @@ export function initHero3D(container) {
     dragX = e.clientX;
     dragY = e.clientY;
   });
-  window.addEventListener('pointerup', () => {
+  on(window, 'pointerup', () => {
     dragging = false;
   });
-  window.addEventListener('pointercancel', () => {
+  on(window, 'pointercancel', () => {
     dragging = false;
   });
 
   // parallax + hover cursor share one pointermove; click focuses / dismisses
   const mouse = { x: 0, y: 0 };
-  window.addEventListener(
+  on(
+    window,
     'pointermove',
     (e) => {
       if (dragging) {
@@ -494,7 +499,7 @@ export function initHero3D(container) {
     },
     { passive: false },
   );
-  window.addEventListener('click', (e) => {
+  on(window, 'click', (e) => {
     if (dragged) {
       dragged = false; // this click is the tail end of a drag — swallow it
       return;
@@ -507,7 +512,7 @@ export function initHero3D(container) {
     if (hit) focus(hit);
     else if (focusedItem) unfocus();
   });
-  window.addEventListener('keydown', (e) => {
+  on(window, 'keydown', (e) => {
     if (e.key === 'Escape') unfocus();
   });
 
@@ -673,7 +678,8 @@ export function initHero3D(container) {
     }
   }
   resize();
-  new ResizeObserver(resize).observe(container);
+  const ro = new ResizeObserver(resize);
+  ro.observe(container);
 
   // Clock is deprecated since three r183 in favor of Timer, which needs an explicit
   // update() each frame (fed the animation loop's own timestamp) before getElapsed() reads it
@@ -804,10 +810,23 @@ export function initHero3D(container) {
     if (run) swallowGap = true;
     renderer.setAnimationLoop(run ? loop : null);
   };
-  new IntersectionObserver(([entry]) => {
+  const io = new IntersectionObserver(([entry]) => {
     onScreen = entry.isIntersecting;
     syncLoop();
-  }).observe(container);
-  document.addEventListener('visibilitychange', () => syncLoop());
+  });
+  io.observe(container);
+  on(document, 'visibilitychange', () => syncLoop());
   syncLoop();
+
+  // Leaving the page in place: the loop, the observers and the GPU context all go now, and
+  // the info card, which lives on <body> and would outlive the page.
+  signal?.addEventListener('abort', () => {
+    renderer.setAnimationLoop(null);
+    ro.disconnect();
+    io.disconnect();
+    renderer.dispose();
+    renderer.forceContextLoss();
+    info.el.remove();
+    document.body.style.cursor = '';
+  });
 }

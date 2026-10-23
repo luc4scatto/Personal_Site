@@ -1854,7 +1854,7 @@ export function initSkillDrawer(host, strip) {
   ro.observe(host);
   resize();
 
-  // hero3d.js has no teardown at all; this module keeps one.
+  // Called by main.js when an in-place page swap (src/router.js) leaves the home page.
   return function dispose() {
     ro.disconnect();
     seen.disconnect();
@@ -1881,6 +1881,9 @@ export function initSkillDrawer(host, strip) {
     envRT.texture.dispose();
     pmrem.dispose();
     renderer.dispose();
+    // free the GPU context now, not whenever GC gets round to it: on iPad the next page's
+    // own WebGL shares that budget (see CLAUDE.md's GPU budget note)
+    renderer.forceContextLoss();
     renderer.domElement.remove();
     css.domElement.remove();
   };

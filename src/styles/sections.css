@@ -1653,6 +1653,153 @@
     visibility 0s linear;
 }
 
+/* Docked: once a set is playing and the visitor leaves the home page, src/router.js swaps
+   pages in place and the same player moves into the nav bar (setPlayer.js's liftPlayer()).
+   One row between the logo and the links: the record (play/pause), the title, a short
+   waveform that still seeks, next set and volume. The skip buttons and the clock stay
+   behind with the full panel. It is a flex item, not centred absolutely, so on a tablet the
+   title gives way before the player can ever run into the links. */
+.nav .set-player.is-docked {
+  order: 1;
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0 1.5rem;
+}
+
+.nav > nav {
+  order: 2;
+}
+
+/* the X beside the docked pill: stops the set and puts the player away. Only docked - in the
+   drawer's corner the player is part of the section and has no business being dismissed. */
+.set-player__close {
+  display: none;
+}
+
+.set-player.is-docked {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.set-player.is-docked.is-closed {
+  display: none;
+}
+
+.set-player.is-docked .set-player__close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.set-player.is-docked .set-player__close:hover {
+  color: var(--text);
+}
+
+.set-player__close-glyph {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+/* touch: the same 44px target the nav links get */
+@media (pointer: coarse) {
+  .set-player.is-docked .set-player__close {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+.set-player.is-docked .set-player__invite,
+.set-player.is-docked .set-player__skip,
+.set-player.is-docked .set-player__mini,
+.set-player.is-docked .set-player__time,
+.set-player.is-docked .set-player__total {
+  display: none;
+}
+
+.set-player.is-docked .set-player__panel {
+  gap: 0.6rem;
+  padding: 0.25rem 0.7rem 0.25rem 0.3rem;
+  border-radius: 999px;
+}
+
+.set-player.is-docked .set-player__disc {
+  width: 2rem;
+  height: 2rem;
+}
+
+.set-player.is-docked .set-player__body {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.set-player.is-docked .set-player__title {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+
+.set-player.is-docked .set-player__note {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.set-player.is-docked .set-player__wave {
+  flex: 0 0 8rem;
+  margin: 0;
+  height: 1.5rem;
+}
+
+.set-player.is-docked .set-player__foot,
+.set-player.is-docked .set-player__controls {
+  margin: 0;
+}
+
+.set-player.is-docked .set-player__volume {
+  width: 3.5rem;
+}
+
+/* a tablet in portrait: the links keep their one line, the player gives up width instead */
+.nav nav a {
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .nav .set-player.is-docked {
+    margin: 0 0.75rem;
+  }
+
+  .set-player.is-docked .set-player__title {
+    max-width: 7rem;
+  }
+
+  .set-player.is-docked .set-player__wave {
+    flex-basis: 5rem;
+  }
+}
+
+/* a finger cannot set the widget's volume on iOS (only the hardware buttons can), so on touch
+   the slider would be a control that does nothing */
+@media (pointer: coarse) {
+  .set-player.is-docked .set-player__volume {
+    display: none;
+  }
+}
+
 /* The metal recedes behind an overlaid card. The canvas and not the folders: cull() is the
    only writer of a folder's opacity and it drops pointer-events below 0.6, so dimming them
    here would quietly cost the index its hit targets. The card rides in front of them anyway

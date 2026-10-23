@@ -11,7 +11,9 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@swup/a11y-plugin": "^5.2.1",
     "gsap": "^3.12.5",
+    "swup": "^4.10.0",
     "three": "^0.185.1"
   },
   "devDependencies": {

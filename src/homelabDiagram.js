@@ -52,7 +52,7 @@ function nodeTag(n) {
   return tag;
 }
 
-export function initHomelabDiagram(container) {
+export function initHomelabDiagram(container, signal) {
   const { hub, categories, nodes = {}, nodeNames = {} } = content.homelab.diagram;
   const { serviceInfo } = content.homelab;
 
@@ -257,13 +257,17 @@ export function initHomelabDiagram(container) {
     previous?.focus();
   });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && active) {
-      const previous = active;
-      closeCard();
-      previous.focus();
-    }
-  });
+  document.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.key === 'Escape' && active) {
+        const previous = active;
+        closeCard();
+        previous.focus();
+      }
+    },
+    { signal },
+  );
 
   // Roving tabindex (WAI-ARIA APG "toolbar" pattern): every enabled row used
   // to sit in the page's tab order (17 of the page's 25 stops), forcing
