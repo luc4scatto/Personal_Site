@@ -10,7 +10,7 @@ Vite + vanilla JS/CSS + GSAP + Three.js. No framework.
 
 - 3D hero: floating icons built from Draco-compressed GLB models, custom drag/spin interaction, real-time gaussian blur on focus
 - Animation: GSAP + ScrollTrigger + SplitText for scroll reveals and text effects
-- Fonts: self-hosted Space Grotesk (display) and Switzer (body)
+- Fonts: self-hosted Mona Sans (display and body, variable width) and Martian Mono
 
 ## Pages
 

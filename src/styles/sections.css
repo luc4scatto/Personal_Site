@@ -2301,7 +2301,7 @@
 }
 
 /* where, what for, how soon: a subtitle to the tagline, same weight in the reading order,
-   told apart by the italic and a step down in size. Switzer ships no italic file here, so
+   told apart by the italic and a step down in size. Mona Sans ships no italic file here, so
    the browser slants the roman - close to a true italic on a sans this plain. */
 .contact-intro .contact-details {
   margin-top: 0.75rem;
@@ -4915,7 +4915,7 @@ button.pp-btn:active {
 
 .pp-input--path {
   color: var(--text-dim);
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
 }
 
@@ -5018,7 +5018,7 @@ button.pp-btn:active {
 
 .pp-code {
   color: var(--sec, var(--accent));
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
 }
 
@@ -5153,7 +5153,7 @@ button.pp-btn:active {
 }
 
 .pp-view__name {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
 }
 
@@ -5264,7 +5264,7 @@ button.pp-btn:active {
 }
 
 .pp-log {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--text-dim);
   padding: 0.6rem;
@@ -5613,7 +5613,7 @@ button.pp-btn:active {
 
 .pp-omni__mtlx {
   align-self: center;
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--text-dim);
 }
@@ -5629,7 +5629,7 @@ button.pp-btn:active {
 }
 
 .pp-maya__preview {
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--text-dim);
   overflow-wrap: anywhere;
@@ -5823,7 +5823,7 @@ button.pp-btn:active {
   border-radius: 6px;
   background: var(--ui-btn);
   color: color-mix(in srgb, var(--text) 70%, transparent);
-  font-family: ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
 }
 

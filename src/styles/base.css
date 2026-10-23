@@ -1,52 +1,45 @@
 /* Self-hosted: no third-party CDN, no render-blocking stylesheet, no preconnect
-   round-trips before the first paint. Space Grotesk ships as one variable file
-   covering the whole 300-700 range; Switzer needs the two weights it actually uses.
-   Vite copies public/fonts/ verbatim, so the URLs are absolute from the site root. */
+   round-trips before the first paint. Mona Sans (GitHub, OFL) is one variable file with a
+   weight and a width axis, so titles and reading text come out of the same family: titles
+   take the wide end, text stays at normal width. Martian Mono (OFL) carries the code and
+   label roles. Latin subset only. Vite copies public/fonts/ verbatim, so the URLs are
+   absolute from the site root. */
 @font-face {
-  font-family: 'Space Grotesk';
-  src: url('/fonts/space-grotesk-var.woff2') format('woff2-variations');
-  font-weight: 300 700;
+  font-family: 'Mona Sans';
+  src: url('/fonts/mona-sans-var.woff2') format('woff2-variations');
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Switzer';
-  src: url('/fonts/switzer-400.woff2') format('woff2');
-  font-weight: 400;
+  font-family: 'Martian Mono';
+  src: url('/fonts/martian-mono-var.woff2') format('woff2-variations');
+  font-weight: 100 800;
   font-style: normal;
   font-display: swap;
 }
 
+/* metric-matched stand-ins for the swap window, measured against Arial in the browser:
+   Mona Sans at normal width runs 4% wider than Arial, the wide 800 titles 10% wider than
+   Arial Bold; ascent 1.09 and descent 0.32 of the em (the overrides are divided by the
+   size-adjust, which scales them too). Without them the swap moves whole sections. */
 @font-face {
-  font-family: 'Switzer';
-  src: url('/fonts/switzer-500.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* metric-matched stand-in for the swap window: Arial scaled to Switzer's proportions,
-   so the fallback and the real face occupy nearly the same box and the text does not
-   jump when Switzer lands */
-@font-face {
-  font-family: 'Switzer Fallback';
+  font-family: 'Mona Sans Fallback';
   src: local('Arial');
-  size-adjust: 96%;
-  ascent-override: 97%;
-  descent-override: 24%;
+  size-adjust: 104%;
+  ascent-override: 105%;
+  descent-override: 31%;
   line-gap-override: 0%;
 }
 
-/* the same for Space Grotesk, measured against Arial in the browser: wider by ~7% at regular and
-   ~1% at bold (headings are 500-700, so 104%), ascent 0.98 and descent 0.29 of the em. Without it
-   the swap moved a whole project hero by 4px (CLS 0.06 on Pipeline Projects, desktop) */
 @font-face {
-  font-family: 'Space Grotesk Fallback';
+  font-family: 'Mona Sans Display Fallback';
   src: local('Arial');
-  size-adjust: 104%;
-  ascent-override: 94%;
-  descent-override: 28%;
+  size-adjust: 110%;
+  ascent-override: 99%;
+  descent-override: 29%;
   line-gap-override: 0%;
 }
 
@@ -59,11 +52,11 @@
   --accent: #ff6a13;
   --accent-2: #5c8dff;
 
-  /* Space Grotesk is the voice: quirky, technical, built for size. It is a display
-     face though - set at 17px across a paragraph it fights the reader. Switzer takes
-     the reading roles, which is the one job the display face demonstrably cannot do. */
-  --font-display: 'Space Grotesk', 'Space Grotesk Fallback', sans-serif;
-  --font-body: 'Switzer', 'Switzer Fallback', sans-serif;
+  /* One family, two voices: the h1-h3 rule below widens the display role on Mona Sans's
+     width axis, so --font-display and --font-body differ only in their fallbacks. */
+  --font-display: 'Mona Sans', 'Mona Sans Display Fallback', sans-serif;
+  --font-body: 'Mona Sans', 'Mona Sans Fallback', sans-serif;
+  --font-mono: 'Martian Mono', ui-monospace, monospace;
 
   --space: clamp(4rem, 10vh, 8rem);
   --pad-x: clamp(1.25rem, 5vw, 4rem);
@@ -130,13 +123,16 @@ h1,
 h2,
 h3 {
   font-family: var(--font-display);
+  font-stretch: 118%;
+  font-weight: 700;
   line-height: 1.05;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 h1 {
   font-size: clamp(2.75rem, 9vw, 7rem);
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.035em;
 }
 
 h2 {

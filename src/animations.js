@@ -172,7 +172,12 @@ function initWordCycler(el) {
   // the only perpetual non-GPU animation on the site. What moves now is the trailing period,
   // on a transform, so the word still reads as tight against it.
   const maxWidth = Math.max(...widths);
-  el.style.width = `${maxWidth}px`;
+  // A wide heavy face with tight tracking draws its last glyph past its advance width, so a
+  // slot cut to the advance clipped the D of "3D". The box gets that ink room back on the
+  // right and gives it up again in a negative margin, so nothing after it moves.
+  const inkRoom = Math.ceil(parseFloat(getComputedStyle(el).fontSize) * 0.12);
+  el.style.width = `${maxWidth + inkRoom}px`;
+  el.style.marginRight = `${-inkRoom}px`;
   el.style.height = `${height}px`;
   el.style.overflow = 'hidden';
   el.style.verticalAlign = 'bottom';
