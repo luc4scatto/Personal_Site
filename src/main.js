@@ -27,6 +27,20 @@ function initPage(signal, firstLoad) {
     if (typeof value !== 'string') return;
     el.innerHTML = value.split('\n').map(escapeHtml).join('<br>');
   });
+  // footer: when the site last changed, from the last commit at build time (vite.config.js).
+  // The footer sits outside the swapped page (src/router.js), so it is filled only once.
+  const updated = import.meta.env.VITE_SITE_UPDATED;
+  const copyright = document.querySelector('.footer [data-copy="footer.copyright"]');
+  if (updated && copyright && !copyright.querySelector('.footer__updated')) {
+    const when = new Date(`${updated}T12:00:00`).toLocaleDateString('en-GB', {
+      month: 'long',
+      year: 'numeric',
+    });
+    const span = document.createElement('span');
+    span.className = 'footer__updated';
+    span.textContent = ` · Updated ${when}`;
+    copyright.append(span);
+  }
   const contactForm = document.getElementById('contact-form');
   if (contactForm) {
     const status = contactForm.querySelector('.contact-status');

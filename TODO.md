@@ -8,11 +8,11 @@ Dopo il checkup di prestazioni e sicurezza (HTTPS forzato, dominio verificato su
 
 - [x] **1. Immagini di anteprima social (og:image)** - fatto 2026-10-23: un JPG 1200x630 per pagina in `public/images/og/`, generati da `tools/og-images.mjs`. Prima: Company Brain usa un SVG (LinkedIn, WhatsApp e Facebook non lo mostrano: anteprima vuota), home/Homelab/Pipeline usano WebP (LinkedIn spesso non lo mostra), la home è un quadrato 1024x1024 invece del formato standard 1200x630. Serve un JPG 1200x630 per pagina, nello stile del sito.
 - [x] **2. DMARC per l'email del dominio** - fatto 2026-10-23: `_dmarc` TXT `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s` su Namecheap (Luca usa il dominio solo per ricevere, con l'inoltro). Prima: il dominio riceve email con l'inoltro di Namecheap ma non ha un record `_dmarc`: chiunque può spedire a nome di `@lucascattolin.com`. Un record TXT su Namecheap; la regola dipende da se Luca spedisce anche *da* un indirizzo @lucascattolin.com.
-- [ ] **3. Dati strutturati dei progetti** - oggi solo `Person` in home. Aggiungere `CreativeWork` per ogni pagina progetto e `BreadcrumbList` (Home > Progetto).
+- [x] **3. Dati strutturati dei progetti** - fatto 2026-10-23: `CreativeWork` + `BreadcrumbList` in ogni pagina progetto, `Person` in home con `@id` `#person`. Era: oggi solo `Person` in home. Aggiungere `CreativeWork` per ogni pagina progetto e `BreadcrumbList` (Home > Progetto).
 - [x] **4. `lastmod` nella sitemap** - fatto 2026-10-23: `tools/sitemap.mjs` scrive `dist/sitemap.xml` a ogni build (deploy con `fetch-depth: 0`). Era: generato in automatico dalla data dell'ultimo commit di ogni pagina, per non doverlo aggiornare a mano.
 - [x] **5. `theme-color`** - fatto 2026-10-23 su tutte le pagine. Era: una riga `<meta name="theme-color" content="#0a0a0a">` per pagina: barra del browser su telefono nel nero del sito.
-- [ ] **6. Prove esterne (contenuto, Luca)** - una frase di un collega o responsabile, o numeri di risultato dove ci sono, anche solo una riga per progetto. Solo con materiale utilizzabile, nel rispetto delle regole di sanitizzazione per Thélios.
-- [ ] **7. Data di aggiornamento visibile** - "Last updated" nel footer.
+- [ ] **6. Prove esterne (contenuto, Luca)** - in attesa (2026-10-23: Luca non ha ancora materiale) - una frase di un collega o responsabile, o numeri di risultato dove ci sono, anche solo una riga per progetto. Solo con materiale utilizzabile, nel rispetto delle regole di sanitizzazione per Thélios.
+- [x] **7. Data di aggiornamento visibile** - fatto 2026-10-23: "Updated <mese anno>" nel footer, dalla data dell'ultimo commit alla build (`VITE_SITE_UPDATED` in `vite.config.js`). Era: "Last updated" nel footer.
 
 ## Critique, decimo giro (2026-10-19, 25/32)
 
