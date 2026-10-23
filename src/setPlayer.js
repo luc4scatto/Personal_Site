@@ -389,8 +389,28 @@ export function initSetPlayer(mount) {
     if (WARM && !eng.warmed) startWarm(eng);
   }
 
+  // The engines are not built on page load: four SoundCloud iframes are four third-party
+  // documents (and a third-party cookie) for every visitor, most of whom never open the
+  // drawer. They are built at the first sign of interest instead - the drawer opening, the
+  // panel scrolling into view, a pointer or focus reaching it (see the triggers at the end of
+  // initSetPlayer). The drawer opening is the one that matters on iOS: the panel only shows
+  // seconds later, which leaves every engine time to load and warm before a finger can reach
+  // the record.
+  let primed = false;
+  function prime() {
+    if (primed) return;
+    primed = true;
+    for (const s of order) engines.set(s.track, makeEngine(s.track));
+    cur = engines.get(current.track);
+  }
+
   function engineLoad(trackUrl, play) {
-    if (!engines.size) for (const s of order) engines.set(s.track, makeEngine(s.track));
+    // not built yet and nothing to play: load() has already set the title and waveform, and
+    // prime() picks up `current` when the engines do get built
+    if (!primed) {
+      if (!play) return;
+      prime();
+    }
     const old = cur;
     cur = engines.get(trackUrl);
     widget = cur.widget; // null until the widget script lands; makeEngine fills it in then
@@ -694,4 +714,29 @@ export function initSetPlayer(mount) {
 
   player = { el, started: false };
   load(order[0]);
+
+  for (const type of ['pointerenter', 'focusin', 'pointerdown'])
+    el.addEventListener(type, prime, { once: true });
+  const scene = mount.querySelector('.drawer__scene');
+  if (scene) {
+    // the drawer's corner: the panel is hidden until the drawer opens
+    const opened = () => !scene.classList.contains('is-shut');
+    if (opened()) prime();
+    else {
+      const mo = new MutationObserver(() => {
+        if (!opened()) return;
+        mo.disconnect();
+        prime();
+      });
+      mo.observe(scene, { attributes: true, attributeFilter: ['class'] });
+    }
+  } else {
+    // the flat wall's block in the flow: built as it comes into view
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      prime();
+    });
+    io.observe(el);
+  }
 }
