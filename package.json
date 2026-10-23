@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node tools/sitemap.mjs",
     "preview": "vite preview",
     "lint": "eslint . --ignore-pattern .claude/ --ignore-pattern .impeccable/",
     "format:check": "prettier --check ."
