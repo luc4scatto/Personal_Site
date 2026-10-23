@@ -27,8 +27,10 @@ export function initRouter(leave, enter) {
     containers: ['#main-content', '.nav nav', '.nav-logo'],
     // downloads (the CV) and new tabs are never page visits
     linkSelector: 'a[href]:not([download]):not([target])',
-    // no transition between pages: the swap is the point, not a show
-    animationSelector: false,
+    // A short fade, not for show: the new page is swapped in and set up (reveals hidden,
+    // drawer pending, scroll placed) while #main-content is invisible, so none of its
+    // half-initialised first frames are ever seen. The transition itself is in sections.css.
+    animationSelector: '#main-content',
     ignoreVisit: (url, { el } = {}) => !player?.playerActive() || !!el?.closest('[data-no-swup]'),
     plugins: [new SwupA11yPlugin()],
   });

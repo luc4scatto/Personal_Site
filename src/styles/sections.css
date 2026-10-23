@@ -302,6 +302,10 @@
      mask; negative margin cancels it so line spacing is unchanged */
   padding-bottom: 0.16em;
   margin-bottom: -0.16em;
+  /* the same room on the right: Mona Sans wide at 800 draws its last glyph past the line's
+     edge, and a line that fills the column ("Bringing ideas") had its S cut by the mask */
+  padding-right: 0.08em;
+  margin-right: -0.08em;
 }
 
 .hero h1 .hero-line-inner {
@@ -1668,6 +1672,27 @@
 
 .nav > nav {
   order: 2;
+}
+
+/* Page swaps while a set plays (src/router.js): Swup puts .is-animating on <html> for the
+   way out and the way in, and waits on this transition both times. Out, the old page fades;
+   in, the new one is already set up underneath and fades up ready. The footer goes with it,
+   or it would sit visible over the gap while the page above it changes height. */
+#main-content,
+.footer {
+  transition: opacity 0.22s var(--ease-out);
+}
+
+html.is-animating #main-content,
+html.is-animating .footer {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main-content,
+  .footer {
+    transition: none;
+  }
 }
 
 /* the X beside the docked pill: stops the set and puts the player away. Only docked - in the
