@@ -705,11 +705,20 @@
   border-radius: 1rem;
   object-fit: cover;
   display: block;
-  /* gradient shows as placeholder while the photo loads */
+  /* The photo is a transparent cutout and this is its backdrop, drawn here so it is never
+     compressed: the old baked-in gradient banded in webp. Stops follow the old photo's falloff
+     (it darkens fast, then trails to black). It also shows while the photo loads. */
   background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--accent-2) 20%, var(--surface)),
-    color-mix(in srgb, var(--accent) 25%, var(--surface))
+    to bottom,
+    var(--accent) 0%,
+    #c8520d 12.5%,
+    #8a3706 25%,
+    #5e2101 37.5%,
+    #3e1400 50%,
+    #230a00 62.5%,
+    #0e0302 75%,
+    #030001 87.5%,
+    #000 100%
   );
 }
 
