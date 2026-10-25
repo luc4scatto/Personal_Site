@@ -162,7 +162,9 @@ function initPage(signal, firstLoad) {
     if (hashTarget) {
       window.addEventListener('load', () => {
         requestAnimationFrame(() =>
-          requestAnimationFrame(() => hashTarget.scrollIntoView({ block: 'start' })),
+          requestAnimationFrame(() =>
+            hashTarget.scrollIntoView({ block: 'start', behavior: 'instant' }),
+          ),
         );
       });
     }
@@ -184,7 +186,7 @@ function initPage(signal, firstLoad) {
   sections.forEach((s) => observer.observe(s));
   signal.addEventListener('abort', () => observer.disconnect());
 
-  initAnimations();
+  initAnimations(signal);
 
   // vivatech "The visitor's path": an animated hand under each step
   const vtSteps = document.querySelector('.vt-steps');

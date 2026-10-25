@@ -65,10 +65,12 @@ export function initRouter(leave, enter) {
   swup.hooks.replace('content:scroll', () => {
     const target = location.hash && document.querySelector(location.hash);
     if (!target) {
-      window.scrollTo(0, 0);
+      // instant: html has scroll-behavior: smooth, and a bare scrollTo(0, 0) would scroll the
+      // whole way up from wherever the last page was, in full view of the new one
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       return;
     }
-    const go = () => target.scrollIntoView({ block: 'start' });
+    const go = () => target.scrollIntoView({ block: 'start', behavior: 'instant' });
     requestAnimationFrame(go);
     const once = () => {
       ScrollTrigger.removeEventListener('refresh', once);
