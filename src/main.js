@@ -28,6 +28,22 @@ function initPage(signal, firstLoad) {
     if (typeof value !== 'string') return;
     el.innerHTML = value.split('\n').map(escapeHtml).join('<br>');
   });
+  // .btn: the copy's leading or trailing arrow moves onto the pill's knob (base.css)
+  document.querySelectorAll('.btn').forEach((btn) => {
+    if (btn.querySelector('.btn__knob')) return;
+    const m = btn.textContent.trim().match(/^([←→↑↓↗])\s*(.+)$|^(.+?)\s*([←→↑↓↗])$/u);
+    if (!m) return;
+    const knob = document.createElement('span');
+    knob.className = 'btn__knob';
+    knob.setAttribute('aria-hidden', 'true');
+    knob.textContent = m[1] || m[4];
+    btn.textContent = m[2] || m[3];
+    if (m[1]) btn.prepend(knob);
+    else {
+      knob.classList.add('btn__knob--end');
+      btn.append(knob);
+    }
+  });
   // footer: when the site last changed, from the last commit at build time (vite.config.js).
   // The footer sits outside the swapped page (src/router.js), so it is filled only once.
   const updated = import.meta.env.VITE_SITE_UPDATED;

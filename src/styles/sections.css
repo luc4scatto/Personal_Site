@@ -282,17 +282,36 @@
     gap: 0.25rem;
   }
 
+  /* a dark knob, the site's pressable material (base.css): 40px drawn, 44px to tap */
   .nav-burger {
+    position: relative;
     display: grid;
     place-items: center;
-    width: 44px;
-    height: 44px;
-    margin-left: -0.6rem;
+    width: 40px;
+    height: 40px;
+    margin-right: 0.5rem;
     padding: 0;
     color: var(--text);
-    background: none;
+    background: var(--knob-bg);
+    background-blend-mode: var(--knob-blend);
+    box-shadow: var(--knob-shadow);
     border: 0;
+    border-radius: 50%;
     cursor: pointer;
+    transition:
+      transform var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out);
+  }
+
+  .nav-burger::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+  }
+
+  .nav-burger:active {
+    transform: translateY(1px);
+    box-shadow: var(--knob-shadow-pressed);
   }
 
   /* the bar keeps only the burger and the logo; every link lives in the menu */
@@ -1584,22 +1603,12 @@
 
 .set-player__next {
   margin-left: auto;
-  padding: 0.1rem;
-  border: 0;
-  background: none;
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: color var(--duration-fast) var(--ease-out);
-}
-
-.set-player__next:hover {
-  color: var(--set-played);
 }
 
 .set-player__next-glyph {
   display: block;
-  width: 1rem;
-  height: 1rem;
+  width: 0.85rem;
+  height: 0.85rem;
 }
 
 /* the mini transport: two skip steps, a plain play/pause, a volume slider - the ordinary,
@@ -1613,26 +1622,59 @@
   margin: 0.5rem 0 0;
 }
 
+/* the transport is hardware: the dark knob of .btn (materials in base.css) */
 .set-player__skip,
-.set-player__mini {
-  padding: 0.25rem;
+.set-player__mini,
+.set-player__next {
+  flex: none; /* a knob stays round: never squeezed by the volume slider in a narrow panel */
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
   border: 0;
-  background: none;
-  color: var(--text-dim);
+  border-radius: 50%;
+  background: var(--knob-bg);
+  background-blend-mode: var(--knob-blend);
+  box-shadow: var(--knob-shadow);
+  color: #cfcfcf;
   cursor: pointer;
-  transition: color var(--duration-fast) var(--ease-out);
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+/* play is the big knob, not an orange one: the disc's blue play already owns the colour */
+.set-player__mini {
+  width: 2.3rem;
+  height: 2.3rem;
+  color: #e6e6e6;
 }
 
 .set-player__skip:hover,
-.set-player__mini:hover {
+.set-player__mini:hover,
+.set-player__next:hover {
   color: var(--set-played);
+}
+
+.set-player__skip:active,
+.set-player__mini:active,
+.set-player__next:active {
+  transform: translateY(1px);
+  box-shadow: var(--knob-shadow-pressed);
 }
 
 .set-player__skip-glyph,
 .set-player__mini-glyph {
   display: block;
-  width: 1rem;
-  height: 1rem;
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.set-player__mini-glyph {
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 /* volume last and pushed to the far edge, the same right-alignment .set-player__next uses in
@@ -1643,6 +1685,8 @@
 .set-player__volume {
   margin-left: auto;
   width: 4.5rem;
+  min-width: 2.5rem; /* the knobs don't shrink, so the slider gives way in a narrow panel */
+  flex: 0 1 auto;
   accent-color: var(--set-played);
   cursor: pointer;
 }
@@ -1932,6 +1976,12 @@ html.is-animating .footer {
 .set-player.is-docked .set-player__foot,
 .set-player.is-docked .set-player__controls {
   margin: 0;
+}
+
+/* a smaller knob in the bar, so it stays under the disc's 2rem */
+.set-player.is-docked .set-player__next {
+  width: 1.6rem;
+  height: 1.6rem;
 }
 
 .set-player.is-docked .set-player__volume {
@@ -2755,17 +2805,6 @@ html.is-animating .footer {
   align-items: center;
   gap: 1rem 1.25rem;
   margin-top: 0.25rem;
-}
-
-/* the one primary action of the section, so the one filled button on it */
-.contact-form .btn {
-  background: var(--accent);
-  color: var(--bg);
-  font-weight: 600;
-}
-
-.contact-form .btn:hover {
-  background: color-mix(in srgb, var(--accent) 85%, #fff);
 }
 
 .contact-form .btn:disabled {
@@ -6716,21 +6755,32 @@ button.pp-btn:active {
    read off the demo (the path strip lights the stage a question is at) instead of a separate
    diagram; the second half of the page is rows, not cards. */
 
+/* a small dark knob, the site's pressable material (base.css) */
 .cb-chat__replay {
   margin-left: auto;
-  padding: 0.15rem 0.65rem;
-  border: 1px solid var(--ui-line);
+  padding: 0.15rem 0.75rem;
+  border: 0;
   border-radius: 99px;
-  background: none;
-  color: var(--text);
+  background: var(--knob-bg);
+  background-blend-mode: var(--knob-blend);
+  box-shadow: var(--knob-shadow);
+  color: #e6e6e6;
   font: inherit;
   font-size: 0.75rem;
   cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease-out);
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
 }
 
 .cb-chat__replay:hover {
-  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.cb-chat__replay:active {
+  transform: translateY(1px);
+  box-shadow: var(--knob-shadow-pressed);
 }
 
 .cb-chat__replay + .cb-chat__ro {
