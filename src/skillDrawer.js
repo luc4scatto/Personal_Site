@@ -157,6 +157,10 @@ function buildFolder(li) {
     body.append(p);
   }
   if (d?.bullets?.length) {
+    const label = document.createElement('p');
+    label.className = 'folder__label';
+    label.textContent = 'What I do with it';
+    body.append(label);
     const ul = document.createElement('ul');
     ul.className = 'folder__bullets';
     for (const b of d.bullets) {
@@ -298,6 +302,10 @@ export function initSkillDrawer(host, strip) {
   // foreshortened sliver, too thin to hit.
   const scrub = coarsePointer ? document.createElement('div') : null;
   const scrubThumb = scrub && document.createElement('span');
+  // the red button by the rail's near end: opens whatever folder the rail has lifted, so a
+  // touch reader can pull a card out without aiming for its tab among twenty others. Drawn in
+  // 3D on the wall (btnCap, below); this is only its 44px hit area, laid over the projection.
+  const scrubOpen = scrub && document.createElement('button');
   let scrubKey = ''; // last transform written, so a still drawer costs no style writes
   let scrubLen = 0; // the drawn rail's length, px
   let scrubS0 = 0; // where the drawn rail starts and ends along the wall, 0-1 (see placeScrub)
@@ -313,7 +321,13 @@ export function initSkillDrawer(host, strip) {
     scrub.setAttribute('aria-hidden', 'true');
     scrubThumb.className = 'drawer__scrub-thumb';
     scrub.appendChild(scrubThumb);
+    scrubOpen.className = 'drawer__scrub-open';
+    scrubOpen.type = 'button';
+    scrubOpen.tabIndex = -1; // touch only; keyboard readers open folders with Enter
+    scrubOpen.disabled = true;
+    scrubOpen.setAttribute('aria-hidden', 'true');
     host.appendChild(scrub);
+    host.appendChild(scrubOpen);
   }
 
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -391,6 +405,47 @@ export function initSkillDrawer(host, strip) {
   const handle = box(W * 0.45, 0.18, 0.24, steel);
   handle.position.set(0, FRONT_Y, D / 2 + 0.33);
   drawer.add(handle);
+
+  // The touch rail's red button (scrubOpen above), touch only: a real part of the drawer, so it
+  // takes the scene's perspective and light instead of sitting flat on top of them. A chrome
+  // bezel and a glossy cap, mounted on the near wall's outer face just behind the front, at the
+  // rail's height. Dark red until the rail has lifted a folder for it to open.
+  const BTN_Z = D / 2 - 0.8;
+  const BTN_UP = 0.05; // the cap's rest height above the bezel; pressed, it sinks to 0
+  let btnCap = null;
+  let btnRed = null;
+  if (coarsePointer) {
+    const btn = new THREE.Group();
+    btn.position.set(W / 2, 0, BTN_Z);
+    btn.rotation.z = -Math.PI / 2; // the cylinders' axis (y) out of the wall (+x)
+    const chrome = new THREE.MeshStandardMaterial({
+      color: 0xe2e5ea,
+      metalness: 1,
+      roughness: 0.16,
+    });
+    const bezel = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.27, 0.06, 48), chrome);
+    bezel.position.y = 0.03;
+    btnRed = new THREE.MeshPhysicalMaterial({
+      color: 0x5a1414,
+      roughness: 0.32,
+      clearcoat: 1,
+      clearcoatRoughness: 0.05,
+    });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.11, 48), btnRed);
+    body.position.y = 0.055;
+    // a shallow dome, not a flat disc: the clearcoat needs a curve to catch a highlight on
+    const dome = new THREE.Mesh(
+      new THREE.SphereGeometry(0.19, 48, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+      btnRed,
+    );
+    dome.scale.y = 0.22;
+    dome.position.y = 0.11;
+    btnCap = new THREE.Group();
+    btnCap.add(body, dome);
+    btnCap.position.y = BTN_UP;
+    btn.add(bezel, btnCap);
+    drawer.add(btn);
+  }
 
   // ---- the cabinet ---------------------------------------------------------------------
   // Behind the drawer's back end, never over it: the whole index has to stay visible, and a
@@ -1346,6 +1401,7 @@ export function initSkillDrawer(host, strip) {
     // it to start the climb from the peek rather than dropping 2rem first. Any other peek goes.
     if (peeked === f) peeked = null;
     else unpeek();
+    setOpenReady(false);
     active = f;
     f.el.classList.add('is-open');
     f.el.setAttribute('aria-expanded', 'true');
@@ -1515,6 +1571,15 @@ export function initSkillDrawer(host, strip) {
       scrubS0 = 0;
       scrubS1 = free;
     }
+    // the button sits on the wall in front of the rail: lay its hit area over it, and start the
+    // rail clear of it
+    scrubP.set(W / 2 + 0.12, 0, BTN_Z);
+    drawer.localToWorld(scrubP);
+    scrubP.project(camera);
+    const bx = ((scrubP.x + 1) / 2) * w;
+    const by = ((1 - scrubP.y) / 2) * h;
+    scrubOpen.style.transform = `translate(${(bx - 22).toFixed(1)}px,${(by - 22).toFixed(1)}px)`;
+    scrubS0 = Math.min(Math.max(scrubS0, alongScrub(bx, by) + 0.05), scrubS1 - 0.25);
     const x0 = scrubA.x + dx * scrubS0;
     const y0 = scrubA.y + dy * scrubS0;
     const key = `translate(${x0.toFixed(1)}px,${y0.toFixed(1)}px) rotate(${Math.atan2(dy, dx).toFixed(4)}rad)`;
@@ -1532,11 +1597,19 @@ export function initSkillDrawer(host, strip) {
     return ((x - scrubA.x) * dx + (y - scrubA.y) * dy) / (dx * dx + dy * dy || 1);
   };
   const scrubTmp = new THREE.Vector2();
+  function setOpenReady(ready) {
+    if (!scrubOpen || scrubOpen.disabled === !ready) return;
+    scrubOpen.disabled = !ready;
+    btnRed.color.set(ready ? 0xe02020 : 0x5a1414);
+    btnRed.emissive.set(ready ? 0x3a0404 : 0x000000);
+    pump(300);
+  }
   function peek(f) {
     if (f === peeked) return;
     unpeek();
     if (!f || f === active) return;
     peeked = f;
+    setOpenReady(true);
     f.el.classList.add('is-peek');
     rotateTo(f, HOVER_QUAT, 0.2, 'power3.out');
   }
@@ -1545,6 +1618,7 @@ export function initSkillDrawer(host, strip) {
     peeked.el.classList.remove('is-peek');
     if (peeked !== active) rotateTo(peeked, RESTING_QUAT, 0.2, 'power3.out');
     peeked = null;
+    setOpenReady(false);
   }
   // Nearest folder to the finger, measured in the rail's own screen terms rather than by
   // splitting it into equal parts: perspective packs the far tabs closer together, so an even
@@ -1588,6 +1662,25 @@ export function initSkillDrawer(host, strip) {
     const end = () => (scrubbing = false);
     scrub.addEventListener('pointerup', end);
     scrub.addEventListener('pointercancel', end);
+    // its own press, not the rail's (no scrub, no drawer drag), and a cap that sinks under the finger
+    const press = (down) => {
+      gsap.to(btnCap.position, {
+        y: down ? 0 : BTN_UP,
+        duration: down ? 0.07 : 0.18,
+        ease: 'power2.out',
+      });
+      pump(400);
+    };
+    scrubOpen.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      if (!scrubOpen.disabled) press(true);
+    });
+    scrubOpen.addEventListener('pointerup', () => press(false));
+    scrubOpen.addEventListener('pointercancel', () => press(false));
+    scrubOpen.addEventListener('click', (e) => {
+      e.stopPropagation(); // or the window's outside-click closes the card it just opened
+      if (peeked) select(peeked);
+    });
   }
 
   // ---- dragging ----------------------------------------------------------------------

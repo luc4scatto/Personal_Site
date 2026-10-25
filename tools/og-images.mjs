@@ -24,14 +24,14 @@ const PAGES = [
   },
   {
     out: 'vivatech',
-    kicker: 'Work · Interactive installation',
+    kicker: 'Live installation',
     title: 'Vivatech Interactive Experience',
     desc: 'Real-time experience for Thélios at the LVMH Dream Gallery, Vivatech Paris.',
     img: img('images/vivatech-10.jpg'),
   },
   {
     out: 'pipeline-projects',
-    kicker: 'Work · Pipeline tools',
+    kicker: 'Pipeline tools',
     title: 'Pipeline Projects',
     desc: 'In-house tools for Maya, Unreal Engine, Omniverse and PowerPoint, built for the 3D R&D team at Thélios.',
     img: img('images/pipeline-projects-cover.webp'),
@@ -39,7 +39,7 @@ const PAGES = [
   },
   {
     out: 'company-brain',
-    kicker: 'Work · AI assistant',
+    kicker: 'AI assistant',
     title: 'Company Brain',
     desc: 'A self-hosted AI assistant that answers questions about our products from the company systems.',
     img: img('images/company-brain-cover.svg'),
@@ -47,7 +47,7 @@ const PAGES = [
   },
   {
     out: 'homelab',
-    kicker: 'Personal · Self-hosting',
+    kicker: 'Personal project',
     title: 'Homelab',
     desc: 'A two-node Proxmox cluster and a NAS in a 3D-printed rack, running media, backups, automation and an AI agent.',
     img: img('images/homelab-rack.webp'),

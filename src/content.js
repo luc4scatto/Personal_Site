@@ -67,7 +67,7 @@ export const content = {
     copyright: '© 2026 Luca Scattolin',
   },
   vivatech: {
-    kicker: 'Work · Live installation',
+    kicker: 'Live installation',
     description1:
       "Vivatech 2026 was the tenth edition of Europe's biggest tech event. LVMH brought ten of its Maisons to the Dream Gallery pavilion in Paris, showing how technology amplifies craftsmanship across the whole value chain.",
     description2:
@@ -130,7 +130,7 @@ export const content = {
   },
   // Company Brain: sanitized like pipelineProjects - no brand names, system names, vendors, hosts or real data.
   companyBrain: {
-    kicker: 'Work · AI assistant',
+    kicker: 'AI assistant',
     meta: 'A self-hosted AI assistant that answers questions about our products from the company systems',
     description1:
       'Product information is spread across many systems: **technical data**, **commercial texts**, **official photos**, **technical drawings**, **prototype tracking** and manuals. Each has its own login and its own search, so a simple question like "what material is this model?" means opening three or four programs.',
@@ -223,7 +223,7 @@ export const content = {
     backCta: '← Back to projects',
   },
   homelab: {
-    kicker: 'Personal · Self-hosting',
+    kicker: 'Personal project',
     description1:
       'It started with a shared folder my Windows PC and my Mac could both reach, instead of carrying files between them on an external drive. That one NAS folder opened the door to **self-hosted software**, and I never really came back out.',
     description2:
@@ -354,7 +354,7 @@ export const content = {
   // codes - only what each tool does, in general terms. The mockups in
   // pipeline-projects.html follow the same rule (redrawn, fake data).
   pipelineProjects: {
-    kicker: 'Work · Pipeline tools',
+    kicker: 'Pipeline tools',
     intro1:
       'In the **3D R&D team** at Thélios, a lot of the slow work was not modeling or rendering, it was everything around it: cleaning and naming meshes by hand, building the variants for every colorway, renaming hundreds of renders, assembling presentation decks slide by slide.',
     intro2:
@@ -603,7 +603,7 @@ export const content = {
     // One line per newline: skillDrawer.js gives each its own <span>, and the two animate
     // differently - the first is nudged to the right, the second carries the colour sweep - so
     // breaking this copy differently changes which line does what
-    drawerText: "Pull the last drawer\nSee what's inside.",
+    drawerText: "Pull the last drawer.\nSee what's inside.",
   },
   // DJ sets for the player that rides the open drawer (src/setPlayer.js). A set is a title
   // and a file - there is no line of blurb under it, because "melodic techno, Jun 2025" told
@@ -824,7 +824,6 @@ export const content = {
         'Scripts and UI for automation in basically every DCC',
         'Connecting multiple sources of truth (PLM, PIM, DAM, SAP, databases) to 3D software',
         'Building tools to speed up the pipeline and everyday work',
-        'PyQt5/6 and PySide for the UI',
       ],
     },
     usd: {

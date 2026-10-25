@@ -24,14 +24,14 @@
 
 .info-card__title {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: var(--fs-md);
   margin-bottom: 0.4rem;
   padding-right: 1rem;
 }
 
 .info-card__text {
   color: var(--text-dim);
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   line-height: 1.5;
 }
 
@@ -106,7 +106,7 @@
   border-radius: 999px;
   color: var(--accent-2);
   font-family: var(--font-display);
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -120,8 +120,22 @@
   max-width: 46ch;
   margin-top: 1.1rem;
   color: var(--text-dim);
-  font-size: 1.0625rem;
+  font-size: var(--fs-md);
   line-height: 1.6;
+}
+
+/* the line that turns the bullets from a feature list into Luca's own use of the tool */
+.skill-card__label {
+  margin-top: 1.6rem;
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.skill-card__label + .skill-card__bullets {
+  margin-top: 0.6rem;
 }
 
 /* "what I actually do" list — two columns once there is room, so a seven-item card
@@ -133,7 +147,7 @@
   columns: 2;
   column-gap: 2.5rem;
   color: var(--text);
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   line-height: 1.55;
 }
 
@@ -160,7 +174,7 @@
   margin: 0.4rem 0 0.7rem;
   padding: 0;
   color: var(--text-dim);
-  font-size: 0.875rem;
+  font-size: var(--fs-sm);
 }
 
 .skill-card__bullets ul li {
@@ -246,7 +260,7 @@
 
 .nav nav a {
   color: var(--text-dim);
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   transition: color 0.2s;
 }
 
@@ -368,7 +382,7 @@
   .mobile-menu__label {
     margin-bottom: 0.25rem;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--text-dim);
@@ -390,7 +404,7 @@
   .mobile-menu li a {
     padding: 0.75rem 0;
     font-family: var(--font-display);
-    font-size: 1.25rem;
+    font-size: var(--fs-lg);
     font-weight: 500;
     line-height: 1.2;
     color: var(--text);
@@ -491,9 +505,11 @@
   pointer-events: none;
   /* fade the left edge instead of hard-clipping it: objects that drift toward the
      headline dissolve into the background rather than being cut off or sitting
-     legibly on top of the text */
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 24%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 24%);
+     legibly on top of the text. The h1 runs ~20% into this box at 1440 (9vw, wide cut), so
+     that first stretch stays clear and the fade finishes past it: at 0-24% a model drifting
+     left sat on "ideas" at full strength. */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 14%, #000 38%);
+  mask-image: linear-gradient(90deg, transparent 0%, transparent 14%, #000 38%);
 }
 
 #hero-canvas canvas {
@@ -535,7 +551,7 @@
   border: 1px solid var(--accent);
   border-radius: 8px;
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   cursor: pointer;
 }
 
@@ -582,7 +598,7 @@
      only thing that says the hero can be clicked */
   color: var(--text-dim);
   font-family: var(--font-display);
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   letter-spacing: 0.04em;
   opacity: 1;
   transition: opacity 0.4s;
@@ -652,14 +668,14 @@
 .hero-kicker {
   color: var(--accent);
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: var(--fs-md);
 }
 
 .hero-subtitle {
   color: var(--text);
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 1.3rem;
+  font-size: var(--fs-lg);
   max-width: 34rem;
   margin-top: 0.5rem;
 }
@@ -667,7 +683,7 @@
 .hero-tagline {
   color: var(--text-dim);
   max-width: 34rem;
-  font-size: 1.15rem;
+  font-size: var(--fs-md);
   margin-top: 0.35rem;
 }
 
@@ -852,11 +868,18 @@
   align-items: center;
 }
 
-.about-grid p {
+.about-text {
   grid-column: 1;
   grid-row: 1;
-  font-size: 1.2rem;
+}
+
+.about-grid p {
+  font-size: var(--fs-md);
   color: var(--text-dim);
+}
+
+.about-grid p + p {
+  margin-top: 1em;
 }
 
 .about-grid p strong {
@@ -1024,7 +1047,7 @@
 
 .skill-label {
   font-family: var(--font-display);
-  font-size: 0.9375rem;
+  font-size: var(--fs-sm);
   font-weight: 500;
   letter-spacing: -0.01em;
   line-height: 1.25;
@@ -1042,29 +1065,14 @@
   opacity: 0.32;
 }
 
-/* the invitation, carrying the same shine sweep as homelab's service-tree hint
-   (hint-shine, defined once, reused here) */
+/* the invitation: plain text, weight carries it (a gradient shine here read as decoration) */
 .skills-hint {
   margin-bottom: 2.5rem;
   font-size: clamp(1.1rem, 2vw, 1.35rem);
   font-weight: 600;
   letter-spacing: -0.01em;
   transition: opacity 0.4s ease;
-  background: linear-gradient(
-    90deg,
-    var(--text-dim) 0%,
-    var(--text-dim) 40%,
-    var(--accent) 50%,
-    var(--accent-2) 60%,
-    var(--text-dim) 70%,
-    var(--text-dim) 100%
-  );
-  background-size: 300% 100%;
-  background-position: 110% center;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: hint-shine 3s linear infinite;
+  color: var(--text-dim);
 }
 
 .skills.is-focused .skills-hint {
@@ -1105,6 +1113,7 @@
   padding: 0;
   margin-top: 8rem;
   max-width: 52rem;
+  padding-top: 0.8rem;
   border-top: 1px solid #1f1f1f;
 }
 
@@ -1112,23 +1121,25 @@
   margin-top: 6rem;
 }
 
+/* a caption, not a menu: no row rules and no bright names, so nothing here reads as tappable
+   (the folders above are the interactive version of this same list) */
 .skills-glance li {
   display: grid;
   grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
   gap: 0.25rem 2rem;
-  padding: 0.85rem 0.1rem;
-  border-bottom: 1px solid #1f1f1f;
+  padding: 0.4rem 0.1rem;
 }
 
 .skills-glance__name {
   font-family: var(--font-display);
-  font-size: 1rem;
-  color: var(--text);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-dim);
 }
 
 .skills-glance__tools {
   color: var(--text-dim);
-  font-size: 0.95rem;
+  font-size: var(--fs-sm);
 }
 
 /* -5rem was tuned against the non-overlay box, which stays 680-900px tall across its own
@@ -1258,26 +1269,9 @@
   animation: hint-nudge 3.6s ease-in-out infinite;
 }
 
-/* and the line that says what the gesture is for carries the colour. hint-shine is homelab's
-   shimmer, reused here and by .skills-hint above: an established "look here" pattern in this
-   codebase, not a new one designed for this spot - slowed, because at this size the 3s sweep
-   reads as a marquee rather than as a highlight. */
+/* and the line that says what the gesture is for is the brighter one: contrast, not a gradient */
 #skill-drawer.is-live .drawer__hint span + span {
-  background: linear-gradient(
-    90deg,
-    var(--text-dim) 0%,
-    var(--text-dim) 40%,
-    var(--accent) 50%,
-    var(--accent-2) 60%,
-    var(--text-dim) 70%,
-    var(--text-dim) 100%
-  );
-  background-size: 300% 100%;
-  background-position: 110% center;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: hint-shine 4.5s linear infinite;
+  color: var(--text);
 }
 
 @keyframes hint-nudge {
@@ -1298,9 +1292,7 @@
    draws spans from wherever the text actually landed toward the handle's own projected
    position - toward, not onto it: that function stops the curve short on purpose, matching
    the homelab diagram's own connector arrowhead (hw-arrow in homelabHardware.js) rather than
-   inventing a second arrow language for the same site. currentColor, not the text's own
-   gradient: the text is background-clip text with color: transparent underneath it, which an
-   SVG cannot inherit as a stroke colour. */
+   inventing a second arrow language for the same site. */
 #skill-drawer.is-live .drawer__hint-arrow {
   position: absolute;
   inset: 0;
@@ -1369,6 +1361,32 @@
     0 0 0 1px rgba(0, 0, 0, 0.75),
     0 2px 4px rgba(0, 0, 0, 0.6);
   transition: transform 0.12s var(--ease-out);
+}
+
+/* the red button's hit area: the button itself is drawn in 3D on the drawer's wall
+   (skillDrawer.js, btnCap), this is a clear 44px target laid over its projection */
+#skill-drawer.is-live .drawer__scrub-open {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  visibility: hidden;
+}
+
+#skill-drawer.is-live .drawer__scrub-open:disabled {
+  cursor: default;
+}
+
+#skill-drawer.is-live .drawer__scene:not(.is-shut):not(.has-open) .drawer__scrub-open {
+  visibility: visible;
 }
 
 #skill-drawer.is-live .drawer__scene:not(.is-shut):not(.has-open) .drawer__scrub {
@@ -2356,6 +2374,19 @@ html.is-animating .footer {
   color: var(--text-dim);
 }
 
+.folder__label {
+  margin: 0.6rem 0 0;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.folder__label + .folder__bullets {
+  margin-top: 0.25rem;
+}
+
 .folder__bullets {
   list-style: none;
   padding: 0;
@@ -2551,7 +2582,7 @@ html.is-animating .footer {
 .projects-count {
   margin-top: 1rem;
   color: var(--text-dim);
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   font-variant-numeric: tabular-nums;
 }
 
@@ -2594,7 +2625,7 @@ html.is-animating .footer {
 
 .card p {
   color: var(--text-dim);
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
 }
 
 /* one label scheme for every project, the same words as the kicker on its own page:
@@ -2603,7 +2634,7 @@ html.is-animating .footer {
   margin: 0;
   color: var(--accent);
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
 }
 
 .card-links {
@@ -2614,7 +2645,7 @@ html.is-animating .footer {
 
 .card-links a {
   color: var(--accent);
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
 }
 
 .card-links a:hover {
@@ -2672,7 +2703,7 @@ html.is-animating .footer {
 
 .contact-intro p {
   color: var(--text-dim);
-  font-size: 1.15rem;
+  font-size: var(--fs-md);
   max-width: 32ch;
   text-wrap: balance;
 }
@@ -2682,7 +2713,7 @@ html.is-animating .footer {
    the browser slants the roman - close to a true italic on a sans this plain. */
 .contact-intro .contact-details {
   margin-top: 0.75rem;
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   max-width: 44ch;
 }
 
@@ -2716,7 +2747,7 @@ html.is-animating .footer {
   align-items: center;
   padding: 0.9rem 0.1rem;
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: var(--fs-base);
   color: var(--text);
   transition: color var(--duration-base) var(--ease-out);
 }
@@ -2771,26 +2802,27 @@ html.is-animating .footer {
 
 .contact-field label {
   color: var(--text-dim);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
 }
 
 /* the wells: darker than the sheet they sit in, so each field reads as a place to type */
 .contact-field input,
 .contact-field textarea {
   background: var(--bg);
-  border: 1px solid #262626;
+  /* 3.1:1 on --bg: a field's edge is a control boundary, WCAG 1.4.11 asks 3:1 */
+  border: 1px solid #606060;
   border-radius: 0.6rem;
   padding: 0.8em 0.95em;
   color: var(--text);
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: var(--fs-base);
   resize: vertical;
   transition: border-color var(--duration-fast) var(--ease-out);
 }
 
 .contact-field input:hover,
 .contact-field textarea:hover {
-  border-color: #363636;
+  border-color: #7a7a7a;
 }
 
 .contact-field input:focus,
@@ -2815,7 +2847,7 @@ html.is-animating .footer {
 .contact-status {
   min-height: 1.2em;
   color: var(--text-dim);
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   margin: 0;
 }
 
@@ -2831,7 +2863,7 @@ html.is-animating .footer {
 
 .contact-error {
   margin: 0.4rem 0 0;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
 }
 
 .contact-error:empty {
@@ -2918,7 +2950,7 @@ html.is-animating .footer {
 }
 
 .project-description p {
-  font-size: 1.2rem;
+  font-size: var(--fs-md);
   color: var(--text-dim);
   max-width: 44rem;
 }
@@ -2935,7 +2967,7 @@ html.is-animating .footer {
 /* phone: 1.2rem intro paragraphs ran to 8-9 lines each on a 390px screen */
 @media (max-width: 700px) {
   .project-description p {
-    font-size: 1.0625rem;
+    font-size: var(--fs-md);
   }
 
   .project-description p + p {
@@ -2982,7 +3014,7 @@ html.is-animating .footer {
 p.project-specs__kicker {
   color: var(--accent);
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   margin-bottom: 1rem;
 }
 
@@ -2999,18 +3031,18 @@ p.project-specs__kicker {
 
 .project-specs__list dt {
   color: var(--text-dim);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
 }
 
 .project-specs__list dd {
   margin: 0;
   color: var(--text);
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
 }
 
 .project-specs__credit {
   margin-top: 1.5rem;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
 }
 
@@ -3064,7 +3096,7 @@ p.project-specs__kicker {
    path through it as a numbered timeline - the numbers carry the order the gestures come
    in - then the three decisions worth reading about. Flat cards like the Pipeline index. */
 .vt-how__intro {
-  font-size: 1.2rem;
+  font-size: var(--fs-md);
   color: var(--text-dim);
   max-width: 44rem;
   margin-bottom: 2.5rem;
@@ -3109,14 +3141,14 @@ p.project-specs__kicker {
 .vt-flow__name {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: var(--fs-base);
   line-height: 1.15;
 }
 
 .vt-flow__text,
 .vt-step__text,
 .vt-detail p {
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
   line-height: 1.5;
 }
@@ -3207,7 +3239,7 @@ p.project-specs__kicker {
   padding-right: 0.6rem;
   background: var(--bg);
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
   letter-spacing: 0.08em;
   color: var(--accent);
 }
@@ -3215,7 +3247,7 @@ p.project-specs__kicker {
 .vt-step__gesture {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: var(--fs-base);
   line-height: 1.2;
 }
 
@@ -3413,7 +3445,7 @@ p.project-specs__kicker {
 }
 
 .vt-detail h3 {
-  font-size: 1.1rem;
+  font-size: var(--fs-md);
   margin-bottom: 0.5rem;
 }
 
@@ -3546,7 +3578,7 @@ p.project-specs__kicker {
 
 .featured-links a {
   color: var(--text);
-  font-size: 1.05rem;
+  font-size: var(--fs-base);
   transition: color 0.2s;
 }
 
@@ -3617,7 +3649,7 @@ p.project-specs__kicker {
 
 .project-next__hint {
   color: var(--accent);
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
 }
 
 .project-back__aside {
@@ -3636,7 +3668,7 @@ p.project-specs__kicker {
 .project-all__label {
   margin: 0 0 0.4rem;
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
 }
 
@@ -3654,7 +3686,7 @@ p.project-specs__kicker {
   padding-block: 0.6rem;
   color: var(--text);
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: var(--fs-base);
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, var(--text) 30%, transparent);
   text-underline-offset: 0.25em;
@@ -3704,46 +3736,14 @@ p.project-specs__kicker {
 
 /* the rows are buttons but nothing about a tree says "tap me", and on touch
    there is no hover to discover it with — so the invitation is written down,
-   and a slow shine sweeps across it so it reads as alive, not a caption */
+   in plain text, at a size and weight that reads as an instruction, not a caption */
 .homelab-services-section .section-hint,
 .pp-hint {
   margin-bottom: 2.5rem;
   font-size: clamp(1.1rem, 2vw, 1.35rem);
   font-weight: 500;
   letter-spacing: -0.01em;
-  background: linear-gradient(
-    90deg,
-    var(--text-dim) 0%,
-    var(--text-dim) 40%,
-    var(--accent) 50%,
-    var(--accent-2) 60%,
-    var(--text-dim) 70%,
-    var(--text-dim) 100%
-  );
-  background-size: 300% 100%;
-  background-position: 110% center;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: hint-shine 3s linear infinite;
-}
-
-@keyframes hint-shine {
-  from {
-    background-position: 110% center;
-  }
-  to {
-    background-position: 10% center;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .homelab-services-section .section-hint,
-  .pp-hint {
-    animation: none;
-    background: none;
-    color: var(--text-dim);
-  }
+  color: var(--text-dim);
 }
 
 .hd-tree {
@@ -3794,7 +3794,7 @@ p.project-specs__kicker {
   padding: 0.35rem 0.75rem 0.35rem 0.6rem;
   border-radius: 0.7rem;
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: var(--fs-md);
   font-weight: 600;
   color: var(--text);
 }
@@ -3854,7 +3854,7 @@ p.project-specs__kicker {
   align-items: center;
   gap: 0.4rem 1.25rem;
   margin: 0 0 0 auto;
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
 }
 
@@ -3907,7 +3907,7 @@ p.project-specs__kicker {
   margin: 0 0 0.35rem;
   padding: 0 0.6rem;
   font-family: var(--font-display);
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
@@ -3922,7 +3922,7 @@ p.project-specs__kicker {
   min-height: 2.75rem;
   padding: 0.35rem 0.6rem;
   border-radius: 0.6rem;
-  font-size: 1rem;
+  font-size: var(--fs-base);
   color: var(--text-dim);
 }
 
@@ -4016,7 +4016,7 @@ p.project-specs__kicker {
 }
 
 .hd-card__text {
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   line-height: 1.6;
   color: var(--text-dim);
 }
@@ -4081,7 +4081,7 @@ p.project-specs__kicker {
 
   .hd-legend {
     margin-left: 0.6rem;
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
   }
 }
 
@@ -4353,7 +4353,7 @@ p.project-specs__kicker {
   margin: 1rem auto 0;
   padding-top: 1rem;
   justify-content: center;
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   color: var(--text-dim);
 }
 
@@ -4386,7 +4386,7 @@ p.project-specs__kicker {
   text-align: center;
   padding: 2rem var(--pad-x);
   color: var(--text-dim);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   border-top: 1px solid #1c1c1c;
 }
 
@@ -4404,7 +4404,7 @@ p.project-specs__kicker {
 
 .footer .credits {
   margin-top: 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   opacity: 0.8;
 }
 
@@ -4431,7 +4431,7 @@ p.project-specs__kicker {
 
   .skill-group > h3 {
     margin: 0;
-    font-size: 1.125rem;
+    font-size: var(--fs-md);
   }
 
   .skill-group > h3::after {
@@ -4456,7 +4456,7 @@ p.project-specs__kicker {
 
   .skill-group__count {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     color: var(--text-dim);
   }
 
@@ -4499,7 +4499,6 @@ p.project-specs__kicker {
     gap: 0.75rem;
     min-height: 3.25rem;
     padding: 0.6rem 0.9rem;
-    border-left: 3px solid var(--brand, var(--accent));
   }
 
   /* inside a list the lift reads as a wobble; the wash and border carry the state */
@@ -4535,7 +4534,7 @@ p.project-specs__kicker {
 
   .skills-hint {
     margin-bottom: 1rem;
-    font-size: 1rem;
+    font-size: var(--fs-base);
   }
 
   /* At the flow width's own available room the title wraps to two lines more often than the
@@ -4565,7 +4564,7 @@ p.project-specs__kicker {
 }
 
 .pp-disclaimer {
-  font-size: 0.95rem !important;
+  font-size: var(--fs-base) !important;
   border-left: 2px solid var(--accent);
   padding-left: 1rem;
 }
@@ -4668,14 +4667,14 @@ p.project-specs__kicker {
 .pp-index__name {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: var(--fs-md);
   line-height: 1.15;
 }
 
 .pp-index__label {
   margin-top: 0.4rem;
   font-family: var(--font-display);
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
@@ -4683,7 +4682,7 @@ p.project-specs__kicker {
 
 .pp-index__problem {
   margin-top: -0.35rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
 }
 
@@ -4741,7 +4740,7 @@ p.project-specs__kicker {
 .pp-tool__label,
 .vt-how__label {
   font-family: var(--font-display);
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
@@ -4752,7 +4751,7 @@ p.project-specs__kicker {
 .pp-tool__idea,
 .pp-tool__bullets {
   color: var(--text-dim);
-  font-size: 1.05rem;
+  font-size: var(--fs-base);
   line-height: 1.55;
 }
 
@@ -4790,7 +4789,7 @@ p.project-specs__kicker {
     background: none;
     color: var(--text);
     font-family: var(--font-display);
-    font-size: 0.9rem;
+    font-size: var(--fs-sm);
     cursor: pointer;
   }
 }
@@ -5784,7 +5783,7 @@ button.pp-btn:active {
   align-items: center;
   gap: 0.5rem;
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   color: var(--text);
 }
 
@@ -5870,7 +5869,7 @@ button.pp-btn:active {
 }
 
 .cb-demo__tab-text {
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
 }
 
 .cb-chat {
@@ -6134,7 +6133,7 @@ button.pp-btn:active {
   background: none;
   color: var(--text-dim);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
   cursor: pointer;
   transition: color var(--duration-fast) var(--ease-out);
 }
@@ -6402,12 +6401,12 @@ button.pp-btn:active {
 
 .cb-details .vt-detail h3 {
   margin-bottom: 0.6rem;
-  font-size: 1.25rem;
+  font-size: var(--fs-lg);
   color: var(--text);
 }
 
 .cb-details .vt-detail p {
-  font-size: 0.98rem;
+  font-size: var(--fs-base);
   color: var(--cb-body);
 }
 
@@ -6451,7 +6450,7 @@ button.pp-btn:active {
 }
 
 .cb-lessons .vt-detail p {
-  font-size: 1rem;
+  font-size: var(--fs-base);
   color: var(--cb-body);
 }
 
@@ -6467,12 +6466,12 @@ button.pp-btn:active {
 
 .cb-limits .vt-detail h4 {
   margin-bottom: 0.35rem;
-  font-size: 1rem;
+  font-size: var(--fs-base);
   color: var(--text-dim);
 }
 
 .cb-limits .vt-detail p {
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
 }
 
 @media (max-width: 1024px) {
@@ -6740,7 +6739,7 @@ button.pp-btn:active {
 }
 
 .cb-limits .vt-detail:nth-child(2) p {
-  font-size: 1rem;
+  font-size: var(--fs-base);
   color: var(--cb-body);
 }
 
@@ -6841,7 +6840,7 @@ button.pp-btn:active {
 }
 
 .cb-path__text {
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
   line-height: 1.45;
   color: color-mix(in srgb, var(--text) 78%, transparent);
 }
@@ -6999,7 +6998,7 @@ button.pp-btn:active {
 
 .project-facts dt {
   color: var(--text-dim);
-  font-size: 0.8rem;
+  font-size: var(--fs-xs);
 }
 
 .project-facts dd {
@@ -7030,7 +7029,7 @@ button.pp-btn:active {
   align-items: center;
   gap: 1rem;
   margin-top: 1.5rem;
-  font-size: 1rem;
+  font-size: var(--fs-base);
   color: var(--text-dim);
 }
 
@@ -7071,7 +7070,7 @@ button.pp-btn:active {
 .cb-desc.project-description p + p {
   max-width: 34rem;
   margin: 0;
-  font-size: 1.1rem;
+  font-size: var(--fs-md);
   line-height: 1.55;
 }
 
@@ -7161,7 +7160,7 @@ button.pp-btn:active {
   margin-top: 1.5rem;
   padding-block: 0.6rem;
   color: var(--accent);
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
 }
 
 .pp-tool__top:hover {
@@ -7183,12 +7182,12 @@ button.pp-btn:active {
   }
 
   .hero-subtitle {
-    font-size: 1.1rem;
+    font-size: var(--fs-md);
     margin-top: 0.25rem;
   }
 
   .hero-tagline {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     line-height: 1.5;
     margin-top: 0;
   }
@@ -7204,7 +7203,7 @@ button.pp-btn:active {
   display: none;
   margin-top: 0.5rem;
   color: var(--text-dim);
-  font-size: 0.9rem;
+  font-size: var(--fs-sm);
 }
 
 @media (max-width: 900px) {
@@ -7299,7 +7298,7 @@ button.pp-btn:active {
     border-radius: 50%;
     background: var(--bg);
     font-family: var(--font-display);
-    font-size: 0.75rem;
+    font-size: var(--fs-xs);
     line-height: 1;
     color: var(--text);
   }
@@ -7313,7 +7312,7 @@ button.pp-btn:active {
     border-radius: 0.4rem;
     background: var(--bg);
     font-family: var(--font-display);
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
@@ -7393,7 +7392,7 @@ button.pp-btn:active {
 .cb-results__tag {
   margin: 0 0 1.25rem;
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   font-weight: 500;
   color: var(--accent);
 }
@@ -7427,14 +7426,14 @@ button.pp-btn:active {
 }
 
 .cb-facts dt {
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   color: var(--text-dim);
 }
 
 .cb-results__lead {
   max-width: 44rem;
   margin: 2rem 0 0;
-  font-size: 1.15rem;
+  font-size: var(--fs-md);
   line-height: 1.55;
   color: var(--text);
 }
@@ -7472,7 +7471,7 @@ button.pp-btn:active {
 /* column heads say which side is which, so "before" needs no strikethrough to read as old */
 .cb-before .cb-before__head {
   padding-block: 0 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-dim);
@@ -7497,7 +7496,7 @@ button.pp-btn:active {
 .cb-results__note {
   max-width: 38rem;
   margin: 1.5rem 0 0;
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   line-height: 1.55;
   color: var(--text-dim);
 }
@@ -7505,7 +7504,7 @@ button.pp-btn:active {
 .cb-results__next {
   max-width: 44rem;
   margin: 3rem 0 0;
-  font-size: 1.05rem;
+  font-size: var(--fs-base);
   line-height: 1.55;
   color: var(--text-dim);
 }
@@ -7532,7 +7531,7 @@ button.pp-btn:active {
 .featured-lead {
   max-width: 44rem;
   margin: -0.5rem 0 1.5rem;
-  font-size: 1.1rem;
+  font-size: var(--fs-md);
   line-height: 1.55;
   color: var(--text);
 }

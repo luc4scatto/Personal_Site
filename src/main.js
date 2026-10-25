@@ -26,7 +26,15 @@ function initPage(signal, firstLoad) {
   document.querySelectorAll('[data-copy]').forEach((el) => {
     const value = el.dataset.copy.split('.').reduce((o, k) => o?.[k], content);
     if (typeof value !== 'string') return;
-    el.innerHTML = value.split('\n').map(escapeHtml).join('<br>');
+    const lines = value.split('\n');
+    // a <div> target takes one <p> per line (real paragraphs), anything else a <br> per line
+    el.innerHTML =
+      el.tagName === 'DIV'
+        ? lines
+            .filter(Boolean)
+            .map((l) => `<p>${escapeHtml(l)}</p>`)
+            .join('')
+        : lines.map(escapeHtml).join('<br>');
   });
   // .btn: the copy's leading or trailing arrow moves onto the pill's knob (base.css)
   document.querySelectorAll('.btn').forEach((btn) => {

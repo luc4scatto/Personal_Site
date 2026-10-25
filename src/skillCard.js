@@ -17,6 +17,7 @@ export function buildSkillCardInner() {
     '<h3 class="skill-card__title"></h3>' +
     '<p class="skill-card__badge"></p>' +
     '<p class="skill-card__text"></p>' +
+    '<p class="skill-card__label">What I do with it</p>' +
     '<ul class="skill-card__bullets"></ul>';
   return inner;
 }
@@ -57,5 +58,6 @@ export function applySkillContent(inner, skill) {
   badge.hidden = !skill.selfTaught;
   inner.querySelector('.skill-card__text').textContent = skill.text;
   renderBullets(inner.querySelector('.skill-card__bullets'), skill.bullets);
+  inner.querySelector('.skill-card__label').hidden = !skill.bullets?.length;
   return true;
 }

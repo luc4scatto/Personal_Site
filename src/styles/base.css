@@ -58,6 +58,16 @@
   --font-body: 'Mona Sans', 'Mona Sans Fallback', sans-serif;
   --font-mono: 'Martian Mono', ui-monospace, monospace;
 
+  /* type scale: every fixed size in the site sits on one of these five steps, then display
+     headings use their own clamp(). 14px is the floor for text meant to be read; 12px is for
+     labels only. The CSS3D folders and the mockups that imitate real software keep their own
+     sizes (a folder's text size is its 3D scale, a mockup copies the app it draws). */
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-md: 1.125rem;
+  --fs-lg: 1.3rem;
+
   --space: clamp(4rem, 10vh, 8rem);
   --pad-x: clamp(1.25rem, 5vw, 4rem);
 
@@ -226,7 +236,7 @@ textarea:focus-visible,
   background-blend-mode: var(--pill-blend);
   color: var(--bg);
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: var(--fs-base);
   font-weight: 600;
   appearance: none;
   cursor: pointer;
@@ -317,7 +327,7 @@ body {
 
 .cookie-banner p {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
   max-width: 60ch;
 }
@@ -351,7 +361,7 @@ body {
   box-shadow: var(--knob-shadow);
   color: var(--text);
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   font-weight: 500;
   cursor: pointer;
   transition:
@@ -371,7 +381,7 @@ body {
 
 .cookie-banner__accept {
   padding: 0.55em 1.4em;
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   cursor: pointer;
 }
 
@@ -384,7 +394,7 @@ body {
   }
 
   .cookie-banner p {
-    font-size: 0.78rem;
+    font-size: var(--fs-xs);
     line-height: 1.35;
   }
 
