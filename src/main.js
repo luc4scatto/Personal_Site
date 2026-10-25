@@ -3,6 +3,7 @@ import './styles/base.css';
 import './styles/sections.css';
 import { initAnimations, refreshScrollTriggers } from './animations.js';
 import { initAnalytics } from './analytics.js';
+import { initMobileMenu } from './mobileMenu.js';
 import { content } from './content.js';
 import { buildSkillCardInner, applySkillContent } from './skillCard.js';
 
@@ -225,26 +226,21 @@ function initPage(signal, firstLoad) {
     window.matchMedia('(min-width: 701px)').matches;
 
   // Same decided-once-at-load contract as DRAWER_MODE (see CLAUDE.md: a resize after load does
-  // not change mode, a reload does). Phone gets its own centered-modal card behavior inside
-  // initSkillsWall() below; reduced-motion desktop and a failed drawer import still fall back to
-  // the plain full-width wall untouched.
+  // not change mode, a reload does). Phone gets the wall as an accordion: one row per category,
+  // the card unfolding right under the tapped tool. Reduced-motion desktop and a failed drawer
+  // import still fall back to the plain full-width wall untouched.
   const IS_PHONE_SKILLS_LAYOUT = window.matchMedia('(max-width: 700px)').matches;
 
   function initSkillsWall() {
     if (!skillsSection || !skillTiles.length) return;
-    // The invitation, in the same place the hero puts its own "click on an object" line -
-    // except on phone, where it's replaced by .skills-invite (below): that one sits beside
-    // the stack itself and stays in view the whole way down, instead of scrolling away
-    // above a 22-tool list the way this one would. Reduced-motion desktop and a failed
-    // drawer import still use the plain grid with no side panel to carry it instead, so they
-    // keep this one.
-    if (!IS_PHONE_SKILLS_LAYOUT) {
-      const hint = document.createElement('p');
-      hint.className = 'skills-hint';
-      hint.textContent =
-        content.skillsHint?.text ?? 'Click any tool to see what I actually do with it.';
-      skillsSection.querySelector('h2')?.after(hint);
-    }
+    // the invitation, in the same place the hero puts its own "click on an object" line
+    const hint = document.createElement('p');
+    hint.className = 'skills-hint';
+    hint.textContent =
+      (matchMedia('(pointer: coarse)').matches && content.skillsHint?.textTouch) ||
+      content.skillsHint?.text ||
+      'Click any tool to see what I actually do with it.';
+    skillsSection.querySelector('h2')?.after(hint);
 
     const card = document.createElement('div');
     card.className = 'skill-card';
@@ -252,58 +248,6 @@ function initPage(signal, firstLoad) {
     card.append(inner);
 
     const isReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // Phone: the stack takes the left half and the card opens fixed in the right half,
-    // beside it. Nothing is covered, so this is a non-modal dialog - no aria-modal, no
-    // inert, no scroll lock: the page keeps scrolling and every tab stays tappable.
-    let modalEl = null;
-    let stripEl = null;
-    let invite = null;
-    if (IS_PHONE_SKILLS_LAYOUT) {
-      modalEl = document.createElement('div');
-      modalEl.className = 'skills-modal';
-      document.body.append(modalEl);
-      // the tab stack itself, which ends with the last tab - the section around it carries
-      // padding the panel has no business sitting beside
-      stripEl = document.querySelector('.drawer__strip');
-      inner.querySelector('.skill-card__title').id = 'skill-card-title';
-      card.setAttribute('role', 'dialog');
-      card.setAttribute('aria-labelledby', 'skill-card-title');
-
-      // The same invitation the section's own heading already carries, repeated into the
-      // empty half of the frame the stack doesn't use - the only thing living there until a
-      // tap fills it with an actual card. Lives in the fixed .skills-modal, sharing the
-      // card's own grid cell (place-items: center end already centres it on the viewport,
-      // not on the stack's own - much taller - height, so it stays put on screen as the
-      // stack scrolls under it, instead of only ever showing up around the drawer's
-      // midpoint). Visibility is wired up below, alongside the card's own placement logic -
-      // it needs the exact same "does this fit beside the stack" test the card uses.
-      invite = document.createElement('p');
-      invite.className = 'skills-invite';
-      // Two explicit rows, not the natural wrap: the shine is one background image per
-      // element, so text that wraps within a single element shows the same slice of the
-      // gradient on every line at once - same colour, same instant, no stagger possible.
-      // Split into two <span>, each its own element with its own hint-shine timeline
-      // (offset in CSS via animation-delay), so the second visibly trails the first instead
-      // of moving in lockstep with it.
-      // a finger taps: the phone layout is touch almost always, but the wording follows the
-      // pointer, not the width
-      const touch = matchMedia('(pointer: coarse)').matches;
-      const text =
-        (touch && content.skillsHint?.textTouch) ||
-        content.skillsHint?.text ||
-        'Click any tool to see what I actually do with it.';
-      const words = text.split(' ');
-      const mid = Math.ceil(words.length / 2);
-      const line1 = document.createElement('span');
-      line1.className = 'skills-invite__line';
-      line1.textContent = words.slice(0, mid).join(' ');
-      const line2 = document.createElement('span');
-      line2.className = 'skills-invite__line';
-      line2.textContent = words.slice(mid).join(' ');
-      invite.append(line1, line2);
-      modalEl.append(invite);
-    }
 
     const applyContent = (li) => {
       const d = SKILL_DESCRIPTIONS[li.dataset.skill];
@@ -314,66 +258,12 @@ function initPage(signal, firstLoad) {
 
     let activeEl = null;
 
-    // where a fixed, centred-on-the-frame element lands, as tall as it needs - shared by the
-    // open card and, further down, the idle invitation that shows in its place
-    const bandFor = (el) => {
-      const h = el.offsetHeight; // layout box: unaffected by any entry transform
-      const top = (window.innerHeight - h) / 2;
-      return { top, bottom: top + h };
-    };
-
-    // Either one may only live alongside the stack itself. Past the bottom it hangs over
-    // Projects; past the top it drifts up beside the section's own title, with no tab next
-    // to it at all. The stack, not the section around it: the section's padding reaches
-    // well past the last tab, which is exactly the slack that let it overlap.
-    const fitsBesideStack = (el) => {
-      if (!stripEl) return true;
-      const strip = stripEl.getBoundingClientRect();
-      const band = bandFor(el);
-      return band.top >= strip.top && band.bottom <= strip.bottom;
-    };
-
-    // Opening a tab near either end of the stack centres the panel past that end - tap the
-    // last tab with Projects already filling the screen and the card opens on top of
-    // Projects. This walks the page the minimum distance that puts the panel back alongside
-    // actual tabs, landing it a few px inside so that rounding alone cannot trip the close
-    // test above on the very next scroll event.
-    const STACK_PAD = 8;
-    let scrollSettleUntil = 0;
-    const scrollPanelBesideStack = () => {
-      if (!stripEl) return;
-      const strip = stripEl.getBoundingClientRect();
-      const panel = bandFor(card);
-
-      // a positive scroll moves the page down, which moves the strip up the frame
-      let delta = 0;
-      if (panel.bottom > strip.bottom - STACK_PAD) delta = strip.bottom - STACK_PAD - panel.bottom;
-      else if (panel.top < strip.top + STACK_PAD) delta = strip.top + STACK_PAD - panel.top;
-      if (!delta) return;
-
-      // the scroll below fires scroll events of its own, and mid-flight the panel is briefly
-      // outside the section - without this the close-on-scroll watcher would shut the card
-      // we are in the middle of placing
-      scrollSettleUntil = performance.now() + (isReduced() ? 0 : 800);
-      window.scrollBy({ top: delta, behavior: isReduced() ? 'auto' : 'smooth' });
-    };
-
     const closeCard = (instant) => {
       if (!activeEl) return;
       activeEl.classList.remove('is-active');
       activeEl = null;
       skillsSection.classList.remove('is-focused');
       card.closest('.skill-group')?.classList.remove('has-open-card');
-
-      if (IS_PHONE_SKILLS_LAYOUT) {
-        modalEl.classList.remove('is-open');
-        if (instant || isReduced()) {
-          card.remove();
-          return;
-        }
-        modalEl.addEventListener('transitionend', () => card.remove(), { once: true });
-        return;
-      }
 
       gsap.killTweensOf(card);
       if (instant || isReduced()) {
@@ -391,35 +281,23 @@ function initPage(signal, firstLoad) {
       });
     };
 
-    const openCard = (li) => {
-      if (IS_PHONE_SKILLS_LAYOUT) {
-        if (!applyContent(li)) return;
-        activeEl?.classList.remove('is-active');
-        activeEl = li;
-        li.classList.add('is-active');
-        gsap.killTweensOf(card);
-        modalEl.append(card);
-        // rAF so the just-inserted node still picks up the CSS transition instead of
-        // starting already in its end state. Focus stays on the tab that was tapped: the
-        // panel covers nothing, so pulling focus across the frame would only cost the
-        // reader their place in the stack.
-        // Guarded: a close landing inside the same frame (Escape on a keyboard, a scripted
-        // open/close) would otherwise be undone by this callback re-opening the panel.
-        requestAnimationFrame(() => {
-          if (activeEl !== li) return;
-          modalEl.classList.add('is-open');
-          scrollPanelBesideStack();
-        });
-        return;
-      }
+    // phone: the card opens under the tool, often past the bottom edge - bring it into view
+    const revealCard = (smooth) => {
+      if (IS_PHONE_SKILLS_LAYOUT)
+        card.scrollIntoView({ block: 'nearest', behavior: smooth ? 'smooth' : 'auto' });
+    };
 
+    const openCard = (li) => {
       const grid = li.closest('.skills-grid');
       if (!applyContent(li) || !grid) return;
       // In drawer mode the folders sit in one horizontal row, so there is no row for the card
       // to unfold inside: it opens in a slot below the drawer instead. With no slot (the
       // mobile / no-WebGL wall) it still unfolds under the category that owns the pick.
-      const mount = document.querySelector('#skill-card-slot') || grid;
-      const movingRow = card.parentElement !== mount;
+      // On phone the card unfolds right under the tapped tool, inside its open category.
+      const mount = IS_PHONE_SKILLS_LAYOUT
+        ? null
+        : document.querySelector('#skill-card-slot') || grid;
+      const movingRow = mount ? card.parentElement !== mount : card.previousElementSibling !== li;
 
       activeEl?.classList.remove('is-active');
       activeEl = li;
@@ -434,10 +312,12 @@ function initPage(signal, firstLoad) {
       // pick — so it always unfolds under the tool, never somewhere else on the wall
       gsap.killTweensOf(card);
       gsap.killTweensOf(inner);
-      mount.append(card);
+      if (mount) mount.append(card);
+      else li.after(card);
       if (isReduced()) {
         gsap.set(card, { height: 'auto', opacity: 1 });
         gsap.set(inner, { y: 0, opacity: 1 });
+        revealCard(false);
         return;
       }
       // switching within a row is a content swap, not a second unfold: only the height
@@ -447,7 +327,13 @@ function initPage(signal, firstLoad) {
         { height: movingRow ? 0 : card.offsetHeight, opacity: movingRow ? 0 : 1 },
         // 0.35, not the 0.55 this shipped with: this is the answer to a tap, and it animates
         // height, which relayouts - the shorter it runs, the less of that there is to drop
-        { height: 'auto', opacity: 1, duration: 0.35, ease: 'power3.out' },
+        {
+          height: 'auto',
+          opacity: 1,
+          duration: 0.35,
+          ease: 'power3.out',
+          onComplete: () => revealCard(true),
+        },
       );
       gsap.fromTo(
         inner,
@@ -470,6 +356,39 @@ function initPage(signal, firstLoad) {
       const name = grid.closest('.skill-group')?.querySelector('h3')?.textContent.trim();
       if (name) grid.setAttribute('aria-label', name);
     });
+
+    // Phone: an accordion, one row per category. The heading's text moves into a real button
+    // that shows or hides its tools; the first category starts open so the section never
+    // reads as empty. Closing a category that holds the open card closes the card with it.
+    if (IS_PHONE_SKILLS_LAYOUT) {
+      document.querySelectorAll('.skill-group').forEach((group, i) => {
+        const h3 = group.querySelector('h3');
+        const grid = group.querySelector('.skills-grid');
+        if (!h3 || !grid) return;
+        grid.id ||= `skill-group-${i}`;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'skill-group__toggle';
+        btn.setAttribute('aria-controls', grid.id);
+        const name = document.createElement('span');
+        name.textContent = h3.textContent.trim();
+        const count = document.createElement('span');
+        count.className = 'skill-group__count';
+        count.textContent = grid.querySelectorAll('li[data-skill]').length;
+        btn.append(name, count);
+        h3.replaceChildren(btn);
+        const setOpen = (open) => {
+          btn.setAttribute('aria-expanded', open);
+          grid.hidden = !open;
+        };
+        setOpen(i === 0);
+        btn.addEventListener('click', () => {
+          const open = btn.getAttribute('aria-expanded') !== 'true';
+          if (!open && grid.contains(card)) closeCard(true);
+          setOpen(open);
+        });
+      });
+    }
 
     skillTiles.forEach((li) => {
       // the tiles are <li>, so keyboard access has to be granted explicitly
@@ -505,28 +424,6 @@ function initPage(signal, firstLoad) {
       },
       { signal },
     );
-    // The panel is fixed, so scrolling slides the stack out from under it and it ends up
-    // hanging over a neighbouring section. It closes the moment it stops fitting beside the
-    // stack - the same test that placed it, so the two can never disagree. Only ever closes:
-    // opening still needs a real tap (see CLAUDE.md - a scroll-driven open burns the gesture
-    // before the reader has looked at anything).
-    //
-    // The idle invitation rides the same listener and the same test: an IntersectionObserver
-    // (the earlier approach) only asks whether the strip has any pixel at all in the
-    // viewport, which stayed true long after the invite's own centred band - a fixed height
-    // in the middle of the screen - had already scrolled past the strip's actual edge and
-    // onto Projects or the section's own title.
-    if (IS_PHONE_SKILLS_LAYOUT) {
-      const syncPlacement = () => {
-        if (activeEl) {
-          if (performance.now() >= scrollSettleUntil && !fitsBesideStack(card)) closeCard();
-        } else if (invite) {
-          invite.classList.toggle('is-visible', fitsBesideStack(invite));
-        }
-      };
-      window.addEventListener('scroll', syncPlacement, { passive: true, signal });
-      syncPlacement();
-    }
 
     // clicking away from the wall closes it; the card and the tiles handle their own clicks
     window.addEventListener(
@@ -537,8 +434,6 @@ function initPage(signal, firstLoad) {
       },
       { signal },
     );
-    // the phone card's fixed layer lives on <body>, outside the page that is swapped
-    if (modalEl) signal.addEventListener('abort', () => modalEl.remove());
   }
 
   // the DJ set player — lazy, and mounted on #skill-drawer in *both* modes. That element is
@@ -726,6 +621,7 @@ function initPage(signal, firstLoad) {
 let page = new AbortController();
 initPage(page.signal, true);
 initAnalytics();
+initMobileMenu();
 // The router exists for one reason: keeping a playing set alive across pages. So it is
 // loaded the first time a set starts (setPlayer.js fires this), never on page load.
 window.addEventListener(

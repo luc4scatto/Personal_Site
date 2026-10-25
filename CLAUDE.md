@@ -27,6 +27,8 @@ Vite MPA, input in `vite.config.js`: `index.html` (home), `vivatech.html`, `home
 - `src/animations.js` - animazioni GSAP + ScrollTrigger
 - `src/hero3d.js` - scena Three.js dell'hero
 - `src/skillDrawer.js` - sezione Skills come cassetto 3D (solo desktop, >701px)
+- `src/mobileMenu.js` - menu burger solo telefono (<=700px): bottone a sinistra del logo, `<dialog>` nativo da sinistra con sezioni della home, le 4 pagine progetto e il CV. Creato una volta in `.nav` fuori dai contenitori di Swup; nella barra restano solo burger e logo. Su tablet/desktop nascosto (test, da valutare se estenderlo)
+- Skills su telefono (`initSkillsWall()` in `main.js`, `IS_PHONE_SKILLS_LAYOUT`): accordion per categoria (l'h3 diventa un bottone, prima categoria aperta), strumenti a righe intere, card che si apre sotto lo strumento toccato. Ha sostituito la colonna "cassetto in piedi" con il pannello fisso a destra (2026-10-25: troppo stretto, card fuori schermo)
 - `src/setPlayer.js` - player DJ set (streaming da SoundCloud, non file ospitati sul sito)
 - `src/router.js` - navigazione senza ricarica (Swup), caricata solo al primo play di un set: tiene viva la musica tra le pagine. Vedi gotcha "Player persistente"
 - `src/content.js` - copy del sito

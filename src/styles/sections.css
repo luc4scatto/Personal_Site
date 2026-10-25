@@ -269,6 +269,156 @@
   }
 }
 
+/* phone menu (src/mobileMenu.js): a burger left of the logo and a native <dialog> sliding in
+   from the left. Hidden above 700px, where the links fit in the bar. */
+.nav-burger,
+.mobile-menu {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .nav {
+    justify-content: flex-start;
+    gap: 0.25rem;
+  }
+
+  .nav-burger {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-left: -0.6rem;
+    padding: 0;
+    color: var(--text);
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  /* the bar keeps only the burger and the logo; every link lives in the menu */
+  .nav > nav {
+    display: none;
+  }
+
+  .mobile-menu[open] {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    inset: 0 auto 0 0;
+    width: min(20rem, 85vw);
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 4.5rem var(--pad-x) 2rem;
+    overflow-y: auto;
+    color: var(--text);
+    background: var(--bg);
+    border: 0;
+    border-right: 1px solid #222;
+    transition:
+      transform var(--duration-base) var(--ease-out),
+      overlay var(--duration-base) allow-discrete,
+      display var(--duration-base) allow-discrete;
+  }
+
+  @starting-style {
+    .mobile-menu[open] {
+      transform: translateX(-100%);
+    }
+  }
+
+  .mobile-menu::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+
+  .mobile-menu__close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    color: var(--text);
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .mobile-menu__label {
+    margin-bottom: 0.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .mobile-menu ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  /* 0.75rem above and below 1.5rem of line: 48px a row; the link's own padding matches it,
+     so the whole row is the tap target while the link stays inline */
+  .mobile-menu li {
+    padding: 0.75rem 0;
+  }
+
+  /* inline, so the orange underline sits under the text itself and draws in from the left
+     on every line of a wrapped title; the vertical padding keeps the tap target tall */
+  .mobile-menu li a {
+    padding: 0.75rem 0;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--text);
+    text-decoration: none;
+    background: linear-gradient(var(--accent), var(--accent)) no-repeat left bottom / 0 2px;
+    background-origin: content-box;
+    background-clip: content-box;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    transition:
+      background-size var(--duration-base) var(--ease-out),
+      color var(--duration-base) var(--ease-out);
+  }
+
+  .mobile-menu li a:active,
+  .mobile-menu li a:focus-visible,
+  .mobile-menu a[aria-current] {
+    color: var(--accent);
+    background-size: 100% 2px;
+  }
+
+  @media (hover: hover) {
+    .mobile-menu li a:hover {
+      color: var(--accent);
+      background-size: 100% 2px;
+    }
+  }
+
+  .mobile-menu a:focus-visible,
+  .nav-burger:focus-visible,
+  .mobile-menu__close:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  html:has(.mobile-menu[open]) {
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 700px) and (prefers-reduced-motion: reduce) {
+  .mobile-menu[open],
+  .mobile-menu li a {
+    transition: none;
+  }
+}
+
 /* scroll progress bar under the nav */
 .scroll-progress {
   position: absolute;
@@ -579,8 +729,7 @@
   }
 
   /* the invitation still reads — it's information, not decoration — just without the shine */
-  .skills-hint,
-  .skills-invite__line {
+  .skills-hint {
     animation: none;
     background: none;
     color: var(--text-dim);
@@ -605,15 +754,6 @@
   .skills-grid > li.is-active,
   .card:hover {
     transform: none;
-  }
-
-  /* phone modal: the open/close state change still happens (JS toggles the classes either
-     way), it just snaps instead of tweening - and closeCard()'s isReduced() branch skips
-     waiting on transitionend entirely, since with transition:none it would never fire */
-  .skills-modal,
-  .skills-modal .skill-card,
-  .skills-invite {
-    transition: none;
   }
 }
 
@@ -4228,208 +4368,91 @@ p.project-specs__kicker {
     gap: 1rem;
   }
 
-  /* The drawer, stood on its end and pushed into the left half: one column of cards filed
-     over each other, each showing only its tab, with the icon and title in the same place
-     as the desktop .folder__tab (top-left, one row). The card carries .folder__sheet's own
-     skin: #0b0b0b, brand top border, brand wash over the tab, and the rim mask that makes
-     it read as continuing under the card filed in front of it.
-
-     Everything is scaled to ~0.78 of the desktop folder so the stack only needs half the
-     frame: the other half is where the detail opens, beside it instead of over it. */
-  /* The drawer itself, flattened. The scene's steel is 0x9aa0a8 at metalness 0.96, brushed
-     with horizontal strokes and lit from one key light, so: a cool grey body raked across
-     its width, horizontal striations over the top, and a bright rim where the light catches
-     the near edge against a dark one where it falls away.
-
-     Inside is pure black, never dark metal - the 3D version takes no light in there at all
-     on purpose, because anything lit down there catches the environment and starts reading
-     as a floor the cards are standing on rather than a void they are filed in. */
-  .drawer__strip {
-    position: relative;
-    /* clearance above and below the metal itself, not just the section's own --space around
-       it: the side panel's placement is clamped to the strip's own top/bottom edge (see
-       scrollPanelBesideStack() in main.js), so with none of this the drawer's rounded
-       corner could end up flush against the viewport's own top edge with an open card
-       right behind it, or the strip's foot could land close enough to "Projects" for the
-       two to read as one run. The section padding below already keeps it apart from
-       "Projects": 3.5rem on top of it left ~225px of empty mat on the phone */
-    margin: 2.5rem 0 1rem;
-    width: 50%;
-    padding: 7px;
-    border-radius: 0.55rem;
-    background:
-      repeating-linear-gradient(
-        0deg,
-        rgba(255, 255, 255, 0.05) 0 1px,
-        rgba(0, 0, 0, 0.06) 1px 2px,
-        transparent 2px 4px
-      ),
-      linear-gradient(105deg, #c3c9d1 0%, #949aa2 14%, #6b7178 46%, #8d939b 72%, #565c64 100%);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.55),
-      0 14px 34px -16px rgba(0, 0, 0, 0.9);
-  }
-
-  /* the void the cards are filed in - painted behind them, since every tab is positioned
-     and this is not */
-  .drawer__strip::before {
-    content: '';
-    position: absolute;
-    inset: 7px;
-    border-radius: 0.3rem;
-    background: #000;
-    box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.95);
-  }
-
-  .skills-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    /* the peek is a transform, so it never grows the box it moves within - when the *last*
-       card of a group is the one hovered/active, the sibling peek has nothing after it to
-       push down except empty space, and without this that empty space doesn't exist: the
-       shifted card paints straight through the metal's own bottom edge. Exactly --peek, so
-       the group's resting height only grows by as much as the worst case ever needs. */
-    padding-bottom: var(--peek, 1.55rem);
-  }
-
-  /* the same clearance rekordbox got at the drawer's own foot, mirrored at its head: the
-     first tile of the first group otherwise sits flush against the 7px bezel with nothing
-     but that to separate it from the metal, while every other tile at rest has at least
-     the peek's worth of room above it (its own overlap into the tile before it). Only the
-     first group, not every group's own first tile - the gap between categories is a
-     separate, deliberately much smaller thing (see .skill-group + .skill-group below). */
-  .skill-group:first-of-type .skills-grid {
-    padding-top: var(--peek, 1.55rem);
-  }
-
-  /* The category, turned to run along the drawer's own long side - a label down the flank
-     rather than a banner across the top, which at this width would have spanned the full
-     frame and run under the detail panel. Same parts as the desktop heading: the name, then
-     a hairline that runs out to the end of the group. */
+  /* Skills on phone: an accordion. One row per category (main.js turns each h3 into a
+     toggle button), the tools of an open category as full-width rows, and the detail card
+     unfolding right under the tapped tool. */
   .skill-group {
-    display: flex;
-    align-items: stretch;
-    gap: 0.3rem;
-    /* single source of truth: read by the peek transform below, and by .skills-grid's own
-       padding-bottom, which needs to know the exact same number to stay in sync with it */
-    --peek: 1.55rem;
+    border-bottom: 1px solid #222;
+  }
+
+  .skill-group + .skill-group {
+    margin-top: 0;
   }
 
   .skill-group > h3 {
-    display: flex;
-    /* reversed to undo the rotate below: without it the 180 turn puts the name at the foot
-       of the group with the rule running up out of it, back to front from the desktop */
-    flex-direction: row-reverse;
-    flex: 0 0 auto;
-    align-items: center;
-    gap: 0.45rem;
-    width: 20px;
     margin: 0;
-    /* rotated as well as vertical, so it reads bottom-to-top the way a spine does */
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
+    font-size: 1.125rem;
+  }
+
+  .skill-group > h3::after {
+    content: none;
+  }
+
+  .skill-group__toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    min-height: 3.5rem;
+    padding: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    text-align: left;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .skill-group__count {
+    font-family: var(--font-mono);
     font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
     color: var(--text-dim);
-    white-space: nowrap;
   }
 
-  /* Two flex:1 hairlines instead of the desktop's one: a single trailing line (flex:1)
-     just pins the name to whichever end it starts from, same as before - centring the name
-     needs an equal-and-opposite line on the other side too, so the pair grows in lockstep
-     and the name sits in the middle of the group's height regardless of how tall it is. */
-  .skill-group > h3::before,
-  .skill-group > h3::after {
+  /* the chevron: points down when shut, up when open */
+  .skill-group__toggle::after {
     content: '';
-    flex: 1;
-    width: 1px;
-    background: #2f2f2f;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin: 0 0.25rem 0.25rem auto;
+    border: solid var(--text-dim);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    transition: transform var(--duration-base) var(--ease-out);
   }
 
-  /* faded at the far end from the name on each side, mirroring the desktop rule's own
-     fade-to-transparent - center-out on both, not the single direction one line allowed */
-  .skill-group > h3::before {
-    background: linear-gradient(0deg, #2f2f2f, transparent);
+  .skill-group__toggle[aria-expanded='true']::after {
+    margin-bottom: -0.25rem;
+    transform: rotate(-135deg);
   }
 
-  .skill-group > h3::after {
-    background: linear-gradient(180deg, #2f2f2f, transparent);
+  .skill-group__toggle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
-  /* the desktop gap (clamp(2.5rem,4vw,3.5rem), 40px here) reads right between two
-     full-width headed bands - between two half-width filed groups, each already carrying
-     its own side label the full run of the category, it read as more black than break.
-     Small enough that the label's own hairlines (which fade out well short of this gap)
-     still read as the thing doing the separating, not the gap itself. */
-  .skill-group + .skill-group {
-    margin-top: 0.85rem;
+  .skills-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding-bottom: 1rem;
   }
 
-  .skill-group > .skills-grid {
-    flex: 1;
-    min-width: 0;
+  /* display: grid above would otherwise win over the hidden attribute */
+  .skills-grid[hidden] {
+    display: none;
   }
 
   .skills-grid > li {
-    /* 2.65rem of tab plus the 1.55rem --peek reveals (declared on .skill-group above, not
-       here - the metal's own padding-bottom needs it too): any taller and the last card of
-       a group, with nothing filed in front of it, sits there as a blank face */
-    height: 4.2rem;
     flex-direction: row;
-    align-items: flex-start;
-    gap: 0.45rem;
-    padding: 0.5rem 0.6rem;
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--brand, var(--accent)) 26%, transparent),
-        transparent 2.65rem
-      ),
-      #0b0b0b;
-    border: 1px solid color-mix(in srgb, var(--brand, var(--accent)) 32%, #232323);
-    border-top: 2px solid var(--brand, var(--accent));
-    border-radius: 0.35rem 0.35rem 0.2rem 0.2rem;
-    box-shadow: 0 12px 26px -14px rgba(0, 0, 0, 0.9);
-    mask-image: linear-gradient(to top, transparent 0, #000 0.45rem);
-    -webkit-mask-image: linear-gradient(to top, transparent 0, #000 0.45rem);
-    /* same 200ms the drawer peeks its sheet in */
-    transition: transform 200ms var(--ease-out);
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.25rem;
+    padding: 0.6rem 0.9rem;
+    border-left: 3px solid var(--brand, var(--accent));
   }
 
-  /* 1.55rem of each card filed under the next one: 2.65rem of tab stays out */
-  .skills-grid > li + li {
-    margin-top: -1.55rem;
-  }
-
-  /* The peek, turned vertical. The drawer slides the pointed-at sheet up out of the rim;
-     here the cards filed *after* it slide down instead, so the same 3.4rem -> 5.4rem
-     reveal happens without ever creeping over the tab above it. */
-  .skills-grid > li:active ~ li,
-  .skills-grid > li:focus-visible ~ li,
-  .skills-grid > li.is-active ~ li {
-    transform: translateY(var(--peek, 2rem));
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .skills-grid > li:hover ~ li {
-      transform: translateY(var(--peek, 2rem));
-    }
-  }
-
-  /* the reveal stays - it is the only thing that says which card is being pointed at -
-     it just stops sliding there */
-  @media (prefers-reduced-motion: reduce) {
-    .skills-grid > li {
-      transition: none;
-    }
-  }
-
-  /* the base tile's press-scale and focus-lift both move the card inside its own stack,
-     which reads as a wobble when everything around it is filed edge to edge */
+  /* inside a list the lift reads as a wobble; the wash and border carry the state */
   .skills-grid > li:active,
   .skills-grid li:focus-visible,
   .skills-grid > li.is-active {
@@ -4437,184 +4460,32 @@ p.project-specs__kicker {
   }
 
   .skill-icon {
-    width: 20px;
-    height: 20px;
+    width: 26px;
+    height: 26px;
   }
 
-  .skill-label {
-    /* 12px floor: 9.6px read as decoration, not as the name of the tool */
-    font-size: 0.75rem;
-    /* two of these still clear the 2.65rem of tab on show, so the long names wrap instead
-       of forcing the whole stack wider than the frame can afford - measured against
-       "Adobe Substance 3D", the only one that needs the second line at 390px */
-    line-height: 0.95rem;
-    margin-top: 2px;
+  /* the card is read right here, under its tool: the rest of the list stays sharp */
+  .skills.is-focused .skills-grid > li:not(.is-active) {
+    opacity: 0.55;
+    filter: none;
   }
 
-  /* The tapped card's detail, beside the stack rather than over it - pinned to the right
-     half and centred on the frame, so it never covers the tabs you are picking from. It
-     sits in the free half, so there is no scrim and nothing is blocked: clicks fall
-     straight through the empty area to the stack underneath. See openCard()/closeCard()'s
-     IS_PHONE_SKILLS_LAYOUT branch in main.js. */
-  .skills-modal {
-    position: fixed;
-    /* top cleared past the fixed nav (measured ~65px/4.0625rem) - place-items: center
-       otherwise centers on the full viewport height and a tall card (long bullet lists,
-       e.g. Substance 3D) lands its top edge under the nav, which this z-index then draws
-       over. The bottom stops at the consent banner while it is up (--cookie-banner-h, set
-       by analytics.js), or the card centres on the full height and runs under the banner */
-    inset: 4.25rem 0 var(--cookie-banner-h, 0px) 0;
-    z-index: 60; /* above .info-card's 50, comfortably above .nav's 10 */
-    /* always laid out, never display:none - toggling display kills the card's own fade
-       before it starts, and with it the transitionend that takes the card back out of the
-       DOM. The container is empty and pointer-events:none while closed, so it costs
-       nothing to leave standing; what comes and goes is the card inside it. */
-    display: grid;
-    place-items: center end;
-    /* the same gutter the page itself keeps, so the gap left of the drawer and the gap
-       right of the panel are the one value and cannot drift apart */
-    padding: 0.75rem var(--pad-x);
-    pointer-events: none;
-  }
-
-  /* the invitation and the card it eventually gets replaced by share one cell - without
-     this, the invite (present the whole time, just faded out once a card opens) would
-     still claim its own row in the implicit grid, and the card's own centering would be
-     measured against that taller two-row box instead of sitting on it as an overlay */
-  .skills-modal .skill-card,
-  .skills-invite {
-    grid-area: 1 / 1;
-  }
-
-  .skills-modal .skill-card {
-    /* a share of the same content width the drawer is a share of - the modal is fixed to
-       the viewport, so the gutters have to come back out by hand */
-    width: calc((100vw - 2 * var(--pad-x)) * 0.48);
-    /* caps to what .skills-modal's own reserved band (inset top 4.25rem, 0.75rem padding
-       top+bottom, minus the consent banner) can actually hold, so centering never has to push the top edge back up
-       under the nav to fit a tall card */
-    max-height: calc(100vh - 4.25rem - 1.5rem - var(--cookie-banner-h, 0px));
-    overflow-y: auto;
-    margin: 0;
-    pointer-events: auto;
-    opacity: 0;
-    transform: scale(0.94) translateY(8px);
-    transition:
-      opacity var(--duration-base) var(--ease-out),
-      transform var(--duration-base) var(--ease-out);
-  }
-
-  .skills-modal.is-open .skill-card {
-    opacity: 1;
-    transform: none;
-  }
-
-  /* The section's only invitation on phone now - main.js stops building .skills-hint here,
-     since that one sits above the stack and has long scrolled away by the time a reader is
-     this far down a 22-tool list. Carries the exact shine .skills-hint used to (same
-     weight/tracking, same gradient sweep, same hint-shine keyframes - all defined once,
-     above, and shared rather than re-declared), just at a size the narrow column can
-     actually hold. Visible only while the strip is in view (.is-visible, toggled by an
-     IntersectionObserver in main.js - nothing here can see the strip's own position) and
-     never while a card is open, whether or not the strip itself is still in view. */
-  .skills-invite {
-    /* width, not max-width: the two-line split (main.js) made the box shrink-to-fit its
-       widest child instead of the whole paragraph's wrapped-line width, so its rendered
-       width no longer reliably matched the card's own - and with .skills-modal's
-       place-items: center end right-aligning each item in its grid cell, two different
-       widths meant two different right gutters. Same formula as .skill-card's own width
-       just below, so the two can never drift apart again. */
-    width: calc((100vw - 2 * var(--pad-x)) * 0.48);
-    margin: 0;
-    opacity: 0;
-    transition: opacity var(--duration-base) var(--ease-out);
-  }
-
-  .skills-invite.is-visible {
+  .skills.is-focused .skill-group:not(.has-open-card) > h3 {
     opacity: 1;
   }
 
-  /* Two rows (main.js splits the text in two, word-count-even), each its own element with
-     its own hint-shine timeline - a shared background on one two-line element would put
-     the same slice of the gradient on both lines at once, since it's one background image
-     spanning the whole box. animation-delay on the second is half the loop's own period
-     (3s / 2), the largest offset a repeating cycle can hold before it just starts
-     lapping - anything past that starts closing the gap back up rather than widening it. */
-  .skills-invite__line {
-    display: block;
-    text-align: center;
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.5;
-    background: linear-gradient(
-      90deg,
-      var(--text-dim) 0%,
-      var(--text-dim) 40%,
-      var(--accent) 50%,
-      var(--accent-2) 60%,
-      var(--text-dim) 70%,
-      var(--text-dim) 100%
-    );
-    background-size: 300% 100%;
-    background-position: 110% center;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: hint-shine 3s linear infinite;
+  .skills-grid > .skill-card {
+    /* clears the fixed nav when scrollIntoView() brings it up */
+    scroll-margin: 5rem 0 1rem;
   }
 
-  .skills-invite__line + .skills-invite__line {
-    animation-delay: 1.5s;
+  .skills.is-focused .skills-hint {
+    opacity: 1;
   }
 
-  .skills-modal.is-open .skills-invite {
-    opacity: 0;
-  }
-
-  /* the detail card is authored for a full-width row, so every step of it has to come
-     down to fit a panel this narrow */
-  .skills-modal .skill-card__inner {
-    padding: 0.9rem 0.8rem;
-    border-radius: 0.7rem;
-  }
-
-  /* 2.25rem of button against a 175px panel put the X on top of a long title
-     ("TouchDesigner" has nowhere to wrap) */
-  .skills-modal .skill-card__close {
-    top: 0.6rem;
-    right: 0.6rem;
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-
-  /* only the title row shares the top-right corner with the close button; keeping the whole
-     card clear of it cost the text a quarter of a panel this narrow, 2-3 words a line */
-  .skills-modal .skill-card__title {
-    padding-right: 1.6rem;
-    font-size: 1.05rem;
-    letter-spacing: -0.02em;
-    line-height: 1.15;
-  }
-
-  .skills-modal .skill-card__badge {
-    margin-top: 0.5rem;
-    padding: 0.15rem 0.45rem;
-    font-size: 0.75rem;
-  }
-
-  .skills-modal .skill-card__text {
-    margin-top: 0.6rem;
-    font-size: 0.75rem;
-    line-height: 1.45;
-  }
-
-  /* 2 columns of bullets in a panel this narrow leaves 3 words a line */
-  .skills-modal .skill-card__bullets {
-    columns: 1;
-    margin-top: 0.8rem;
-    font-size: 0.75rem;
-    line-height: 1.4;
+  .skills-hint {
+    margin-bottom: 1rem;
+    font-size: 1rem;
   }
 
   /* At the flow width's own available room the title wraps to two lines more often than the
