@@ -113,7 +113,9 @@ export function initHomelabDiagram(container, signal) {
       height: 0,
       opacity: 0,
       duration: 0.32,
-      ease: 'power2.in',
+      // power2.out like the skills wall (main.js): power2.in delays the first visible
+      // collapse, right when the click expects a reaction
+      ease: 'power2.out',
       onComplete: () => card.remove(),
     });
   }
@@ -143,12 +145,13 @@ export function initHomelabDiagram(container, signal) {
     gsap.fromTo(
       card,
       { height: 0, opacity: 0 },
-      { height: 'auto', opacity: 1, duration: 0.55, ease: 'power3.out' },
+      // 0.35 like the skills wall: it animates height, which relayouts
+      { height: 'auto', opacity: 1, duration: 0.35, ease: 'power3.out' },
     );
     gsap.fromTo(
       inner,
       { y: 18, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.5, delay: 0.08, ease: 'power3.out' },
+      { y: 0, opacity: 1, duration: 0.35, delay: 0.06, ease: 'power3.out' },
     );
   }
 
