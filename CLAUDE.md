@@ -78,6 +78,7 @@ Vite MPA, input in `vite.config.js`: `index.html` (home), `vivatech.html`, `home
 - **Video di Vivatech**: `public/video/vivatech-2026.mp4` è il video ufficiale e resta com'è (scelta di Luca, 2026-10-19), anche se mostra il marchio di una Maison: la regola di sanitizzazione vale per i testi, i mockup e le immagini scelte da noi, non per questo file.
 - **Titolo della home** ("Bringing ideas to life with 3D/2D/AI"): le critique lo segnalano come generico o "da generalista AI". Luca l'ha confermato due volte (2026-10-11 e 2026-10-19): resta com'è, non riproporlo.
 - **Galleria di Vivatech**: le sette foto restano tutte (scelta di Luca, 2026-10-19), anche se le critique propongono di ridurle a 4-5.
+- **Lunghezza dei testi (2026-10-25)**: dopo critiche ripetute ("troppo testo", soprattutto da telefono) i testi sono stati accorciati. Regole per i nuovi: card progetto in home una frase (~15-20 parole); nei tool di Pipeline Projects "What changed" una frase, "The problem" una frase, "What it does" max 4 punti, "The interesting part" ~30 parole; paragrafi intro sotto le ~70 parole. Su telefono i mockup decorativi di Pipeline Projects sono a `zoom: 0.85` (non Omniverse, ha controlli veri) e i paragrafi `.project-description` a 17px.
 - **Cassetti chiusi del mobile skill**: i frontali sopra il cassetto vivo sono bloccati di proposito (un gruppo ciascuno, al click uno strattone contro la serratura e rimbalzo elastico), così il click non sembra perso. Non renderli apribili.
 
 ## TODO

@@ -96,15 +96,15 @@
       <section id="description" class="project-description cb-desc">
         <div class="project-description-grid">
           <div class="project-description-text">
-          <p data-reveal data-copy="companyBrain.description1">Information about a product lives in many systems: technical data, commercial texts and attributes, official photos, technical drawings and standard components, prototype tracking, plus design manuals and internal notes. Each has its own interface, its own login, its own way of searching, so a simple question like "what material is this model, and how is it built?" often means opening three or four programs and knowing exactly where to look.</p>
-          <p data-reveal data-copy="companyBrain.description2">Company Brain is one chat that fixes that. You ask in plain language, like you would ask an expert colleague, and it reads the answer live from the company systems and gives it back with photos, drawings and charts. It runs on our own servers, so nothing leaves the company, and every answer says which system each piece of data came from.</p>
+          <p data-reveal data-copy="companyBrain.description1">Product information is spread across many systems: technical data, commercial texts, official photos, technical drawings, prototype tracking and manuals. Each has its own login and its own search, so a simple question like "what material is this model?" means opening three or four programs.</p>
+          <p data-reveal data-copy="companyBrain.description2">Company Brain is one chat for all of them. Ask in plain language and it reads the answer live from the company systems, with photos, drawings and charts and the source of every piece of data. It runs on our own servers: nothing leaves the company.</p>
           </div>
         </div>
       </section>
 
       <section id="demo" class="cb-demo">
         <h2 data-reveal>See it in action</h2>
-        <p class="vt-how__intro" data-reveal data-copy="companyBrain.demoIntro">Everything shown uses sample data. A question enters the chat, a language model decides which tools to use, and each tool talks to a single company system. Pick a question and follow it through.</p>
+        <p class="vt-how__intro" data-reveal data-copy="companyBrain.demoIntro">Sample data throughout. A language model picks the tools, and each tool talks to one company system. Pick a question and follow it through.</p>
         <ol class="cb-path" aria-label="The path of a question" data-reveal>
           <li data-stage="chat"><span class="cb-path__name" data-copy="companyBrain.how.flow.0.name">Chat</span><span class="cb-path__text" data-copy="companyBrain.how.flow.0.text">Internal web chat, questions in plain language</span></li>
           <li data-stage="model"><span class="cb-path__name" data-copy="companyBrain.how.flow.1.name">Language model</span><span class="cb-path__text" data-copy="companyBrain.how.flow.1.text">Runs on our own server on a dedicated GPU, understands the question and picks a tool</span></li>
@@ -215,23 +215,23 @@
         <div class="vt-details cb-details" data-reveal>
           <div class="vt-detail cb-lead">
             <h3 data-copy="companyBrain.how.details.2.title">The code does the math</h3>
-            <p data-copy="companyBrain.how.details.2.text">Language models are good with words and less reliable with numbers, so averages, counts, comparisons and charts are computed exactly by the tools. The model only receives the result to explain.</p>
+            <p data-copy="companyBrain.how.details.2.text">Language models are good with words, less with numbers: averages, comparisons and charts are computed by the tools, and the model only explains the result.</p>
           </div>
           <div class="vt-detail">
             <h3 data-copy="companyBrain.how.details.0.title">Everything in-house</h3>
-            <p data-copy="companyBrain.how.details.0.text">The model runs on an internal server with a dedicated GPU. No question and no data is ever sent to an external service.</p>
+            <p data-copy="companyBrain.how.details.0.text">The model runs on an internal server with its own GPU. No question and no data ever goes to an external service.</p>
           </div>
           <div class="vt-detail">
             <h3 data-copy="companyBrain.how.details.1.title">Read-only, and gated</h3>
-            <p data-copy="companyBrain.how.details.1.text">It consults the company systems but cannot change them: every connection uses a read-only account, and each group only sees the tools relevant to its own work.</p>
+            <p data-copy="companyBrain.how.details.1.text">It reads the company systems but cannot change them, and each group only sees the tools for its own work.</p>
           </div>
           <div class="vt-detail">
             <h3 data-copy="companyBrain.how.details.3.title">No copies of the data</h3>
-            <p data-copy="companyBrain.how.details.3.text">Photos, drawings and documents are read from the original source at the moment of the question, never duplicated on the server, so what you see is always current.</p>
+            <p data-copy="companyBrain.how.details.3.text">Photos, drawings and documents are read from the source at the moment of the question, never copied, so they are always current.</p>
           </div>
           <div class="vt-detail">
             <h3 data-copy="companyBrain.how.monitorLabel">Monitoring</h3>
-            <p data-copy="companyBrain.how.monitor">An internal dashboard shows whether every service is up, how loaded the server is and which tools get used the most. It tells us where to invest next.</p>
+            <p data-copy="companyBrain.how.monitor">An internal dashboard tracks uptime, server load and which tools get used the most, to decide where to invest next.</p>
           </div>
         </div>
 
@@ -267,11 +267,11 @@
           </div>
           <div class="vt-detail">
             <h4 data-copy="companyBrain.how.limits.2.title">Only as good as the data</h4>
-            <p data-copy="companyBrain.how.limits.2.text">Answers can only be as accurate as what is written in the systems. Data is often entered wrongly because of loose organization or because nothing helps people avoid mistakes, and messy data means messy answers.</p>
+            <p data-copy="companyBrain.how.limits.2.text">Answers are only as accurate as the data in the systems, and messy data means messy answers.</p>
           </div>
           <div class="vt-detail">
             <h4 data-copy="companyBrain.how.limits.0.title">Sized for a pilot</h4>
-            <p data-copy="companyBrain.how.limits.0.text">It runs on a single GPU: enough for a small team, slower when many people ask at once. Next comes a more powerful machine for more capable models, then more data sources and other departments.</p>
+            <p data-copy="companyBrain.how.limits.0.text">One GPU: enough for a small team, slower when many people ask at once. Next: a bigger machine for more capable models, more data sources, other departments.</p>
           </div>
         </div>
           </aside>

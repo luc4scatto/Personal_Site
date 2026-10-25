@@ -33,9 +33,8 @@ export const content = {
   },
   about: {
     paragraph:
-      'My path into 3D started at **EssilorLuxottica**, where I spent over four years as a 3D Render Specialist working on **Prada Group**, **Burberry** and **Oliver Peoples** eyewear lines. \n' +
-      'In my last two years there I moved into improving and building new features for the 3D pipeline itself, a focus I carried forward into **Thélios**.\n' +
-      "Today I'm part of the 3D R&D team at **Thélios** (**LVMH** eyewear), where I build internal tools that make work easier for different departments, 3D above all, and develop and maintain the 3D pipeline, from 2D design all the way to renders, 3D configurators and videos.\n",
+      'I started in 3D at **EssilorLuxottica**: over four years as a 3D Render Specialist on **Prada Group**, **Burberry** and **Oliver Peoples** eyewear, the last two spent building the 3D pipeline itself.\n' +
+      "Today I'm in the 3D R&D team at **Thélios** (**LVMH** eyewear). I build internal tools for several departments and run the 3D pipeline, from 2D design to renders, configurators and videos.\n",
   },
   projects: {
     vivatech: {
@@ -46,17 +45,17 @@ export const content = {
     pipeline: {
       title: 'Pipeline Projects',
       description:
-        'Five in-house tools for Maya, Unreal Engine, Omniverse and PowerPoint, from USD and MaterialX look-dev to renders and decks, each built to remove one slow, manual step from the 3D workflow.',
+        'Five in-house tools for Maya, Unreal, Omniverse and PowerPoint, each removing one slow, manual step from the 3D workflow.',
     },
     companyBrain: {
       title: 'Company Brain',
       description:
-        'A self-hosted AI assistant that answers questions about our products in plain language, reading live from the company systems and replying with photos, drawings and charts. Nothing leaves the company.',
+        'A self-hosted AI assistant that answers product questions from live company data, with photos, drawings and charts. Nothing leaves the company.',
     },
     three: {
       title: 'Homelab',
       description:
-        'A two-node Proxmox cluster and a UniFi NAS in a 3D-printed rack case, running media, backups, automation and an AI agent.',
+        'A two-node Proxmox cluster and a UniFi NAS in a 3D-printed rack, running media, backups and an AI agent.',
     },
   },
   contact: {
@@ -134,11 +133,11 @@ export const content = {
     kicker: 'Work · AI assistant',
     meta: 'A self-hosted AI assistant that answers questions about our products from the company systems',
     description1:
-      'Information about a product lives in many systems: **technical data**, **commercial texts and attributes**, **official photos**, **technical drawings** and standard components, **prototype tracking**, plus design manuals and internal notes. Each has its own interface, its own login, its own way of searching, so a simple question like "what material is this model, and how is it built?" often means opening three or four programs and knowing exactly where to look.',
+      'Product information is spread across many systems: **technical data**, **commercial texts**, **official photos**, **technical drawings**, **prototype tracking** and manuals. Each has its own login and its own search, so a simple question like "what material is this model?" means opening three or four programs.',
     description2:
-      '**Company Brain** is one chat that fixes that. You ask in plain language, like you would ask an expert colleague, and it reads the answer live from the company systems and gives it back with photos, drawings and charts. It runs on our own servers, so nothing leaves the company, and every answer says which system each piece of data came from.',
+      '**Company Brain** is one chat for all of them. Ask in plain language and it reads the answer live from the company systems, with photos, drawings and charts and the source of every piece of data. It runs on our own servers: nothing leaves the company.',
     demoIntro:
-      'Everything shown uses sample data. A question enters the chat, a language model decides which tools to use, and each tool talks to a single company system. Pick a question and follow it through.',
+      'Sample data throughout. A language model picks the tools, and each tool talks to one company system. Pick a question and follow it through.',
     how: {
       title: 'How it works',
       flow: [
@@ -163,24 +162,24 @@ export const content = {
       details: [
         {
           title: 'Everything in-house',
-          text: 'The model runs on an internal server with a dedicated GPU. No question and no data is ever sent to an external service.',
+          text: 'The model runs on an internal server with its own GPU. No question and no data ever goes to an external service.',
         },
         {
           title: 'Read-only, and gated',
-          text: 'It consults the company systems but cannot change them: every connection uses a read-only account, and each group only sees the tools relevant to its own work.',
+          text: 'It reads the company systems but cannot change them, and each group only sees the tools for its own work.',
         },
         {
           title: 'The code does the math',
-          text: 'Language models are good with words and less reliable with numbers, so averages, counts, comparisons and charts are computed exactly by the tools. The model only receives the result to explain.',
+          text: 'Language models are good with words, less with numbers: averages, comparisons and charts are computed by the tools, and the model only explains the result.',
         },
         {
           title: 'No copies of the data',
-          text: 'Photos, drawings and documents are read from the original source at the moment of the question, never duplicated on the server, so what you see is always current.',
+          text: 'Photos, drawings and documents are read from the source at the moment of the question, never copied, so they are always current.',
         },
       ],
       monitorLabel: 'Monitoring',
       monitor:
-        'An internal dashboard shows whether every service is up, how loaded the server is and which tools get used the most. It tells us where to invest next.',
+        'An internal dashboard tracks uptime, server load and which tools get used the most, to decide where to invest next.',
       retroTitle: 'What the pilot taught me',
       lessonsLabel: 'What I learned',
       lessons: [
@@ -201,7 +200,7 @@ export const content = {
       limits: [
         {
           title: 'Sized for a pilot',
-          text: 'It runs on a single GPU: enough for a small team, slower when many people ask at once. Next comes a more powerful machine for more capable models, then more data sources and other departments.',
+          text: 'One GPU: enough for a small team, slower when many people ask at once. Next: a bigger machine for more capable models, more data sources, other departments.',
         },
         {
           title: 'Assists, does not decide',
@@ -209,7 +208,7 @@ export const content = {
         },
         {
           title: 'Only as good as the data',
-          text: 'Answers can only be as accurate as what is written in the systems. Data is often entered wrongly because of loose organization or because nothing helps people avoid mistakes, and messy data means messy answers.',
+          text: 'Answers are only as accurate as the data in the systems, and messy data means messy answers.',
         },
       ],
     },
@@ -226,11 +225,11 @@ export const content = {
   homelab: {
     kicker: 'Personal · Self-hosting',
     description1:
-      'It started with something simple: a shared folder my Windows machine and my Mac could both reach, instead of shuffling files between them by hand with an external hard drive, inconvenient enough over time, that I went looking for a better way. That one NAS folder opened a door into **self-hosted software**, and I never really came back out.',
+      'It started with a shared folder my Windows PC and my Mac could both reach, instead of carrying files between them on an external drive. That one NAS folder opened the door to **self-hosted software**, and I never really came back out.',
     description2:
-      'The rack is now a **two-node Proxmox cluster**: an HP EliteDesk 800 G5 with 32GB of RAM and a Lenovo ThinkCentre M910q with 16GB, both on added 2.5G network cards and tied together by a dedicated cluster link. Storage moved off the hosts onto a UniFi UNAS 4 with two mirrored 4TB drives. It all lives in a **3D-printed rack case**: an open design I found and adapted, swapping in other printable parts until it fit what I actually needed. A JetKVM sits on top for headless remote management; BIOS access and reboots from anywhere, no monitor or keyboard needed on-site.',
+      'Today the rack is a **two-node Proxmox cluster**: an HP EliteDesk 800 G5 with 32GB of RAM and a Lenovo ThinkCentre M910q with 16GB, on 2.5G network cards with a dedicated cluster link. Storage lives on a UniFi UNAS 4 with two mirrored 4TB drives, and a JetKVM gives BIOS access and reboots from anywhere. It all sits in a **3D-printed rack case**, an open design I adapted until it fit.',
     description3:
-      'Every service runs in its own **LXC container** (a lightweight Linux box sharing the host kernel) on Proxmox: media streaming and automation, photo backup, DNS ad-blocking, a password manager, personal finance, with Hermes for agentic workflows. Around them sits the boring part that keeps it alive: nightly deduplicated backups to Proxmox Backup Server, single sign-on with passkeys, metrics in Grafana, push alerts to my phone, automatic security patches, and remote access over Tailscale with no port open to the internet.',
+      'Every service runs in its own **LXC container** (a lightweight Linux box sharing the host kernel): media, photo backup, DNS ad-blocking, passwords, personal finance and Hermes, an AI agent. Around them sits the boring part that keeps it alive: nightly backups, single sign-on with passkeys, Grafana metrics, phone alerts, automatic security patches and remote access over Tailscale, with no port open to the internet.',
     description4:
       'Most of what I know about networking and sysadmin work, I picked up here, one broken config at a time.',
     backCta: '← Back to projects',
@@ -359,7 +358,7 @@ export const content = {
     intro1:
       'In the **3D R&D team** at Thélios, a lot of the slow work was not modeling or rendering, it was everything around it: cleaning and naming meshes by hand, building the variants for every colorway, renaming hundreds of renders, assembling presentation decks slide by slide.',
     intro2:
-      'None of these tools were planned as a system. Each one started from a specific problem the team kept hitting, and grew until those problems went away. They were built to make the most of what Maya, Unreal Engine and NVIDIA Omniverse can do, or as standalone Python desktop apps. The look-dev side is built on open standards: **USD** for everything in the scene and **OpenPBR in MaterialX** (an open material model and the file format that carries it) for every material.',
+      'None of these tools were planned as a system: each one started from a problem the team kept hitting. They run inside Maya, Unreal Engine and NVIDIA Omniverse, or as standalone Python apps, and the look-dev side is built on open standards: **USD** for the scene and **OpenPBR in MaterialX** for every material.',
     disclaimer:
       'Built in-house. Tool names, data and interfaces shown here are generalized and redrawn - no proprietary code, data or assets.',
     indexHint: 'Five tools, each built to fix one problem. Pick one to see it.',
@@ -381,17 +380,17 @@ export const content = {
         // one line for the index card, under its Problem label; the full problem is in the chapter
         teaser: 'Look-dev scenes built by hand, one model and one material at a time.',
         problem:
-          'Setting up a look-dev scene meant importing models one by one, hunting materials across a shared library, cross-checking product data between separate databases to get it right, and rendering every model and colorway by hand, one at a time, before anything could go to review.',
+          'Every model was imported, dressed and rendered by hand, one colorway at a time, with product data cross-checked across separate databases.',
         bullets: [
-          'Brings hand-picked prototypes or single models into the scene straight from product data, each one composed into the stage as **USD**',
-          'Searches, creates, updates and copies **OpenPBR** materials authored in **MaterialX**, with thumbnail renders on sample shapes',
-          'Batch-renders the selected SKUs with **Omniverse RTX**, the ray-traced renderer that runs on NVIDIA GPUs',
-          'Steps through every model and colorway in the scene to check each look before it goes out',
+          'Brings prototypes or single models into the scene from product data, each composed as **USD**',
+          'Searches, creates and updates **OpenPBR** materials in **MaterialX**, with thumbnail renders',
+          'Batch-renders the selected SKUs with **Omniverse RTX**',
+          'Steps through every model and colorway to check each look before it goes out',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
         result:
           'A look-dev scene starts from product data: models, materials and renders come in from one panel instead of being set up one at a time.',
-        idea: 'The whole kit is built around two open standards: **USD** for everything in the scene, from templates to models, and **OpenPBR in MaterialX** for every material, so a material is written once in a standard format that any USD or MaterialX-compatible tool can open, with no conversion. Materials are also **portable**: whenever one is created or updated, its links to textures and to its master material are saved as relative paths, so a material folder can be moved anywhere in the library and every scene that uses it keeps working.',
+        idea: 'Built on two open standards, **USD** and **OpenPBR in MaterialX**, so a material is written once and opens in any compatible tool. Texture links are saved as relative paths, so a material folder can move anywhere in the library.',
       },
       {
         id: 'maya',
@@ -406,20 +405,17 @@ export const content = {
         ],
         // one line for the index card, under its Problem label; the full problem is in the chapter
         teaser: 'Every artist prepped meshes their own way, so nothing matched downstream.',
-        problem:
-          'Every artist cleaned, unwrapped and named meshes a little differently, so models arrived downstream inconsistent and had to be fixed again before rendering.',
+        problem: 'Every artist prepped meshes their own way, so nothing matched downstream.',
         bullets: [
-          'One dockable panel for mesh cleanup: combine, separate, group, freeze, pivot, mirror with automatic left/right naming',
-          'UV presets tuned for lenses and acetate parts, plus a dedicated lightmap UV set',
-          'Diagnostic materials (checker, arrow pattern, RGB) to check UV direction and part separation at a glance',
-          'Exports to Unreal as one FBX per part, after checking every mesh is ready for it',
-          'A second tab looks the model up in product data: its SKUs, and which material goes on which component',
-          'Exports that as JSON, one file per SKU or a whole release at once, ready for the render tools downstream',
+          'Mesh cleanup in one dockable panel, with automatic left/right naming on mirror',
+          'UV presets for lenses and acetate parts, plus a lightmap UV set',
+          'Diagnostic materials to check UV direction and part separation at a glance',
+          "Exports one checked FBX per part to Unreal, and each SKU's material map from product data as JSON",
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
         result:
           'Every model leaves Maya cleaned, unwrapped and named the same way, so nothing has to be fixed again before rendering.',
-        idea: "Naming comes from **product data**, not memory: the panel loads the model's component list and builds a tree, and picking a node renames the selected mesh to the standard convention, suffixes included. Every tool after it can trust the names.",
+        idea: 'Names come from **product data**, not memory: pick a component in the tree and the selected mesh gets the standard name. Every tool after it can trust them.',
       },
       {
         id: 'unreal',
@@ -437,17 +433,17 @@ export const content = {
         // one line for the index card, under its Problem label; the full problem is in the chapter
         teaser: 'Every colorway set up and rendered by hand, pass by pass.',
         problem:
-          'Each model ships in many colorways, and every colorway needed its own variant for the beauty, HDR, mirror and shadow passes, set up by hand, then every rendered frame renamed by hand.',
+          'Every colorway needed its own variant for each render pass, set up by hand, and every frame renamed by hand.',
         bullets: [
-          'Imports new models from the shared folders, skipping anything already in the project',
-          'Builds one Blueprint per model, with lighting channels, LOD settings and an ID material per part',
-          'Creates Level Variant Sets for every pass from a data table, one variant per colorway',
-          'Copies camera and light keyframes across sequences, then drives Movie Render Graph',
+          'Imports new models from the shared folders, skipping what is already there',
+          'Builds one Blueprint per model, with lighting channels, LODs and an ID material per part',
+          'Creates the variants for every pass and colorway from a data table',
+          'Copies camera and light keys across sequences, then drives Movie Render Graph',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
         result:
           'A new colorway is one click instead of a rebuild, and every render comes out already named.',
-        idea: 'Everything is **incremental**: the scripts compare what is already in the project with the data table and only add the difference, so a new colorway is one click, not a rebuild. When the render queue finishes, a hook renames every EXR from frame numbers to Model_Colorway.Camera.',
+        idea: 'Everything is **incremental**: the scripts compare the project with the data table and add only the difference. When the queue finishes, a hook renames every EXR to Model_Colorway.Camera.',
       },
       {
         id: 'catalogue',
@@ -462,17 +458,17 @@ export const content = {
         // one line for the index card, under its Problem label; the full problem is in the chapter
         teaser: 'Seasonal catalogues pasted together in PowerPoint from three systems.',
         problem:
-          'Seasonal catalogues were assembled by hand in PowerPoint, copying product data from one system, images from another and marketing copy from a third.',
+          'Seasonal catalogues were pasted together in PowerPoint from three different systems.',
         bullets: [
           'Pick a release and a brand, get a finished deck',
-          'Merges product data, attributes from the product database (PIM), images from the media library (DAM) and data from the product lifecycle system (PLM) for every SKU',
+          'Merges product data (PIM), images (DAM) and lifecycle data (PLM) for every SKU',
           'Places a hero image and up to seven variant groups per slide',
           'Gives variant families their own slides and flags prescription-ready models',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
         result:
           'A seasonal catalogue is a release and a brand picked from a list, with no copying between systems.',
-        idea: 'The layout is a small **engine**, not a fixed template: positions are computed from how many variant groups land on each slide, product images are auto-cropped, and one list of slide jobs decides both how many slides exist and what goes on each.',
+        idea: 'The layout is a small **engine**, not a fixed template: positions follow how many variant groups land on each slide, and product images are auto-cropped.',
       },
       {
         id: 'review',
@@ -485,15 +481,12 @@ export const content = {
         ],
         // one line for the index card, under its Problem label; the full problem is in the chapter
         teaser: 'Evaluation decks typed up slide by slide, one style at a time.',
-        problem:
-          'Evaluation decks meant one slide per style, each with renders, worn shots, codes and technical specs typed in by hand.',
+        problem: 'Evaluation decks were typed up by hand, one slide per style.',
         bullets: [
-          'Finds every style for a release, category and brand, and gives each one a slide',
-          'Places renders and worn shots in layouts tuned for one to six images',
-          'Fills sizes, materials and specs straight from product data',
-          'Every slide carries a voting system, so each model can be rated during the review, built with PowerPoint macros',
-          'The deck ends with a slide of buttons that build a report of the votes each model received, which can also be exported to Excel',
-          'A second tab splits any finished deck into 4K PNGs, named after the model on each slide',
+          'Finds every style for a release, category and brand, one slide each',
+          'Places renders and worn shots in layouts for one to six images, with specs from product data',
+          'A voting system on every slide, built with PowerPoint macros, and a final report of the votes, exportable to Excel',
+          'Splits any finished deck into 4K PNGs named after each model',
         ],
         // qualitative, from what the tool does; swap in a measured number when there is one
         result:
