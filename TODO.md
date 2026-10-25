@@ -13,7 +13,7 @@ Sulla parte tecnica il sito è ai livelli dei migliori siti personali; da qui il
 - [ ] **5. Disponibilità esplicita** - una frase vicino al contatto: freelance, consulenze sulla pipeline, ruoli full-time, oppure "not looking, but happy to talk".
 - [ ] **6. Note tecniche (più avanti)** - brevi articoli su MaterialX/OpenPBR, USD, homelab, player persistente: competenza dimostrata, traffico da Google, contenuti da condividere su LinkedIn. Impegno continuativo, da valutare.
 - [ ] **7. Monitoraggio del sito (più avanti)** - Uptime Kuma (o lo strumento già nel homelab) su sito e modulo contatti, con notifica su ntfy se qualcosa si rompe.
-- [ ] **8. Rifiniture tecniche già note** - bottone Replay di Company Brain a 44px su touch, linguette del cassetto su Firefox, distanza player/cassetto su tablet (dettagli in CLAUDE.md, sezione TODO).
+- [ ] **8. Rifiniture tecniche già note** - linguette del cassetto su Firefox, distanza player/cassetto su tablet (dettagli in CLAUDE.md, sezione TODO).
 
 Consigliato: partire da 1 e 2 (poco lavoro, dati subito), poi 3 e 4 (fanno la differenza).
 
