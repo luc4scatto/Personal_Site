@@ -2,6 +2,31 @@
 
 Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiesto. Aggiornato 2026-10-23 (checkup professionale), prima 2026-10-19 (decimo giro di critique, 25/32).
 
+## Prossimi passi per alzare il livello (proposti il 2026-10-23)
+
+Sulla parte tecnica il sito è ai livelli dei migliori siti personali; da qui il livello lo alzano contenuti e visibilità. In ordine di impatto.
+
+- [ ] **1. Google Search Console e Bing Webmaster Tools** - registrare il sito, verificare il dominio (record TXT su Namecheap, come per GitHub) e inviare la sitemap. Dice per quali ricerche il sito compare, quanti cliccano, errori di indicizzazione.
+- [ ] **2. Eventi di Google Analytics** - oggi GA conta solo le pagine viste. Aggiungere eventi per download del CV, invio del modulo, apertura di un progetto, play di un set (solo con il consenso ai cookie già dato).
+- [ ] **3. Showreel (contenuto, Luca)** - 60-90 secondi con i lavori migliori (render, configuratori, Vivatech, pipeline in azione): per un 3D Technical Artist è lo standard del settore. In home, in alto o vicino ai progetti, ospitato come il video di Vivatech. Solo materiale pubblico o ridisegnato (regole di sanitizzazione Thélios).
+- [ ] **4. Ruolo chiaro in ogni progetto** - una riga fissa per progetto ("Role: lead developer, team of 3, 4 months"): chi seleziona cerca subito cosa ha fatto Luca, da solo o in team. Prima controllare quali pagine lo dicono già.
+- [ ] **5. Disponibilità esplicita** - una frase vicino al contatto: freelance, consulenze sulla pipeline, ruoli full-time, oppure "not looking, but happy to talk".
+- [ ] **6. Note tecniche (più avanti)** - brevi articoli su MaterialX/OpenPBR, USD, homelab, player persistente: competenza dimostrata, traffico da Google, contenuti da condividere su LinkedIn. Impegno continuativo, da valutare.
+- [ ] **7. Monitoraggio del sito (più avanti)** - Uptime Kuma (o lo strumento già nel homelab) su sito e modulo contatti, con notifica su ntfy se qualcosa si rompe.
+- [ ] **8. Rifiniture tecniche già note** - bottone Replay di Company Brain a 44px su touch, linguette del cassetto su Firefox, distanza player/cassetto su tablet (dettagli in CLAUDE.md, sezione TODO).
+
+Consigliato: partire da 1 e 2 (poco lavoro, dati subito), poi 3 e 4 (fanno la differenza).
+
+## Fatto il 2026-10-23
+
+- [x] Merge di `preview/combined` su `main` (sito online con Pipeline Projects, Company Brain e le revisioni di settembre e ottobre); pulizia dei branch, solo `main` con branch `feature/<nome>` corti.
+- [x] Font: Mona Sans (titoli larghi e testo) + Martian Mono al posto di Space Grotesk e Switzer, fallback misurati; carosello senza contorni sovrapposti; "3D" e "ideas" non più tagliati.
+- [x] Player persistente: la musica continua tra le pagine (Swup caricato solo al primo play), player nella barra con X, rientro nel cassetto all'apertura, dissolvenza al cambio pagina.
+- [x] Copy: Company Brain (intro della demo, limiti e prossimi passi), About (strumenti interni prima della pipeline), descrizioni degli oggetti 3D dell'hero con link a Vivatech, Pipeline Projects e Homelab, "Other projects" in fondo ai progetti.
+- [x] Foto About: ritaglio trasparente su gradiente CSS (niente bande), versione da 480px su telefono.
+- [x] Favicon e icona touch in arancio; schema Homelab con l'UPS che alimenta la ciabatta.
+- [x] Checkup di prestazioni e sicurezza: HTTPS forzato, dominio verificato su GitHub, DMARC, 0 vulnerabilità, iframe SoundCloud solo al primo segno di interesse, Lighthouse a 100 su accessibilità, buone pratiche e SEO.
+
 ## Standard professionali (checkup del 2026-10-23)
 
 Dopo il checkup di prestazioni e sicurezza (HTTPS forzato, dominio verificato su GitHub, 0 vulnerabilità, Lighthouse a 100 su accessibilità, buone pratiche e SEO). Restano questi, in ordine di impatto.
