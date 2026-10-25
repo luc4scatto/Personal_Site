@@ -15,9 +15,35 @@ function loadGA() {
   window.gtag('config', GA_ID);
 }
 
+// window.gtag only exists once the visitor has accepted, so without consent this is a no-op
+export function track(name, params) {
+  window.gtag?.('event', name, params);
+}
+
+const PROJECT_PAGES = ['vivatech', 'pipeline-projects', 'company-brain', 'homelab'];
+
+// One listener for the whole session: Swup swaps the page content, not the document, so
+// this keeps working across pages and needs no page signal.
+function trackClicks() {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest?.('a[href]');
+    if (!link) return;
+    const path = new URL(link.href, location.href).pathname;
+    if (link.hasAttribute('download') || path.endsWith('.pdf')) {
+      track('cv_download');
+      return;
+    }
+    const project = PROJECT_PAGES.find((p) => path.endsWith(`/${p}.html`));
+    if (!project) return;
+    const source = link.closest('.nav, dialog') ? 'nav' : 'page';
+    track('project_open', { project, source });
+  });
+}
+
 // GDPR: nothing loads until the visitor accepts. Choice is remembered in
 // localStorage so the banner only ever shows once per browser.
 export function initAnalytics() {
+  trackClicks();
   const consent = localStorage.getItem(CONSENT_KEY);
   if (consent === 'granted') {
     loadGA();

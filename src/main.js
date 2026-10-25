@@ -2,7 +2,7 @@ import gsap from 'gsap';
 import './styles/base.css';
 import './styles/sections.css';
 import { initAnimations, refreshScrollTriggers } from './animations.js';
-import { initAnalytics } from './analytics.js';
+import { initAnalytics, track } from './analytics.js';
 import { initMobileMenu } from './mobileMenu.js';
 import { content } from './content.js';
 import { buildSkillCardInner, applySkillContent } from './skillCard.js';
@@ -127,6 +127,7 @@ function initPage(signal, firstLoad) {
         if (res.ok) {
           say("Sent. Thanks, I'll get back to you soon.", 'ok');
           contactForm.reset();
+          track('contact_submit');
         } else {
           say(
             "It didn't go through, and your message is still here. Try again, or reach me on LinkedIn below.",

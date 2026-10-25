@@ -1,4 +1,5 @@
 import { content } from './content.js';
+import { track } from './analytics.js';
 
 /* The DJ set player: a record and a waveform, filed in the corner the open drawer leaves
  * free. The visible UI is entirely ours - no SoundCloud chrome, no branding, no widget
@@ -603,8 +604,13 @@ export function initSetPlayer(mount) {
 
   // Bound per engine in makeEngine(), which only lets the current one through - there is no
   // DOM element here to addEventListener on.
+  const tracked = new Set(); // one event per set per visit, not one per resume
   const onPlay = () => {
     curPaused = false;
+    if (!tracked.has(current.title)) {
+      tracked.add(current.title);
+      track('set_play', { set: current.title });
+    }
     if (!player.started) {
       player.started = true;
       // main.js loads the page router (src/router.js) on this, not before: a visitor who never

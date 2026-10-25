@@ -499,7 +499,7 @@ export const content = {
     kicker: 'Privacy',
     meta: "What this site collects, and what it doesn't",
     description1:
-      'This site uses Google Analytics (GA4) to understand traffic - page views, general location, device type - but only after you accept the cookie banner. Decline or ignore it and nothing loads, nothing is tracked.',
+      'This site uses Google Analytics (GA4) to understand traffic - page views, general location, device type, and which CV, project, contact form or DJ set gets used (never what you type) - but only after you accept the cookie banner. Decline or ignore it and nothing loads, nothing is tracked.',
     description2:
       "Beyond that: no ads, no other trackers, no data stored on this site's own servers, nothing sold. Questions or a removal request? Email scattolinluca2@gmail.com.",
     backCta: '← Back home',
