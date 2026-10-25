@@ -6,7 +6,7 @@ Punti aperti ordinati per rapporto tra effetto sul sito finale e lavoro richiest
 
 Sulla parte tecnica il sito è ai livelli dei migliori siti personali; da qui il livello lo alzano contenuti e visibilità. In ordine di impatto.
 
-- [ ] **1. Google Search Console e Bing Webmaster Tools** - registrare il sito, verificare il dominio (record TXT su Namecheap, come per GitHub) e inviare la sitemap. Dice per quali ricerche il sito compare, quanti cliccano, errori di indicizzazione.
+- [x] **1. Google Search Console e Bing Webmaster Tools** (fatto 2026-10-25) - registrare il sito, verificare il dominio (record TXT su Namecheap, come per GitHub) e inviare la sitemap. Dice per quali ricerche il sito compare, quanti cliccano, errori di indicizzazione.
 - [ ] **2. Eventi di Google Analytics** - oggi GA conta solo le pagine viste. Aggiungere eventi per download del CV, invio del modulo, apertura di un progetto, play di un set (solo con il consenso ai cookie già dato).
 - [ ] **3. Showreel (contenuto, Luca)** - 60-90 secondi con i lavori migliori (render, configuratori, Vivatech, pipeline in azione): per un 3D Technical Artist è lo standard del settore. In home, in alto o vicino ai progetti, ospitato come il video di Vivatech. Solo materiale pubblico o ridisegnato (regole di sanitizzazione Thélios).
 - [ ] **4. Ruolo chiaro in ogni progetto** - una riga fissa per progetto ("Role: lead developer, team of 3, 4 months"): chi seleziona cerca subito cosa ha fatto Luca, da solo o in team. Prima controllare quali pagine lo dicono già.
