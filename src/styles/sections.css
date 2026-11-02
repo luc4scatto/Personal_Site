@@ -1315,7 +1315,7 @@
    coarse pointer). skillDrawer.js writes its width and a translate+rotate from the side
    wall's projected edge, so the box is laid out from its own top-left and turned about its
    left end. 44px tall is the hit target; the line drawn in it is 3px. Hidden while the drawer
-   is shut and while a card is open, since an overlaid card covers what it would point at. */
+   is shut; with a card open it recedes with the rest of the scene (below). */
 #skill-drawer.is-live .drawer__scrub {
   position: absolute;
   top: -22px;
@@ -1329,7 +1329,8 @@
   visibility: hidden;
   transition:
     opacity 0.35s var(--ease-out),
-    visibility 0s linear 0.35s;
+    visibility 0s linear 0.35s,
+    filter var(--focus-fade);
 }
 
 #skill-drawer.is-live .drawer__scrub::before {
@@ -1393,12 +1394,25 @@
   visibility: visible;
 }
 
-#skill-drawer.is-live .drawer__scene:not(.is-shut):not(.has-open) .drawer__scrub {
+#skill-drawer.is-live .drawer__scene:not(.is-shut) .drawer__scrub {
   opacity: 1;
   visibility: visible;
   transition:
     opacity 0.35s var(--ease-out),
-    visibility 0s linear;
+    visibility 0s linear,
+    filter var(--focus-fade);
+}
+
+/* Part of the background while a card is open: 3px like the metal it sits on, since this is in
+   screen space and not scaled down like the folders. A tap on it closes the card, as anywhere
+   else outside it. The CSS3D layer goes above it, or the rail would be drawn over the card. */
+#skill-drawer.is-live .drawer__scene.has-open .drawer__scrub {
+  filter: blur(3px) brightness(0.7);
+  pointer-events: none;
+}
+
+#skill-drawer.is-live .drawer__scene.has-open .drawer__css {
+  z-index: 4;
 }
 
 /* the CSS3D layer rides above the metal; it must not swallow the drag, so only the folders
@@ -2045,15 +2059,18 @@ html.is-animating .footer {
 }
 
 /* The category names stand off to the left of the tabs, so an open card cuts them in half -
-   "REAL-", "3D SOF". Blurred with the rest that reads as a name behind a card (the fine-pointer
-   block below), sharp it reads as a rendering fault, so where the folders do not get a blur the
-   names go while a card is open. `visibility` and not `opacity` on purpose: cull() writes opacity
-   inline on these every frame and would win, but it never touches visibility. */
-@media not ((hover: hover) and (pointer: fine)) {
-  #skill-drawer.is-live .drawer__scene.has-open .drawer__label,
-  #skill-drawer.is-live .drawer__scene.has-open .drawer__rule {
-    visibility: hidden;
-  }
+   "REAL-", "3D SOF". Sharp that reads as a rendering fault, blurred as a name behind a card, so
+   they recede like the metal. On every device, unlike the folders' blur further down: these are
+   14 small elements, not 21 full cards. On the children, because the parents are the nodes
+   CSS3DRenderer writes its matrix3d to (see the folder sheet's blur below). */
+#skill-drawer.is-live .drawer__label span,
+#skill-drawer.is-live .drawer__rule::before {
+  transition: filter var(--focus-fade);
+}
+
+#skill-drawer.is-live .drawer__scene.has-open .drawer__label span,
+#skill-drawer.is-live .drawer__scene.has-open .drawer__rule::before {
+  filter: blur(4px) brightness(0.7);
 }
 
 #skill-drawer.is-live .drawer__scene.has-open canvas {
@@ -2086,54 +2103,39 @@ html.is-animating .footer {
    sheet is a plain child with no 3D transform of its own, so this stays an ordinary 2D
    filter everywhere. Its own transform/border-color transitions are repeated here: this
    rule wins on specificity, and a bare `transition: filter` would drop them. */
-/* Fine pointers only, which in practice means: not on a tablet. This is one blur per filed
-   folder - twenty-one offscreen raster passes, re-composited in 3D on every frame the drawer
-   pumps - and on iPad Chrome (WebKit, sharing a GPU budget with two WebGL contexts) it both
-   dropped the framerate across the whole section and appeared to collapse WebKit's 3D sorting
-   of the folders, which then interpenetrated the open card. Same media condition the hover
-   rules use below, for the same reason: what the device can do, not how wide it is. The
-   canvas keeps its own single blur above, so the card still reads as the one sharp thing. */
-@media (hover: hover) and (pointer: fine) {
-  /* On the resting state too, so the folders come back into focus with the metal on close. */
-  #skill-drawer.is-live .drawer__css .folder:not(.is-open) .folder__sheet {
-    transition:
-      transform 200ms var(--ease-out),
-      border-color var(--duration-base) var(--ease-out),
-      filter var(--focus-fade);
-  }
+/* On every device, by choice: sharp folders over blurred metal read as two different planes.
+   It is the expensive part of this, one blur per filed folder, re-composited in 3D on every frame
+   the drawer pumps. On iPad Chrome (WebKit, sharing a GPU budget with two WebGL contexts) an
+   earlier version dropped the framerate across the whole section and appeared to collapse
+   WebKit's 3D sorting, so the folders cut through the open card. That is the first place to look
+   if either comes back. */
+/* On the resting state too, so the folders come back into focus with the metal on close. */
+#skill-drawer.is-live .drawer__css .folder:not(.is-open) .folder__sheet {
+  transition:
+    transform 200ms var(--ease-out),
+    border-color var(--duration-base) var(--ease-out),
+    filter var(--focus-fade);
+}
 
-  /* 4px, not the canvas's 3: this one is drawn in the folder's own space and scaled down with
-     it, about 0.75 on screen. Dimmed as well, or the full-colour tabs read as labels stuck on
-     top of soft metal instead of as part of the same background. */
-  #skill-drawer.is-live .drawer__scene.has-open .drawer__css .folder:not(.is-open) .folder__sheet {
-    filter: blur(4px) brightness(0.7) saturate(0.8);
-  }
+/* 4px, not the canvas's 3: this one is drawn in the folder's own space and scaled down with
+   it, about 0.75 on screen. Dimmed as well, or the full-colour tabs read as labels stuck on
+   top of soft metal instead of as part of the same background. */
+#skill-drawer.is-live .drawer__scene.has-open .drawer__css .folder:not(.is-open) .folder__sheet {
+  filter: blur(4px) brightness(0.7) saturate(0.8);
+}
 
-  /* The category names and their rules recede the same way. On the children, for the same reason
-     as the sheet above: the parents are the nodes CSS3DRenderer writes its matrix3d to. */
-  #skill-drawer.is-live .drawer__label span,
-  #skill-drawer.is-live .drawer__rule::before {
-    transition: filter var(--focus-fade);
-  }
-
-  #skill-drawer.is-live .drawer__scene.has-open .drawer__label span,
-  #skill-drawer.is-live .drawer__scene.has-open .drawer__rule::before {
-    filter: blur(4px) brightness(0.7);
-  }
-
-  /* The box clips the sheet and masks the rim, and both cut the blur into a hard edge down each
-     side. Let it spill sideways only: the mask's gradient runs vertically, so it repeats across
-     and keeps the rim's fade. Vertically the clip stays exactly on the box, because the rest of
-     the sheet is waiting right below it: a clip margin there showed its copy under every tab
-     until the blur had grown enough to hide it. */
-  #skill-drawer.is-live .drawer__scene.has-open .drawer__css .folder:not(.is-open) {
-    overflow-x: visible;
-    overflow-y: clip;
-    mask-clip: no-clip;
-    -webkit-mask-clip: no-clip;
-    mask-repeat: repeat-x;
-    -webkit-mask-repeat: repeat-x;
-  }
+/* The box clips the sheet and masks the rim, and both cut the blur into a hard edge down each
+   side. Let it spill sideways only: the mask's gradient runs vertically, so it repeats across
+   and keeps the rim's fade. Vertically the clip stays exactly on the box, because the rest of
+   the sheet is waiting right below it: a clip margin there showed its copy under every tab
+   until the blur had grown enough to hide it. */
+#skill-drawer.is-live .drawer__scene.has-open .drawer__css .folder:not(.is-open) {
+  overflow-x: visible;
+  overflow-y: clip;
+  mask-clip: no-clip;
+  -webkit-mask-clip: no-clip;
+  mask-repeat: repeat-x;
+  -webkit-mask-repeat: repeat-x;
 }
 
 /* A folder's own box may not take the pointer: the box is the whole 320px card, transparent
