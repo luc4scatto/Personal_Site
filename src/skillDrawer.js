@@ -312,9 +312,14 @@ export function initSkillDrawer(host, strip) {
   // 3D on the wall (btnCap, below); this is only its 44px hit area, laid over the projection.
   const scrubOpen = scrub && document.createElement('button');
   let scrubKey = ''; // last transform written, so a still drawer costs no style writes
-  let scrubLen = 0; // the drawn rail's length, px
-  let scrubS0 = 0; // where the drawn rail starts and ends along the wall, 0-1 (see placeScrub)
+  let scrubLen = 0; // the rail's drawn length now, px: shorter once it is going into the cabinet
+  let scrubFull = 0; // the rail's whole length, px
+  let scrubT = 0; // the thumb's place along the whole rail, 0-1
+  let scrubThumbX = ''; // last thumb transform written
+  let scrubS0 = 0; // where the rail starts and ends along the wall, 0-1 (see solveScrub)
   let scrubS1 = 1;
+  let scrubLimit = -Infinity; // world z the rail may not retract past, to stay off the set player
+  let scrubSolved = false;
   let scrubAvoid = null; // the set player's box in host px, or null until it is mounted
   let scrubAvoidStale = true;
   let peeked = null; // the folder the rail has lifted
@@ -1191,6 +1196,7 @@ export function initSkillDrawer(host, strip) {
 
   function resize() {
     scrubAvoidStale = true;
+    scrubSolved = false;
     w = host.clientWidth;
     h = host.clientHeight;
     if (!w || !h) return;
@@ -1376,8 +1382,11 @@ export function initSkillDrawer(host, strip) {
     if (active) collapse(active);
     // A peeked folder keeps its .is-peek until it is filed back (collapse): riseSheet() reads
     // it to start the climb from the peek rather than dropping 2rem first. Any other peek goes.
-    if (peeked === f) peeked = null;
-    else unpeek();
+    if (peeked === f) {
+      peeked = null;
+      scrubT = 0; // it has left the file: the thumb has nothing to mark, as in unpeek()
+      placeThumb();
+    } else unpeek();
     setOpenReady(false);
     active = f;
     const filed = !f.el.classList.contains('is-open'); // false if caught on its way back
@@ -1520,15 +1529,16 @@ export function initSkillDrawer(host, strip) {
   // shorter and the finger's travel along it is stretched back over the whole wall, the way a
   // scrollbar's track stands for the whole page: cut short instead, every folder past the cut
   // would have had nothing left to reach it with.
-  // Laid halfway up the wall's outer face and measured in the drawer's space, so it is part of the
-  // furniture: the near end rides the drawer's front, and the far end stops at the cabinet's
-  // mouth, where the wall goes in - the rail comes out, and grows, as the drawer does.
-  function placeScrub() {
-    wallPoint(drawer.position.z + D / 2, scrubA);
-    wallPoint(Math.max(drawer.position.z - D / 2, CAB_MOUTH), scrubB);
+  /** Where the rail sits on the wall, once per resize: solved with the drawer all the way out, at
+   *  the zoom it has there, because that is the only time it is really used. */
+  function solveScrub() {
+    const zoomNow = camera.zoom;
+    frameFor(view.zoom);
+    const front = OPEN_Z + D / 2;
+    wallPoint(front, scrubA);
+    wallPoint(front - D, scrubB);
     const dx = scrubB.x - scrubA.x;
     const dy = scrubB.y - scrubA.y;
-    const len = Math.hypot(dx, dy) || 1;
     let free = 1; // how far along the wall the rail can run before it meets the player
     const box = avoidRect();
     if (box) {
@@ -1554,24 +1564,61 @@ export function initSkillDrawer(host, strip) {
       scrubS0 = 0;
       scrubS1 = free;
     }
-    // the button sits on the wall in front of the rail: lay its hit area over it, and start the
-    // rail clear of it
+    // the button sits on the wall in front of the rail: start the rail clear of it
+    const btn = wallPoint(OPEN_Z + BTN_Z, scrubTmp);
+    scrubS0 = Math.min(Math.max(scrubS0, alongScrub(btn.x, btn.y) + 0.05), scrubS1 - 0.25);
+    // the wall's line stays put on screen as the drawer runs in, so a rail riding it would climb
+    // onto the player if one is in the way
+    scrubLimit = free < 1 ? front - free * D : -Infinity;
+    frameFor(zoomNow);
+    scrubSolved = !!box; // no player yet: asked again next frame
+  }
+  // A slot cut in the wall, not a share of whatever is showing: both ends are fixed points on the
+  // drawer, so it travels at the drawer's speed and goes into the cabinet with it, the far end
+  // stopping at the mouth. As a fraction of the visible wall it slid over the metal on the way in.
+  function placeScrub() {
+    if (!scrubSolved) solveScrub();
+    const front = drawer.position.z + D / 2;
+    wallPoint(front, scrubA);
+    wallPoint(front - D, scrubB);
+    const near = wallPoint(front - scrubS0 * D, scrubNear);
+    const whole = wallPoint(front - scrubS1 * D, scrubFar);
+    scrubFull = Math.hypot(whole.x - near.x, whole.y - near.y);
+    const zFar = Math.max(front - scrubS1 * D, CAB_MOUTH, scrubLimit);
+    const far = wallPoint(zFar, scrubFar);
+    const zNear = front - scrubS0 * D;
+    const drawn = zFar < zNear ? Math.hypot(far.x - near.x, far.y - near.y) : 0;
+    // The rail is drawn over the scene, so nothing in the scene can hide it: cut it off at the
+    // cabinet's mouth by hand, or the thumb rides on over the front of the cabinet. Signed, as
+    // the near end keeps going once it is inside, and the thumb's own width is still crossing.
+    const mouth = wallPoint(CAB_MOUTH, scrubTmp);
+    const toMouth = Math.hypot(mouth.x - near.x, mouth.y - near.y) * (zNear > CAB_MOUTH ? 1 : -1);
+    const clip = `inset(-22px ${(drawn - toMouth).toFixed(1)}px -22px -22px)`;
+    if (clip !== scrubClip) scrub.style.clipPath = scrubClip = clip;
+    // the button's hit area, laid over its projection
     scrubP.set(W / 2 + 0.12, 0, BTN_Z);
     drawer.localToWorld(scrubP);
     scrubP.project(camera);
     const bx = ((scrubP.x + 1) / 2) * w;
     const by = ((1 - scrubP.y) / 2) * h;
     scrubOpen.style.transform = `translate(${(bx - 22).toFixed(1)}px,${(by - 22).toFixed(1)}px)`;
-    scrubS0 = Math.min(Math.max(scrubS0, alongScrub(bx, by) + 0.05), scrubS1 - 0.25);
-    const x0 = scrubA.x + dx * scrubS0;
-    const y0 = scrubA.y + dy * scrubS0;
-    const key = `translate(${x0.toFixed(1)}px,${y0.toFixed(1)}px) rotate(${Math.atan2(dy, dx).toFixed(4)}rad)`;
-    const drawn = len * (scrubS1 - scrubS0);
-    if (key === scrubKey && drawn === scrubLen) return;
-    scrubKey = key;
+    const angle = Math.atan2(scrubB.y - scrubA.y, scrubB.x - scrubA.x);
+    const key = `translate(${near.x.toFixed(1)}px,${near.y.toFixed(1)}px) rotate(${angle.toFixed(4)}rad)`;
     scrubLen = drawn;
+    placeThumb();
+    if (key === scrubKey && drawn === scrubDrawn) return;
+    scrubKey = key;
+    scrubDrawn = drawn;
     scrub.style.width = `${drawn.toFixed(1)}px`;
     scrub.style.transform = key;
+  }
+  /** Worked out from scrubT whenever the rail moves: written once in pixels on a touch, it stayed
+   *  put while the rail ran in and ended up hanging off its end. Never past where it is drawn. */
+  function placeThumb() {
+    const x = `translateX(${Math.min(scrubT * scrubFull, scrubLen).toFixed(1)}px)`;
+    if (x === scrubThumbX) return;
+    scrubThumbX = x;
+    scrubThumb.style.transform = x;
   }
   // 0 at the near end, 1 at the far one: where `x`,`y` falls along the rail
   const alongScrub = (x, y) => {
@@ -1580,6 +1627,10 @@ export function initSkillDrawer(host, strip) {
     return ((x - scrubA.x) * dx + (y - scrubA.y) * dy) / (dx * dx + dy * dy || 1);
   };
   const scrubTmp = new THREE.Vector2();
+  const scrubNear = new THREE.Vector2();
+  const scrubFar = new THREE.Vector2();
+  let scrubDrawn = -1; // last width written
+  let scrubClip = ''; // last clip written
   function setOpenReady(ready) {
     if (!scrubOpen || scrubOpen.disabled === !ready) return;
     scrubOpen.disabled = !ready;
@@ -1601,6 +1652,9 @@ export function initSkillDrawer(host, strip) {
     peeked.el.classList.remove('is-peek');
     if (peeked !== active) rotateTo(peeked, RESTING_QUAT, 0.2, 'power3.out');
     peeked = null;
+    // the thumb marks the folder the rail has lifted: with none lifted it goes back to the start
+    scrubT = 0;
+    placeThumb();
     setOpenReady(false);
   }
   // Nearest folder to the finger, measured in the rail's own screen terms rather than by
@@ -1625,7 +1679,8 @@ export function initSkillDrawer(host, strip) {
       if (d < bestD) ((best = f), (bestD = d), (bestT = ft));
     }
     peek(best);
-    scrubThumb.style.transform = `translateX(${(THREE.MathUtils.clamp(bestT, 0, 1) * scrubLen).toFixed(1)}px)`;
+    scrubT = THREE.MathUtils.clamp(bestT, 0, 1);
+    placeThumb();
   }
   if (scrub) {
     let scrubbing = false;
