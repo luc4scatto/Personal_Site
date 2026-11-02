@@ -1156,6 +1156,10 @@
    drawer as it comes out: same 1.5s as DRAWER_RUN, same curve as its power3.out. is-out,
    not is-shut, so the invitation nudge does not move the page. */
 #skill-drawer.is-live {
+  /* Everything that steps back for an open card, on the card's own unhurried rhythm: over in
+     0.4s, the background had finished well before the card arrived. The curve is sine.inOut, the
+     same as skillDrawer.js's CARD_EASE. */
+  --focus-fade: 0.65s cubic-bezier(0.37, 0, 0.63, 1);
   transition: margin-bottom 1.5s cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
@@ -1197,7 +1201,7 @@
       rgba(0, 0, 0, 0.45) 88%,
       transparent 100%
     ),
-    linear-gradient(to right, #000 calc(62% + var(--slide, 0px)), transparent 100%);
+    linear-gradient(to right, #000 62%, transparent 100%);
   -webkit-mask-image:
     linear-gradient(
       to bottom,
@@ -1208,7 +1212,7 @@
       rgba(0, 0, 0, 0.45) 88%,
       transparent 100%
     ),
-    linear-gradient(to right, #000 calc(62% + var(--slide, 0px)), transparent 100%);
+    linear-gradient(to right, #000 62%, transparent 100%);
   mask-composite: intersect;
   -webkit-mask-composite: source-in;
 }
@@ -1733,14 +1737,11 @@
    matters: shutting the drawer mid-track must not take the Pause button away with it. */
 #skill-drawer.is-live .set-player {
   position: absolute;
-  /* Measured, not guessed, and measured against the *slid* frame rather than the resting one:
-     the canvas mask's right-hand cutoff sits at 62% of the box width, and a picked card slides
-     the whole carcass right (slideFrame()) by a near-constant ~5.3% of the box, pushing that
-     cutoff with it. Solved once for the worse of the two states - at a typical box (1440px
-     viewport, ~1026px) the slid cutoff lands at ~690px and this panel's left edge at ~714px -
-     so the panel is the same size and in the same place whether a card is filed or out. It
-     used to be sized to the resting cutoff and then pulled in and narrowed on .has-open, which
-     meant a panel that could be mid-track resized itself out from under the visitor's hand. */
+  /* Measured, not guessed: the canvas mask's right-hand cutoff sits at 62% of the box width, and
+     at a typical box (1440px viewport, ~1026px) this panel's left edge lands at ~714px, past it.
+     Same size and same place whether a card is filed or out. It used to be pulled in and
+     narrowed on .has-open, which meant a panel that could be mid-track resized itself out from
+     under the visitor's hand. */
   right: 0.8%;
   /* rem, not a percentage: the box caps at 76vh, so above ~900px of width its aspect stops
      holding and a percentage inset drifts. Low in the box on purpose - the canvas mask fades
@@ -1794,14 +1795,13 @@
   --set-delay: 0s;
 }
 
-/* Tablet, where skillDrawer.js has put the picked card over the scene instead of in a column
-   beside it (.is-overlay, written off the measured frame in resize()). Two things follow.
+/* Tablet (.is-overlay, written off the measured frame in resize()), and the panel beside an open
+   card at every width. Two things follow.
 
-   First, the panel above was solved against a *slid* frame, and overlaid there is no slide -
-   pickShift() returns 0 - so the mask's right-hand cutoff stays at its resting 62% and the
-   panel has to clear that instead. The rem cap is what binds at this size: 11rem is 176px
-   against a 670px box, putting the left edge well clear of the ~415px cutoff. The percentage
-   is only there to keep it honest if the box ever grows without the cap moving.
+   First, the panel has to clear the mask's right-hand cutoff at 62% on a narrower box. The rem
+   cap is what binds at this size: 11rem is 176px against a 670px box, putting the left edge well
+   clear of the ~415px cutoff. The percentage is only there to keep it honest if the box ever
+   grows without the cap moving.
 
    17rem, not a number chosen to look right: `.set-player__panel` set to `width: fit-content`
    measures 258px of real content at rest (disc + the transport row - two skips, play/pause,
@@ -1834,28 +1834,26 @@
    cover the panel instead just hid it a different way, through a blur instead of a cut - same
    complaint, new mechanism. Reserving the margin is the one version where both stay visible,
    all the time, doing their own job. */
-#skill-drawer.is-live .drawer__scene.is-overlay.has-open ~ .set-player:not(.is-playing) {
+#skill-drawer.is-live .drawer__scene.has-open ~ .set-player:not(.is-playing) {
   opacity: 0.45;
   filter: blur(3px);
   pointer-events: none;
   transition:
-    opacity 0.35s var(--ease-out),
-    filter 0.35s var(--ease-out);
+    opacity var(--focus-fade),
+    filter var(--focus-fade);
 }
 
 /* Closing the card drops .has-open, but the scene is still ".is-overlay" and ":not(.is-shut)",
    so without this the panel falls back to the "arrives late" show-transition above (sections.css:1314)
    and its 5s delay - built for the drawer opening, not for a card closing - so the panel sat
-   dim for seconds after the card was already gone. Same fast timing as the dim-in, just undone.
+   dim for seconds after the card was already gone. Same timing as the dim-in, just undone.
    Gated on .has-opened (skillDrawer.js's select(), set the first time a card opens and cleared
    only when the drawer goes fully shut) so this never wins on the drawer's own first reveal -
    that one still needs the 5s delay above, only a later card-close should skip it. */
-#skill-drawer.is-live
-  .drawer__scene.is-overlay.has-opened:not(.has-open)
-  ~ .set-player:not(.is-playing) {
+#skill-drawer.is-live .drawer__scene.has-opened:not(.has-open) ~ .set-player:not(.is-playing) {
   transition:
-    opacity 0.35s var(--ease-out),
-    filter 0.35s var(--ease-out),
+    opacity var(--focus-fade),
+    filter var(--focus-fade),
     visibility 0s linear;
 }
 
@@ -2040,22 +2038,25 @@ html.is-animating .footer {
 
    The transition sits on the overlay state and not on the dimmed one, or filing the card
    back would snap the metal to full instead of bringing it back up. */
-#skill-drawer.is-live .drawer__scene.is-overlay canvas {
+#skill-drawer.is-live .drawer__scene canvas {
   transition:
-    opacity 0.4s var(--ease-out),
-    filter 0.4s var(--ease-out);
+    opacity var(--focus-fade),
+    filter var(--focus-fade);
 }
 
-/* The category names stand off to the left of the tabs, so an overlaid card cuts them in
-   half - "REAL-", "3D SOF" - which reads as a rendering fault rather than as a name behind a
-   card. They go while one is open. `visibility` and not `opacity` on purpose: cull() writes
-   opacity inline on these every frame and would win, but it never touches visibility. */
-#skill-drawer.is-live .drawer__scene.is-overlay.has-open .drawer__label,
-#skill-drawer.is-live .drawer__scene.is-overlay.has-open .drawer__rule {
-  visibility: hidden;
+/* The category names stand off to the left of the tabs, so an open card cuts them in half -
+   "REAL-", "3D SOF". Blurred with the rest that reads as a name behind a card (the fine-pointer
+   block below), sharp it reads as a rendering fault, so where the folders do not get a blur the
+   names go while a card is open. `visibility` and not `opacity` on purpose: cull() writes opacity
+   inline on these every frame and would win, but it never touches visibility. */
+@media not ((hover: hover) and (pointer: fine)) {
+  #skill-drawer.is-live .drawer__scene.has-open .drawer__label,
+  #skill-drawer.is-live .drawer__scene.has-open .drawer__rule {
+    visibility: hidden;
+  }
 }
 
-#skill-drawer.is-live .drawer__scene.is-overlay.has-open canvas {
+#skill-drawer.is-live .drawer__scene.has-open canvas {
   /* Barely a step down, and that is deliberate: the metal is already dark on a black page,
      and at 0.55 the furniture simply vanished - which loses the reason the drawer is still
      here on a tablet at all. Enough to seat the card in front, not enough to erase what it
@@ -2093,16 +2094,45 @@ html.is-animating .footer {
    rules use below, for the same reason: what the device can do, not how wide it is. The
    canvas keeps its own single blur above, so the card still reads as the one sharp thing. */
 @media (hover: hover) and (pointer: fine) {
-  #skill-drawer.is-live
-    .drawer__scene.is-overlay.has-open
-    .drawer__css
-    .folder:not(.is-open)
-    .folder__sheet {
-    filter: blur(3px);
+  /* On the resting state too, so the folders come back into focus with the metal on close. */
+  #skill-drawer.is-live .drawer__css .folder:not(.is-open) .folder__sheet {
     transition:
       transform 200ms var(--ease-out),
       border-color var(--duration-base) var(--ease-out),
-      filter 0.4s var(--ease-out);
+      filter var(--focus-fade);
+  }
+
+  /* 4px, not the canvas's 3: this one is drawn in the folder's own space and scaled down with
+     it, about 0.75 on screen. Dimmed as well, or the full-colour tabs read as labels stuck on
+     top of soft metal instead of as part of the same background. */
+  #skill-drawer.is-live .drawer__scene.has-open .drawer__css .folder:not(.is-open) .folder__sheet {
+    filter: blur(4px) brightness(0.7) saturate(0.8);
+  }
+
+  /* The category names and their rules recede the same way. On the children, for the same reason
+     as the sheet above: the parents are the nodes CSS3DRenderer writes its matrix3d to. */
+  #skill-drawer.is-live .drawer__label span,
+  #skill-drawer.is-live .drawer__rule::before {
+    transition: filter var(--focus-fade);
+  }
+
+  #skill-drawer.is-live .drawer__scene.has-open .drawer__label span,
+  #skill-drawer.is-live .drawer__scene.has-open .drawer__rule::before {
+    filter: blur(4px) brightness(0.7);
+  }
+
+  /* The box clips the sheet and masks the rim, and both cut the blur into a hard edge down each
+     side. Let it spill sideways only: the mask's gradient runs vertically, so it repeats across
+     and keeps the rim's fade. Vertically the clip stays exactly on the box, because the rest of
+     the sheet is waiting right below it: a clip margin there showed its copy under every tab
+     until the blur had grown enough to hide it. */
+  #skill-drawer.is-live .drawer__scene.has-open .drawer__css .folder:not(.is-open) {
+    overflow-x: visible;
+    overflow-y: clip;
+    mask-clip: no-clip;
+    -webkit-mask-clip: no-clip;
+    mask-repeat: repeat-x;
+    -webkit-mask-repeat: repeat-x;
   }
 }
 
@@ -2303,6 +2333,20 @@ html.is-animating .footer {
   -webkit-mask-image: none;
 }
 
+/* Drawn at twice its authored size so it stays sharp at the size it is read at: skillDrawer.js's
+   CARD_RES halves the 3D scale to match. `zoom` on the children and never on .folder itself:
+   there it also doubles the translation in the matrix3d CSS3DRenderer writes, and the card lands
+   somewhere else. */
+.folder.is-open {
+  width: 500px;
+  height: 640px;
+}
+
+.folder.is-open .folder__sheet,
+.folder.is-open .folder__close {
+  zoom: 2;
+}
+
 /* The open card's frame is painted by .folder, not by the sheet inside it. Firefox rasterises
    the sheet's subtree at the folder's own (tiny) CSS3D scale and then magnifies it, so a 1px
    border came out as a fat brand-coloured band around the card - measured on the real thing, a
@@ -2315,10 +2359,11 @@ html.is-animating .footer {
    the swap is seamless. The sheet drops its border entirely rather than just its colour, so
    the width lands on .folder instead of being counted twice and the content box inside stays
    exactly what it was (248x317). */
+/* Twice the sheet's own values: .folder is not zoomed, see CARD_RES above. */
 .folder.is-landed {
-  border: 1px solid color-mix(in srgb, var(--brand, var(--accent)) 32%, #232323);
-  border-top: 2px solid var(--brand, var(--accent));
-  border-radius: 0.35rem 0.35rem 0.2rem 0.2rem;
+  border: 2px solid color-mix(in srgb, var(--brand, var(--accent)) 32%, #232323);
+  border-top: 4px solid var(--brand, var(--accent));
+  border-radius: 0.7rem 0.7rem 0.4rem 0.4rem;
 }
 
 .folder.is-landed .folder__sheet,
@@ -2459,6 +2504,13 @@ html.is-animating .footer {
 .drawer__rule {
   width: 100px;
   height: 2px;
+}
+
+/* on a child so it can be blurred without a filter on the matrix3d node, see .has-open above */
+.drawer__rule::before {
+  content: '';
+  display: block;
+  height: 100%;
   background: color-mix(in srgb, var(--text) 70%, transparent);
 }
 

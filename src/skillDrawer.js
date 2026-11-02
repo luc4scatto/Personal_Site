@@ -22,6 +22,11 @@ import { content } from './content.js';
 // rail is scaled into world units.
 const CARD_W = 250;
 const CARD_H = 320;
+// An open card is drawn at this many times its authored size and scaled back down by the same
+// amount (.folder.is-open in sections.css, which has to match). Chrome rasters a CSS3D element
+// at its CSS size and magnifies the result, so a card shown at nearly 2x looked like a zoomed
+// PNG. Only the open one: the other 22 would each cost four times the memory for no gain.
+const CARD_RES = 2;
 const PX = 0.011; // px -> world
 const CW = CARD_W * PX; // ~2.75
 const CH = CARD_H * PX; // ~3.52
@@ -886,6 +891,17 @@ export function initSkillDrawer(host, strip) {
   let shutState = null;
   let outState = null;
   function render() {
+    // The push-in follows the drawer's real z, like is-shut below, so a click, a drag and a Tab
+    // all get it from this one line. NUDGE_Z of slack keeps the invitation nudge from breathing
+    // the frame. Cubed because the run is a power3.out, which covers most of its z early: cubing
+    // moves the zoom into the slow tail, so it lands with the drawer.
+    const opened = THREE.MathUtils.clamp(
+      (drawer.position.z - SHUT_Z - NUDGE_Z) / (OPEN_Z - SHUT_Z - NUDGE_Z),
+      0,
+      1,
+    );
+    const zoom = 1 + (view.zoom - 1) * opened ** 3;
+    if (zoom !== camera.zoom) frameFor(zoom);
     cull();
     // NUDGE_Z of slack: the invitation nudge (below) moves the face a hair out and back, and
     // that must not read as the drawer opening - the hint and the names key off is-shut.
@@ -924,39 +940,28 @@ export function initSkillDrawer(host, strip) {
   // drawer's front, under the section heading. Placed in screen space rather than in the
   // scene, so it lands in the same spot on the page at any framing: a world position tuned
   // at one aspect drifted off the heading, or onto the drawer, at every other.
-  const PICK_W = 0.25; // share of the frame's width the card takes
-  // Under this frame width a side column cannot hold a readable card. The card is authored
-  // at CARD_W/CARD_H and drawn through one uniform scale, so its type size *is* that scale:
-  // in a 670px frame (a 744px tablet) a quarter-width card renders its 12px body copy at
-  // 8px. Past the cut-off it overlays the scene at PICK_W_WIDE instead, and the height
-  // clamp below does most of the work from there. Measured off the live frame rather than
-  // a media query, so there is no CSS twin to keep in sync and a rotation re-decides in
-  // resize() for free.
+  // The card is authored at CARD_W/CARD_H and drawn through one uniform scale, so its type size
+  // *is* that scale. It goes over the scene at every width: a side column made it small on
+  // desktop and in a 670px frame (a 744px tablet) rendered its 12px body copy at 8px.
+  // Below this frame width only the layout around the drawer changes (.is-overlay in
+  // sections.css). Measured off the live frame, so a rotation re-decides in resize() for free.
   const OVERLAY_MAX_W = 980;
   const PICK_W_WIDE = 0.62;
-  // A pure safety backstop, not a routine constraint - it only fires past a box wider than
-  // any real overlay frame gets (host width * 0.627 stays under CARD_H * 2 up to ~1020px of
-  // host, comfortably past OVERLAY_MAX_W). It shipped at 1.35 first, a real ceiling at every
-  // width past about 690px of host - three quarters of the overlay range, iPad Pro 11" and
-  // 12.9" both included. There the card stopped growing with the box while the height term
-  // below kept climbing, so height/width and MAX_SCALE traded which one bound as the frame
-  // widened, and the card that resulted sat well short of where the dimmed player still was
-  // - the corner it's meant to disappear into, only partly.
+  // The ceiling on a wide frame, where the width term alone would outgrow the type.
   const MAX_SCALE = 2;
   const PICK_TOP = 0.03; // gap above it, as a share of the frame's height
   // World units in front of the drawer's face, so the card rides over every folder. Free to
   // raise: pickTarget() derives pxPerUnit from this same depth and compensates in the scale,
   // so the card is the same size on screen at any value - this only buys separation in Z.
   //
-  // 2 was enough while the card sat in its own column. Overlaid it does not get one
-  // (pickShift() returns 0 there, deliberately), so it lands directly over the folders filed
-  // at the front of the mouth, which stand out past the drawer's face on the left - and 2
-  // units ahead of the face *centre* is not 2 ahead of those. Chrome resolved that overlap in
-  // the card's favour; WebKit on iPad painted the frontmost folder (Blender, slot 0) over the
-  // open card, at every card, because a CSS3D layer has no per-pixel depth and the browser is
-  // free to order two near-coplanar elements either way. 8 clears the whole front of the file
-  // with room to spare, so there is no near-coplanar case left to order.
-  const pickPull = () => (overlaid() ? 8 : 2);
+  // 2 was enough while the card had its own column. Over the scene it lands directly on the
+  // folders filed at the front of the mouth, which stand out past the drawer's face on the
+  // left - and 2 units ahead of the face *centre* is not 2 ahead of those. Chrome resolved that
+  // overlap in the card's favour; WebKit on iPad painted the frontmost folder (Blender, slot 0)
+  // over the open card, at every card, because a CSS3D layer has no per-pixel depth and the
+  // browser is free to order two near-coplanar elements either way. 8 clears the whole front of
+  // the file with room to spare, so there is no near-coplanar case left to order.
+  const PICK_PULL = 8;
   const overlaid = () => w <= OVERLAY_MAX_W;
   // The DJ player parks in the box's right margin while a card is open, blurred but never
   // hidden (sections.css's .is-overlay ~ .set-player rule) - that's the point of it: it must
@@ -977,59 +982,34 @@ export function initSkillDrawer(host, strip) {
   const pickRay = new THREE.Vector3();
   const camFwd = new THREE.Vector3();
   function cardSize() {
-    const share = overlaid() ? PICK_W_WIDE : PICK_W;
-    const availW = overlaid() ? w - PLAYER_RESERVE_PX() : w;
     const cardH = Math.min(
       h * (1 - PICK_TOP * 2),
-      (availW * share * CARD_H) / CARD_W,
+      ((w - PLAYER_RESERVE_PX()) * PICK_W_WIDE * CARD_H) / CARD_W,
       CARD_H * MAX_SCALE,
     );
     return [(cardH * CARD_W) / CARD_H, cardH];
   }
-  // How far the furniture steps right so the card gets a column of its own, clear of the
-  // drawer's front instead of laid over the folders filed there - and clear of the category
-  // names, which stand out past that front on the left: sized to the front alone, the longest
-  // name beside the card ran into its corner. The names are measured off the page, less the
-  // slide they were last drawn at, so this reads where they rest at no slide at all.
-  const pickShift = () => {
-    // An overlaid card spans most of the frame, so there is no column beside the drawer to
-    // step aside for - and sliding the furniture out from under it would move the scene for
-    // no reason a visitor can see.
-    if (overlaid()) return 0;
-    const [cardW, cardH] = cardSize();
-    const clear = cardW + w * 0.025;
-    let shift = clear - view.left;
-    const hb = host.getBoundingClientRect();
-    const top = h * PICK_TOP;
-    for (const l of labels) {
-      const b = l.el.firstChild.getBoundingClientRect();
-      if (!b.width || b.bottom - hb.top < top || b.top - hb.top > top + cardH) continue;
-      shift = Math.max(shift, clear - (b.left - hb.left - view.shift));
-    }
-    return Math.max(0, shift);
-  };
-
   function pickTarget() {
+    // Solved at the zoom the frame will settle on, not this frame's: the zoom is still moving
+    // when a card is picked, and a card placed against it would drift as it finishes.
+    const zoomNow = camera.zoom;
+    frameFor(view.zoom);
     const [cardW, cardH] = cardSize();
     const face = pickPos.set(0, 0, D / 2 + OPEN_Z).applyMatrix4(camera.matrixWorldInverse);
-    const depth = -face.z - pickPull();
-    // left edge on the frame's own left edge, which is the heading's: centre in NDC, cast
-    // through the camera (so the view offset fit() sets is honoured) out to that depth.
-    // Overlaid, it centres within the region left of the player's reserved margin instead of
-    // the full frame - centring in the full frame is what let the card grow into that margin
-    // in the first place. Stays bottom-anchored vertically, mirroring the top margin PICK_TOP
-    // leaves everywhere else: MAX_SCALE caps the card's height on a box that keeps growing
-    // wider, so on a wide-but-short-of-desktop frame the box outgrows the card, and centring
-    // it vertically split that slack top and bottom - the bottom half sat directly over the
-    // player. Bottom-anchored, the same slack collects above the card instead, under the
-    // heading, where there is nothing to show through.
-    if (overlaid()) pickRay.set(-PLAYER_RESERVE_PX() / w, -1 + 2 * PICK_TOP + cardH / h, 0.5);
-    else pickRay.set(cardW / w - 1, 1 - (2 * (h * PICK_TOP + cardH / 2)) / h, 0.5);
+    const depth = -face.z - PICK_PULL;
+    // Centred in NDC and cast through the camera (so the view offset fit() sets is honoured) out
+    // to that depth, within the region left of the player's reserved margin - centring in the
+    // full frame is what let the card grow into that margin. Bottom-anchored, mirroring the top
+    // margin PICK_TOP leaves: MAX_SCALE caps the card on a box that keeps growing wider, and
+    // centring it vertically split that slack top and bottom, the bottom half over the player.
+    pickRay.set(-PLAYER_RESERVE_PX() / w, -1 + 2 * PICK_TOP + cardH / h, 0.5);
     pickRay.unproject(camera).sub(camera.position).normalize();
     camera.getWorldDirection(camFwd);
     pickPos.copy(camera.position).addScaledVector(pickRay, depth / pickRay.dot(camFwd));
-    const pxPerUnit = h / (2 * depth * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
-    return { pos: pickPos, scale: cardW / pxPerUnit / CARD_W };
+    const pxPerUnit =
+      (view.zoom * h) / (2 * depth * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+    frameFor(zoomNow);
+    return { pos: pickPos, scale: cardW / pxPerUnit / CARD_W / CARD_RES };
   }
 
   // Solve the distance numerically against the corners of what is on screen: the cabinet,
@@ -1039,76 +1019,65 @@ export function initSkillDrawer(host, strip) {
   // left out on purpose: it lives in the corner the drawer's silhouette leaves empty, and
   // framing its reach as well is what used to shrink the furniture to half the frame.
   const corner = new THREE.Vector3();
+  const ZOOM = 1.25; // how much closer the camera gets to an open drawer, at most
 
-  // The frame's own centring, solved by fit(), and how far the furniture has been slid right
-  // to make room for a picked card. Kept apart so the slide can be tweened without re-solving
-  // the fit; `left` is the furniture's left edge in px once centred.
+  // The frame's own centring, solved by fit().
   const view = {
     baseX: 0,
     baseY: 0,
-    left: 0,
     handleX: 0,
     handleY: 0,
     shutLeft: 0,
-    shift: 0,
+    zoom: 1, // the push-in on an open drawer
+    zoomX: 0, // the centring at that zoom; between the two the frame is a pure zoom about a point
+    zoomY: 0,
   };
-  function frameFor(shift) {
-    camera.setViewOffset(w, h, view.baseX - shift, view.baseY, w, h);
-    // the canvas mask's right-hand fade rides along, or it dims the cabinet's face instead
-    // of the carcass running off behind it
-    // On the canvas, which is the element the mask is on, rather than on the host: a custom
-    // property set on the host invalidates style for everything under it, and everything
-    // under it is the CSS3D layer - 30-odd folder and label elements restyled on every frame
-    // of a slide that runs while the scene is already rendering.
-    renderer.domElement.style.setProperty('--slide', `${shift}px`);
+  function frameFor(zoom = camera.zoom) {
+    camera.zoom = zoom;
+    const t = view.zoom > 1 ? (zoom - 1) / (view.zoom - 1) : 0;
+    camera.setViewOffset(
+      w,
+      h,
+      THREE.MathUtils.lerp(view.baseX, view.zoomX, t),
+      THREE.MathUtils.lerp(view.baseY, view.zoomY, t),
+      w,
+      h,
+    );
   }
 
-  /** Slide the furniture to `shift`. `solve` runs against the frame being slid to, so a card
-   *  placed in it lands where the frame will be rather than where it was. `duration` has to
-   *  match whatever card tween this call is paired with - left at its own fixed 0.6s, the
-   *  furniture kept sliding for ~250ms after collapse()'s shorter tweens had already settled
-   *  the folder, so a card that looked done sat there while the background kept moving under
-   *  it. */
-  function slideFrame(shift, solve, duration = 0.48) {
-    gsap.killTweensOf(view);
-    frameFor(shift);
-    solve?.();
-    frameFor(view.shift);
-    gsap.to(view, {
-      shift,
-      duration,
-      // the card's own curve: the pan and the card move together, and two different eases on
-      // one moment read as two things happening rather than one
-      ease: CARD_EASE,
-      onUpdate: () => {
-        frameFor(view.shift);
-        render();
-      },
-    });
+  /** NDC bounds of a box, through the camera as it stands. */
+  function bounds(xs, ys, zs) {
+    let x0 = Infinity;
+    let x1 = -Infinity;
+    let y0 = Infinity;
+    let y1 = -Infinity;
+    for (const x of xs) {
+      for (const y of ys) {
+        for (const z of zs) {
+          corner.set(x, y, z).project(camera);
+          x0 = Math.min(x0, corner.x);
+          x1 = Math.max(x1, corner.x);
+          y0 = Math.min(y0, corner.y);
+          y1 = Math.max(y1, corner.y);
+        }
+      }
+    }
+    return [x0, x1, y0, y1];
   }
 
   function fit(total) {
+    camera.zoom = 1; // everything fit() measures is the unzoomed frame; render() puts it back
     camera.clearViewOffset();
     dist = Math.max(W, D) * 1.4;
     let cx = 0;
     let cy = 0;
     for (let i = 0; i < 10; i++) {
       aim();
-      let x0 = Infinity;
-      let x1 = -Infinity;
-      let y0 = Infinity;
-      let y1 = -Infinity;
-      for (const x of [-CAB_W / 2 - 0.1, CAB_W / 2 + 0.1]) {
-        for (const y of [-H, cabTop(total) + 0.1]) {
-          for (const z of [-D / 2, D / 2 + 0.45 + OPEN_Z]) {
-            corner.set(x, y, z).project(camera);
-            x0 = Math.min(x0, corner.x);
-            x1 = Math.max(x1, corner.x);
-            y0 = Math.min(y0, corner.y);
-            y1 = Math.max(y1, corner.y);
-          }
-        }
-      }
+      const [x0, x1, y0, y1] = bounds(
+        [-CAB_W / 2 - 0.1, CAB_W / 2 + 0.1],
+        [-H, cabTop(total) + 0.1],
+        [-D / 2, D / 2 + 0.45 + OPEN_Z],
+      );
       cx = (x0 + x1) / 2;
       cy = (y0 + y1) / 2;
       const over = Math.max(x1 - x0, y1 - y0) / 2 / 0.96;
@@ -1121,11 +1090,18 @@ export function initSkillDrawer(host, strip) {
     // of the frame empty on one side.
     view.baseX = (cx * w) / 2;
     view.baseY = (-cy * h) / 2;
-    frameFor(0);
-    // the drawer front's own left edge, not the carcass's: the front is the narrower of the
-    // two, and measured off the carcass the furniture stepped further aside than it needed to
-    corner.set(-FACE_W / 2, FRONT_Y + FRONT_H / 2, D / 2 + 0.22 + OPEN_Z).project(camera);
-    view.left = ((corner.x + 1) / 2) * w;
+    // The push-in: the open drawer and its tabs, centred, as big as ZOOM or the frame allows.
+    // The carcass is what gets cropped, and the canvas mask already dissolves it at the edges.
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const [ox0, ox1, oy0, oy1] = bounds(
+      [-FACE_W / 2, FACE_W / 2],
+      [-H, RIM + (TAB_REM + PEEK_REM) * rem * PX],
+      [-D / 2, D / 2 + 0.45 + OPEN_Z],
+    );
+    view.zoom = THREE.MathUtils.clamp((2 * 0.94) / Math.max(ox1 - ox0, oy1 - oy0), 1, ZOOM);
+    view.zoomX = (view.zoom * (ox0 + ox1) * w) / 4;
+    view.zoomY = (-view.zoom * (oy0 + oy1) * h) / 4;
+    frameFor();
     // The last drawer's own handle, at rest - where the sweeping hint arrow has to land. Its
     // world position while shut is the drawer group's own position (SHUT_Z) plus the handle's
     // local one, since the handle is a child of that group; the arrow only ever shows while the
@@ -1133,10 +1109,8 @@ export function initSkillDrawer(host, strip) {
     corner.set(0, FRONT_Y, SHUT_Z + D / 2 + 0.33).project(camera);
     view.handleX = ((corner.x + 1) / 2) * w;
     view.handleY = ((1 - corner.y) / 2) * h;
-    // The front's own left edge while shut - not view.left just above, which is the same
-    // corner pulled out to OPEN_Z for the picked card's column and sits well left of where
-    // the closed furniture actually starts. The hint arrow needs the shut silhouette, since
-    // it only ever shows while the drawer is exactly that: shut.
+    // The front's own left edge while shut. The hint arrow needs the shut silhouette, since it
+    // only ever shows while the drawer is exactly that: shut.
     corner.set(-FACE_W / 2, FRONT_Y + FRONT_H / 2, SHUT_Z + D / 2 + 0.22).project(camera);
     view.shutLeft = ((corner.x + 1) / 2) * w;
     return dist;
@@ -1234,16 +1208,9 @@ export function initSkillDrawer(host, strip) {
     measureZAxis();
     renderer.setSize(w, h);
     css.setSize(w, h);
-    // the card's spot is in screen space, so it and the room made for it follow the frame
-    gsap.killTweensOf(view);
-    view.shift = 0;
-    frameFor(0);
-    if (active) {
-      render(); // pickShift() measures the category names off the page, so draw them at the new size first
-      view.shift = pickShift();
-      frameFor(view.shift);
-      lift(active, 0);
-    }
+    // the card's spot is in screen space, so it follows the frame
+    frameFor();
+    if (active) lift(active, 0);
     render();
   }
 
@@ -1262,19 +1229,25 @@ export function initSkillDrawer(host, strip) {
   // out of the rail rather than being drawn out of it. One curve carries position, scale and
   // rotation, in both directions - three tweens that land together read as one motion only if
   // they share an ease, which is what the old power3/power4 pairing was hand-matching by eye.
-  const CARD_OUT = 0.78;
-  const CARD_IN = 0.55;
-  const CARD_EASE = 'power2.inOut';
+  // Halfway between the 0.78s power2 this shipped with, a little abrupt, and a 1.15s sine, which
+  // dragged. The blur behind it is the shorter of the two runs (--focus-fade in sections.css).
+  const CARD_OUT = 0.95;
+  const CARD_IN = 0.68;
+  const CARD_EASE = 'power1.inOut';
   // The flex. A waypoint quaternion - out past square, then back - was two slerps sharing one
   // tween, and at the seam the card turned back at a different rate than it had arrived: that
   // kink read as two moves rather than as a bend. This overshoots along the arc the card is
   // already turning through, so it keeps going the way it was going, passes the reading plane
   // and eases back - one continuous motion, and the only flex available at all, since a folder
   // is DOM on a CSS3D plane with no geometry to curve. The number is the overshoot's strength:
-  // 1.7 is GSAP's own default (~10% past the target), 3 lands near 8 degrees on this arc.
-  // 'power2.inOut' here turns the flex off without touching anything else.
-  const BEND_EASE = 'back.out(3)';
-  const SHEET_LEAD = 0.45; // the share of the card's run the sheet takes to unroll (see lift())
+  // 1.8 is softer than the 3 this shipped with, whose kick was visible where the hold ended, and
+  // a back.inOut was tried and hesitated, turning away first. A CARD_EASE here turns the flex off
+  // without touching anything else.
+  const BEND_EASE = 'back.out(1.8)';
+  const SHEET_LEAD = 0.47; // the share of the card's run the sheet takes to unroll (see lift())
+  // How far below its spot the card's path aims on arrival, in world units: it comes up into
+  // place rather than dropping onto it from the top of the arc, which makes the run an S.
+  const ARRIVE_BELOW = 0.8;
   /** The sheet's climb out of the rim, driven here rather than by its own CSS transition.
    *  CSS3DRenderer re-inserts a folder's element when the object changes parent - which is
    *  what scene.attach() does on a pick - and a transition never starts on an element the
@@ -1334,10 +1307,13 @@ export function initSkillDrawer(host, strip) {
    *  Not named `travel`: that is already the drag's own pointer distance, a few hundred lines
    *  down in this same closure, and the collision is a SyntaxError that takes the whole module
    *  out - which main.js's .catch then hides by falling back to the flat wall, silently. */
-  function arcTo(f, target, duration, ease, over, onDone) {
+  function arcTo(f, target, duration, ease, over, onDone, arrive) {
     const p = f.posP ?? (f.posP = {});
     gsap.killTweensOf(p);
-    const path = new THREE.QuadraticBezierCurve3(f.obj.position.clone(), over, target.clone());
+    const from = f.obj.position.clone();
+    const path = arrive
+      ? new THREE.CubicBezierCurve3(from, over, arrive, target.clone())
+      : new THREE.QuadraticBezierCurve3(from, over, target.clone());
     p.t = 0;
     gsap.to(p, {
       t: 1,
@@ -1361,7 +1337,7 @@ export function initSkillDrawer(host, strip) {
     // at 43% of the run: the card flew as a slice cut off by a hard edge that only closed on
     // landing - a mask catching up with the card. Front-loaded, it unrolls during the climb,
     // where being drawn out of a slot is what it looks like anyway, and flies whole.
-    if (duration) riseSheet(f, duration * SHEET_LEAD, 'power2.out');
+    if (duration) riseSheet(f, duration * SHEET_LEAD, 'power1.out');
     // up out of its slot first, then forward to the spot - see CLEAR
     const over = f.obj.position.clone().setY(f.obj.position.y + CLEAR);
     // The close control only exists once there is a card under it, and only on a card that
@@ -1371,7 +1347,8 @@ export function initSkillDrawer(host, strip) {
     // so it jumped straight to opaque. This class lands at the end of the run, hundreds of
     // frames after that insert, where a transition behaves like any other. Off the travel, not
     // off the sheet, since the sheet now finishes first (SHEET_LEAD).
-    arcTo(f, pos, duration, ease, over, () => f.el.classList.add('is-landed'));
+    const arrive = pos.clone().setY(pos.y - ARRIVE_BELOW);
+    arcTo(f, pos, duration, ease, over, () => f.el.classList.add('is-landed'), arrive);
     gsap.to(f.obj.scale, { x: scale, y: scale, z: scale, duration, ease, onUpdate: render });
     // The turn waits out the first fifth of the run, and this is what keeps the card from
     // cutting through the ones filed in front of it. In the file every folder is a plane
@@ -1403,6 +1380,7 @@ export function initSkillDrawer(host, strip) {
     else unpeek();
     setOpenReady(false);
     active = f;
+    const filed = !f.el.classList.contains('is-open'); // false if caught on its way back
     f.el.classList.add('is-open');
     f.el.setAttribute('aria-expanded', 'true');
     f.el.querySelector('.folder__close').tabIndex = 0;
@@ -1418,10 +1396,9 @@ export function initSkillDrawer(host, strip) {
     gsap.killTweensOf([f.obj.position, f.obj.scale]);
     if (f.posP) gsap.killTweensOf(f.posP); // the curved run writes through this, not position
     scene.attach(f.obj);
-    // the furniture's pan is tied to the card's own run, or the scene keeps sliding under a
-    // card that has already landed
-    slideFrame(pickShift(), () => lift(f, CARD_OUT), CARD_OUT);
-    pump(1400);
+    if (filed) f.obj.scale.divideScalar(CARD_RES); // the box has just doubled: same size on screen
+    lift(f, CARD_OUT);
+    pump((CARD_OUT + 0.6) * 1000);
   }
 
   function collapse(f) {
@@ -1446,14 +1423,21 @@ export function initSkillDrawer(host, strip) {
     // too small to see.
     const slot = new THREE.Vector3(0, RIM + CH / 2, f.z0);
     const over = slot.clone().setY(slot.y + CLEAR);
-    arcTo(f, slot, CARD_IN, CARD_EASE, over, () => f.el.classList.remove('is-open'));
+    arcTo(f, slot, CARD_IN, CARD_EASE, over, () => {
+      f.el.classList.remove('is-open');
+      // back to its authored size, and with it the scale; the tween below would otherwise land
+      // after this, since it was started later and ticks later
+      gsap.killTweensOf(f.obj.scale);
+      f.obj.scale.setScalar(PX);
+      render();
+    });
     // Square again before it sinks back between its neighbours, which is the way out's rule
     // read backwards: a tilted card entering a file of parallel planes is what slices them.
     rotateTo(f, RESTING_QUAT, CARD_IN * 0.72, CARD_EASE);
     gsap.to(f.obj.scale, {
-      x: PX,
-      y: PX,
-      z: PX,
+      x: PX / CARD_RES,
+      y: PX / CARD_RES,
+      z: PX / CARD_RES,
       duration: CARD_IN,
       ease: CARD_EASE,
       onUpdate: render,
@@ -1465,7 +1449,6 @@ export function initSkillDrawer(host, strip) {
     collapse(active);
     active = null;
     host.classList.remove('has-open');
-    slideFrame(0, undefined, CARD_IN);
     pump(1000);
   }
 
@@ -1957,7 +1940,6 @@ export function initSkillDrawer(host, strip) {
     window.removeEventListener('keydown', onKey);
     window.removeEventListener('click', onOutside);
     gsap.killTweensOf(drawer.position);
-    gsap.killTweensOf(view);
     gsap.killTweensOf(items);
     gsap.killTweensOf(labels);
     items.forEach((f) => {
