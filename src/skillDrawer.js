@@ -601,8 +601,6 @@ export function initSkillDrawer(host, strip) {
   folders.forEach((f, fi) => (f.fi = fi));
 
   let active = null;
-  let railZ = 0;
-  const maxZ = Math.max(0, (railSource.length - 1) * GAP - D * 0.34);
 
   // ---- category labels ---------------------------------------------------------------------
   // Outside the drawer, not filed in it. A divider tab standing in the index covered the logo
@@ -828,15 +826,13 @@ export function initSkillDrawer(host, strip) {
       let op = '';
       let pe = '';
       if (f !== active) {
-        // pushed out through the drawer's own face by a drag
-        const past = rail.position.z + f.z0 > D / 2 + 0.15;
         // still swallowed by the cabinet
         const emerged = THREE.MathUtils.clamp(
-          (drawer.position.z + rail.position.z + f.z0 - FADE_AT) / FADE_OVER,
+          (drawer.position.z + f.z0 - FADE_AT) / FADE_OVER,
           0,
           1,
         );
-        const shown = past ? 0 : emerged * f.reveal;
+        const shown = emerged * f.reveal;
         op = shown.toFixed(3);
         pe = shown < 0.6 ? 'none' : '';
       }
@@ -863,8 +859,8 @@ export function initSkillDrawer(host, strip) {
     // cabinet face, and not pushed out through the drawer's own front by a drag. Clipped by
     // how far along the rim-offset segment (not the world-Z span) the limits fall, since p0
     // and p1 no longer share a world X/Y the way the old Z-only rule did.
-    const backLim = CAB_MOUTH - drawer.position.z - rail.position.z;
-    const frontLim = D / 2 - rail.position.z;
+    const backLim = CAB_MOUTH - drawer.position.z;
+    const frontLim = D / 2;
     const span = labelTmp;
     for (const l of labels) {
       const front = Math.min(l.front, frontLim);
@@ -1220,15 +1216,6 @@ export function initSkillDrawer(host, strip) {
     render();
   }
 
-  // ---- browsing the index ------------------------------------------------------------
-  // Only ever called mid-drag, so it always snaps — there is no tweened path to a target
-  // left in the index browsing gesture (the drawer's own open/shut run is tweened separately).
-  function slideTo(z) {
-    railZ = THREE.MathUtils.clamp(z, 0, maxZ);
-    rail.position.z = railZ;
-    render();
-  }
-
   // ---- picking a folder ----------------------------------------------------------------
   // The card's own two runs. Coming out is the longer and the more sinuous of the two: it is
   // the moment the whole section exists for, and at 0.48s on a power3.out the card snapped
@@ -1399,9 +1386,9 @@ export function initSkillDrawer(host, strip) {
     // replaying that delay. Cleared only when the drawer goes fully shut (render(), below),
     // so the next real opening gets the slow fade-in again.
     host.classList.add('has-opened');
-    // Out of the file and into the scene itself: left on the rail, a drag through the index
-    // carried the open card along with it. Moving the rail to bring the card forward instead
-    // pushed everything in front of it out through the drawer's face.
+    // Out of the file and into the scene itself: left on the rail, it would ride with the drawer
+    // when a hand shuts it. Moving the rail to bring the card forward instead pushed everything
+    // in front of it out through the drawer's face.
     gsap.killTweensOf([f.obj.position, f.obj.scale]);
     if (f.posP) gsap.killTweensOf(f.posP); // the curved run writes through this, not position
     scene.attach(f.obj);
@@ -1673,7 +1660,7 @@ export function initSkillDrawer(host, strip) {
     let bestT = t;
     for (const f of folders) {
       if (f === active || f.pe === 'none') continue; // still in the cabinet, or out of the file
-      const p = wallPoint(drawer.position.z + rail.position.z + f.z0, scrubTmp);
+      const p = wallPoint(drawer.position.z + f.z0, scrubTmp);
       const ft = alongScrub(p.x, p.y);
       const d = Math.abs(ft - t);
       if (d < bestD) ((best = f), (bestD = d), (bestT = ft));
@@ -1722,8 +1709,8 @@ export function initSkillDrawer(host, strip) {
   }
 
   // ---- dragging ----------------------------------------------------------------------
-  // Two drags share the canvas. Grab the drawer's face or its handle and the whole drawer
-  // runs in and out; grab anywhere else and you walk your fingers through the index.
+  // Grab the drawer's face or its handle and the whole drawer runs in and out. Nothing else
+  // drags: the folders stay filed where they are, and they all fit the drawer as it is.
   // Shut means shut: the front panel's back face lands on the cabinet's own face, so the
   // drawer reads as closed rather than as parked. The panel spans D/2 to D/2 + 0.22 in the
   // drawer's own space and the face sits at -D/2 - 0.05, which is the whole of this sum.
@@ -1802,11 +1789,10 @@ export function initSkillDrawer(host, strip) {
   }
 
   const DRAG_MIN = 5; // px of travel that tells a drag of the face from a click on it
-  let dragMode = null; // 'drawer' | 'index'
+  let dragging = false; // a hand on the drawer's face or handle
   let dragHid = false; // whether this drag has already taken the category names down
   let startX = 0;
   let startY = 0;
-  let startZ = 0;
   let startDrawerZ = 0;
   let travel = 0; // how far the pointer went, so a click can be told from a drag
   host.addEventListener('pointerdown', (e) => {
@@ -1817,10 +1803,11 @@ export function initSkillDrawer(host, strip) {
     const tugged = rayHits(e, locked)[0]?.object.parent;
     if (tugged) {
       rattle(tugged);
-      return; // not a drag of anything: no capture, the pointerup finds dragMode null
+      return; // not a drag of anything: no capture, the pointerup finds dragging false
     }
     if (grabsDrawer(e)) {
-      dragMode = 'drawer';
+      dragging = true;
+      host.classList.add('is-grabbing');
       gsap.killTweensOf(drawer.position); // a hand on the handle beats the opening tween
       // and the names' fade with it, callback included. Their `reveal` is left where the
       // fade got to: snapping it back to 1 here is what made a click on a shut drawer show
@@ -1834,10 +1821,7 @@ export function initSkillDrawer(host, strip) {
       startDrawerZ = drawer.position.z;
       close(); // an open card would ride out over the cabinet while the drawer shuts
       unpeek();
-    } else {
-      dragMode = 'index';
-      startZ = railZ;
-    }
+    } else return; // the index does not move: only the drawer itself can be dragged
     try {
       host.setPointerCapture(e.pointerId);
     } catch {
@@ -1846,9 +1830,12 @@ export function initSkillDrawer(host, strip) {
     }
   });
   host.addEventListener('pointermove', (e) => {
-    if (!dragMode) return;
-    if (dragMode === 'index') {
-      slideTo(startZ + ((e.clientX - startX) / host.clientWidth) * maxZ * 1.6);
+    if (!dragging) {
+      // The grab hand only where a grab does something. Raycast because the face and the handle
+      // are WebGL, with no element to hang a CSS cursor on; the folders have their own (CSS).
+      if (e.pointerType === 'mouse') {
+        host.classList.toggle('can-grab', !e.target.closest('.folder') && grabsDrawer(e));
+      }
       return;
     }
     const dx = e.clientX - startX;
@@ -1869,7 +1856,7 @@ export function initSkillDrawer(host, strip) {
     render();
   });
   const release = () => {
-    if (dragMode === 'drawer') {
+    if (dragging) {
       // a grab that never went anywhere was a click on the face, not a drag of it
       if (travel < DRAG_MIN) runDrawer();
       // a drag ends wherever the hand left it, so the names come back only if that is all
@@ -1880,7 +1867,8 @@ export function initSkillDrawer(host, strip) {
         pump();
       }
     }
-    dragMode = null;
+    dragging = false;
+    host.classList.remove('is-grabbing');
   };
   host.addEventListener('pointerup', release);
   host.addEventListener('pointercancel', release);

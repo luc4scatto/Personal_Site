@@ -1101,7 +1101,6 @@
      with .skills' own padding-bottom *and* #projects' padding-top read as one big gap. */
   margin-bottom: -5rem;
   touch-action: pan-y;
-  cursor: grab;
 }
 
 /* the skill list as plain text under the drawer: what the folders say, readable without
@@ -1171,8 +1170,19 @@
   margin-bottom: calc(-3rem - var(--shut-gap, 0px));
 }
 
-#skill-drawer.is-live:active {
+/* over the drawer's face and handle only: skillDrawer.js raycasts for these two classes */
+#skill-drawer.is-live .drawer__scene.can-grab {
+  cursor: grab;
+}
+
+#skill-drawer.is-live .drawer__scene.is-grabbing {
   cursor: grabbing;
+}
+
+/* no grab hand anywhere while a card is open: it is there to be read */
+#skill-drawer.is-live .drawer__scene.has-open.can-grab,
+#skill-drawer.is-live .drawer__scene.has-open .folder {
+  cursor: default;
 }
 
 #skill-drawer.is-live .drawer__scene {
@@ -2185,7 +2195,7 @@ html.is-animating .footer {
   width: 250px;
   height: 320px;
   overflow: hidden;
-  cursor: pointer;
+  cursor: grab;
   list-style: none;
   /* set here rather than alongside the open card's border below, so taking that border does
      not resize the box mid-animation */
