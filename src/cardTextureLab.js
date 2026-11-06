@@ -42,21 +42,15 @@ const HOLO_CSS = [
   'trainer-gallery-v-max',
   'trainer-gallery-secret-rare',
 ];
+// Luca's pick (2026-11-06): seven effects, one per skill category, in the page's category order
+// (3D Software, Real-time, Code, AI, Motion & Video, 2D, Audio)
 const HOLO_RARITIES = [
-  ['rare ultra|pokémon|', 'V full art (Celebi)'],
-  ['rare rainbow alt|pokémon|', 'Rainbow alt art'],
   ['rare holo v|pokémon|', 'Holo V'],
-  ['rare holo vmax|pokémon|', 'Holo VMAX'],
-  ['rare holo vstar|pokémon|', 'Holo VSTAR'],
+  ['rare ultra|pokémon|', 'V full art (Celebi)'],
   ['rare rainbow|pokémon|', 'Rainbow'],
-  ['rare secret|pokémon|', 'Secret (gold)'],
   ['rare shiny v|pokémon|', 'Shiny V'],
-  ['rare shiny vmax|pokémon|', 'Shiny VMAX'],
-  ['rare shiny|pokémon|', 'Shiny'],
   ['rare holo|pokémon|', 'Holo'],
   ['rare holo cosmos|pokémon|', 'Cosmos'],
-  ['radiant rare|pokémon|', 'Radiant'],
-  ['amazing rare|pokémon|', 'Amazing'],
   ['rare ultra|trainer|supporter', 'Trainer full art'],
 ];
 let holoLoaded = false;
@@ -73,24 +67,21 @@ function loadHolo() {
 const holoPick = document.createElement('select');
 holoPick.className = 'tex-lab__holo';
 holoPick.setAttribute('aria-label', 'Rarità poke-holo');
-holoPick.append(new Option('Casuale per card', 'random'));
+holoPick.append(new Option('Per categoria', 'category'));
 for (const [value, label] of HOLO_RARITIES) holoPick.append(new Option(label, value));
-// random: one rarity per skill, drawn the first time its card opens and kept for the visit
-const drawn = new Map();
+// category: the skill's category picks the effect, so every card in a group shares one
 function rarityFor(card) {
-  if (holoPick.value !== 'random') return holoPick.value;
-  const key = card.closest('.folder')?.dataset.skill ?? '';
-  if (!drawn.has(key)) {
-    drawn.set(key, HOLO_RARITIES[Math.floor(Math.random() * HOLO_RARITIES.length)][0]);
-  }
-  return drawn.get(key);
+  if (holoPick.value !== 'category') return holoPick.value;
+  const cat = skillMeta.get(card.closest('.folder')?.dataset.skill)?.cat;
+  const cats = [...new Set([...skillMeta.values()].map((m) => m.cat))];
+  return HOLO_RARITIES[Math.max(0, cats.indexOf(cat)) % HOLO_RARITIES.length][0];
 }
 function applyRarity(card) {
   const [rarity, supertype, subtypes] = rarityFor(card).split('|');
   card.dataset.rarity = rarity;
   card.dataset.supertype = supertype;
   card.dataset.subtypes = subtypes;
-  // lab only: name the drawn effect, so a disliked one can be named and dropped from the list
+  // lab only: name the effect on the open card
   holoName.textContent = HOLO_RARITIES.find(([v]) => v === rarityFor(card))?.[1] ?? '';
 }
 const holoName = document.createElement('span');
@@ -225,7 +216,15 @@ fetch('/')
       ]),
     );
     items.forEach(([key, cat], i) => skillMeta.set(key, { cat, no: i + 1, total: items.length }));
+    layoutAll();
   });
+// every folder gets the layout up front, so a card looks the same in the drawer and out of it.
+// ponytail: polls until the drawer has built its folders, an event from skillDrawer.js if it ships
+function layoutAll() {
+  const folders = document.querySelectorAll('.folder[data-skill]');
+  if (!folders.length) return setTimeout(layoutAll, 300);
+  folders.forEach(ensureLayout);
+}
 const layoutPick = document.createElement('select');
 layoutPick.className = 'tex-lab__holo';
 layoutPick.setAttribute('aria-label', 'Layout card');
@@ -279,7 +278,7 @@ function ensureLayout(folder) {
     el('lay-cat', `<span>${meta.cat}</span>`),
     art,
     el('lay-strip', `${selfTaught ? 'Self-taught · ' : ''}No. ${no}`),
-    el('lay-foot', `<span>Illus. Luca Scattolin</span><span>${no}/${meta.total} &#9733;</span>`),
+    el('lay-foot', `<span>${no}/${meta.total} &#9733;</span>`),
   );
 }
 

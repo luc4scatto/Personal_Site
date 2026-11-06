@@ -78,7 +78,7 @@
     );
 
   background-size: 400% 800%;
-  background-position: calc( 50% + (50% - (var(--background-x))) * 3 ) calc( 50% + (50% - (var(--background-y))) * 3 );
+  background-position: clamp(0%, 50% + (50% - var(--background-x)) * 3, 100%) clamp(0%, 50% + (50% - var(--background-y)) * 3, 100%);
   filter: brightness(calc( 0.75 - ( var(--pointer-from-center) * 0.5 ))) contrast(1) saturate(1);
   mix-blend-mode: saturation;
 

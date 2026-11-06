@@ -287,6 +287,8 @@ html[data-tex='p'] .folder.is-landed .folder__sheet .card > * {
 html[data-tex='p'] .folder.is-landed .folder__sheet .card > *::before,
 html[data-tex='p'] .folder.is-landed .folder__sheet .card > *::after {
   grid-area: 1 / 1;
+  /* the repo's 4.55% / 3.5% card corners: on a wide, short window they showed as rounded ends */
+  border-radius: 0;
 }
 
 html.holo-screen[data-tex='p'] .folder.is-landed .folder__sheet .card > .card__shine {
@@ -349,27 +351,27 @@ html.holo-screen[data-tex='p'] .folder.is-landed .folder__sheet .card > .card__s
   display: none;
 }
 
-html[data-layout] .folder.is-landed .folder__sheet {
+html[data-layout] .folder .folder__sheet {
   display: flex;
   flex-direction: column;
 }
 
-html[data-layout] .folder.is-landed :is(.lay-cat, .lay-art, .lay-strip, .lay-foot) {
+html[data-layout] .folder :is(.lay-cat, .lay-art, .lay-strip, .lay-foot) {
   display: flex;
 }
 
 /* shared: the footer, like the illustrator line and set number */
-html[data-layout] .folder.is-landed .lay-foot {
+html[data-layout] .folder .lay-foot {
   order: 9;
   margin-top: auto;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 0.3rem 0.7rem 0.4rem;
   font-size: 0.42rem;
   letter-spacing: 0.06em;
   color: var(--text-dim);
 }
 
-html[data-layout] .folder.is-landed .lay-art {
+html[data-layout] .folder .lay-art {
   position: relative;
   align-items: center;
   justify-content: center;
@@ -379,12 +381,14 @@ html[data-layout] .folder.is-landed .lay-art {
 }
 
 /* ===== A: full card ===== */
-html[data-layout='a'] .folder.is-landed .lay-cat {
-  order: 0;
-  padding: 0.55rem 0.7rem 0;
+/* name first, category under it: in the drawer only the top strip of a filed card shows, and it
+   has to be the name */
+html[data-layout='a'] .folder .lay-cat {
+  order: 1;
+  padding: 0 0.7rem 0.35rem;
 }
 
-html[data-layout='a'] .folder.is-landed .lay-cat span {
+html[data-layout='a'] .folder .lay-cat span {
   padding: 0.08rem 0.5rem 0.08rem 0.35rem;
   font-size: 0.4rem;
   font-weight: 700;
@@ -395,20 +399,21 @@ html[data-layout='a'] .folder.is-landed .lay-cat span {
   clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
 }
 
-html[data-layout='a'] .folder.is-landed .folder__tab {
-  order: 1;
-  padding: 0.15rem 0.7rem 0.35rem;
+html[data-layout='a'] .folder .folder__tab {
+  order: 0;
+  padding: 0.5rem 0.7rem 0.2rem;
   background: none;
 }
 
-html[data-layout='a'] .folder.is-landed .folder__tab .skill-label {
+html[data-layout='a'] .folder .folder__tab .skill-label {
   order: 1;
-  font-size: 1.05rem;
+  /* 0.95rem: the longest name (Adobe Substance 3D) clears the close X on the top row */
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
 /* the type symbol before the name: on the right it sat under the close X */
-html[data-layout='a'] .folder.is-landed .folder__tab .skill-icon {
+html[data-layout='a'] .folder .folder__tab .skill-icon {
   order: 0;
   width: 14px;
   height: 14px;
@@ -418,7 +423,7 @@ html[data-layout='a'] .folder.is-landed .folder__tab .skill-icon {
   box-sizing: content-box;
 }
 
-html[data-layout='a'] .folder.is-landed .lay-art {
+html[data-layout='a'] .folder .lay-art {
   order: 2;
   flex-shrink: 0;
   /* one size for every card (2026-11-06): 21% and the type sizes below are the largest that fit
@@ -434,16 +439,16 @@ html[data-layout='a'] .folder.is-landed .lay-art {
   );
 }
 
-html[data-layout='a'] .folder.is-landed .lay-art__logo {
+html[data-layout='a'] .folder .lay-art__logo {
   height: 62%;
 }
 
-html[data-layout='a'] .folder.is-landed .lay-art__icon {
+html[data-layout='a'] .folder .lay-art__icon {
   width: auto;
   height: 100%;
 }
 
-html[data-layout='a'] .folder.is-landed .lay-strip {
+html[data-layout='a'] .folder .lay-strip {
   order: 3;
   justify-content: center;
   margin: 0.25rem 1.1rem 0;
@@ -455,25 +460,25 @@ html[data-layout='a'] .folder.is-landed .lay-strip {
   background: linear-gradient(90deg, transparent, rgb(167 173 179 / 0.25), transparent);
 }
 
-html[data-layout='a'] .folder.is-landed .folder__body {
+html[data-layout='a'] .folder .folder__body {
   order: 4;
   display: flex;
   flex-direction: column;
   padding: 0.25rem 0.7rem 0;
 }
 
-html[data-layout='a'] .folder.is-landed :is(.folder__badge, .folder__label) {
+html[data-layout='a'] .folder :is(.folder__badge, .folder__label) {
   display: none;
 }
 
 /* sentences (Python, Second Brain) and nested items (Substance) in one column: same type size,
    only the column count changes */
-html[data-layout='a'] .folder.is-landed .lay-long .folder__bullets {
+html[data-layout='a'] .folder .lay-long .folder__bullets {
   grid-template-columns: 1fr;
 }
 
 /* the bullets as attacks: an energy pip pair, the name, a hairline under each */
-html[data-layout='a'] .folder.is-landed .folder__bullets {
+html[data-layout='a'] .folder .folder__bullets {
   order: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -483,13 +488,13 @@ html[data-layout='a'] .folder.is-landed .folder__bullets {
   font-weight: 600;
 }
 
-html[data-layout='a'] .folder.is-landed .folder__bullets > li {
+html[data-layout='a'] .folder .folder__bullets > li {
   margin: 0;
   padding: 0.08rem 0 0.08rem 1.05rem;
   border-bottom: 1px solid rgb(255 255 255 / 0.08);
 }
 
-html[data-layout='a'] .folder.is-landed .folder__bullets > li::before {
+html[data-layout='a'] .folder .folder__bullets > li::before {
   top: 50%;
   width: 5px;
   height: 5px;
@@ -498,12 +503,12 @@ html[data-layout='a'] .folder.is-landed .folder__bullets > li::before {
 }
 
 /* with effect text under it, the pip sits on the name's line, not the middle of the block */
-html[data-layout='a'] .folder.is-landed .folder__bullets > li:has(ul)::before {
+html[data-layout='a'] .folder .folder__bullets > li:has(ul)::before {
   top: calc(0.08rem + 0.7em);
 }
 
 /* nested items (Substance) as the attack's effect text: one small line, dot-separated */
-html[data-layout='a'] .folder.is-landed .folder__bullets ul {
+html[data-layout='a'] .folder .folder__bullets ul {
   display: block;
   margin: 0.08rem 0 0;
   padding: 0;
@@ -513,17 +518,17 @@ html[data-layout='a'] .folder.is-landed .folder__bullets ul {
   opacity: 0.75;
 }
 
-html[data-layout='a'] .folder.is-landed .folder__bullets ul > li {
+html[data-layout='a'] .folder .folder__bullets ul > li {
   display: inline;
   margin: 0;
   padding: 0;
 }
 
-html[data-layout='a'] .folder.is-landed .folder__bullets ul > li::before {
+html[data-layout='a'] .folder .folder__bullets ul > li::before {
   content: none;
 }
 
-html[data-layout='a'] .folder.is-landed .folder__bullets ul > li + li::before {
+html[data-layout='a'] .folder .folder__bullets ul > li + li::before {
   content: ' · ';
   position: static;
   display: inline;
@@ -535,7 +540,7 @@ html[data-layout='a'] .folder.is-landed .folder__bullets ul > li + li::before {
 }
 
 /* the description as the flavour text */
-html[data-layout='a'] .folder.is-landed .folder__text {
+html[data-layout='a'] .folder .folder__text {
   order: 1;
   margin-top: 0.35rem;
   padding: 0.3rem 0.45rem;
@@ -554,78 +559,86 @@ html[data-layout='a'] .folder.is-landed {
   border-radius: 1.1rem;
 }
 
+/* the same frame on a filed card, at its 250x320 scale. On the sheet because a filed .folder is
+   the full card box with only the tab showing: a border there would frame empty space. Firefox
+   will draw this one too thick (the known tab bug in CLAUDE.md's TODO). */
+html[data-layout='a'] .folder:not(.is-landed) .folder__sheet {
+  border: 6px solid var(--brand, var(--accent));
+  border-radius: 0.55rem;
+}
+
 /* ===== B: full art ===== */
-html[data-layout='b'] .folder.is-landed .lay-cat,
-html[data-layout='b'] .folder.is-landed .lay-strip {
+html[data-layout='b'] .folder .lay-cat,
+html[data-layout='b'] .folder .lay-strip {
   display: none;
 }
 
-html[data-layout='b'] .folder.is-landed .folder__tab {
+html[data-layout='b'] .folder .folder__tab {
   order: 1;
   padding: 0.7rem 0.8rem 0;
   background: none;
 }
 
-html[data-layout='b'] .folder.is-landed .folder__tab .skill-icon {
+html[data-layout='b'] .folder .folder__tab .skill-icon {
   display: none;
 }
 
-html[data-layout='b'] .folder.is-landed .folder__tab .skill-label {
+html[data-layout='b'] .folder .folder__tab .skill-label {
   font-size: 1.15rem;
   font-weight: 700;
 }
 
-html[data-layout='b'] .folder.is-landed .lay-art {
+html[data-layout='b'] .folder .lay-art {
   order: 2;
   flex: 1;
 }
 
-html[data-layout='b'] .folder.is-landed .lay-art__logo {
+html[data-layout='b'] .folder .lay-art__logo {
   width: 58%;
 }
 
-html[data-layout='b'] .folder.is-landed .folder__body {
+html[data-layout='b'] .folder .folder__body {
   order: 3;
   padding: 0.5rem 0.8rem 0;
   background: linear-gradient(180deg, transparent, rgb(0 0 0 / 0.55));
 }
 
-html[data-layout='b'] .folder.is-landed :is(.folder__badge, .folder__label, .folder__bullets) {
+html[data-layout='b'] .folder :is(.folder__badge, .folder__label, .folder__bullets) {
   display: none;
 }
 
-html[data-layout='b'] .folder.is-landed .folder__text {
+html[data-layout='b'] .folder .folder__text {
   font-size: 0.55rem;
 }
 
 /* ===== C: minimal ===== */
-html[data-layout='c'] .folder.is-landed :is(.lay-cat, .lay-strip, .folder__body) {
+html[data-layout='c'] .folder :is(.lay-cat, .lay-strip, .folder__body) {
   display: none;
 }
 
-html[data-layout='c'] .folder.is-landed .lay-art {
+html[data-layout='c'] .folder .lay-art {
   order: 1;
   flex: 1;
   flex-direction: column;
   gap: 0.9rem;
 }
 
-html[data-layout='c'] .folder.is-landed .lay-art__logo {
+html[data-layout='c'] .folder .lay-art__logo {
   width: 46%;
 }
 
-html[data-layout='c'] .folder.is-landed .folder__tab {
+html[data-layout='c'] .folder .folder__tab {
   order: 2;
   justify-content: center;
   padding: 0 0.8rem 1.4rem;
   background: none;
 }
 
-html[data-layout='c'] .folder.is-landed .folder__tab .skill-icon {
+html[data-layout='c'] .folder .folder__tab .skill-icon {
   display: none;
 }
 
-html[data-layout='c'] .folder.is-landed .folder__tab .skill-label {
+html[data-layout='c'] .folder .folder__tab .skill-label {
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -633,27 +646,27 @@ html[data-layout='c'] .folder.is-landed .folder__tab .skill-label {
 
 /* ---- embossed, glossy logo (all layouts). --lx/--ly (-1..1) is where the light comes from,
    written on .lay-art by the lab from the pointer. ---- */
-html[data-layout] .folder.is-landed .lay-art__logo {
+html[data-layout] .folder .lay-art__logo {
   position: relative;
   z-index: 1; /* over the foil, which sits at -1 in the window */
   display: flex;
 }
 
-html[data-layout='b'] .folder.is-landed .lay-art__icon,
-html[data-layout='c'] .folder.is-landed .lay-art__icon {
+html[data-layout='b'] .folder .lay-art__icon,
+html[data-layout='c'] .folder .lay-art__icon {
   width: 100%;
   height: auto;
 }
 
 /* raised edge, fixed like a real stamp: light always from above, the rim never moves.
    (A rim that followed the pointer swapped sides and made the logo look like it wobbled.) */
-html[data-layout] .folder.is-landed .lay-art__icon {
+html[data-layout] .folder .lay-art__icon {
   filter: drop-shadow(0 -0.6px 0 rgb(255 255 255 / 0.5)) drop-shadow(0 1px 0 rgb(0 0 0 / 0.7))
     drop-shadow(0 4px 6px rgb(0 0 0 / 0.5));
 }
 
 /* only the sheen moves: a soft diagonal band cut to the logo, sliding a little with the light */
-html[data-layout] .folder.is-landed .lay-art__gloss {
+html[data-layout] .folder .lay-art__gloss {
   position: absolute;
   inset: 0;
   pointer-events: none;

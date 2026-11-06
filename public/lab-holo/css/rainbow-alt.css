@@ -48,7 +48,7 @@
     );
 
   background-size: 200% 400%, var(--glittersize) var(--glittersize), 400% 400%;
-  background-position: 0% calc(var(--background-y) * 1), center center, calc( var(--background-x) * 1.5) calc( var(--background-y) * 1.5 );
+  background-position: 0% calc(var(--background-y) * 1), center center, clamp(0%, var(--background-x) * 1.5, 100%) clamp(0%, var(--background-y) * 1.5, 100%);
   background-blend-mode: luminosity, overlay;
   filter: brightness(calc((var(--pointer-from-center)*0.3) + 0.3)) contrast(3) saturate(1.8);
 
@@ -71,7 +71,7 @@
     );
   background-blend-mode: overlay;
   background-size: var(--glittersize) var(--glittersize), 400% 400%;
-  background-position: center center, calc( var(--background-x) * -1.5) calc( var(--background-y) * -1.5 );
+  background-position: center center, clamp(0%, 100% - var(--background-x) * 1.5, 100%) clamp(0%, 100% - var(--background-y) * 1.5, 100%);
   filter: brightness(calc((var(--pointer-from-center)*0.5) + 0.6)) contrast(3) saturate(1);
   mix-blend-mode: color-dodge;
 

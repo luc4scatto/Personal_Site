@@ -83,7 +83,7 @@
   content: "";
 
   background-size: var(--imgsize), 200% 400%, 195% 100%, 200% 100%;
-  background-position: center center, 0% var(--background-y), calc( var(--background-x) * -1) calc( var(--background-y) * -1), var(--background-x) var(--background-y);
+  background-position: center center, 0% var(--background-y), calc(100% - var(--background-x)) calc(100% - var(--background-y)), var(--background-x) var(--background-y);
 
   filter: brightness(calc((var(--pointer-from-center) * .75) + .5)) contrast(1.5) saturate(1.5);
   mix-blend-mode: exclusion;

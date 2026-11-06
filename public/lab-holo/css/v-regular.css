@@ -73,7 +73,7 @@
 
   content: "";
 
-  background-position: center, 0% var(--background-y), calc( var(--background-x) * -1) calc( var(--background-y) * -1), var(--background-x) var(--background-y);
+  background-position: center, 0% var(--background-y), calc(100% - var(--background-x)) calc(100% - var(--background-y)), var(--background-x) var(--background-y);
   background-size: var(--imgsize) 100%, 200% 400%, 195% 100%, 200% 100%;
 
   filter: brightness(1) contrast(2.5) saturate(1.75);
