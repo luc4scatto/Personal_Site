@@ -100,18 +100,22 @@ html.holo-cards .folder .lay-art {
    has to be the name */
 html.holo-cards .folder .lay-cat {
   order: 1;
+  /* on the wrapper, not the span: the span's clip-path (the slanted end) would cut a box-shadow */
+  filter: drop-shadow(0 1.5px 1.5px rgb(0 0 0 / 0.6)) drop-shadow(0 3px 5px rgb(0 0 0 / 0.35));
   padding: 0 0.7rem 0.35rem;
 }
 
 html.holo-cards .folder .lay-cat span {
-  padding: 0.08rem 0.5rem 0.08rem 0.35rem;
+  /* right padding wider than the slant, so the last letter never sits under the cut */
+  padding: 0.08rem 0.8rem 0.08rem 0.35rem;
   font-size: 0.4rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #111;
   background: linear-gradient(90deg, #e9ecef, #9aa1a8);
-  clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+  /* a fixed slant, not a percentage: 12% of a long label (Real-time & Interactive) cut its last letter */
+  clip-path: polygon(0 0, 100% 0, calc(100% - 0.5rem) 100%, 0 100%);
 }
 
 html.holo-cards .folder .folder__tab {
@@ -133,7 +137,9 @@ html.holo-cards .folder .folder__tab .skill-icon {
   width: 14px;
   height: 14px;
   padding: 3px;
-  border-radius: 50%;
+  /* a rounded square, not a circle: the circle cut the corners off every square logo (Adobe,
+     Houdini, Maya, Traktor...); at this radius the 3px padding keeps them clear */
+  border-radius: 5px;
   background: color-mix(in srgb, var(--brand, var(--accent)) 30%, #111);
   box-sizing: content-box;
 }
@@ -146,7 +152,11 @@ html.holo-cards .folder .lay-art {
   height: 21%;
   margin: 0 0.6rem;
   border: 2px solid #a7adb3;
-  box-shadow: inset 0 0 0 1px #2b2e31;
+  /* inset: the dark line inside the silver rim; the rest lifts the window off the card stock */
+  box-shadow:
+    inset 0 0 0 1px #2b2e31,
+    0 2px 3px rgb(0 0 0 / 0.55),
+    0 5px 10px -2px rgb(0 0 0 / 0.45);
   background: radial-gradient(
     circle at 50% 45%,
     color-mix(in srgb, var(--brand, var(--accent)) 45%, transparent),
@@ -194,7 +204,7 @@ html.holo-cards .folder .lay-long .folder__bullets {
   grid-template-columns: 1fr;
 }
 
-/* the bullets as attacks: an energy pip pair, the name, a hairline under each */
+/* the bullets as attacks: an energy pip, the name, a hairline under each */
 html.holo-cards .folder .folder__bullets {
   order: 0;
   display: grid;
@@ -207,21 +217,17 @@ html.holo-cards .folder .folder__bullets {
 
 html.holo-cards .folder .folder__bullets > li {
   margin: 0;
-  padding: 0.08rem 0 0.08rem 1.05rem;
+  padding: 0.08rem 0 0.08rem 0.7rem;
   border-bottom: 1px solid rgb(255 255 255 / 0.08);
 }
 
+/* one pip on the name's first line: centred on the cell it drifted off the text whenever the
+   row was taller (a two-line name beside it, or effect text under it) */
 html.holo-cards .folder .folder__bullets > li::before {
-  top: 50%;
+  top: calc(0.08rem + 0.7em);
   width: 5px;
   height: 5px;
   transform: translateY(-50%);
-  box-shadow: 6px 0 0 var(--brand, var(--accent));
-}
-
-/* with effect text under it, the pip sits on the name's line, not the middle of the block */
-html.holo-cards .folder .folder__bullets > li:has(ul)::before {
-  top: calc(0.08rem + 0.7em);
 }
 
 /* nested items (Substance) as the attack's effect text: one small line, dot-separated */
@@ -320,9 +326,9 @@ html.holo-cards .folder .folder__sheet {
      the tint in its own hue instead of greying it. One SVG per layer stretched over the card, no
      tiles */
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='320'%3E%3Cfilter id='l' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.011' numOctaves='5' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.1 0 0 0 -0.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23l)'/%3E%3C/svg%3E")
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='320'%3E%3Cfilter id='l' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.011' numOctaves='5' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.75 0 0 0 -0.34'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23l)'/%3E%3C/svg%3E")
       0 0 / 100% 100% no-repeat,
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='320'%3E%3Cfilter id='d' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.009' numOctaves='5' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4 0 0 0 -0.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23d)'/%3E%3C/svg%3E")
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='320'%3E%3Cfilter id='d' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.009' numOctaves='5' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.05 0 0 0 -0.38'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23d)'/%3E%3C/svg%3E")
       0 0 / 100% 100% no-repeat,
     color-mix(in srgb, var(--brand, var(--accent)) 20%, #0a0a0a);
   background-blend-mode: overlay, normal, normal;
