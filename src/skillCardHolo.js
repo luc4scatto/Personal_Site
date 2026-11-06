@@ -127,6 +127,59 @@ export function initSkillCardHolo(scene, meta, signal) {
     }
   }
 
+  // where the light rests when the pointer is off the card: off-centre, because some effects
+  // (shiny, cosmos) scale with the distance from the centre and vanish in the middle
+  const REST = [30, 25];
+  const pose = (card, px, py, duration = 0.3, ease = 'power2.out') => {
+    // a zero-length gsap.to only renders on the next tick, and the tween after it would kill it
+    const go = (target, vars) => (duration ? gsap.to(target, vars) : gsap.set(target, vars));
+    // light direction for the logo's sheen, -1..1 from the window centre
+    go(card.parentElement, {
+      '--lx': (px - 50) / 50,
+      '--ly': (py - 50) / 50,
+      duration,
+      ease,
+      overwrite: 'auto',
+    });
+    // the same variables the original component computes from the pointer
+    go(card, {
+      '--pointer-x': `${px}%`,
+      '--pointer-y': `${py}%`,
+      '--background-x': `${37 + px * 0.26}%`,
+      '--background-y': `${33 + py * 0.34}%`,
+      '--pointer-from-center': Math.min(1, Math.hypot(px - 50, py - 50) / 50),
+      '--pointer-from-top': py / 100,
+      '--pointer-from-left': px / 100,
+      '--card-opacity': 1,
+      '--card-scale': 1,
+      duration,
+      ease,
+      overwrite: 'auto',
+    });
+  };
+
+  // the foil is on as soon as a card starts out of the drawer (.is-open, at the click; the CSS
+  // shows it from there too): a light sweep while it flies,
+  // ending at the rest pose
+  const watch = new MutationObserver((records) => {
+    for (const r of records) {
+      const f = r.target;
+      if (r.oldValue?.includes('is-open') || !f.classList.contains('is-open')) continue;
+      const sheet = f.querySelector('.folder__sheet');
+      if (!sheet?.querySelector('.lay-art')) continue;
+      const card = ensureFoil(sheet, meta);
+      gsap.killTweensOf([card, card.parentElement]);
+      pose(card, 85, 90, 0);
+      pose(card, ...REST, 1.4, 'power2.inOut');
+    }
+  });
+  scene
+    .querySelectorAll('.folder[data-skill]')
+    .forEach((f) =>
+      watch.observe(f, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }),
+    );
+  signal.addEventListener('abort', () => watch.disconnect());
+
   window.addEventListener(
     'pointermove',
     (e) => {
@@ -136,35 +189,16 @@ export function initSkillCardHolo(scene, meta, signal) {
       const inside =
         e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
       const card = ensureFoil(sheet, meta);
+      if (!inside) return pose(card, ...REST, 0.6);
       // measured on the logo window and clamped to it, so moving anywhere on the card sweeps the
       // window edge to edge
       const hr = card.parentElement.getBoundingClientRect();
       const clamp = (v) => Math.min(100, Math.max(0, v));
-      const px = inside ? clamp(((e.clientX - hr.left) / hr.width) * 100) : 50;
-      const py = inside ? clamp(((e.clientY - hr.top) / hr.height) * 100) : 50;
-      // light direction for the logo's sheen, -1..1 from the window centre
-      gsap.to(card.parentElement, {
-        '--lx': inside ? (px - 50) / 50 : 0,
-        '--ly': inside ? (py - 50) / 50 : -0.6,
-        duration: 0.3,
-        ease: 'power2.out',
-        overwrite: 'auto',
-      });
-      // the same variables the original component computes from the pointer
-      gsap.to(card, {
-        '--pointer-x': `${px}%`,
-        '--pointer-y': `${py}%`,
-        '--background-x': `${37 + px * 0.26}%`,
-        '--background-y': `${33 + py * 0.34}%`,
-        '--pointer-from-center': Math.min(1, Math.hypot(px - 50, py - 50) / 50),
-        '--pointer-from-top': py / 100,
-        '--pointer-from-left': px / 100,
-        '--card-opacity': inside ? 1 : 0,
-        '--card-scale': 1,
-        duration: 0.3,
-        ease: 'power2.out',
-        overwrite: 'auto',
-      });
+      pose(
+        card,
+        clamp(((e.clientX - hr.left) / hr.width) * 100),
+        clamp(((e.clientY - hr.top) / hr.height) * 100),
+      );
     },
     { signal },
   );

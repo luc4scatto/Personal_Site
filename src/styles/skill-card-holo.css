@@ -3,7 +3,7 @@
    pokemon-cards-css, used with the author's permission) inside the logo window of the open card.
    Driven by skillCardHolo.js, which puts .holo-cards on <html>. */
 
-html.holo-cards .folder.is-landed .folder__sheet {
+html.holo-cards .folder.is-open .folder__sheet {
   isolation: isolate;
 }
 
@@ -12,7 +12,7 @@ html.holo-cards .folder.is-landed .folder__sheet {
 }
 
 /* all: unset: the wrapper takes none of the repo's own card box (aspect ratio, 3D, glow) */
-html.holo-cards .folder.is-landed .folder__sheet .holo-card {
+html.holo-cards .folder.is-open .folder__sheet .holo-card {
   all: unset;
   display: block;
   position: absolute;
@@ -29,31 +29,31 @@ html.holo-cards .folder.is-landed .folder__sheet .holo-card {
 }
 
 /* their translateZ(1px) would sort the layers in front of the text inside the CSS3D scene */
-html.holo-cards .folder.is-landed .folder__sheet .holo-card > *,
-html.holo-cards .folder.is-landed .folder__sheet .holo-card > *::before,
-html.holo-cards .folder.is-landed .folder__sheet .holo-card > *::after {
+html.holo-cards .folder.is-open .folder__sheet .holo-card > *,
+html.holo-cards .folder.is-open .folder__sheet .holo-card > *::before,
+html.holo-cards .folder.is-open .folder__sheet .holo-card > *::after {
   transform: none !important;
 }
 
 /* display grid + grid-area: the repo stacks each layer's ::before/::after in one cell via its
    .card__rotator * rule, which we don't have; without it they sat one under the other and the
    second showed as a band at the bottom of the window */
-html.holo-cards .folder.is-landed .folder__sheet .holo-card > * {
+html.holo-cards .folder.is-open .folder__sheet .holo-card > * {
   position: absolute;
   inset: 0;
   z-index: -1;
   display: grid;
   overflow: hidden;
 }
-html.holo-cards .folder.is-landed .folder__sheet .holo-card > *::before,
-html.holo-cards .folder.is-landed .folder__sheet .holo-card > *::after {
+html.holo-cards .folder.is-open .folder__sheet .holo-card > *::before,
+html.holo-cards .folder.is-open .folder__sheet .holo-card > *::after {
   grid-area: 1 / 1;
   /* the repo's 4.55% / 3.5% card corners: on a wide, short window they showed as rounded ends */
   border-radius: 0;
 }
 
 /* screen, not their color-dodge: dodge brightens the art under it, and on our black sheet gives black */
-html.holo-cards .folder.is-landed .folder__sheet .holo-card > .card__shine {
+html.holo-cards .folder.is-open .folder__sheet .holo-card > .card__shine {
   mix-blend-mode: screen;
 }
 
