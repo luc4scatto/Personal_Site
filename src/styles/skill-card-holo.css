@@ -177,6 +177,8 @@ html.holo-cards .folder .lay-strip {
 
 html.holo-cards .folder .folder__body {
   order: 4;
+  /* fills the card down to the footer, so the description below can sit at the bottom */
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   padding: 0.25rem 0.7rem 0;
@@ -254,10 +256,10 @@ html.holo-cards .folder .folder__bullets ul > li + li::before {
   transform: none;
 }
 
-/* the description as the flavour text */
+/* the description as the flavour text, always at the bottom of the card */
 html.holo-cards .folder .folder__text {
   order: 1;
-  margin-top: 0.35rem;
+  margin-top: auto;
   padding: 0.3rem 0.45rem;
   font-size: 0.46rem;
   font-style: italic;
@@ -308,4 +310,52 @@ html.holo-cards .folder .lay-art__gloss {
   mask-size: 100% 100%;
   mask-repeat: no-repeat;
   mix-blend-mode: soft-light;
+}
+
+/* ---- card stock: printed on paper, not rendered. Gradients and SVG noise only, no borders or
+   shadows on the sheet (Firefox draws those thick inside the CSS3D scene, see CLAUDE.md) ---- */
+html.holo-cards .folder .folder__sheet {
+  /* painted stock, like a card's type-coloured body: soft clouds lighter and darker than a dark
+     tint of the skill colour, never one flat fill. The light ones blend in overlay, so they brighten
+     the tint in its own hue instead of greying it. One SVG per layer stretched over the card, no
+     tiles */
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='320'%3E%3Cfilter id='l' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.011' numOctaves='5' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1.1 0 0 0 -0.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23l)'/%3E%3C/svg%3E")
+      0 0 / 100% 100% no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='320'%3E%3Cfilter id='d' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.009' numOctaves='5' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4 0 0 0 -0.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23d)'/%3E%3C/svg%3E")
+      0 0 / 100% 100% no-repeat,
+    color-mix(in srgb, var(--brand, var(--accent)) 20%, #0a0a0a);
+  background-blend-mode: overlay, normal, normal;
+}
+
+html.holo-cards .folder .folder__sheet::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: inherit;
+  /* edges a little darker than the middle, like ink pooling on the cut */
+  background: radial-gradient(120% 90% at 50% 45%, transparent 60%, rgb(0 0 0 / 0.35));
+}
+
+/* paper fibre over everything, ink and text included */
+html.holo-cards .folder .folder__sheet::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  /* light fibres: noise turned into alpha, so it reads on black (blend modes vanish on it) */
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4 2.2' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.92 0 0 0 0 0.9 0 0 0 0 0.85 0 0 0 0.22 -0.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E")
+    0 0 / 48px 48px;
+}
+
+/* print, not pixels: the white ink sits slightly soft and warm on the stock */
+html.holo-cards .folder .folder__sheet {
+  color: #ebe6dc;
+}
+html.holo-cards .folder .folder__tab .skill-label,
+html.holo-cards .folder .folder__bullets {
+  text-shadow: 0 0 0.6px rgb(235 230 220 / 0.55);
 }

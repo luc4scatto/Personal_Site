@@ -21,14 +21,14 @@ const HOLO_CSS = [
   'shiny-v',
 ];
 // one effect per skill category, in the page's category order (3D Software, Real-time, Code, AI,
-// Motion & Video, 2D, Audio): Luca's pick, 2026-11-06. As data-rarity|supertype|subtypes.
+// Motion & Video, 2D, Audio): Luca's pick, 2026-11-06 (Code and 2D swapped the same day). As data-rarity|supertype|subtypes.
 const RARITIES = [
   'rare holo v|pokémon|',
   'rare ultra|pokémon|',
-  'rare rainbow|pokémon|',
+  'rare holo cosmos|pokémon|',
   'rare shiny v|pokémon|',
   'rare holo|pokémon|',
-  'rare holo cosmos|pokémon|',
+  'rare rainbow|pokémon|',
   'rare ultra|trainer|supporter',
 ];
 
