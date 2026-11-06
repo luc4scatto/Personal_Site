@@ -1,0 +1,128 @@
+<!doctype html>
+<!-- Source of public/cv/Luca-Scattolin-CV.pdf. Rebuild with: node tools/cv.mjs -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Luca Scattolin CV</title>
+    <style>
+      @font-face {
+        font-family: 'Mona Sans';
+        src: url('../public/fonts/mona-sans-var.woff2') format('woff2');
+        font-weight: 200 900;
+        font-stretch: 75% 125%;
+      }
+      @page { size: A4; margin: 15mm 15mm 13mm; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font: 400 9.6pt/1.42 'Mona Sans', Arial, sans-serif; color: #232120; }
+      a { color: inherit; text-decoration: none; }
+      ul { list-style: none; }
+      h1 { font-size: 25pt; font-weight: 700; font-stretch: 118%; line-height: 1.15; color: #000; }
+      .role { margin-top: 3pt; font-size: 12pt; font-weight: 500; font-stretch: 110%; color: #2f4a5e; }
+      .contact { display: flex; flex-wrap: wrap; gap: 3pt 10pt; margin-top: 8pt; font-size: 9pt; color: #5b5854; }
+      .contact a { border-bottom: 0.75pt solid #d8d5cf; }
+      h2 {
+        margin: 13pt 0 6pt; padding-bottom: 4pt; border-bottom: 0.75pt solid #d8d5cf;
+        font-size: 8.4pt; font-weight: 600; font-stretch: 110%; letter-spacing: 0.1em;
+        text-transform: uppercase; color: #2f4a5e; break-after: avoid;
+      }
+      .rows > div { display: grid; grid-template-columns: 112pt 1fr; gap: 8pt; padding: 1.8pt 0; }
+      .rows dt { font-weight: 600; }
+      .rows dd, .muted { color: #5b5854; }
+      .entry { margin-top: 8pt; break-inside: avoid; }
+      h2 + .entry { margin-top: 0; }
+      .head { display: flex; justify-content: space-between; gap: 12pt; }
+      .head strong { font-size: 10.2pt; font-weight: 600; }
+      .head .org { color: #2f4a5e; }
+      .head .date, .head .url { flex: none; color: #5b5854; font-size: 9pt; }
+      .entry ul { margin-top: 2.5pt; }
+      .entry li { position: relative; padding: 1.4pt 0 1.4pt 12pt; break-inside: avoid; }
+      .entry li::before { content: ''; position: absolute; left: 2pt; top: 7pt; width: 3pt; height: 3pt; border-radius: 50%; background: #232120; }
+      .entry p { margin-top: 2pt; }
+      .line { display: flex; justify-content: space-between; gap: 12pt; padding: 1.8pt 0; }
+    </style>
+  </head>
+  <body>
+    <h1>Luca Scattolin</h1>
+    <p class="role">3D Technical Artist &amp; Creative Technologist</p>
+    <p class="contact">
+      <span>Padua, Italy</span>
+      <a href="mailto:scattolinluca2@gmail.com">scattolinluca2@gmail.com</a>
+      <a href="https://lucascattolin.com/">lucascattolin.com</a>
+      <a href="https://www.linkedin.com/in/lucascattolin">linkedin.com/in/lucascattolin</a>
+      <a href="https://github.com/luc4scatto">github.com/luc4scatto</a>
+    </p>
+
+    <h2>Summary</h2>
+    <p>3D Technical Artist and Creative Technologist with 6+ years building 3D production pipelines for eyewear brands at Thélios (LVMH) and EssilorLuxottica, from 2D design through rendering, 3D configurators and video. Recent focus: in-house pipeline tools on open standards (USD, OpenPBR in MaterialX), real-time interactive installations (TouchDesigner, Unreal Engine) and self-hosted AI assistants.</p>
+
+    <h2>Skills</h2>
+    <dl class="rows">
+      <div><dt>3D Software</dt><dd>Blender, Autodesk Maya, Houdini (learning Solaris), Adobe Substance 3D (Painter &amp; Designer), NVIDIA Omniverse, Pixyz</dd></div>
+      <div><dt>Rendering</dt><dd>V-Ray, Redshift, Omniverse RTX, Unreal Movie Render Graph</dd></div>
+      <div><dt>Real-Time &amp; Interactive</dt><dd>Unreal Engine, TouchDesigner, MediaPipe, OSC</dd></div>
+      <div><dt>Code &amp; Automation</dt><dd>Python, PySide/PyQt, USD, MaterialX, OpenPBR, SQL, REST APIs</dd></div>
+      <div><dt>AI</dt><dd>Agentic workflows (Claude Code, Hermes Agent, OpenClaw, n8n), self-hosted assistants, local models, Obsidian second brain</dd></div>
+      <div><dt>Self-Hosting</dt><dd>Proxmox, LXC, Docker, Tailscale, Grafana, Prometheus</dd></div>
+      <div><dt>Motion &amp; Video</dt><dd>After Effects, DaVinci Resolve, Premiere Pro</dd></div>
+      <div><dt>2D &amp; Design</dt><dd>Photoshop, Illustrator</dd></div>
+      <div><dt>Audio</dt><dd>Ableton Live, Traktor, Rekordbox</dd></div>
+      <div><dt>Office</dt><dd>Word, Excel, PowerPoint, Outlook, Teams</dd></div>
+    </dl>
+
+    <h2>Experience</h2>
+    <div class="entry">
+      <div class="head"><span><strong>3D R&amp;D - 3D Pipeline Developer</strong> <span class="org">· Thélios (LVMH)</span></span><span class="date">2023 - Present</span></div>
+      <ul>
+        <li>Contributed to developing and maintaining an end-to-end 3D pipeline, from 2D design through rendering, and helped build 3D configurators and promotional video for Thélios and partner Maisons.</li>
+        <li>Helped adopt a USD-based 3D pipeline that cut concept-to-market lead time by roughly a quarter, bringing digital content availability forward by up to ~2 months.</li>
+        <li>Paired the USD pipeline with on-demand rendering to cut digital content production turnaround by roughly a quarter across brands, speeding up commercial ranking and freeing up capacity for more in-house content and R&amp;D instead of external vendors.</li>
+        <li>Cut last-minute design and color changes by roughly a third by introducing more effective upfront 3D approval processes.</li>
+        <li>Reduced, and in many cases eliminated, material-to-component mapping errors by moving approvals into 3D earlier in the process.</li>
+        <li>Replaced manual Illustrator/Excel upload steps with automation, cutting related production time by more than 50%.</li>
+        <li>Shifted Maisons toward 3D digital selling content over physical prototypes (previously single, non-full-SKU samples), cutting physical sample production by roughly half and improving pre-order and reorder rates.</li>
+        <li>Automated pipeline steps with Python and agentic AI tooling, including material assignment/creation across 1,000+ SKUs a year, to cut manual production work.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="head"><span><strong>3D Render Specialist</strong> <span class="org">· EssilorLuxottica</span></span><span class="date">2019 - 2023</span></div>
+      <ul>
+        <li>Produced 3D renders for Prada Group, Burberry and Oliver Peoples eyewear lines over 4+ years.</li>
+        <li>Moved into pipeline engineering in the final two years, building and improving internal 3D production tools later carried forward into the Thélios role.</li>
+      </ul>
+    </div>
+    <div class="entry">
+      <div class="head"><span><strong>Motion Graphic Designer</strong> <span class="org">· HEADS Group</span></span><span class="date">2017</span></div>
+      <ul><li>Motion graphics, video editing and illustration work.</li></ul>
+    </div>
+
+    <h2>Selected Projects</h2>
+    <div class="entry">
+      <div class="head"><span><strong>Vivatech Interactive Experience</strong> <span class="org">· Thélios (LVMH)</span></span><a class="url" href="https://lucascattolin.com/vivatech.html">lucascattolin.com/vivatech.html</a></div>
+      <p>Co-developed a real-time installation for the LVMH Dream Gallery at Vivatech Paris 2026: a live 3D showcase of eyewear digital twins for visitors and press, driven by hand gestures with nothing to touch. Webcam tracking (MediaPipe) in TouchDesigner drives Unreal Engine 5.7 over OSC.</p>
+    </div>
+    <div class="entry">
+      <div class="head"><span><strong>Pipeline Tools</strong> <span class="org">· Thélios (LVMH)</span></span><a class="url" href="https://lucascattolin.com/pipeline-projects.html">lucascattolin.com/pipeline-projects.html</a></div>
+      <p>Five in-house tools, each removing one slow manual step: a look-dev panel for Omniverse (USD, OpenPBR in MaterialX), a Maya prep toolkit, render automation for Unreal Engine, and catalogue and review deck generators for PowerPoint.</p>
+    </div>
+    <div class="entry">
+      <div class="head"><span><strong>Company Brain</strong></span><a class="url" href="https://lucascattolin.com/company-brain.html">lucascattolin.com/company-brain.html</a></div>
+      <p>Self-hosted AI assistant that answers product questions in plain language from live company data, with photos, drawings and charts; read-only, and nothing leaves the company. 10-week pilot with a team of 7: 318 answers and 566 queries to company systems, with 82% of answers calling at least one tool.</p>
+    </div>
+    <div class="entry">
+      <div class="head"><span><strong>Homelab</strong> <span class="org">· Personal</span></span><a class="url" href="https://lucascattolin.com/homelab.html">lucascattolin.com/homelab.html</a></div>
+      <p>Two-node Proxmox cluster and a UniFi NAS in a 3D-printed rack, running 20+ self-hosted services in LXC containers, with nightly backups, single sign-on with passkeys, Grafana metrics and remote access over Tailscale.</p>
+    </div>
+
+    <h2>Education</h2>
+    <div class="line"><span><strong>Master in 3D Graphics</strong> <span class="muted">- BigRock, Computer Graphic School</span></span><span class="muted">2018 - 2019</span></div>
+    <div class="line"><span><strong>Bachelor's Degree, Sciences and Multimedia Technologies</strong> <span class="muted">- University of Udine · 110/110 cum laude</span></span><span class="muted">2015 - 2018</span></div>
+
+    <h2>Languages</h2>
+    <div class="line"><span>Italian</span><span class="muted">Native</span></div>
+    <div class="line"><span>English</span><span class="muted">C1</span></div>
+    <div class="line"><span>Spanish</span><span class="muted">B1</span></div>
+
+    <h2>Interests</h2>
+    <p class="muted">Technology, self-hosting, DJing &amp; vinyl collection, cinema, Lego.</p>
+  </body>
+</html>
