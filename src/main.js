@@ -7,8 +7,6 @@ import { initMobileMenu } from './mobileMenu.js';
 import { content } from './content.js';
 import { buildSkillCardInner, applySkillContent } from './skillCard.js';
 
-if (import.meta.env.DEV) import('./cardTextureLab.js'); // TEMPORARY: card texture trials
-
 // content.js copy is developer-authored, not user input, so **bold** markup is safe to allow
 function escapeHtml(str) {
   return str
@@ -534,11 +532,13 @@ function initPage(signal, firstLoad) {
     const scene = skillDrawer.querySelector('.drawer__scene');
     const strip = skillDrawer.querySelector('.drawer__strip');
     const skillGroups = readSkillGroups(strip);
-    import('./skillDrawer.js')
-      .then((m) => {
+    Promise.all([import('./skillDrawer.js'), import('./skillCardHolo.js')])
+      .then(([m, holo]) => {
         if (signal.aborted) return;
+        const skillMeta = holo.readSkillMeta(strip); // before the drawer lifts the <li>s out
         const dispose = m.initSkillDrawer(scene, strip);
         signal.addEventListener('abort', dispose);
+        holo.initSkillCardHolo(scene, skillMeta, signal);
         // only claim the drawer once the metal is actually there; CSS keys the whole layout
         // off this class
         skillDrawer.classList.add('is-live');

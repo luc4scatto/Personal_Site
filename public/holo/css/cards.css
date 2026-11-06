@@ -1,8 +1,8 @@
 
-.card {
+.holo-card {
 
-  --grain: url("/lab-holo/img/grain.webp");
-  --glitter: url("/lab-holo/img/glitter.png");
+  --grain: url("/holo/img/grain.webp");
+  --glitter: url("/holo/img/glitter.png");
   --glittersize: 25%;
 
   --space: 5%;

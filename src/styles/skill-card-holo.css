@@ -1,0 +1,311 @@
+/* Skill drawer cards as trading cards (2026-11-06, Luca's pick of the lab trials): layout A on
+   every folder, filed or open, and the poke-holo foil (public/holo/, from simeydotme's
+   pokemon-cards-css, used with the author's permission) inside the logo window of the open card.
+   Driven by skillCardHolo.js, which puts .holo-cards on <html>. */
+
+html.holo-cards .folder.is-landed .folder__sheet {
+  isolation: isolate;
+}
+
+.folder__sheet .holo-card {
+  display: none;
+}
+
+/* all: unset: the wrapper takes none of the repo's own card box (aspect ratio, 3D, glow) */
+html.holo-cards .folder.is-landed .folder__sheet .holo-card {
+  all: unset;
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* the repo clips some rarities (holo, shiny, cosmos...) to a Pokémon card's art box; our host is
+     already the art window, so every clip is the whole box */
+  --clip: inset(0);
+  --clip-invert: inset(0);
+  --clip-stage: inset(0);
+  --clip-stage-invert: inset(0);
+  --clip-trainer: inset(0);
+  --clip-borders: inset(0);
+}
+
+/* their translateZ(1px) would sort the layers in front of the text inside the CSS3D scene */
+html.holo-cards .folder.is-landed .folder__sheet .holo-card > *,
+html.holo-cards .folder.is-landed .folder__sheet .holo-card > *::before,
+html.holo-cards .folder.is-landed .folder__sheet .holo-card > *::after {
+  transform: none !important;
+}
+
+/* display grid + grid-area: the repo stacks each layer's ::before/::after in one cell via its
+   .card__rotator * rule, which we don't have; without it they sat one under the other and the
+   second showed as a band at the bottom of the window */
+html.holo-cards .folder.is-landed .folder__sheet .holo-card > * {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: grid;
+  overflow: hidden;
+}
+html.holo-cards .folder.is-landed .folder__sheet .holo-card > *::before,
+html.holo-cards .folder.is-landed .folder__sheet .holo-card > *::after {
+  grid-area: 1 / 1;
+  /* the repo's 4.55% / 3.5% card corners: on a wide, short window they showed as rounded ends */
+  border-radius: 0;
+}
+
+/* screen, not their color-dodge: dodge brightens the art under it, and on our black sheet gives black */
+html.holo-cards .folder.is-landed .folder__sheet .holo-card > .card__shine {
+  mix-blend-mode: screen;
+}
+
+/* ---- card layout: trading-card zones, not a copy. The .lay-* blocks are added by
+   skillCardHolo.js and hidden until .holo-cards is on. ---- */
+.lay-cat,
+.lay-art,
+.lay-strip,
+.lay-foot {
+  display: none;
+}
+
+html.holo-cards .folder .folder__sheet {
+  display: flex;
+  flex-direction: column;
+}
+
+html.holo-cards .folder :is(.lay-cat, .lay-art, .lay-strip, .lay-foot) {
+  display: flex;
+}
+
+/* shared: the footer, like the illustrator line and set number */
+html.holo-cards .folder .lay-foot {
+  order: 9;
+  margin-top: auto;
+  justify-content: flex-end;
+  padding: 0.3rem 0.7rem 0.4rem;
+  font-size: 0.42rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+html.holo-cards .folder .lay-art {
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  /* the foil's own blend group, clipped to the frame: the rest of the card stays plain black */
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* ===== A: full card ===== */
+/* name first, category under it: in the drawer only the top strip of a filed card shows, and it
+   has to be the name */
+html.holo-cards .folder .lay-cat {
+  order: 1;
+  padding: 0 0.7rem 0.35rem;
+}
+
+html.holo-cards .folder .lay-cat span {
+  padding: 0.08rem 0.5rem 0.08rem 0.35rem;
+  font-size: 0.4rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #111;
+  background: linear-gradient(90deg, #e9ecef, #9aa1a8);
+  clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+}
+
+html.holo-cards .folder .folder__tab {
+  order: 0;
+  padding: 0.5rem 0.7rem 0.2rem;
+  background: none;
+}
+
+html.holo-cards .folder .folder__tab .skill-label {
+  order: 1;
+  /* 0.95rem: the longest name (Adobe Substance 3D) clears the close X on the top row */
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* the type symbol before the name: on the right it sat under the close X */
+html.holo-cards .folder .folder__tab .skill-icon {
+  order: 0;
+  width: 14px;
+  height: 14px;
+  padding: 3px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand, var(--accent)) 30%, #111);
+  box-sizing: content-box;
+}
+
+html.holo-cards .folder .lay-art {
+  order: 2;
+  flex-shrink: 0;
+  /* one size for every card (2026-11-06): 21% and the type sizes below are the largest that fit
+     the fullest card (Unreal) inside the coloured frame, without stepping any card down */
+  height: 21%;
+  margin: 0 0.6rem;
+  border: 2px solid #a7adb3;
+  box-shadow: inset 0 0 0 1px #2b2e31;
+  background: radial-gradient(
+    circle at 50% 45%,
+    color-mix(in srgb, var(--brand, var(--accent)) 45%, transparent),
+    transparent 70%
+  );
+}
+
+html.holo-cards .folder .lay-art__logo {
+  height: 62%;
+}
+
+html.holo-cards .folder .lay-art__icon {
+  width: auto;
+  height: 100%;
+}
+
+html.holo-cards .folder .lay-strip {
+  order: 3;
+  justify-content: center;
+  margin: 0.25rem 1.1rem 0;
+  padding: 0.08rem 0;
+  font-size: 0.42rem;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  color: #c9ced3;
+  background: linear-gradient(90deg, transparent, rgb(167 173 179 / 0.25), transparent);
+}
+
+html.holo-cards .folder .folder__body {
+  order: 4;
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem 0.7rem 0;
+}
+
+html.holo-cards .folder :is(.folder__badge, .folder__label) {
+  display: none;
+}
+
+/* sentences (Python, Second Brain) and nested items (Substance) in one column: same type size,
+   only the column count changes */
+html.holo-cards .folder .lay-long .folder__bullets {
+  grid-template-columns: 1fr;
+}
+
+/* the bullets as attacks: an energy pip pair, the name, a hairline under each */
+html.holo-cards .folder .folder__bullets {
+  order: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 0.6rem;
+  margin: 0;
+  font-size: 0.55rem;
+  font-weight: 600;
+}
+
+html.holo-cards .folder .folder__bullets > li {
+  margin: 0;
+  padding: 0.08rem 0 0.08rem 1.05rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+}
+
+html.holo-cards .folder .folder__bullets > li::before {
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  transform: translateY(-50%);
+  box-shadow: 6px 0 0 var(--brand, var(--accent));
+}
+
+/* with effect text under it, the pip sits on the name's line, not the middle of the block */
+html.holo-cards .folder .folder__bullets > li:has(ul)::before {
+  top: calc(0.08rem + 0.7em);
+}
+
+/* nested items (Substance) as the attack's effect text: one small line, dot-separated */
+html.holo-cards .folder .folder__bullets ul {
+  display: block;
+  margin: 0.08rem 0 0;
+  padding: 0;
+  font-size: 0.48rem;
+  font-weight: 400;
+  line-height: 1.35;
+  opacity: 0.75;
+}
+
+html.holo-cards .folder .folder__bullets ul > li {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+html.holo-cards .folder .folder__bullets ul > li::before {
+  content: none;
+}
+
+html.holo-cards .folder .folder__bullets ul > li + li::before {
+  content: ' · ';
+  position: static;
+  display: inline;
+  width: auto;
+  height: auto;
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
+
+/* the description as the flavour text */
+html.holo-cards .folder .folder__text {
+  order: 1;
+  margin-top: 0.35rem;
+  padding: 0.3rem 0.45rem;
+  font-size: 0.46rem;
+  font-style: italic;
+  line-height: 1.4;
+  border: 1px solid rgb(167 173 179 / 0.35);
+  border-radius: 0.2rem;
+}
+
+/* the card's frame in the skill's own colour (Blender orange, Omniverse green...), like a
+   trading card's yellow border. On .folder, never on the sheet: Firefox draws borders on the
+   CSS3D children at the wrong scale (see CLAUDE.md). Real px of the 500x640 open card. */
+html.holo-cards .folder.is-landed {
+  border: 12px solid var(--brand, var(--accent));
+  border-radius: 1.1rem;
+}
+
+/* the same frame on a filed card, at its 250x320 scale. On the sheet because a filed .folder is
+   the full card box with only the tab showing: a border there would frame empty space. Firefox
+   will draw this one too thick (the known tab bug in CLAUDE.md's TODO). */
+html.holo-cards .folder:not(.is-landed) .folder__sheet {
+  border: 6px solid var(--brand, var(--accent));
+  border-radius: 0.55rem;
+}
+
+/* ---- embossed, glossy logo (all layouts). --lx/--ly (-1..1) is where the light comes from,
+   written on .lay-art by skillCardHolo.js from the pointer. ---- */
+html.holo-cards .folder .lay-art__logo {
+  position: relative;
+  z-index: 1; /* over the foil, which sits at -1 in the window */
+  display: flex;
+}
+
+/* raised edge, fixed like a real stamp: light always from above, the rim never moves.
+   (A rim that followed the pointer swapped sides and made the logo look like it wobbled.) */
+html.holo-cards .folder .lay-art__icon {
+  filter: drop-shadow(0 -0.6px 0 rgb(255 255 255 / 0.5)) drop-shadow(0 1px 0 rgb(0 0 0 / 0.7))
+    drop-shadow(0 4px 6px rgb(0 0 0 / 0.5));
+}
+
+/* only the sheen moves: a soft diagonal band cut to the logo, sliding a little with the light */
+html.holo-cards .folder .lay-art__gloss {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.5) 48%, transparent 66%);
+  background-size: 250% 100%;
+  background-position: calc(50% - var(--lx, 0) * 40%) 0;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  mix-blend-mode: soft-light;
+}

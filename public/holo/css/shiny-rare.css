@@ -16,15 +16,15 @@
 
 */
 
-.card[data-rarity="rare shiny"] .card__shine {
+.holo-card[data-rarity="rare shiny"] .card__shine {
   clip-path: var(--clip);
 }
-.card[data-rarity="rare shiny"][data-subtypes^="stage"] .card__shine {
+.holo-card[data-rarity="rare shiny"][data-subtypes^="stage"] .card__shine {
   clip-path: var(--clip-stage);
 }
 
-.card[data-rarity="rare shiny"] .card__shine,
-.card[data-rarity="rare shiny"] .card__shine:after {
+.holo-card[data-rarity="rare shiny"] .card__shine,
+.holo-card[data-rarity="rare shiny"] .card__shine:after {
 
   --space: 5%;
   --angle: 133deg;
@@ -71,7 +71,7 @@
 
 }
 
-.card[data-rarity="rare shiny"] .card__shine:after {
+.holo-card[data-rarity="rare shiny"] .card__shine:after {
 
   content: "";
 
@@ -88,7 +88,7 @@
 
 }
 
-.card[data-rarity="rare shiny"] .card__shine:before {
+.holo-card[data-rarity="rare shiny"] .card__shine:before {
 
   content: "";
   -webkit-mask-image: none;
@@ -122,7 +122,7 @@
 
 */
 
-.card[data-rarity="rare shiny"] .card__glare {
+.holo-card[data-rarity="rare shiny"] .card__glare {
 
   background-image: 
     radial-gradient( farthest-corner circle at var(--pointer-x) var(--pointer-y), 
@@ -152,11 +152,11 @@
 
 */
 
-.card:not(.masked).card[data-rarity="rare shiny"] .card__shine,
-.card:not(.masked).card[data-rarity="rare shiny"] .card__shine:after {
+.holo-card:not(.masked).holo-card[data-rarity="rare shiny"] .card__shine,
+.holo-card:not(.masked).holo-card[data-rarity="rare shiny"] .card__shine:after {
 
   --mask: none;
-  --foil: url("/lab-holo/img/illusion.png"); 
+  --foil: url("/holo/img/illusion.png"); 
   --imgsize: 33%;
 
   -webkit-mask-image: var(--mask);
@@ -169,7 +169,7 @@
 
 }
 
-.card:not(.masked).card[data-rarity*="rare shiny"] .card__shine:after {
+.holo-card:not(.masked).holo-card[data-rarity*="rare shiny"] .card__shine:after {
 
   filter: brightness(calc((var(--pointer-from-center)*.4) + .5)) contrast(1.4) saturate(1.2);
   mix-blend-mode: difference;
