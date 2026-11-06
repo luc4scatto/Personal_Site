@@ -790,6 +790,27 @@ export function initSkillDrawer(host, strip) {
     });
   }
 
+  // The landed card leans toward the pointer, like the project cards (animations.js). On top of
+  // billboardQuat and never on the DOM: CSS3DRenderer rewrites .folder's matrix3d every frame.
+  const TILT_MAX = THREE.MathUtils.degToRad(9);
+  const tiltEuler = new THREE.Euler();
+  const tiltQuat = new THREE.Quaternion();
+  function tiltTo(f, rx, ry) {
+    const p = f.tiltP ?? (f.tiltP = { rx: 0, ry: 0 });
+    gsap.to(p, {
+      rx,
+      ry,
+      duration: 0.5,
+      ease: 'power3',
+      overwrite: true,
+      onUpdate: () => {
+        tiltQuat.setFromEuler(tiltEuler.set(p.rx, p.ry, 0));
+        f.obj.quaternion.copy(billboardQuat).multiply(tiltQuat);
+        render();
+      },
+    });
+  }
+
   function aim() {
     camera.position.set(
       dist * Math.cos(ELEVATION) * Math.sin(AZIMUTH),
@@ -1403,6 +1424,10 @@ export function initSkillDrawer(host, strip) {
     f.el.setAttribute('aria-expanded', 'false');
     f.el.querySelector('.folder__close').tabIndex = -1;
     f.el.classList.remove('is-landed'); // the close goes first, before the card starts back
+    if (f.tiltP) {
+      gsap.killTweensOf(f.tiltP); // or it would go on writing over the turn back into the file
+      f.tiltP.rx = f.tiltP.ry = 0;
+    }
     // a climb still running would go on writing inline transforms over the filed rest state
     restSheet(f);
     // back into the file, so it rides with the index again; a lift still running would
@@ -1459,6 +1484,18 @@ export function initSkillDrawer(host, strip) {
     });
     f.el.addEventListener('pointerleave', (e) => {
       if (e.pointerType === 'mouse' && f !== active) rotateTo(f, RESTING_QUAT, 0.2, 'power3.out');
+      if (f.tiltP && f.el.classList.contains('is-landed')) tiltTo(f, 0, 0);
+    });
+    // Mouse only: on touch it would add 3D sorting risk against the filed folders (see PICK_PULL).
+    f.el.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse' || !f.el.classList.contains('is-landed')) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const r = f.el.getBoundingClientRect();
+      tiltTo(
+        f,
+        ((e.clientY - r.top) / r.height - 0.5) * 2 * TILT_MAX,
+        ((e.clientX - r.left) / r.width - 0.5) * 2 * TILT_MAX,
+      );
     });
     // its own control: a bare click on the folder already toggles shut via select(), but the
     // X has to win over that bubbling to the same handler and reopening what it just closed

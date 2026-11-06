@@ -7,6 +7,8 @@ import { initMobileMenu } from './mobileMenu.js';
 import { content } from './content.js';
 import { buildSkillCardInner, applySkillContent } from './skillCard.js';
 
+if (import.meta.env.DEV) import('./cardTextureLab.js'); // TEMPORARY: card texture trials
+
 // content.js copy is developer-authored, not user input, so **bold** markup is safe to allow
 function escapeHtml(str) {
   return str

@@ -1,0 +1,666 @@
+/* TEMPORARY: foil trials for the open drawer card, compared with cardTextureLab.js.
+   Loaded only by the dev server. Delete this file and the lab once one is chosen.
+   Look studied from the V cards on poke-holo.simey.me (GPL-3.0): no code or asset taken, written
+   from scratch. Black stays black: diagonal silver bars carry the light, a pastel spectrum colours
+   only what is lit, and all of it sits under the text. Only the landed card pays for it. */
+
+html[data-tex] .folder.is-landed .folder__sheet {
+  isolation: isolate;
+}
+
+html[data-tex] .folder.is-landed .folder__sheet::before,
+html[data-tex] .folder.is-landed .folder__sheet::after {
+  --spectrum: repeating-linear-gradient(
+    0deg,
+    #ff9ed8,
+    #b79bff 14%,
+    #8ec5ff 28%,
+    #8ff0e0 42%,
+    #d8f59a 56%,
+    #ffd9a0 70%,
+    #ff9ed8 84%
+  );
+  --bars: repeating-linear-gradient(
+    127deg,
+    #0b0b0b 0 2%,
+    var(--dim) 4.2%,
+    var(--peak) 5%,
+    var(--dim) 5.8%,
+    #0b0b0b 8% 11%
+  );
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+html[data-tex] .folder.is-landed .folder__sheet::before {
+  opacity: var(--hon, 0.3);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='s' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 3.4 0 0 0 -1.5'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23s)'/%3E%3C/svg%3E"),
+    var(--spectrum), var(--bars);
+  background-size:
+    260px 260px,
+    200% 500%,
+    280% 100%;
+  background-position:
+    center,
+    0 calc(var(--hy, 30) * 1%),
+    calc(var(--hx, 50) * 1%) center;
+  background-blend-mode: overlay, color, normal;
+}
+
+/* a second set running the other way, so the bars cross and shimmer as the card moves */
+html[data-tex] .folder.is-landed .folder__sheet::after {
+  opacity: calc(var(--hon, 0.3) * 0.45);
+  background-image: var(--spectrum), var(--bars);
+  background-size:
+    200% 300%,
+    190% 100%;
+  background-position:
+    0 calc(100% - var(--hy, 30) * 1%),
+    calc(100% - var(--hx, 50) * 1%) center;
+  background-blend-mode: color, normal;
+  mix-blend-mode: screen;
+}
+
+/* J: restrained, dark bars and a tighter pool of light */
+html[data-tex='j'] .folder.is-landed .folder__sheet::before,
+html[data-tex='j'] .folder.is-landed .folder__sheet::after {
+  --dim: #2a2c30;
+  --peak: #62666c;
+  mask: radial-gradient(
+    circle at calc(var(--hx, 50) * 1%) calc(var(--hy, 30) * 1%),
+    #000 0,
+    rgb(0 0 0 / 0.55) 22%,
+    rgb(0 0 0 / 0.14) 55%,
+    rgb(0 0 0 / 0.04) 100%
+  );
+  -webkit-mask: radial-gradient(
+    circle at calc(var(--hx, 50) * 1%) calc(var(--hy, 30) * 1%),
+    #000 0,
+    rgb(0 0 0 / 0.55) 22%,
+    rgb(0 0 0 / 0.14) 55%,
+    rgb(0 0 0 / 0.04) 100%
+  );
+}
+
+/* L: K plus raised fingerprint ridges that only catch the light while the card moves */
+html[data-tex='l'] .folder.is-landed .folder__sheet::before,
+html[data-tex='l'] .folder.is-landed .folder__sheet::after {
+  --dim: #3b3e43;
+  --peak: #a4a9b0;
+  mask: radial-gradient(
+    circle at calc(var(--hx, 50) * 1%) calc(var(--hy, 30) * 1%),
+    #000 0,
+    rgb(0 0 0 / 0.75) 30%,
+    rgb(0 0 0 / 0.35) 70%,
+    rgb(0 0 0 / 0.04) 100%
+  );
+}
+
+.tex-relief {
+  display: none;
+}
+
+html[data-tex='l'] .folder.is-landed .tex-relief {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+      0deg,
+      #ffc2e6,
+      #cdbbff 14%,
+      #b4dcff 28%,
+      #b4fff0 42%,
+      #eaffb8 56%,
+      #ffe6bf 70%,
+      #ffc2e6 84%
+    )
+    0 calc(var(--hy, 30) * 1%) / 100% 400%;
+  mask-image:
+    var(--relief),
+    radial-gradient(
+      circle at calc(var(--hx, 50) * 1%) calc(var(--hy, 30) * 1%),
+      #000 0,
+      rgb(0 0 0 / 0.6) 35%,
+      transparent 85%
+    );
+  mask-size: 100% 100%;
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+
+/* two lights, one per side: the pointer crossfades them, so the lit flank of each ridge swaps */
+html[data-tex='l'] .folder.is-landed .tex-relief--a {
+  --relief: var(--relief-a);
+  opacity: calc(var(--hmove, 0.08) * (1 - var(--hx, 50) / 100));
+}
+
+html[data-tex='l'] .folder.is-landed .tex-relief--b {
+  --relief: var(--relief-b);
+  opacity: calc(var(--hmove, 0.08) * var(--hx, 50) / 100);
+}
+
+/* M: the full-art recipe rebuilt by hand: etched rings (exclusion) over a pastel spectrum (hue) over
+   diagonal silver bars (hard-light). As the light moves the bars and spectrum slide under the rings,
+   so every ring flips colour and the etching shimmers; still, it settles back into the black. */
+html[data-tex='m'] .folder.is-landed .folder__sheet::before,
+html[data-tex='m'] .folder.is-landed .folder__sheet::after {
+  --m-spectrum: repeating-linear-gradient(
+    0deg,
+    #e9a3c9 5%,
+    #b5a6f2 10%,
+    #8fc6f4 15%,
+    #8fe8c9 20%,
+    #d6ea8f 25%,
+    #f2c38f 30%,
+    #e9a3c9 35%
+  );
+  --m-bars: repeating-linear-gradient(
+    133deg,
+    #0b0b0b 0%,
+    #7f8c94 3.8%,
+    #b9c8cc 4.5%,
+    #7f8c94 5.2%,
+    #0b0b0b 10%,
+    #0b0b0b 12%
+  );
+  background-image:
+    var(--foil-lines), var(--m-spectrum), var(--m-bars),
+    radial-gradient(
+      farthest-corner circle at calc(var(--hx, 50) * 1%) calc(var(--hy, 30) * 1%),
+      rgb(0 0 0 / 0.1) 12%,
+      rgb(0 0 0 / 0.25) 120%
+    );
+  background-size:
+    100% 100%,
+    200% 700%,
+    300% 100%,
+    200% 100%;
+  background-position:
+    center,
+    0 calc(var(--hy, 30) * 1%),
+    calc((var(--hx, 50) + var(--hy, 30) * 0.2) * 1%) calc(var(--hy, 30) * 1%),
+    calc(var(--hx, 50) * 1%) calc(var(--hy, 30) * 1%);
+  background-blend-mode: exclusion, hue, hard-light;
+  filter: brightness(calc(0.3 + var(--hmove, 0.08) * 0.3)) contrast(1.5) saturate(2.2);
+  mask: radial-gradient(
+    circle at calc(var(--hx, 50) * 1%) calc(var(--hy, 30) * 1%),
+    #000 0,
+    rgb(0 0 0 / 0.8) 35%,
+    rgb(0 0 0 / 0.35) 80%,
+    rgb(0 0 0 / 0.12) 100%
+  );
+}
+
+/* the same stack the other way round, so two sets of bars cross under the rings */
+html[data-tex='m'] .folder.is-landed .folder__sheet::after {
+  background-position:
+    center,
+    0 calc(100% - var(--hy, 30) * 1%),
+    calc((100 - var(--hx, 50) - var(--hy, 30) * 0.2) * 1%) calc(100% - var(--hy, 30) * 1%),
+    calc(var(--hx, 50) * 1%) calc(var(--hy, 30) * 1%);
+  background-size:
+    100% 100%,
+    200% 400%,
+    195% 100%,
+    200% 100%;
+  mix-blend-mode: exclusion;
+  opacity: calc(var(--hon, 0.3) * 0.5);
+}
+
+html[data-tex='m'] .folder.is-landed .folder__sheet::before {
+  opacity: calc(var(--hon, 0.3) * 0.75);
+}
+
+/* K: fuller, closer to the real card, the bars reach across most of it */
+html[data-tex='k'] .folder.is-landed .folder__sheet::before,
+html[data-tex='k'] .folder.is-landed .folder__sheet::after {
+  --dim: #3b3e43;
+  --peak: #a4a9b0;
+  mask: radial-gradient(
+    circle at calc(var(--hx, 50) * 1%) calc(var(--hy, 30) * 1%),
+    #000 0,
+    rgb(0 0 0 / 0.75) 30%,
+    rgb(0 0 0 / 0.35) 70%,
+    rgb(0 0 0 / 0.04) 100%
+  );
+  -webkit-mask: radial-gradient(
+    circle at calc(var(--hx, 50) * 1%) calc(var(--hy, 30) * 1%),
+    #000 0,
+    rgb(0 0 0 / 0.75) 30%,
+    rgb(0 0 0 / 0.35) 70%,
+    rgb(0 0 0 / 0.04) 100%
+  );
+}
+
+/* P: the copied poke-holo layers (local test only, see cardTextureLab.js). Our own foils off, and
+   their wrapper made inert: no transform or z-index of its own, so its shine and glare blend with
+   the black sheet behind the text, as theirs blend with the card art. */
+html[data-tex='p'] .folder.is-landed .folder__sheet::before,
+html[data-tex='p'] .folder.is-landed .folder__sheet::after {
+  display: none;
+}
+
+.folder__sheet .card {
+  display: none;
+}
+
+/* all: unset drops the site's own .card (project cards) styles too; custom properties survive it */
+html[data-tex='p'] .folder.is-landed .folder__sheet .card {
+  all: unset;
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* the repo clips some rarities (holo, shiny, cosmos...) to a Pokémon card's art box; our host is
+     already the art window, so every clip is the whole box */
+  --clip: inset(0);
+  --clip-invert: inset(0);
+  --clip-stage: inset(0);
+  --clip-stage-invert: inset(0);
+  --clip-trainer: inset(0);
+  --clip-borders: inset(0);
+}
+
+/* their translateZ(1px) would sort the layers in front of the text inside the CSS3D scene */
+html[data-tex='p'] .folder.is-landed .folder__sheet .card > *,
+html[data-tex='p'] .folder.is-landed .folder__sheet .card > *::before,
+html[data-tex='p'] .folder.is-landed .folder__sheet .card > *::after {
+  transform: none !important;
+}
+
+/* display grid + grid-area: the repo stacks each layer's ::before/::after in one cell via its
+   .card__rotator * rule, which we don't have; without it they sat one under the other and the
+   second showed as a band at the bottom of the window */
+html[data-tex='p'] .folder.is-landed .folder__sheet .card > * {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  display: grid;
+  overflow: hidden;
+}
+html[data-tex='p'] .folder.is-landed .folder__sheet .card > *::before,
+html[data-tex='p'] .folder.is-landed .folder__sheet .card > *::after {
+  grid-area: 1 / 1;
+}
+
+html.holo-screen[data-tex='p'] .folder.is-landed .folder__sheet .card > .card__shine {
+  mix-blend-mode: screen;
+}
+
+.tex-lab__name {
+  min-width: 7rem;
+  font-size: var(--fs-xs);
+  color: var(--accent);
+}
+
+.tex-lab__holo {
+  padding: 0.4rem 0.6rem;
+  color: var(--text);
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 999px;
+  font: inherit;
+}
+
+/* ---- the switcher ---- */
+.tex-lab {
+  position: fixed;
+  left: 50%;
+  bottom: 1rem;
+  z-index: 9999;
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  transform: translateX(-50%);
+  background: rgba(10, 10, 10, 0.92);
+  border: 1px solid #333;
+  border-radius: 999px;
+  font: 500 13px/1 var(--font-body);
+}
+
+.tex-lab button {
+  padding: 0.55rem 0.85rem;
+  color: var(--text-dim);
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tex-lab button[aria-pressed='true'] {
+  color: #0a0a0a;
+  background: var(--accent);
+}
+
+/* ---- card layouts (spike): Pokemon-like zones, not a copy. Only on the landed card; the
+   injected .lay-* blocks are hidden everywhere else. Borders on children are a known Firefox
+   thickening issue (see CLAUDE.md), fine for a Chrome-only trial. ---- */
+.lay-cat,
+.lay-art,
+.lay-strip,
+.lay-foot {
+  display: none;
+}
+
+html[data-layout] .folder.is-landed .folder__sheet {
+  display: flex;
+  flex-direction: column;
+}
+
+html[data-layout] .folder.is-landed :is(.lay-cat, .lay-art, .lay-strip, .lay-foot) {
+  display: flex;
+}
+
+/* shared: the footer, like the illustrator line and set number */
+html[data-layout] .folder.is-landed .lay-foot {
+  order: 9;
+  margin-top: auto;
+  justify-content: space-between;
+  padding: 0.3rem 0.7rem 0.4rem;
+  font-size: 0.42rem;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+html[data-layout] .folder.is-landed .lay-art {
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  /* the foil's own blend group, clipped to the frame: the rest of the card stays plain black */
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* ===== A: full card ===== */
+html[data-layout='a'] .folder.is-landed .lay-cat {
+  order: 0;
+  padding: 0.55rem 0.7rem 0;
+}
+
+html[data-layout='a'] .folder.is-landed .lay-cat span {
+  padding: 0.08rem 0.5rem 0.08rem 0.35rem;
+  font-size: 0.4rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #111;
+  background: linear-gradient(90deg, #e9ecef, #9aa1a8);
+  clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+}
+
+html[data-layout='a'] .folder.is-landed .folder__tab {
+  order: 1;
+  padding: 0.15rem 0.7rem 0.35rem;
+  background: none;
+}
+
+html[data-layout='a'] .folder.is-landed .folder__tab .skill-label {
+  order: 1;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* the type symbol before the name: on the right it sat under the close X */
+html[data-layout='a'] .folder.is-landed .folder__tab .skill-icon {
+  order: 0;
+  width: 14px;
+  height: 14px;
+  padding: 3px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand, var(--accent)) 30%, #111);
+  box-sizing: content-box;
+}
+
+html[data-layout='a'] .folder.is-landed .lay-art {
+  order: 2;
+  flex-shrink: 0;
+  /* one size for every card (2026-11-06): 21% and the type sizes below are the largest that fit
+     the fullest card (Unreal) inside the coloured frame, without stepping any card down */
+  height: 21%;
+  margin: 0 0.6rem;
+  border: 2px solid #a7adb3;
+  box-shadow: inset 0 0 0 1px #2b2e31;
+  background: radial-gradient(
+    circle at 50% 45%,
+    color-mix(in srgb, var(--brand, var(--accent)) 45%, transparent),
+    transparent 70%
+  );
+}
+
+html[data-layout='a'] .folder.is-landed .lay-art__logo {
+  height: 62%;
+}
+
+html[data-layout='a'] .folder.is-landed .lay-art__icon {
+  width: auto;
+  height: 100%;
+}
+
+html[data-layout='a'] .folder.is-landed .lay-strip {
+  order: 3;
+  justify-content: center;
+  margin: 0.25rem 1.1rem 0;
+  padding: 0.08rem 0;
+  font-size: 0.42rem;
+  font-style: italic;
+  letter-spacing: 0.05em;
+  color: #c9ced3;
+  background: linear-gradient(90deg, transparent, rgb(167 173 179 / 0.25), transparent);
+}
+
+html[data-layout='a'] .folder.is-landed .folder__body {
+  order: 4;
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem 0.7rem 0;
+}
+
+html[data-layout='a'] .folder.is-landed :is(.folder__badge, .folder__label) {
+  display: none;
+}
+
+/* sentences (Python, Second Brain) and nested items (Substance) in one column: same type size,
+   only the column count changes */
+html[data-layout='a'] .folder.is-landed .lay-long .folder__bullets {
+  grid-template-columns: 1fr;
+}
+
+/* the bullets as attacks: an energy pip pair, the name, a hairline under each */
+html[data-layout='a'] .folder.is-landed .folder__bullets {
+  order: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 0.6rem;
+  margin: 0;
+  font-size: 0.55rem;
+  font-weight: 600;
+}
+
+html[data-layout='a'] .folder.is-landed .folder__bullets > li {
+  margin: 0;
+  padding: 0.08rem 0 0.08rem 1.05rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+}
+
+html[data-layout='a'] .folder.is-landed .folder__bullets > li::before {
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  transform: translateY(-50%);
+  box-shadow: 6px 0 0 var(--brand, var(--accent));
+}
+
+/* with effect text under it, the pip sits on the name's line, not the middle of the block */
+html[data-layout='a'] .folder.is-landed .folder__bullets > li:has(ul)::before {
+  top: calc(0.08rem + 0.7em);
+}
+
+/* nested items (Substance) as the attack's effect text: one small line, dot-separated */
+html[data-layout='a'] .folder.is-landed .folder__bullets ul {
+  display: block;
+  margin: 0.08rem 0 0;
+  padding: 0;
+  font-size: 0.48rem;
+  font-weight: 400;
+  line-height: 1.35;
+  opacity: 0.75;
+}
+
+html[data-layout='a'] .folder.is-landed .folder__bullets ul > li {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+html[data-layout='a'] .folder.is-landed .folder__bullets ul > li::before {
+  content: none;
+}
+
+html[data-layout='a'] .folder.is-landed .folder__bullets ul > li + li::before {
+  content: ' · ';
+  position: static;
+  display: inline;
+  width: auto;
+  height: auto;
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
+
+/* the description as the flavour text */
+html[data-layout='a'] .folder.is-landed .folder__text {
+  order: 1;
+  margin-top: 0.35rem;
+  padding: 0.3rem 0.45rem;
+  font-size: 0.46rem;
+  font-style: italic;
+  line-height: 1.4;
+  border: 1px solid rgb(167 173 179 / 0.35);
+  border-radius: 0.2rem;
+}
+
+/* the card's frame in the skill's own colour (Blender orange, Omniverse green...), like a
+   trading card's yellow border. On .folder, never on the sheet: Firefox draws borders on the
+   CSS3D children at the wrong scale (see CLAUDE.md). Real px of the 500x640 open card. */
+html[data-layout='a'] .folder.is-landed {
+  border: 12px solid var(--brand, var(--accent));
+  border-radius: 1.1rem;
+}
+
+/* ===== B: full art ===== */
+html[data-layout='b'] .folder.is-landed .lay-cat,
+html[data-layout='b'] .folder.is-landed .lay-strip {
+  display: none;
+}
+
+html[data-layout='b'] .folder.is-landed .folder__tab {
+  order: 1;
+  padding: 0.7rem 0.8rem 0;
+  background: none;
+}
+
+html[data-layout='b'] .folder.is-landed .folder__tab .skill-icon {
+  display: none;
+}
+
+html[data-layout='b'] .folder.is-landed .folder__tab .skill-label {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+html[data-layout='b'] .folder.is-landed .lay-art {
+  order: 2;
+  flex: 1;
+}
+
+html[data-layout='b'] .folder.is-landed .lay-art__logo {
+  width: 58%;
+}
+
+html[data-layout='b'] .folder.is-landed .folder__body {
+  order: 3;
+  padding: 0.5rem 0.8rem 0;
+  background: linear-gradient(180deg, transparent, rgb(0 0 0 / 0.55));
+}
+
+html[data-layout='b'] .folder.is-landed :is(.folder__badge, .folder__label, .folder__bullets) {
+  display: none;
+}
+
+html[data-layout='b'] .folder.is-landed .folder__text {
+  font-size: 0.55rem;
+}
+
+/* ===== C: minimal ===== */
+html[data-layout='c'] .folder.is-landed :is(.lay-cat, .lay-strip, .folder__body) {
+  display: none;
+}
+
+html[data-layout='c'] .folder.is-landed .lay-art {
+  order: 1;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+html[data-layout='c'] .folder.is-landed .lay-art__logo {
+  width: 46%;
+}
+
+html[data-layout='c'] .folder.is-landed .folder__tab {
+  order: 2;
+  justify-content: center;
+  padding: 0 0.8rem 1.4rem;
+  background: none;
+}
+
+html[data-layout='c'] .folder.is-landed .folder__tab .skill-icon {
+  display: none;
+}
+
+html[data-layout='c'] .folder.is-landed .folder__tab .skill-label {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ---- embossed, glossy logo (all layouts). --lx/--ly (-1..1) is where the light comes from,
+   written on .lay-art by the lab from the pointer. ---- */
+html[data-layout] .folder.is-landed .lay-art__logo {
+  position: relative;
+  z-index: 1; /* over the foil, which sits at -1 in the window */
+  display: flex;
+}
+
+html[data-layout='b'] .folder.is-landed .lay-art__icon,
+html[data-layout='c'] .folder.is-landed .lay-art__icon {
+  width: 100%;
+  height: auto;
+}
+
+/* raised edge, fixed like a real stamp: light always from above, the rim never moves.
+   (A rim that followed the pointer swapped sides and made the logo look like it wobbled.) */
+html[data-layout] .folder.is-landed .lay-art__icon {
+  filter: drop-shadow(0 -0.6px 0 rgb(255 255 255 / 0.5)) drop-shadow(0 1px 0 rgb(0 0 0 / 0.7))
+    drop-shadow(0 4px 6px rgb(0 0 0 / 0.5));
+}
+
+/* only the sheen moves: a soft diagonal band cut to the logo, sliding a little with the light */
+html[data-layout] .folder.is-landed .lay-art__gloss {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 0.5) 48%, transparent 66%);
+  background-size: 250% 100%;
+  background-position: calc(50% - var(--lx, 0) * 40%) 0;
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  mix-blend-mode: soft-light;
+}
