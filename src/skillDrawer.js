@@ -1486,9 +1486,13 @@ export function initSkillDrawer(host, strip) {
       if (e.pointerType === 'mouse' && f !== active) rotateTo(f, RESTING_QUAT, 0.2, 'power3.out');
       if (f.tiltP && f.el.classList.contains('is-landed')) tiltTo(f, 0, 0);
     });
-    // Mouse only: on touch it would add 3D sorting risk against the filed folders (see PICK_PULL).
+    // Touch too (2026-11-14, Luca's call): a finger dragged on the card tilts it with the foil.
+    // The tilt turns the card about its own centre, so its bounding sphere stays where PICK_PULL
+    // put it, clear of the filed folders' - no new 3D sorting case. A touch pointer is captured
+    // by the card it went down on, so the moves keep coming here; touch-action: none on
+    // .is-landed (skill-card-holo.css) keeps the page from scrolling instead.
     f.el.addEventListener('pointermove', (e) => {
-      if (e.pointerType !== 'mouse' || !f.el.classList.contains('is-landed')) return;
+      if (!f.el.classList.contains('is-landed')) return;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       const r = f.el.getBoundingClientRect();
       tiltTo(

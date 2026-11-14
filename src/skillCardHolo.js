@@ -202,4 +202,13 @@ export function initSkillCardHolo(scene, meta, signal) {
     },
     { signal },
   );
+
+  // a lifted finger is a mouse leaving the card: the light goes back to rest
+  const lift = (e) => {
+    if (e.pointerType === 'mouse') return;
+    const sheet = scene.querySelector('.folder.is-landed .folder__sheet');
+    if (sheet?.querySelector('.lay-art')) pose(ensureFoil(sheet, meta), ...REST, 0.6);
+  };
+  window.addEventListener('pointerup', lift, { signal });
+  window.addEventListener('pointercancel', lift, { signal });
 }

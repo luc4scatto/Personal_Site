@@ -33,6 +33,10 @@ html.holo-cards .folder.is-open .folder__sheet .holo-card > *,
 html.holo-cards .folder.is-open .folder__sheet .holo-card > *::before,
 html.holo-cards .folder.is-open .folder__sheet .holo-card > *::after {
   transform: none !important;
+  /* their will-change (cards.css) gave every layer its own GPU layer, and WebKit (iPad, Chrome
+     iOS too) drops mix-blend-mode across GPU layers: while the card tilted, the cosmos foil
+     painted as flat opaque rainbow, and blended back right only once it stopped */
+  will-change: auto !important;
 }
 
 /* display grid + grid-area: the repo stacks each layer's ::before/::after in one cell via its
@@ -280,6 +284,9 @@ html.holo-cards .folder .folder__text {
 html.holo-cards .folder.is-landed {
   border: 12px solid var(--brand, var(--accent));
   border-radius: 1.1rem;
+  /* a finger dragged on the open card moves the foil, not the page: the drawer box is pan-y,
+     which would scroll and cancel the pointer after a few px */
+  touch-action: none;
 }
 
 /* the same frame on a filed card, at its 250x320 scale. On the sheet because a filed .folder is
@@ -323,13 +330,14 @@ html.holo-cards .folder .lay-art__gloss {
 html.holo-cards .folder .folder__sheet {
   /* painted stock, like a card's type-coloured body: soft clouds lighter and darker than a dark
      tint of the skill colour, never one flat fill. The light ones blend in overlay, so they brighten
-     the tint in its own hue instead of greying it. One SVG per layer stretched over the card, no
+     the tint in its own hue instead of greying it. One image per layer stretched over the card, no
      tiles */
+  /* baked from SVG feTurbulence (light: baseFrequency 0.011 seed 3, dark: 0.009 seed 11, 5
+     octaves each, 250x320 drawn at 500x640): live, every card re-ran the noise at each new 3D
+     scale, ~150ms stalls per card opened on iPad */
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='320'%3E%3Cfilter id='l' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.011' numOctaves='5' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.75 0 0 0 -0.34'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23l)'/%3E%3C/svg%3E")
-      0 0 / 100% 100% no-repeat,
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='320'%3E%3Cfilter id='d' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.009' numOctaves='5' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.05 0 0 0 -0.38'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23d)'/%3E%3C/svg%3E")
-      0 0 / 100% 100% no-repeat,
+    url('/images/card-stock-light.webp') 0 0 / 100% 100% no-repeat,
+    url('/images/card-stock-dark.webp') 0 0 / 100% 100% no-repeat,
     color-mix(in srgb, var(--brand, var(--accent)) 20%, #0a0a0a);
   background-blend-mode: overlay, normal, normal;
 }
@@ -353,8 +361,8 @@ html.holo-cards .folder .folder__sheet::before {
   z-index: 3;
   pointer-events: none;
   /* light fibres: noise turned into alpha, so it reads on black (blend modes vanish on it) */
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4 2.2' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.92 0 0 0 0 0.9 0 0 0 0 0.85 0 0 0 0.22 -0.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E")
-    0 0 / 48px 48px;
+  /* baked from SVG feTurbulence (baseFrequency 1.4 2.2, 2 octaves, 160px stitched tile) */
+  background: url('/images/card-fibre.png') 0 0 / 48px 48px;
 }
 
 /* print, not pixels: the white ink sits slightly soft and warm on the stock */
