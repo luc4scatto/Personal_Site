@@ -508,8 +508,16 @@
      legibly on top of the text. The h1 runs ~20% into this box at 1440 (9vw, wide cut), so
      that first stretch stays clear and the fade finishes past it: at 0-24% a model drifting
      left sat on "ideas" at full strength. */
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 14%, #000 38%);
-  mask-image: linear-gradient(90deg, transparent 0%, transparent 14%, #000 38%);
+  /* the scroll scatter (hero3d.js) pushes objects into every edge: right and bottom fade too,
+     or the canvas rectangle became the outline of the burst */
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, transparent 14%, #000 38%, #000 94%, transparent),
+    linear-gradient(0deg, transparent, #000 14%);
+  mask-image:
+    linear-gradient(90deg, transparent 0%, transparent 14%, #000 38%, #000 94%, transparent),
+    linear-gradient(0deg, transparent, #000 14%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }
 
 #hero-canvas canvas {
@@ -576,9 +584,16 @@
     width: 100%;
     height: 46svh;
     margin-top: 2.5rem;
-    /* band is centered below the text on mobile — no side fade needed */
-    -webkit-mask-image: none;
-    mask-image: none;
+    /* band is centered below the text on mobile: no headline to clear, only soft edges for
+       the scroll scatter, which otherwise cut objects flat on all four sides */
+    -webkit-mask-image:
+      linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent),
+      linear-gradient(0deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image:
+      linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent),
+      linear-gradient(0deg, transparent, #000 12%, #000 88%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
   }
 
   .hero {

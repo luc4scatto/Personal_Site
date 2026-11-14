@@ -76,6 +76,14 @@ const HOVER_SCALE = 1.12; // gentle scale-up while the pointer is over an object
 const PULSE_AMP = 0.18; // extra scale at the peak of a click-me pulse
 // Until the first click one object at a time, near the front, pulses with a ring and a
 // "click me" label (.hero-ping): the random pulses alone did not read as clickable.
+// Scrolling out of the hero blows the cloud apart, an exploded view: every object moves out
+// along its own direction from the centre, up to SCATTER times its radius, and the ones facing
+// the camera faster (SCATTER_FRONT), so they fly past it while the canvas is still on screen.
+// Done when the marquee reaches the top of the window (readScroll). The idle spin slows as it opens (a faster one swept the objects sideways, a vortex
+// instead of a burst). Tied to the scroll, so scrolling back rebuilds it.
+const SCATTER = 2;
+const SCATTER_FRONT = 1.5; // extra spread per unit of a home's depth toward the camera
+const SCATTER_FOLLOW = 0.25; // share of the gap closed per 60Hz frame
 const PING_EVERY = 4.5; // s between pings
 const PING_LIFE = 2; // s a ping stays on screen, the length of its CSS fade
 const GLOW_AMP = 0.5; // emissive flash at the peak of a pulse (same sin curve)
@@ -336,6 +344,25 @@ export function initHero3D(container, signal) {
   document.body.append(ping);
   let invited = false; // set by the first focus: from then on only the old random pulses
   let pingItem = null;
+  let scatter = 0; // eased scroll progress out of the hero, 0..1
+  let scatterTo = 0;
+  // read on scroll, not every frame: a rect read in the loop forces layout whenever the page
+  // has anything dirty
+  // Done when the marquee under the hero reaches the top of the window: that is when the last
+  // of the cloud has left the screen (Luca's call), whatever the layout. Without a marquee,
+  // the hero's own bottom.
+  const marquee = document.querySelector('.marquee');
+  const readScroll = () => {
+    const hero = container.parentElement.getBoundingClientRect();
+    const end = (marquee ?? container.parentElement).getBoundingClientRect();
+    const run = (marquee ? end.top : end.bottom) - hero.top; // scroll from rest to done
+    scatterTo = Math.min(1, Math.max(0, -hero.top / run));
+  };
+  readScroll();
+  scatter = scatterTo; // a reload mid-page starts where the page is, not from a burst
+  on(window, 'scroll', readScroll, { passive: true });
+  on(window, 'resize', readScroll);
+  const heroHint = document.querySelector('.hero-hint');
   let pingAt = 0;
   let nextPing = 1.5;
   const placePing = () => {
@@ -748,7 +775,16 @@ export function initHero3D(container, signal) {
     }
     timer.update(time);
     const t = timer.getElapsed();
-    if (!invited && !focusedItem && !dragging && t > nextPing) {
+    // frames at 60Hz this one stands for: the easing and the spin run at the same speed on a
+    // 120Hz screen (capped, so a stalled tab does not jump)
+    const f = Math.min(3, timer.getDelta() * 60);
+    // eased so a wheel's steps read as one motion, per real time
+    scatter += (scatterTo - scatter) * (1 - (1 - SCATTER_FOLLOW) ** f);
+    const opened = scatter * scatter * (3 - 2 * scatter); // smoothstep: no dead start
+    // nothing left to click once the cloud is apart: the invites wait for it to come back
+    const apart = scatter > 0.1;
+    heroHint?.classList.toggle('is-hidden', invited || apart);
+    if (!invited && !apart && !focusedItem && !dragging && t > nextPing) {
       nextPing = t + PING_EVERY;
       pingItem = pickPing();
       if (pingItem) {
@@ -762,14 +798,17 @@ export function initHero3D(container, signal) {
     }
     items.forEach((it) => {
       const wander = it === focusedItem ? 0 : (it.wander ?? WANDER);
+      // how far this home faces the camera, in the cloud's current turn
+      const front = Math.max(0, tmpV.copy(it.home).applyQuaternion(group.quaternion).z);
+      const spread = 1 + opened * SCATTER * (1 + (front / 3) * SCATTER_FRONT);
       it.wrapper.position.set(
-        it.home.x + Math.sin(t * it.freq + it.phase) * wander,
-        it.home.y + Math.sin(t * it.freq * 0.8 + it.phase * 2) * wander,
-        it.home.z + Math.cos(t * it.freq * 0.6 + it.phase) * wander,
+        it.home.x * spread + Math.sin(t * it.freq + it.phase) * wander,
+        it.home.y * spread + Math.sin(t * it.freq * 0.8 + it.phase * 2) * wander,
+        it.home.z * spread + Math.cos(t * it.freq * 0.6 + it.phase) * wander,
       );
-      it.wrapper.rotation.x += it.spin.x;
-      it.wrapper.rotation.y += it.spin.y;
-      it.wrapper.rotation.z += it.spin.z;
+      it.wrapper.rotation.x += it.spin.x * f;
+      it.wrapper.rotation.y += it.spin.y * f;
+      it.wrapper.rotation.z += it.spin.z * f;
 
       if (it.clickable) {
         // ease the focus scale up/down
@@ -821,7 +860,7 @@ export function initHero3D(container, signal) {
       }
       // only once the cloud has come to rest, so it never fights the hand
       if (!dragging && !throwing) settleRoll();
-      autoSpin += 0.001;
+      autoSpin += 0.001 * (1 - opened) * f;
       parallaxY += (mouse.x * 0.35 - parallaxY) * 0.03;
       parallaxX += (mouse.y * 0.2 - parallaxX) * 0.03;
       // idle spin and mouse parallax stay screen-relative, so they're applied on the
