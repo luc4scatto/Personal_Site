@@ -74,6 +74,10 @@ const WANDER = 0.3;
 const FOCUS_SCALE = 1.3;
 const HOVER_SCALE = 1.12; // gentle scale-up while the pointer is over an object
 const PULSE_AMP = 0.18; // extra scale at the peak of a click-me pulse
+// Until the first click one object at a time, near the front, pulses with a ring and a
+// "click me" label (.hero-ping): the random pulses alone did not read as clickable.
+const PING_EVERY = 4.5; // s between pings
+const PING_LIFE = 2; // s a ping stays on screen, the length of its CSS fade
 const GLOW_AMP = 0.5; // emissive flash at the peak of a pulse (same sin curve)
 const BLUR_STRENGTH = 2.5; // gaussian blur radius (in texels) applied while focused
 // directional smear while the sphere is being spun — a cheap stand-in for real motion
@@ -323,6 +327,39 @@ export function initHero3D(container, signal) {
   const ndc = new THREE.Vector2();
   const tmpV = new THREE.Vector3();
   let focusedItem = null;
+  // the invite: on <body> like the info card, placed from the loop
+  const ping = document.createElement('div');
+  ping.className = 'hero-ping';
+  ping.setAttribute('aria-hidden', 'true'); // the .hero-hint line says it in words
+  ping.innerHTML = '<span class="hero-ping__ring"></span><span class="hero-ping__label"></span>';
+  const pingText = COARSE_POINTER ? content.hero.pingTouch : content.hero.ping;
+  document.body.append(ping);
+  let invited = false; // set by the first focus: from then on only the old random pulses
+  let pingItem = null;
+  let pingAt = 0;
+  let nextPing = 1.5;
+  const placePing = () => {
+    pingItem.wrapper.getWorldPosition(tmpV).project(camera);
+    const r = renderer.domElement.getBoundingClientRect();
+    const x = r.left + (tmpV.x * 0.5 + 0.5) * r.width;
+    const y = r.top + (-tmpV.y * 0.5 + 0.5) * r.height;
+    ping.style.transform = `translate(${x}px, ${y}px)`;
+    // near the right edge (phones, the cloud's right side) the label goes on the left
+    const left = x > window.innerWidth - 170;
+    ping.classList.toggle('is-left', left);
+    const text = left ? `${pingText} →` : `← ${pingText}`;
+    if (ping.lastChild.textContent !== text) ping.lastChild.textContent = text;
+  };
+  // one of the three objects nearest the camera, well inside the frame, not the last one
+  const pickPing = () => {
+    const near = items
+      .filter((it) => it.clickable && it !== pingItem)
+      .map((it) => ({ it, p: it.wrapper.getWorldPosition(new THREE.Vector3()).project(camera) }))
+      .filter(({ p }) => Math.abs(p.x) < 0.6 && Math.abs(p.y) < 0.7)
+      .sort((a, b) => a.p.z - b.p.z)
+      .slice(0, 3);
+    return near[Math.floor(Math.random() * near.length)]?.it ?? null;
+  };
   // assigned at the bottom of init, once the renderer's loop exists; declared here because
   // focus()/unfocus() below call it and they are defined long before it
   let syncLoop = () => {};
@@ -352,6 +389,14 @@ export function initHero3D(container, signal) {
   function focus(item, triggerEl) {
     if (focusedItem === item) return;
     document.querySelector('.hero-hint')?.classList.add('is-hidden');
+    if (!invited) {
+      // the random pulses take over from here, spread out rather than all due at once
+      const now = timer.getElapsed();
+      items.forEach((it) => (it.nextPulse = now + 3 + Math.random() * 5));
+    }
+    invited = true;
+    ping.classList.remove('is-on');
+    pingItem = null;
     if (focusedItem) focusedItem.wrapper.traverse((o) => o.layers.set(0));
     focusedItem = item;
     syncLoop(); // the card is position: fixed and only repositioned from the loop
@@ -703,6 +748,18 @@ export function initHero3D(container, signal) {
     }
     timer.update(time);
     const t = timer.getElapsed();
+    if (!invited && !focusedItem && !dragging && t > nextPing) {
+      nextPing = t + PING_EVERY;
+      pingItem = pickPing();
+      if (pingItem) {
+        pingAt = t;
+        pingItem.pulseStart = t;
+        pingItem.pulseUntil = t + 0.6;
+        ping.classList.remove('is-on');
+        void ping.offsetWidth; // restart the CSS animation
+        ping.classList.add('is-on');
+      }
+    }
     items.forEach((it) => {
       const wander = it === focusedItem ? 0 : (it.wander ?? WANDER);
       it.wrapper.position.set(
@@ -718,7 +775,7 @@ export function initHero3D(container, signal) {
         // ease the focus scale up/down
         it.focusAmt += ((it === focusedItem ? 1 : 0) - it.focusAmt) * 0.15;
         // occasional "click me" pulse, only when nothing is focused
-        if (!focusedItem && t > it.nextPulse) {
+        if (invited && !focusedItem && t > it.nextPulse) {
           it.pulseStart = t;
           it.pulseUntil = t + 0.6;
           it.nextPulse = t + 3 + Math.random() * 5;
@@ -742,6 +799,12 @@ export function initHero3D(container, signal) {
         it.wrapper.scale.setScalar(focusScale * hoverScale * pulse);
       }
     });
+
+    if (pingItem && t - pingAt > PING_LIFE) {
+      ping.classList.remove('is-on');
+      pingItem = null;
+    }
+    if (pingItem) placePing();
 
     // freeze rotation while focused so the object (and its card) stay put
     if (!focusedItem) {
@@ -827,6 +890,7 @@ export function initHero3D(container, signal) {
     renderer.dispose();
     renderer.forceContextLoss();
     info.el.remove();
+    ping.remove();
     document.body.style.cursor = '';
   });
 }

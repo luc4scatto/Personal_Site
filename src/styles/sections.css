@@ -609,6 +609,92 @@
   pointer-events: none;
 }
 
+/* the invite on the sphere itself (hero3d.js): a ring ripples out from one object at a time,
+   with a label beside it, until the first click. Placed by the loop with a transform. */
+.hero-ping {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.hero-ping.is-on {
+  animation: hero-ping-fade 2s ease-out forwards;
+}
+
+.hero-ping__ring,
+.hero-ping::before {
+  position: absolute;
+  top: -2rem;
+  left: -2rem;
+  width: 4rem;
+  height: 4rem;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* a second ring half a beat behind: one ring read as a blink, two as a ripple. On the
+   wrapper, not inside the first ring, or it would scale with it */
+.hero-ping::before {
+  content: '';
+}
+
+.hero-ping.is-on .hero-ping__ring {
+  animation: hero-ping-ring 1s ease-out 2;
+}
+
+.hero-ping.is-on::before {
+  animation: hero-ping-ring 1s ease-out 0.35s 2 backwards;
+}
+
+.hero-ping__label {
+  position: absolute;
+  top: 0;
+  left: 2.8rem;
+  transform: translateY(-50%);
+  padding: 0.2rem 0.65rem;
+  white-space: nowrap;
+  color: var(--text);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.04em;
+  /* a dark pill: bare text vanished over the busy cloud behind it */
+  background: rgb(10 10 10 / 0.75);
+  border: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  border-radius: 999px;
+}
+
+.hero-ping.is-left .hero-ping__label {
+  right: 2.8rem;
+  left: auto;
+}
+
+@keyframes hero-ping-ring {
+  from {
+    transform: scale(0.4);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes hero-ping-fade {
+  0% {
+    opacity: 0;
+  }
+  10%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 @media (max-width: 700px), (max-width: 1024px) and (orientation: portrait) {
   .hero-hint {
     order: 2;

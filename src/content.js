@@ -15,6 +15,9 @@ export const content = {
       'I build 2D-3D pipelines across every major DCC tool, \nalso powering configurators and interactive 3D experiences, \nwith a touch of AI.',
     hint: '✦ click on an object to learn more',
     hintTouch: '✦ tap an object to learn more',
+    // label beside the ring that pings one object at a time until the first click (hero3d.js)
+    ping: 'click me',
+    pingTouch: 'tap me',
     cta: 'See my work ↓',
   },
   // scrolling marquee band between hero and about (src/main.js builds the loop from this array)
