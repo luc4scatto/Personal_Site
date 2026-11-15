@@ -355,8 +355,13 @@ export function initHero3D(container, signal) {
   const readScroll = () => {
     const hero = container.parentElement.getBoundingClientRect();
     const end = (marquee ?? container.parentElement).getBoundingClientRect();
-    const run = (marquee ? end.top : end.bottom) - hero.top; // scroll from rest to done
-    scatterTo = Math.min(1, Math.max(0, -hero.top / run));
+    const done = (marquee ? end.top : end.bottom) - hero.top; // scroll from rest to done
+    // and it waits until the cloud is in the middle of the window, still whole: on a phone the
+    // band sits under the text, below the fold, and burst while it was still coming in (Luca's
+    // call). Zero on desktop, where the canvas is the hero and already centred.
+    const box = container.getBoundingClientRect();
+    const start = Math.max(0, (box.top + box.bottom) / 2 - hero.top - innerHeight / 2);
+    scatterTo = Math.min(1, Math.max(0, (-hero.top - start) / (done - start)));
   };
   readScroll();
   scatter = scatterTo; // a reload mid-page starts where the page is, not from a burst
