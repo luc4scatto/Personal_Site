@@ -37,7 +37,8 @@ export const content = {
   about: {
     paragraph:
       'I started in 3D at **EssilorLuxottica**: over four years as a 3D Render Specialist on **Prada Group**, **Burberry** and **Oliver Peoples** eyewear, the last two spent building the 3D pipeline itself.\n' +
-      "Today I'm in the 3D R&D team at **Thélios** (**LVMH** eyewear). I build internal tools for several departments and run the 3D pipeline, from 2D design to renders, configurators and videos.\n",
+      "Today I'm in the 3D R&D team at **Thélios** (**LVMH** eyewear). I build internal tools for several departments and run the 3D pipeline, from 2D design to renders, configurators and videos.\n" +
+      'With the team, I moved that pipeline to **USD** and to approvals in 3D: about a quarter off concept-to-market time, a third fewer last-minute design changes and half the physical samples.\n',
   },
   projects: {
     vivatech: {
