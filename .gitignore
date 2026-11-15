@@ -13,3 +13,4 @@ plans/001-drawer-card-open-close-timing.md
 
 # local Claude Code config (agents, skills, settings, locks)
 .claude/
+.taste-skill

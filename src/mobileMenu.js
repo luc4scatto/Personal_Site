@@ -62,6 +62,7 @@ export function initMobileMenu() {
   button.setAttribute('aria-label', 'Menu');
   button.setAttribute('aria-haspopup', 'dialog');
   button.setAttribute('aria-controls', 'mobile-menu');
+  button.setAttribute('aria-expanded', 'false');
   button.innerHTML = ICON('M4 7h16M4 12h16M4 17h16');
 
   const dialog = document.createElement('dialog');
@@ -94,7 +95,10 @@ export function initMobileMenu() {
       else a.removeAttribute('aria-current');
     });
     dialog.showModal();
+    button.setAttribute('aria-expanded', 'true');
   });
+  // every way out (X, link, backdrop, Esc) ends in the dialog's close event
+  dialog.addEventListener('close', () => button.setAttribute('aria-expanded', 'false'));
   close.addEventListener('click', () => dialog.close());
   // a link (an anchor on this page or another page) or a tap on the backdrop closes it
   dialog.addEventListener('click', (e) => {

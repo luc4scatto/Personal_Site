@@ -233,7 +233,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem var(--pad-x);
+  padding: 1rem var(--edge);
   background: color-mix(in srgb, var(--bg) 80%, transparent);
   backdrop-filter: blur(10px);
   z-index: 10;
@@ -468,6 +468,8 @@
 .hero {
   min-height: 100svh;
   max-width: none;
+  /* full-bleed box (the canvas runs to the screen edge), text on the sections' column */
+  padding-inline: var(--edge);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -722,6 +724,15 @@
   }
 }
 
+/* wide screens: the text starts on the sections' column (--edge), which moves right faster
+   than the canvas's left edge (50%), so the h1 shrinks to keep the run into the sphere it had
+   when it started at --pad-x: about 144px at 1440 (95px type, 7.14 widths of "Bringing ideas") */
+@media (min-width: 1367px) {
+  .hero h1 {
+    font-size: min(7rem, calc(1.4vw + 4.7rem));
+  }
+}
+
 /* tablets in portrait: text block + 3D band both have to fit one 100svh hero, and at
    9vw the two headline lines alone eat half of it — the kicker ended up clipped behind
    the nav and the sphere ran off the bottom edge */
@@ -853,6 +864,49 @@
   text-shadow: none;
 }
 
+/* pause: a dark knob at the band's right end (base.css materials); 36px drawn, 44px to tap */
+.marquee-pause {
+  position: absolute;
+  top: 50%;
+  right: var(--pad-x);
+  z-index: 1;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin-top: -1.125rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text);
+  background: var(--knob-bg);
+  background-blend-mode: var(--knob-blend);
+  box-shadow: var(--knob-shadow);
+  cursor: pointer;
+}
+
+.marquee-pause::before {
+  content: '';
+  position: absolute;
+  inset: -0.25rem;
+}
+
+.marquee-pause:active {
+  box-shadow: var(--knob-shadow-pressed);
+}
+
+.marquee-pause .marquee-pause__play,
+.marquee-pause[aria-pressed='true'] .marquee-pause__bars {
+  display: none;
+}
+
+.marquee-pause[aria-pressed='true'] .marquee-pause__play {
+  display: inline;
+}
+
+.marquee-track.is-paused {
+  animation-play-state: paused;
+}
+
 @keyframes marquee {
   to {
     transform: translateX(-50%);
@@ -862,6 +916,10 @@
 @media (prefers-reduced-motion: reduce) {
   .marquee-track {
     animation: none;
+  }
+
+  .marquee-pause {
+    display: none;
   }
 
   /* the invitation still reads — it's information, not decoration — just without the shine */
@@ -2656,18 +2714,25 @@ html.is-animating .footer {
   --fade-r: 0px;
   -webkit-mask-image: linear-gradient(
     to right,
-    transparent 0,
+    transparent calc(var(--fade-l) * 0.35),
     #000 var(--fade-l),
     #000 calc(100% - var(--fade-r)),
-    transparent 100%
+    transparent calc(100% - var(--fade-r) * 0.35)
   );
   mask-image: linear-gradient(
     to right,
-    transparent 0,
+    transparent calc(var(--fade-l) * 0.35),
     #000 var(--fade-l),
     #000 calc(100% - var(--fade-r)),
-    transparent 100%
+    transparent calc(100% - var(--fade-r) * 0.35)
   );
+}
+
+/* the grid's edge mask cuts its own outline: the ring goes on the scroller around it */
+.projects-scroller:has(.projects-grid:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 0.5rem;
+  border-radius: 1rem;
 }
 
 .projects-grid::-webkit-scrollbar {
@@ -4664,6 +4729,9 @@ p.project-specs__kicker {
     gap: 0.75rem;
     min-height: 3.25rem;
     padding: 0.6rem 0.9rem;
+    /* flat rows, no brand wash, open or closed (Luca, 2026-11-15): the colour is the logo
+       and, on the open row, the border */
+    background: var(--surface);
   }
 
   /* inside a list the lift reads as a wobble; the wash and border carry the state */
@@ -4688,9 +4756,67 @@ p.project-specs__kicker {
     opacity: 1;
   }
 
+  /* One piece with the tool's row, the row as its header (Luca, 2026-11-15: two frames with
+     the name twice read as two things). One outline, drawn by the card alone: the card box
+     reaches up over its row (--row-h, the row's height, set by main.js), transparent there,
+     and its border runs round both. The row's own border goes transparent meanwhile. GSAP
+     grows the box from the row's height, never from 0, so its corners are always fully
+     round, and closed it is the row's own outline: the hand back is invisible. Two outlines
+     (the row's, the card's) drew a step where they met while the card was shorter than its
+     corners, the line that made the close look like it snapped. */
   .skills-grid > .skill-card {
     /* clears the fixed nav when scrollIntoView() brings it up */
     scroll-margin: 5rem 0 1rem;
+    /* up over the row: the grid's 0.5rem gap and the row itself */
+    margin-top: calc(-0.5rem - var(--row-h, 0px));
+    /* less the 2px of border, so folded shut the box is exactly the row's height (border-box
+       never goes below padding + border); the fill starts at the row's bottom edge (its
+       stops count from inside the 1px top border) */
+    padding-top: calc(var(--row-h, 2px) - 2px);
+    border: 1px solid color-mix(in srgb, var(--brand, var(--accent)) 70%, transparent);
+    border-radius: 0.9rem;
+    background: linear-gradient(transparent calc(var(--row-h, 1px) - 1px), var(--surface) 0);
+    /* above the row (position: relative, so it would paint over the outline); the row under
+       it stays the tap target, the content takes taps again (.skill-card__inner) */
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .skills-grid > li.is-joined {
+    border-color: transparent;
+  }
+
+  /* the card's outline handed back to the row (main.js unjoin): same colour for a frame, then
+     the row's usual transition to its resting border */
+  .skills-grid > li.is-handover {
+    border-color: color-mix(in srgb, var(--brand, var(--accent)) 70%, transparent);
+  }
+
+  .skills-grid > .skill-card .skill-card__inner {
+    pointer-events: auto;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+    /* same inline padding as the row, so the content lines up under the tool's logo */
+    padding: 1rem 0.9rem 1.5rem;
+  }
+
+  /* the row above already names the tool: the heading stays for screen readers only */
+  .skills-grid > .skill-card .skill-card__title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* the close button in the header row, level with the tool's name */
+  .skills-grid > .skill-card .skill-card__close {
+    top: calc(var(--row-h, 3.25rem) / -2 - 1.125rem);
+    right: 0.6rem;
   }
 
   .skills.is-focused .skills-hint {

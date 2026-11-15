@@ -83,8 +83,12 @@
         <a class="btn" href="#projects" data-stagger data-copy="hero.cta">See my work ↓</a>
       </section>
 
-      <div class="marquee" aria-hidden="true">
-        <div class="marquee-track" id="marquee-track"></div>
+      <div class="marquee">
+        <div class="marquee-track" id="marquee-track" aria-hidden="true"></div>
+        <!-- WCAG 2.2.2: moves past 5s, so it can be stopped (main.js) -->
+        <button class="marquee-pause" type="button" aria-pressed="false" aria-label="Pause the scrolling band">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path class="marquee-pause__bars" d="M5 3v10M11 3v10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" /><path class="marquee-pause__play" d="M5 3l8 5-8 5z" fill="currentColor" /></svg>
+        </button>
       </div>
 
       <section id="projects" class="projects">
@@ -238,10 +242,11 @@
         <div class="contact-intro">
           <h2 data-reveal>Let's talk</h2>
           <p data-reveal data-copy="contact.tagline">Got a project in mind or just want to say hi?</p>
-          <!-- not in content.js: [data-copy] writes plain text, and Padua is a link. No address
-               on purpose, the form keeps it off the page (contact.formEndpoint) -->
+          <!-- not in content.js: [data-copy] writes plain text and this has <br>s. No address
+               on purpose, the form keeps it off the page (contact.formEndpoint). Padua is plain
+               text: a map of a whole city answers nothing -->
           <p class="contact-details" data-reveal>
-            Based in <a href="https://www.google.com/maps/search/?api=1&amp;query=Padua%2C%20Italy" target="_blank" rel="noopener">Padua, Italy</a>.<br />
+            Based in Padua, Italy.<br />
             Open to consulting on 3D pipelines and real-time projects. Not looking for a new role, but always happy to talk.<br />
             I usually reply within a few hours.
           </p>

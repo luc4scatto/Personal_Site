@@ -160,6 +160,16 @@ function initPage(signal, firstLoad) {
     marqueeTrack.innerHTML = [...words, ...words]
       .map((w) => `<span>${escapeHtml(w)}</span>`)
       .join('');
+    const pause = marqueeTrack.parentElement.querySelector('.marquee-pause');
+    pause?.addEventListener('click', () => {
+      const paused = pause.getAttribute('aria-pressed') !== 'true';
+      pause.setAttribute('aria-pressed', String(paused));
+      pause.setAttribute(
+        'aria-label',
+        paused ? 'Play the scrolling band' : 'Pause the scrolling band',
+      );
+      marqueeTrack.classList.toggle('is-paused', paused);
+    });
   }
 
   // arriving with a hash already in the URL (e.g. a project sub-page's footer Contact link)
@@ -285,6 +295,28 @@ function initPage(signal, firstLoad) {
 
     let activeEl = null;
 
+    // Phone: the card box reaches up over the row it hangs from and draws one outline round
+    // both (sections.css, .skill-card); the row's own border is hidden meanwhile (.is-joined).
+    // The box never gets shorter than the row, so the outline is always fully round, and at
+    // the end of a close it is exactly the row's own outline. unjoin() hands the border back
+    // with no fade in between: same colour for a frame (.is-handover), then the row's usual
+    // transition to its resting colour.
+    const rowHeight = () => card.previousElementSibling?.offsetHeight ?? 0;
+    const join = (li) => {
+      card.style.setProperty('--row-h', `${li.offsetHeight}px`);
+      li.classList.add('is-joined');
+    };
+    const unjoin = () => {
+      document.querySelectorAll('.skills-grid > li.is-joined').forEach((l) => {
+        l.style.transition = 'none';
+        l.classList.add('is-handover');
+        l.classList.remove('is-joined');
+        void l.offsetWidth; // apply the swap now, without the transition
+        l.style.transition = '';
+        requestAnimationFrame(() => l.classList.remove('is-handover'));
+      });
+    };
+
     const closeCard = (instant) => {
       if (!activeEl) return;
       activeEl.classList.remove('is-active');
@@ -295,16 +327,31 @@ function initPage(signal, firstLoad) {
       gsap.killTweensOf(card);
       if (instant || isReduced()) {
         card.remove();
+        unjoin();
         return;
       }
+      // phone: the content, close button included (it sits up in the row, outside the part
+      // the fold clips), fades out as the box folds back into its row
+      if (IS_PHONE_SKILLS_LAYOUT) {
+        gsap.killTweensOf(inner);
+        gsap.to(inner, { opacity: 0, duration: 0.22, ease: 'power2.out' });
+      }
       gsap.to(card, {
-        height: 0,
-        opacity: 0,
-        duration: 0.32,
+        // phone: the box folds back into its header row, solid, instead of fading off it
+        height: IS_PHONE_SKILLS_LAYOUT ? rowHeight() : 0,
+        opacity: IS_PHONE_SKILLS_LAYOUT ? 1 : 0,
         // exits read as responsive starting fast, same as entrances — power2.in delayed the
-        // moment the card actually started collapsing, right when the click expects a reaction
-        ease: 'power2.out',
-        onComplete: () => card.remove(),
+        // moment the card actually started collapsing, right when the click expects a reaction.
+        // Phone (Luca, 2026-11-15, a stutter on close): power2.out over 0.32s set off at ~30px
+        // a frame and then crept the last pixels one at a time, which read as a twitch on a
+        // phone screen. sine.inOut over 0.42s gathers speed and settles evenly, closer to the
+        // open's 0.55s, and has no long one-pixel tail before the row takes the outline back.
+        duration: IS_PHONE_SKILLS_LAYOUT ? 0.42 : 0.32,
+        ease: IS_PHONE_SKILLS_LAYOUT ? 'sine.inOut' : 'power2.out',
+        onComplete: () => {
+          card.remove();
+          unjoin();
+        },
       });
     };
 
@@ -341,26 +388,66 @@ function initPage(signal, firstLoad) {
       gsap.killTweensOf(inner);
       if (mount) mount.append(card);
       else li.after(card);
+      if (IS_PHONE_SKILLS_LAYOUT) {
+        unjoin();
+        join(li);
+      }
       if (isReduced()) {
         gsap.set(card, { height: 'auto', opacity: 1 });
         gsap.set(inner, { y: 0, opacity: 1 });
         revealCard(false);
         return;
       }
+      // phone: a new card starts folded into its row (the row's height), not at 0
+      const startHeight = movingRow
+        ? IS_PHONE_SKILLS_LAYOUT
+          ? li.offsetHeight
+          : 0
+        : card.offsetHeight;
+      // phone: one movement. The unfold and the scroll that brings the card into view run on
+      // the same tween, same curve, same clock (Luca, 2026-11-15). A native smooth scroll after
+      // the unfold read as open, stop, move again; one started alongside it still had its own
+      // slow-in curve and length. Aimed at the card's final height (5rem under the nav, 1rem
+      // over the bottom edge), with the tool's row, the card's header here, in view too.
+      if (IS_PHONE_SKILLS_LAYOUT) {
+        gsap.set(card, { height: 'auto' });
+        const r = card.getBoundingClientRect();
+        const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        const top = li.getBoundingClientRect().top - 5 * rem;
+        const below = r.bottom - (innerHeight - rem);
+        const delta = top < 0 ? top : Math.min(Math.max(below, 0), top);
+        const y0 = window.scrollY;
+        // the box is solid from the first frame, with its border all round: only its content
+        // fades in, so it grows out of the header row as one piece
+        gsap.fromTo(
+          card,
+          { height: startHeight, opacity: 1 },
+          {
+            height: 'auto',
+            opacity: 1,
+            duration: 0.55,
+            ease: 'power2.out',
+            // 'instant': html has scroll-behavior: smooth, which would chase every step
+            onUpdate() {
+              if (delta) window.scrollTo({ top: y0 + delta * this.ratio, behavior: 'instant' });
+            },
+          },
+        );
+        gsap.fromTo(
+          inner,
+          { opacity: movingRow ? 0 : 0.4 },
+          { opacity: 1, duration: 0.55, ease: 'power2.out' },
+        );
+        return;
+      }
       // switching within a row is a content swap, not a second unfold: only the height
       // re-measures. Landing in a new row unfolds from nothing.
       gsap.fromTo(
         card,
-        { height: movingRow ? 0 : card.offsetHeight, opacity: movingRow ? 0 : 1 },
+        { height: startHeight, opacity: movingRow ? 0 : 1 },
         // 0.35, not the 0.55 this shipped with: this is the answer to a tap, and it animates
         // height, which relayouts - the shorter it runs, the less of that there is to drop
-        {
-          height: 'auto',
-          opacity: 1,
-          duration: 0.35,
-          ease: 'power3.out',
-          onComplete: () => revealCard(true),
-        },
+        { height: 'auto', opacity: 1, duration: 0.35, ease: 'power3.out' },
       );
       gsap.fromTo(
         inner,

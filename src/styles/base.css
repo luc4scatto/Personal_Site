@@ -70,6 +70,10 @@
 
   --space: clamp(4rem, 10vh, 8rem);
   --pad-x: clamp(1.25rem, 5vw, 4rem);
+  /* the content column's left/right edge: sections are 1200px wide (border-box) and padded by
+     --pad-x, so a full-width box (nav, hero) padded by --edge lines up with them. 100% is the
+     containing block, so it only works on a direct child of body/main. */
+  --edge: max(var(--pad-x), calc((100% - 1200px) / 2 + var(--pad-x)));
 
   /* motion: strong curves for anything that moves or fades on its own (GSAP's power3/4
      already cover JS-driven motion — these are for the CSS transitions in this file and
@@ -319,7 +323,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem var(--pad-x);
+  padding: 1rem var(--edge);
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(10px);
   border-top: 1px solid #1c1c1c;
