@@ -206,7 +206,7 @@ export function initHero3D(container, signal) {
   objectNav.setAttribute('aria-label', '3D showcase objects');
   // one Tab to get past the whole list, not one per object
   const skip = document.createElement('a');
-  skip.href = '#about';
+  skip.href = '#projects';
   skip.textContent = 'Skip the 3D object list';
   objectNav.appendChild(skip);
   const objectButtons = GLB_MODELS.map((model) => {

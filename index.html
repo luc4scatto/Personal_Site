@@ -55,9 +55,9 @@
     <header class="nav">
       <a class="nav-logo" href="#hero">LS</a>
       <nav>
+        <a href="#projects">Projects</a>
         <a href="#about">About</a>
         <a href="#skills">Skills</a>
-        <a href="#projects">Projects</a>
         <a href="#contact">Contact</a>
         <a href="cv/Luca-Scattolin-CV.pdf" download>CV</a>
       </nav>
@@ -74,7 +74,7 @@
           <span class="hero-line"><span class="hero-line-inner" data-copy="hero.line1">I bring ideas</span></span>
           <span class="hero-line"><span class="hero-line-inner"><span data-copy="hero.line2Prefix">to life with</span> <span class="accent">3D</span>.</span></span>
         </h1>
-        <p class="hero-subtitle" data-stagger data-copy="hero.subtitle">3D Technical Artist &amp; Creative Technologist</p>
+        <p class="hero-subtitle" data-stagger data-copy="hero.subtitle">3D Technical Artist at Thélios (LVMH)</p>
         <p class="hero-tagline" data-stagger data-copy="hero.tagline">
           I build 2D-3D pipelines across every major DCC tool, <br />
           also powering configurators and interactive 3D experiences, <br />
@@ -86,6 +86,57 @@
       <div class="marquee" aria-hidden="true">
         <div class="marquee-track" id="marquee-track"></div>
       </div>
+
+      <section id="projects" class="projects">
+        <h2 data-reveal>Projects</h2>
+        <div class="projects-scroller" id="projects-scroller">
+        <button class="projects-arrow projects-arrow--prev" type="button" aria-label="Previous projects" hidden>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
+        <div class="projects-grid" tabindex="0" role="region" aria-label="Projects, scrolls horizontally">
+          <article class="card" data-reveal>
+            <img class="card-thumb" src="images/1782142834983.webp" alt="Thélios booth at the LVMH Dream Gallery, Vivatech Paris" width="2048" height="1365" loading="lazy" />
+            <p class="card-kicker" data-copy="vivatech.kicker">Live installation</p>
+            <h3 data-copy="projects.vivatech.title">Vivatech Interactive Experience</h3>
+            <p data-copy="projects.vivatech.description">Gesture-driven installation in TouchDesigner and Unreal, built in 3 weeks and live all four days at Vivatech Paris.</p>
+            <div class="card-links">
+              <a href="vivatech.html">See the installation →</a>
+            </div>
+          </article>
+          <article class="card" data-reveal>
+            <img class="card-thumb" src="images/pipeline-projects-cover.webp" alt="Redrawn look-dev panel with collapsible import, materials, render and view sections" width="1600" height="1200" loading="lazy" />
+            <p class="card-kicker" data-copy="pipelineProjects.kicker">Pipeline tools</p>
+            <h3 data-copy="projects.pipeline.title">Pipeline Projects</h3>
+            <p data-copy="projects.pipeline.description">Five in-house tools for Maya, Unreal, Omniverse and PowerPoint, used daily by the 3D team: hundreds of hours saved.</p>
+            <div class="card-links">
+              <a href="pipeline-projects.html">See the five tools →</a>
+            </div>
+          </article>
+          <article class="card" data-reveal>
+            <img class="card-thumb" src="images/company-brain-cover.svg" alt="Redrawn chat: a question about a collection and an answer with a price chart and its sources" width="1600" height="1000" loading="lazy" />
+            <p class="card-kicker" data-copy="companyBrain.kicker">AI assistant</p>
+            <h3 data-copy="projects.companyBrain.title">Company Brain</h3>
+            <p data-copy="projects.companyBrain.description">A self-hosted AI assistant for product questions, on live company data. In pilot with 7 users, nothing leaves the company.</p>
+            <div class="card-links">
+              <a href="company-brain.html">Try the demo →</a>
+            </div>
+          </article>
+          <article class="card" data-reveal>
+            <img class="card-thumb" style="object-position: 50% 70%" src="images/homelab-case.webp" alt="Front of the 3D-printed homelab rack: 2.5G switch with JetKVM, HP EliteDesk and Lenovo ThinkCentre stacked below" width="1800" height="2400" loading="lazy" />
+            <p class="card-kicker" data-copy="homelab.kicker">Personal project</p>
+            <h3 data-copy="projects.three.title">Homelab</h3>
+            <p data-copy="projects.three.description">A two-node Proxmox cluster and a UniFi NAS in a 3D-printed rack, running media, backups and an AI agent.</p>
+            <div class="card-links">
+              <a href="homelab.html">Tour the rack →</a>
+            </div>
+          </article>
+        </div>
+        <button class="projects-arrow projects-arrow--next" type="button" aria-label="Next projects" hidden>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+        </button>
+        <p class="projects-count" aria-hidden="true">1 / 4</p>
+      </div>
+      </section>
 
       <section id="about" class="about">
         <h2 data-reveal>About</h2>
@@ -179,57 +230,6 @@
         <div id="skill-card-slot"></div>
       </section>
 
-      <section id="projects" class="projects">
-        <h2 data-reveal>Projects</h2>
-        <div class="projects-scroller" id="projects-scroller">
-        <button class="projects-arrow projects-arrow--prev" type="button" aria-label="Previous projects" hidden>
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-        </button>
-        <div class="projects-grid" tabindex="0" role="region" aria-label="Projects, scrolls horizontally">
-          <article class="card" data-reveal>
-            <img class="card-thumb" src="images/1782142834983.webp" alt="Thélios booth at the LVMH Dream Gallery, Vivatech Paris" width="2048" height="1365" loading="lazy" />
-            <p class="card-kicker" data-copy="vivatech.kicker">Live installation</p>
-            <h3 data-copy="projects.vivatech.title">Vivatech Interactive Experience</h3>
-            <p data-copy="projects.vivatech.description">Real-time interactive installation built with TouchDesigner and Unreal Engine, showcased at Vivatech in Paris.</p>
-            <div class="card-links">
-              <a href="vivatech.html">View project →</a>
-            </div>
-          </article>
-          <article class="card" data-reveal>
-            <img class="card-thumb" src="images/pipeline-projects-cover.webp" alt="Redrawn look-dev panel with collapsible import, materials, render and view sections" width="1600" height="1200" loading="lazy" />
-            <p class="card-kicker" data-copy="pipelineProjects.kicker">Pipeline tools</p>
-            <h3 data-copy="projects.pipeline.title">Pipeline Projects</h3>
-            <p data-copy="projects.pipeline.description">Five in-house tools for Maya, Unreal, Omniverse and PowerPoint, each removing one slow, manual step from the 3D workflow.</p>
-            <div class="card-links">
-              <a href="pipeline-projects.html">View project →</a>
-            </div>
-          </article>
-          <article class="card" data-reveal>
-            <img class="card-thumb" src="images/company-brain-cover.svg" alt="Redrawn chat: a question about a collection and an answer with a price chart and its sources" width="1600" height="1000" loading="lazy" />
-            <p class="card-kicker" data-copy="companyBrain.kicker">AI assistant</p>
-            <h3 data-copy="projects.companyBrain.title">Company Brain</h3>
-            <p data-copy="projects.companyBrain.description">A self-hosted AI assistant that answers product questions from live company data, with photos, drawings and charts. Nothing leaves the company.</p>
-            <div class="card-links">
-              <a href="company-brain.html">View project →</a>
-            </div>
-          </article>
-          <article class="card" data-reveal>
-            <img class="card-thumb" style="object-position: 50% 70%" src="images/homelab-case.webp" alt="Front of the 3D-printed homelab rack: 2.5G switch with JetKVM, HP EliteDesk and Lenovo ThinkCentre stacked below" width="1800" height="2400" loading="lazy" />
-            <p class="card-kicker" data-copy="homelab.kicker">Personal project</p>
-            <h3 data-copy="projects.three.title">Homelab</h3>
-            <p data-copy="projects.three.description">A two-node Proxmox cluster and a UniFi NAS in a 3D-printed rack, running media, backups and an AI agent.</p>
-            <div class="card-links">
-              <a href="homelab.html">View project →</a>
-            </div>
-          </article>
-        </div>
-        <button class="projects-arrow projects-arrow--next" type="button" aria-label="Next projects" hidden>
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
-        </button>
-        <p class="projects-count" aria-hidden="true">1 / 4</p>
-      </div>
-      </section>
-
       <section id="contact" class="contact">
         <div class="contact-intro">
           <h2 data-reveal>Let's talk</h2>
@@ -238,7 +238,8 @@
                on purpose, the form keeps it off the page (contact.formEndpoint) -->
           <p class="contact-details" data-reveal>
             Based in <a href="https://www.google.com/maps/search/?api=1&amp;query=Padua%2C%20Italy" target="_blank" rel="noopener">Padua, Italy</a>.<br />
-            Open to collaborations. I usually reply within a few hours.
+            Open to consulting on 3D pipelines and real-time projects. Not looking for a new role, but always happy to talk.<br />
+            I usually reply within a few hours.
           </p>
         </div>
         <form class="contact-form" id="contact-form" novalidate data-reveal>

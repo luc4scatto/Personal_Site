@@ -5,9 +5,9 @@ import { content } from './content.js';
 // .nav but outside the parts src/router.js swaps, so it survives in-place page changes.
 // CSS shows it only under 700px; above that the button and dialog stay hidden.
 const SECTIONS = [
+  ['Projects', '/#projects'],
   ['About', '/#about'],
   ['Skills', '/#skills'],
-  ['Projects', '/#projects'],
 ];
 
 // the same ways to reach out as the home page's Contact section

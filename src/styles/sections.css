@@ -1199,7 +1199,7 @@
   /* negative on purpose: the canvas mask (below) already fades the last ~30% of this box's
      own height toward black for the "sinks away" effect, so the box reads as empty well
      before its true bottom edge. Left at a normal positive margin, that dead tail stacked
-     with .skills' own padding-bottom *and* #projects' padding-top read as one big gap. */
+     with .skills' own padding-bottom *and* #contact's padding-top read as one big gap. */
   margin-bottom: -5rem;
   touch-action: pan-y;
 }
@@ -1245,7 +1245,7 @@
 /* -5rem was tuned against the non-overlay box, which stays 680-900px tall across its own
    width range. The overlay box is shorter across its whole range (max ~650px, aspect-ratio
    3/2 against a narrower frame), so the same fixed overlap eats a much bigger share of it -
-   there was only 25px left between the player and #projects before this, not enough room to
+   there was only 25px left between the player and #contact before this, not enough room to
    also pull the player away from the drawer above it without crowding one edge or the other. */
 #skill-drawer.is-live:has(.drawer__scene.is-overlay) {
   margin-bottom: -3rem;
@@ -1871,7 +1871,7 @@
   /* rem, not a percentage: the box caps at 76vh, so above ~900px of width its aspect stops
      holding and a percentage inset drifts. Low in the box on purpose - the canvas mask fades
      the metal out from 70% down, so this sits on dark rather than on steel. The floor is the
-     box's own -5rem margin into #projects: go lower than about 1rem and the panel starts
+     box's own -5rem margin into #contact: go lower than about 1rem and the panel starts
      reaching into the section below it. */
   bottom: 3.5rem;
   z-index: 2;
@@ -1938,7 +1938,7 @@
    to keep clear of - change one, change both. */
 #skill-drawer.is-live .drawer__scene.is-overlay ~ .set-player {
   /* Lower than the non-overlay 3.5rem - see #skill-drawer.is-live:has(.drawer__scene.is-overlay)
-     above, which buys the room this needs against #projects. Without that change 0.4rem left
+     above, which buys the room this needs against #contact. Without that change 0.4rem left
      only 9px of clearance below; with it, room enough to also open real air above, between the
      invite line and the drawer it sits under. */
   bottom: 0.4rem;

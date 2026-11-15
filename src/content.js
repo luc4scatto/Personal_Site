@@ -10,7 +10,7 @@ export const content = {
     line1: 'Bringing ideas',
     line2Prefix: 'to life with',
     words: ['3D', '2D', 'AI'], // cycles through the accent word after "to life with"
-    subtitle: '3D Technical Artist & Creative Technologist',
+    subtitle: '3D Technical Artist at Thélios (LVMH)',
     tagline:
       'I build 2D-3D pipelines across every major DCC tool, \nalso powering configurators and interactive 3D experiences, \nwith a touch of AI.',
     hint: '✦ click on an object to learn more',
@@ -43,17 +43,17 @@ export const content = {
     vivatech: {
       title: 'Vivatech Interactive Experience',
       description:
-        'Real-time interactive installation built with TouchDesigner and Unreal Engine, showcased at Vivatech in Paris.',
+        'Gesture-driven installation in TouchDesigner and Unreal, built in 3 weeks and live all four days at Vivatech Paris.',
     },
     pipeline: {
       title: 'Pipeline Projects',
       description:
-        'Five in-house tools for Maya, Unreal, Omniverse and PowerPoint, each removing one slow, manual step from the 3D workflow.',
+        'Five in-house tools for Maya, Unreal, Omniverse and PowerPoint, used daily by the 3D team: hundreds of hours saved.',
     },
     companyBrain: {
       title: 'Company Brain',
       description:
-        'A self-hosted AI assistant that answers product questions from live company data, with photos, drawings and charts. Nothing leaves the company.',
+        'A self-hosted AI assistant for product questions, on live company data. In pilot with 7 users, nothing leaves the company.',
     },
     three: {
       title: 'Homelab',
