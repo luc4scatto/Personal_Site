@@ -385,7 +385,9 @@
     font-size: var(--fs-xs);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--text-dim);
+    /* orange like every other small caps label on the site (project eyebrows, the skill
+       card's "What I do with it"); blue reads as a link here */
+    color: var(--accent);
   }
 
   .mobile-menu ul {
@@ -1637,6 +1639,30 @@
      CSS3D layer that both animate through a 1.5s drawer run, and a live blur would re-sample
      all of it every frame for an effect nobody asked for. */
   background: color-mix(in srgb, var(--bg) 92%, transparent);
+  /* the notes' anchor (setNotes.js); no z-index, so they can sit behind the panel */
+  position: relative;
+}
+
+/* notes out of the panel's top-right corner while a set plays: behind the panel (z-index -1
+   inside the player's own stacking context), so they slip out from under its corner */
+.set-player__notes {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.6rem;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.set-player__notes-note {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.set-player__notes-note svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* the fallback variant: a block under the wall, not a corner panel */
@@ -3286,7 +3312,8 @@ p.project-specs__kicker {
 }
 
 .project-specs__credit a::before {
-  content: '↗ ';
+  /* U+FE0E asks for the text glyph: without it iOS and iPadOS draw ↗ as an emoji */
+  content: '\2197\FE0E  ';
   color: var(--accent-2);
 }
 
@@ -3817,7 +3844,8 @@ p.project-specs__kicker {
 }
 
 .featured-links a::before {
-  content: '↗ ';
+  /* U+FE0E asks for the text glyph: without it iOS and iPadOS draw ↗ as an emoji */
+  content: '\2197\FE0E  ';
   color: var(--accent-2);
 }
 

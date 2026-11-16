@@ -1,5 +1,6 @@
 import { content } from './content.js';
 import { track } from './analytics.js';
+import { createSetNotes } from './setNotes.js';
 
 /* The DJ set player: a record and a waveform, filed in the corner the open drawer leaves
  * free. The visible UI is entirely ours - no SoundCloud chrome, no branding, no widget
@@ -202,6 +203,8 @@ export function initSetPlayer(mount) {
     </div>`;
 
   const disc = el.querySelector('.set-player__disc');
+  // notes out of the panel's top-right corner while a set plays (setNotes.js)
+  const notes = createSetNotes(el, el.querySelector('.set-player__panel'));
   const glyph = el.querySelector('.set-player__glyph');
   const miniBtn = el.querySelector('.set-player__mini');
   const miniGlyph = el.querySelector('.set-player__mini-glyph');
@@ -620,6 +623,7 @@ export function initSetPlayer(mount) {
     clearTimeout(playWatchdog);
     if (!el.classList.contains('is-error')) noteEl.hidden = true;
     el.classList.add('is-playing');
+    notes.start();
     disc.setAttribute('aria-label', `Pause ${current.title}`);
     miniBtn.setAttribute('aria-label', 'Pause');
     glyph.innerHTML = PAUSE_GLYPH;
@@ -629,6 +633,7 @@ export function initSetPlayer(mount) {
   const onPause = () => {
     curPaused = true;
     el.classList.remove('is-playing');
+    notes.stop();
     disc.setAttribute('aria-label', `Play ${current.title}`);
     miniBtn.setAttribute('aria-label', 'Play');
     glyph.innerHTML = PLAY_GLYPH;
